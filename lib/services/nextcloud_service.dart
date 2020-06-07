@@ -2,7 +2,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
+import 'package:yaga/model/nc_file.dart';
 
 class NextCloudService {
   NextCloudClient _client;
@@ -17,15 +19,16 @@ class NextCloudService {
 
   bool isLoggedIn() => _client==null ? false : true;
 
-  void listFiles(String path) {
-    this._client.webDav.ls("files/svidenov/").catchError((error) {
-      print(error);
-      return Future.error(error);
-    }).asStream().listen((event) {
-      event.forEach((element) {
-        print(element);
-        // print(element.name+":"+element.mimeType??"");
-      });
+  Stream<NcFile> listFiles(String path) {
+    String basePath = "files/${_client.username}";
+    return this._client.webDav.ls(basePath+path).asStream()
+    .flatMap((value) => Stream.fromIterable(value))
+    .map((webDavFile) {
+      NcFile file = NcFile();
+      file.isDirectory = webDavFile.isDirectory;
+      file.name = webDavFile.name;
+      file.path = "nc:"+webDavFile.path.replaceFirst("/remote.php/dav/"+basePath, "");
+      return file;
     });
   }
 

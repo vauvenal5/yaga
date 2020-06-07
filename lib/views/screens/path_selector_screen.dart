@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/path_selector_screen_arguments.dart';
 import 'package:yaga/views/widgets/folder_widget.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
@@ -42,7 +43,7 @@ class PathSelectorScreen extends StatelessWidget {
           preferredSize: Size.fromHeight(40)
         ),
       ),
-      body: FolderWidget(this._path, (FileSystemEntity folder) => this._navigateToSelf(context, folder.path)),
+      body: FolderWidget(this._path, (NcFile folder) => this._navigateToSelf(context, folder.path)),
       bottomNavigationBar: ButtonBar(
         children: <Widget>[
           OutlineButton(

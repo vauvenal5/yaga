@@ -10,6 +10,7 @@ import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/nc_login_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
+import 'package:yaga/views/widgets/avatar_widget.dart';
 import 'package:yaga/views/widgets/category_widget.dart';
 import 'package:yaga/views/widgets/folder_widget.dart';
 
@@ -93,21 +94,7 @@ class YagaHomeScreen extends StatelessWidget {
                   if(getIt.get<NextCloudService>().isLoggedIn()) {
                     return Column(
                       children: <Widget>[
-                        StreamBuilder<Uint8List>(
-                          stream: getIt.get<NextCloudManager>().updateAvatarCommand,
-                          initialData: getIt.get<NextCloudManager>().updateAvatarCommand.lastResult,
-                          builder: (context, snapshot) {
-                            if(snapshot.data == null) {
-                              return CircleAvatar(
-                                backgroundColor: Theme.of(context).accentColor,
-                                child: Text("N/A"),
-                              );
-                            }
-                            return CircleAvatar(
-                              backgroundImage: MemoryImage(snapshot.data),
-                            );
-                          },
-                        ),
+                        AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand),
                         FlatButton(
                           onPressed: () => getIt.get<NextCloudManager>().logoutCommand(), 
                           child: Text("Logout")

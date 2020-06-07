@@ -29,8 +29,15 @@ dependencies:
   rxdart: ^0.23.1
   shared_preferences: ^0.5.7+3
   exif: ^1.0.3
-  image: ^2.1.12
-  flutter_sticky_header: "^0.4.2"
+  image: ^2.1.13
+  flutter_sticky_header: ^0.4.2
+  nextcloud: ^1.1.0
+  webview_flutter: ^0.3.22+1
+  string_validator: ^0.1.4
+  flutter_secure_storage: ^3.3.3
+
+dependency_overrides:
+  xml: ^4.2.0
 
 dev_dependencies:
   flutter_test:

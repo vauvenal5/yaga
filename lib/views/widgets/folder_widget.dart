@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
+import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class FolderWidget extends StatefulWidget {
   final String _path;
@@ -18,34 +21,72 @@ class FolderWidget extends StatefulWidget {
 }
 
 class FolderWidgetState extends State<FolderWidget> {
-  List<FileSystemEntity> _files = [];
+  List<NcFile> _files = [];
   List<NcFile> _folders = [];
 
   void _updateFilesAndFolders() {
     this._files = [];
     this._folders = [];
 
+    //todo: this mess has to be solved differently; this was only a proof of concept
     if(widget._path.startsWith("nc:")) {
+      // getIt.get<NextCloudService>().listFiles(widget._path.replaceFirst("nc:", ""))
+      // .where((event) => !event.isDirectory)
+      // .asyncMap((event) async {
+      //   event.inMemoryPreview = await getIt.get<NextCloudService>().getPreview(event.path);
+      //   return event;
+      // })
+      // .listen((file) {
+      //   if(file.isDirectory) {
+      //     setState(() {
+      //       _folders.add(file);
+      //     });
+      //   } else {
+      //     print("loading preview");
+      //     setState(() {
+      //       _files.add(file);
+      //     });
+      //   }
+      // });
       getIt.get<NextCloudService>().listFiles(widget._path.replaceFirst("nc:", ""))
-      .where((event) => event.isDirectory)
+      .flatMap((ncFile) => getIt.get<LocalImageProviderService>().getTmpFile(ncFile.path).asStream()
+        .map((event) {
+          ncFile.previewFile = event;
+          return ncFile;
+        })
+      )
+      .flatMap((ncFile) => getIt.get<LocalImageProviderService>().getLocalFile(ncFile.path).asStream()
+        .map((event) {
+          ncFile.localFile = event;
+          return ncFile;
+        })
+      )
+      // .doOnData((event) async {
+      //   event.previewFile = await getIt.get<LocalImageProviderService>().getTmpFile(event.path);
+      //   event.localFile = await getIt.get<LocalImageProviderService>().getLocalFile(event.path);
+      // })
       .listen((file) {
-        setState((){
-          print("updating list state");
-          if(file.isDirectory) {
-            _folders.add(file);
-          }
-        });
-      });
+        if(file.isDirectory) {
+          _folders.add(file);
+        } else {
+          _files.add(file);
+        }
+      }, onDone: () => setState((){}));
     } else {
       getIt.get<LocalImageProviderService>().searchDir(widget._path).listen((file) {
         setState((){
-          print("updating list state");
+          // print("updating list state");
+          // print(file.uri.toString());
           if(file is File) {
-            print(file.lastModifiedSync().toString());
+            // print(file.lastModifiedSync().toString());
             // readExifFromBytes(file.readAsBytesSync()).asStream().listen((event) {
             //   print(event);
             // });
-            _files.add(file);
+            NcFile ncFile = NcFile();
+            ncFile.name = file.path.split("/").last;
+            ncFile.path = file.path;
+            ncFile.localFile = file;
+            _files.add(ncFile);
           } else {
             NcFile folder = NcFile();
             folder.isDirectory = true;
@@ -91,8 +132,11 @@ class FolderWidgetState extends State<FolderWidget> {
         SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) => ListTile(
-              leading: Image.file(_files[index], cacheWidth: 32,),
-              title: Text(_files[index].uri.toString()),
+              leading: RemoteImageWidget(_files[index]),
+              // _files[index].localFile==null ?
+              //   Image.memory(_files[index].inMemoryPreview, cacheWidth: 32,) : 
+              //   Image.file(_files[index].localFile, cacheWidth: 32,),
+              title: Text(_files[index].name),
             ),
             childCount: _files.length
           )

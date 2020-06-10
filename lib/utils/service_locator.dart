@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
@@ -16,4 +17,5 @@ void setupServiceLocator() {
 
   getIt.registerSingleton(SettingsManager());
   getIt.registerSingleton(NextCloudManager());
+  getIt.registerSingleton(FileManager());
 }

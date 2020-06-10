@@ -23,18 +23,23 @@ class NextCloudService {
     String basePath = "files/${_client.username}";
     return this._client.webDav.ls(basePath+path).asStream()
     .flatMap((value) => Stream.fromIterable(value))
+    .where((event) => event.isDirectory || event.mimeType.startsWith("image"))
     .map((webDavFile) {
       NcFile file = NcFile();
       file.isDirectory = webDavFile.isDirectory;
       file.name = webDavFile.name;
-      file.path = "nc:"+webDavFile.path.replaceFirst("/remote.php/dav/"+basePath, "");
+      file.path = webDavFile.path.replaceFirst("/$basePath", "");
       return file;
-    });
+    });//.toList --> should this return a Future<List> since the data is actually allready downloaded?
   }
 
   Future<Uint8List> getAvatar(user) {
     print("getting avatar: "+user);
     return this._client.avatar.getAvatar(user, 100)
       .then((value) => base64.decode(value));
+  }
+
+  Future<Uint8List> getPreview(String path) {
+    return this._client.preview.getPreview(path.replaceFirst("nc:", ""), 128, 128);
   }
 }

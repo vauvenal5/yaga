@@ -31,10 +31,11 @@ dependencies:
   exif: ^1.0.3
   image: ^2.1.13
   flutter_sticky_header: ^0.4.2
-  nextcloud: ^1.1.0
+  nextcloud: ^1.2.0
   webview_flutter: ^0.3.22+1
   string_validator: ^0.1.4
   flutter_secure_storage: ^3.3.3
+  path_provider: ^1.6.10
 
 dependency_overrides:
   xml: ^4.2.0

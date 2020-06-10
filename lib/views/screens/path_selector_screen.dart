@@ -18,6 +18,7 @@ class PathSelectorScreen extends StatelessWidget {
   }
 
   void _navigateToSelf(BuildContext context, String path) {
+    path = _path.startsWith("nc:")?"nc:$path":path;
     Navigator.pushNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(path, _onCancel, _onSelect));
   }
 

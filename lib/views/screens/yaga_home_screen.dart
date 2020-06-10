@@ -25,7 +25,7 @@ class YagaHomeScreen extends StatelessWidget {
   final List<Preference> _defaultViewPreferences = [];
   StringPreference _path;
 
-  YagaHomeScreen(YagaHomeViews this._view) {
+  YagaHomeScreen(this._view) {
     SectionPreference general = SectionPreference.route(route, "general", "General");
     this._path = StringPreference.section(general, "path", "Path", "/sdcard/Download");
 

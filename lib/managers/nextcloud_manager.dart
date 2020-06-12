@@ -34,7 +34,7 @@ class NextCloudManager {
         updateAvatarCommand(event.user);
       });
 
-    this.updateLoginStateCommand = RxCommand.createSync((param) => param, initialLastResult: NextCloudLoginData("", "", ""));
+    this.updateLoginStateCommand = RxCommand.createSync((param) => param, initialLastResult: NextCloudLoginData(null, "", ""));
 
     this.loadLoginDataCommand = RxCommand.createFromStream((_) => ForkJoinStream.list([
         _secureStorageService.loadPreference(NextCloudLoginDataKeys.server).asStream(),
@@ -44,11 +44,11 @@ class NextCloudManager {
       .where((event) => event[0] != "")
       .where((event) => event[1] != "")
       .where((event) => event[2] != "")
-      .map((event) => NextCloudLoginData(event[0], event[1], event[2]))
+      .map((event) => NextCloudLoginData(Uri.parse(event[0]), event[1], event[2]))
     );
     this.loadLoginDataCommand.listen((event) => _internalLoginCommand(event));
 
-    this.logoutCommand = RxCommand.createFromStream((_) => this._createLoginDataPersisStream(NextCloudLoginData("","","")));
+    this.logoutCommand = RxCommand.createFromStream((_) => this._createLoginDataPersisStream(NextCloudLoginData(null,"","")));
     this.logoutCommand.doOnData((event) => _nextCloudService.logout())
     .listen((value) => this.updateLoginStateCommand(value));
 
@@ -57,7 +57,7 @@ class NextCloudManager {
 
   Stream<NextCloudLoginData> _createLoginDataPersisStream(NextCloudLoginData data) {
     return ForkJoinStream.list([
-      _secureStorageService.savePreference(NextCloudLoginDataKeys.server, data.server).asStream(),
+      _secureStorageService.savePreference(NextCloudLoginDataKeys.server, data.server.toString()).asStream(),
       _secureStorageService.savePreference(NextCloudLoginDataKeys.user, data.user).asStream(),
       _secureStorageService.savePreference(NextCloudLoginDataKeys.password, data.password).asStream(),
     ])

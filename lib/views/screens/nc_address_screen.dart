@@ -40,12 +40,12 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
                 labelText: "Nextcloud Server address https://...",
                 icon: Icon(Icons.cloud_queue)
               ),
-              onSaved: (value) => Navigator.pushNamed(context, NextCloudLoginScreen.route, arguments: rtrim(_addHttps(value), "/")),
+              onSaved: (value) => Navigator.pushNamed(context, NextCloudLoginScreen.route, arguments: Uri.parse('https://${rtrim(value, "/")}')),
               validator: (value) {
-                if(value.startsWith("http://")) {
-                  return "Only https connection are allowed.";
+                if(value.startsWith("https://") || value.startsWith("http://")) {
+                  return "Https will be added automaically.";
                 }
-                return isURL(_addHttps(value))?null:"Please enter a valid URL.";
+                return isURL("https://$value")?null:"Please enter a valid URL.";
               },
             ),
           )

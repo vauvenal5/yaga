@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:rxdart/rxdart.dart';
@@ -19,16 +20,16 @@ class CategoryWidget extends StatefulWidget {
 
 class CategoryWidgetState extends State<CategoryWidget> {
   List<DateTime> _dates = [];
-  Map<String, List<FileSystemEntity>> _sortedFiles = Map();
+  Map<String, List<NcFile>> _sortedFiles = Map();
 
   void _updateFilesAndFolders() {
     this._dates = [];
     this._sortedFiles = Map();
 
-    getIt.get<LocalImageProviderService>().searchDir(widget._path).where((event) => event is File).listen((file) {
+    getIt.get<LocalImageProviderService>().searchDir(Uri.parse(widget._path)).where((event) => !event.isDirectory).listen((file) {
       setState((){
         print("updating list state"); 
-        DateTime lastModified = (file as File).lastModifiedSync();
+        DateTime lastModified = file.lastModified;
         DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);  
 
         if(!this._dates.contains(date)) {
@@ -82,7 +83,7 @@ class CategoryWidgetState extends State<CategoryWidget> {
         sliver: SliverGrid(
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
-              return Image.file(_sortedFiles[key][index], cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].path),);
+              return Image.file(_sortedFiles[key][index].localFile, cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].uri.path),);
             },
             childCount: _sortedFiles[key].length
           ), 

@@ -20,13 +20,17 @@ class FileManager {
     listRemoteFilesCommand = RxCommand.createFromStream((param) => getIt.get<NextCloudService>().listFiles(param));
     _getPreviewCommand = RxCommand.createSync((param) => param);
     //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
-    _getPreviewCommand.asyncMap((ncFile) => getIt.get<NextCloudService>().getPreview(ncFile.path)
+    _getPreviewCommand.asyncMap((ncFile) => getIt.get<NextCloudService>().getPreview(ncFile.uri.path)
       .then((value) async {
         ncFile.previewFile.createSync(recursive: true);
         ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value); 
         return ncFile;
+      }, 
+      onError: (err) {
+        return null;
       })
     )
+    .where((event) => event != null)
     .listen((value) => updatePreviewCommand(value));
 
     downloadPreviewCommand = RxCommand.createSync((param) => param);

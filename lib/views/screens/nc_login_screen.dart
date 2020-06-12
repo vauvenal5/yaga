@@ -7,7 +7,7 @@ import 'package:yaga/views/screens/yaga_home_screen.dart';
 
 class NextCloudLoginScreen extends StatelessWidget {
   static const String route = "/nc/login";
-  final String _url;
+  final Uri _url;
 
   NextCloudLoginScreen(this._url);
 
@@ -19,11 +19,11 @@ class NextCloudLoginScreen extends StatelessWidget {
       ),
       body: WebView(
         key: UniqueKey(),
-        initialUrl: this._url,
+        initialUrl: this._url.toString(),
         userAgent: "Nextcloud Yaga",
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (WebViewController webViewController) {
-          webViewController.loadUrl(this._url+"/index.php/login/flow", headers: <String,String>{"OCS-APIREQUEST": "true"});
+          webViewController.loadUrl(this._url.toString()+"/index.php/login/flow", headers: <String,String>{"OCS-APIREQUEST": "true"});
         },
         navigationDelegate: (NavigationRequest request) {
           if(request.url.startsWith("nc")) {
@@ -38,7 +38,7 @@ class NextCloudLoginScreen extends StatelessWidget {
             });
 
             getIt.get<NextCloudManager>().loginCommand(NextCloudLoginData(
-              ncParas[NextCloudLoginDataKeys.server], 
+              Uri.parse(ncParas[NextCloudLoginDataKeys.server]), 
               ncParas[NextCloudLoginDataKeys.user], 
               ncParas[NextCloudLoginDataKeys.password]
             ));

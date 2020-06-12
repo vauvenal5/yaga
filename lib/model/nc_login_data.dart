@@ -5,7 +5,7 @@ class NextCloudLoginDataKeys {
 }
 
 class NextCloudLoginData {
-  String server;
+  Uri server;
   String user;
   String password;
 

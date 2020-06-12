@@ -18,7 +18,7 @@ class RemoteImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<NcFile>(
-      stream: getIt.get<FileManager>().updatePreviewCommand.where((event) => event.path == _file.path),
+      stream: getIt.get<FileManager>().updatePreviewCommand.where((event) => event.uri.path == _file.uri.path),
       initialData: this._file,
       builder: (context, snapshot) {
         if(snapshot.data.localFile != null && snapshot.data.localFile.existsSync()) {

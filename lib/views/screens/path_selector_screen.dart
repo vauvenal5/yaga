@@ -9,17 +9,14 @@ import 'package:yaga/views/widgets/path_widget.dart';
 class PathSelectorScreen extends StatelessWidget {
   static const String route = "/pathSelector";
 
-  final String _path;
+  final Uri _uri;
   final void Function() _onCancel;
-  final void Function(String) _onSelect;
+  final void Function(Uri) _onSelect;
 
-  PathSelectorScreen(this._path, this._onCancel, this._onSelect) {
-    print(_path);
-  }
+  PathSelectorScreen(this._uri, this._onCancel, this._onSelect);
 
-  void _navigateToSelf(BuildContext context, String path) {
-    path = _path.startsWith("nc:")?"nc:$path":path;
-    Navigator.pushNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(path, _onCancel, _onSelect));
+  void _navigateToSelf(BuildContext context, Uri path) {
+    Navigator.pushNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(uri: path, onCancel: _onCancel, onSelect: _onSelect));
   }
 
   @override
@@ -38,13 +35,14 @@ class PathSelectorScreen extends StatelessWidget {
             // padding: EdgeInsets.only(bottom: 10),
             child: Align(
               alignment: Alignment.topLeft,
-              child: PathWidget(this._path, (subPath) => this._navigateToSelf(context, subPath))
+              child: PathWidget(this._uri, (Uri subPath) => this._navigateToSelf(context, subPath))
             )
           ), 
           preferredSize: Size.fromHeight(40)
         ),
       ),
-      body: FolderWidget(this._path, (NcFile folder) => this._navigateToSelf(context, folder.path)),
+      //todo: is it possible to directly pass the folder.uri?
+      body: FolderWidget(this._uri, (NcFile folder) => this._navigateToSelf(context, folder.uri)),
       bottomNavigationBar: ButtonBar(
         children: <Widget>[
           OutlineButton(
@@ -52,7 +50,7 @@ class PathSelectorScreen extends StatelessWidget {
             child: Text("Cancel"),
           ),
           RaisedButton(
-            onPressed: () => _onSelect(this._path),
+            onPressed: () => _onSelect(this._uri),
             color: Theme.of(context).accentColor,
             child: Text("Select"),
           )

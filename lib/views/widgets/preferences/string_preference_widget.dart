@@ -5,7 +5,7 @@ import 'package:yaga/utils/service_locator.dart';
 
 class StringPreferenceWidget extends StatelessWidget {
   final StringPreference _defaultPreference;
-  final Function _onTap;
+  final Function(StringPreference) _onTap;
 
   StringPreferenceWidget(this._defaultPreference, this._onTap) {
     getIt.get<SettingsManager>().newLoadSettingCommand(_defaultPreference);

@@ -8,13 +8,14 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
+import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class FolderWidget extends StatefulWidget {
-  final String _path;
+  final Uri _uri;
   final Function _onFolderTap;
 
-  FolderWidget(this._path, this._onFolderTap);
+  FolderWidget(this._uri, this._onFolderTap);
 
   @override
   State<StatefulWidget> createState() => FolderWidgetState();
@@ -29,7 +30,8 @@ class FolderWidgetState extends State<FolderWidget> {
     this._folders = [];
 
     //todo: this mess has to be solved differently; this was only a proof of concept
-    if(widget._path.startsWith("nc:")) {
+    // if(widget._path.startsWith("nc:")) {
+    if(UriUtils.isNextCloudUri(widget._uri)) {
       // getIt.get<NextCloudService>().listFiles(widget._path.replaceFirst("nc:", ""))
       // .where((event) => !event.isDirectory)
       // .asyncMap((event) async {
@@ -48,14 +50,14 @@ class FolderWidgetState extends State<FolderWidget> {
       //     });
       //   }
       // });
-      getIt.get<NextCloudService>().listFiles(widget._path.replaceFirst("nc:", ""))
-      .flatMap((ncFile) => getIt.get<LocalImageProviderService>().getTmpFile(ncFile.path).asStream()
+      getIt.get<NextCloudService>().listFiles(widget._uri.path)
+      .flatMap((ncFile) => getIt.get<LocalImageProviderService>().getTmpFile(ncFile.uri.path).asStream()
         .map((event) {
           ncFile.previewFile = event;
           return ncFile;
         })
       )
-      .flatMap((ncFile) => getIt.get<LocalImageProviderService>().getLocalFile(ncFile.path).asStream()
+      .flatMap((ncFile) => getIt.get<LocalImageProviderService>().getLocalFile(ncFile.uri.path).asStream()
         .map((event) {
           ncFile.localFile = event;
           return ncFile;
@@ -73,26 +75,26 @@ class FolderWidgetState extends State<FolderWidget> {
         }
       }, onDone: () => setState((){}));
     } else {
-      getIt.get<LocalImageProviderService>().searchDir(widget._path).listen((file) {
+      getIt.get<LocalImageProviderService>().searchDir(widget._uri).listen((file) {
         setState((){
           // print("updating list state");
           // print(file.uri.toString());
-          if(file is File) {
+          if(!file.isDirectory) {
             // print(file.lastModifiedSync().toString());
             // readExifFromBytes(file.readAsBytesSync()).asStream().listen((event) {
             //   print(event);
             // });
-            NcFile ncFile = NcFile();
-            ncFile.name = file.path.split("/").last;
-            ncFile.path = file.path;
-            ncFile.localFile = file;
-            _files.add(ncFile);
+            // NcFile ncFile = NcFile();
+            // ncFile.name = file.path.split("/").last;
+            // ncFile.path = file.path;
+            // ncFile.localFile = file;
+            _files.add(file);
           } else {
-            NcFile folder = NcFile();
-            folder.isDirectory = true;
-            folder.name = file.path.split("/").last;
-            folder.path = file.path;
-            _folders.add(folder);
+            // NcFile folder = NcFile();
+            // folder.isDirectory = true;
+            // folder.name = file.path.split("/").last;
+            // folder.path = file.path;
+            _folders.add(file);
           }
         });
       });

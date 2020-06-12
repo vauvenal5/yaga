@@ -12,11 +12,11 @@ class Router {
       case SettingsScreen.route:
         return MaterialPageRoute(settings: settings, builder: (context) => SettingsScreen(settings.arguments??[]));
       case PathSelectorScreen.route:
-        PathSelectorScreenArguments pathSelectorScreenArguments = settings.arguments as PathSelectorScreenArguments ?? PathSelectorScreenArguments.empty();
+        PathSelectorScreenArguments pathSelectorScreenArguments = settings.arguments as PathSelectorScreenArguments;
         return MaterialPageRoute(
           settings: settings, 
           builder: (context) => PathSelectorScreen(
-            pathSelectorScreenArguments.path,
+            pathSelectorScreenArguments.uri,
             pathSelectorScreenArguments.onCancel,
             pathSelectorScreenArguments.onSelect
           ));

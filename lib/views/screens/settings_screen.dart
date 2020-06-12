@@ -3,6 +3,7 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/path_selector_screen_arguments.dart';
+import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/widgets/preferences/section_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/string_preference_widget.dart';
@@ -31,11 +32,11 @@ class SettingsScreen extends StatelessWidget {
                 context, 
                 PathSelectorScreen.route, 
                 arguments: PathSelectorScreenArguments(
-                  pref.value,
-                  () => Navigator.popUntil(context, ModalRoute.withName(SettingsScreen.route)), 
-                  (String path) {
+                  uri: Uri.parse(pref.value),//UriUtils.createLocalUri(pref.value),
+                  onCancel: () => Navigator.popUntil(context, ModalRoute.withName(SettingsScreen.route)), 
+                  onSelect: (Uri path) {
                     Navigator.popUntil(context, ModalRoute.withName(SettingsScreen.route));
-                    getIt.get<SettingsManager>().updateSettingCommand(StringPreference(pref.key, pref.title, path));
+                    getIt.get<SettingsManager>().updateSettingCommand(StringPreference(pref.key, pref.title, path.toString()));
                   }
                 )
               )

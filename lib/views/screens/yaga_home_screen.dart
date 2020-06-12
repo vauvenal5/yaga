@@ -27,10 +27,12 @@ class YagaHomeScreen extends StatelessWidget {
 
   YagaHomeScreen(this._view) {
     SectionPreference general = SectionPreference.route(route, "general", "General");
-    this._path = StringPreference.section(general, "path", "Path", "/sdcard/Download");
+    this._path = StringPreference.section(general, "path", "Path", "");
 
     this._addAndLoadPreference(general);
-    this._addAndLoadPreference(this._path);
+    this._defaultViewPreferences.add(_path);
+    getIt.get<SettingsManager>().loadDefaultPath(_path);
+    // this._addAndLoadPreference(this._path);
 
     getIt.get<NextCloudManager>().loadLoginDataCommand();
   }

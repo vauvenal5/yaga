@@ -1,8 +1,9 @@
-class PathSelectorScreenArguments {
-  final String path;
-  final void Function() onCancel;
-  final void Function(String) onSelect;
+import 'package:flutter/foundation.dart';
 
-  PathSelectorScreenArguments(this.path, this.onCancel, this.onSelect);
-  PathSelectorScreenArguments.empty() : path = "/sdcard", onCancel = null, onSelect = null;
+class PathSelectorScreenArguments {
+  final Uri uri;
+  final void Function() onCancel;
+  final void Function(Uri) onSelect;
+
+  PathSelectorScreenArguments({@required this.uri, @required this.onCancel, @required this.onSelect});
 }

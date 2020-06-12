@@ -4,13 +4,17 @@ import 'dart:typed_data';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
+import 'package:string_validator/string_validator.dart';
 import 'package:yaga/model/nc_file.dart';
 
 class NextCloudService {
+  final String scheme = "nc";
+  Uri _host;
   NextCloudClient _client;
 
-  void login(String host, String username, String password) {
-    this._client = NextCloudClient(host, username, password);
+  void login(Uri host, String username, String password) {
+    this._host = host;
+    this._client = NextCloudClient(_host.toString(), username, password);
   }
 
   void logout() {
@@ -28,7 +32,9 @@ class NextCloudService {
       NcFile file = NcFile();
       file.isDirectory = webDavFile.isDirectory;
       file.name = webDavFile.name;
-      file.path = webDavFile.path.replaceFirst("/$basePath", "");
+      var path = rtrim(webDavFile.path.replaceFirst("/$basePath", ""), "/");
+      file.uri = Uri(scheme: this.scheme, userInfo: _client.username, host: _host.host, path: path);
+      // file.path = webDavFile.path.replaceFirst("/$basePath", "");
       return file;
     });//.toList --> should this return a Future<List> since the data is actually allready downloaded?
   }
@@ -40,6 +46,14 @@ class NextCloudService {
   }
 
   Future<Uint8List> getPreview(String path) {
-    return this._client.preview.getPreview(path.replaceFirst("nc:", ""), 128, 128);
+    return this._client.preview.getPreview(Uri.decodeComponent(path.replaceFirst("nc:", "")), 128, 128)
+    .catchError((err) {
+      print("Could not load preview for $path");
+      return err;
+    });
+  }
+
+  Uri getOrigin() {
+    return Uri(scheme: this.scheme, userInfo: _client.username, host: _host.host);
   }
 }

@@ -2,21 +2,24 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
+import 'package:yaga/services/local_image_provider_service.dart';
+import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/utils/service_locator.dart';
+import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
 
 class PathWidget extends StatelessWidget {
-  final List<String> _paths;
-  final Function _onTap;
+  final Uri _uri;
+  final Function(Uri) _onTap;
 
-  PathWidget(String path, this._onTap) : _paths = path.split("/");
+  PathWidget(this._uri, this._onTap);
 
-  String _subPath(int index) {
-    String subPath = _paths[0]==""?"":"nc:";
-    for(int i = 1; i<=index;i++) {
-      subPath += "/"+_paths[i];
+  Uri _subPath(int index) {
+    String subPath = "";
+    for(int i = 0; i<=index;i++) {
+      subPath += "/"+this._uri.pathSegments[i];
     }
-    return subPath;
+    return Uri(scheme: _uri.scheme, host: _uri.host, userInfo: _uri.userInfo, path: subPath);
   }
 
   @override
@@ -28,35 +31,41 @@ class PathWidget extends StatelessWidget {
         shrinkWrap: true,
         padding: EdgeInsets.symmetric(horizontal: 20),
         scrollDirection: Axis.horizontal,
+        itemCount: _uri.pathSegments.length+1,
         itemBuilder: (context, index) {
           if(index == 0) {
+            List<DropdownMenuItem<String>> items = [
+              DropdownMenuItem<String>(
+                  value: getIt.get<LocalImageProviderService>().getOrigin().toString(),
+                  child: Icon(Icons.phone_android, color: Colors.white,)
+                ),
+            ];
+
+            if(getIt.get<NextCloudService>().isLoggedIn()) {
+              items.add(DropdownMenuItem<String>(
+                value: getIt.get<NextCloudService>().getOrigin().toString(),
+                child: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 12,)
+              ));
+            }
+
             return DropdownButton<String>(
-              value: _paths[0]==""?"/":"nc:/",
+              value: Uri(scheme: _uri.scheme, userInfo: _uri.userInfo, host: _uri.host).toString(),
               dropdownColor: Theme.of(context).accentColor,
               underline: Container(),
               onChanged: (value) {
-                _onTap(value);
+                Uri origin = Uri.parse(value);
+                _onTap(Uri(scheme: origin.scheme, host: origin.host, userInfo: origin.userInfo, path: "/"));
               },
-              items: <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(
-                  value: "/",
-                  child: Icon(Icons.phone_android, color: Colors.white,)
-                ),
-                DropdownMenuItem<String>(
-                  value: "nc:/",
-                  child: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 12,)
-                )
-              ],
+              items: items,
             );
           }
           return  FlatButton(
             textColor: Colors.white,
-            onPressed: () => _onTap(_subPath(index)), 
-            child: Text(_paths[index]),
+            onPressed: () => _onTap(_subPath(index-1)), 
+            child: Text(_uri.pathSegments[index-1]),
           );
-        }, 
-        separatorBuilder: (context, index) => Icon(Icons.keyboard_arrow_right, color: Colors.white), 
-        itemCount: _paths.length
+        },
+        separatorBuilder: (context, index) => Icon(Icons.keyboard_arrow_right, color: Colors.white),
       )
     );
   }

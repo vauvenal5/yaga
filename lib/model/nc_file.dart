@@ -5,8 +5,9 @@ import 'dart:typed_data';
 class NcFile {
   bool isDirectory;
   String name;
-  String path;
+  Uri uri;
+  // String path;
   File localFile;
   File previewFile;
-  Uint8List inMemoryPreview;
+  DateTime lastModified;
 }

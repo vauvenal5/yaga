@@ -1,4 +1,4 @@
-package com.example.yaga
+package com.github.vauvenal5.yaga
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

@@ -6,8 +6,9 @@ import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/services/file_provider_service.dart';
 
-class NextCloudService {
+class NextCloudService implements FileProviderService {
   final String scheme = "nc";
   Uri _host;
   NextCloudClient _client;
@@ -23,14 +24,16 @@ class NextCloudService {
 
   bool isLoggedIn() => _client==null ? false : true;
 
-  Stream<NcFile> listFiles(String path) {
+  @override
+  Stream<NcFile> list(Uri dir) {
     String basePath = "files/${_client.username}";
-    return this._client.webDav.ls(basePath+path).asStream()
+    return this._client.webDav.ls(basePath+dir.path).asStream()
     .flatMap((value) => Stream.fromIterable(value))
     .where((event) => event.isDirectory || event.mimeType.startsWith("image"))
     .map((webDavFile) {
       NcFile file = NcFile();
       file.isDirectory = webDavFile.isDirectory;
+      file.lastModified = webDavFile.lastModified;
       file.name = webDavFile.name;
       var path = rtrim(webDavFile.path.replaceFirst("/$basePath", ""), "/");
       file.uri = Uri(scheme: this.scheme, userInfo: _client.username, host: _host.host, path: path);
@@ -51,6 +54,11 @@ class NextCloudService {
       print("Could not load preview for $path");
       return err;
     });
+  }
+
+  Future<Uint8List> downloadImage(String path) {
+    String basePath = "files/${_client.username}";
+    return this._client.webDav.download(basePath+path);
   }
 
   Uri getOrigin() {

@@ -1,18 +1,22 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:yaga/views/screens/image_screen.dart';
+import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class CategoryWidget extends StatefulWidget {
-  final String _path;
+  final Uri _uri;
   final Function _onFolderTap;
 
-  CategoryWidget(this._path, this._onFolderTap);
+  CategoryWidget(this._uri, this._onFolderTap);
 
   @override
   State<StatefulWidget> createState() => CategoryWidgetState();
@@ -21,17 +25,17 @@ class CategoryWidget extends StatefulWidget {
 class CategoryWidgetState extends State<CategoryWidget> {
   List<DateTime> _dates = [];
   Map<String, List<NcFile>> _sortedFiles = Map();
+  StreamSubscription<NcFile> _updateFilesListCommandSubscription;
 
-  void _updateFilesAndFolders() {
-    this._dates = [];
-    this._sortedFiles = Map();
-
-    getIt.get<LocalImageProviderService>().searchDir(Uri.parse(widget._path)).where((event) => !event.isDirectory).listen((file) {
+  CategoryWidgetState() {
+    this._updateFilesListCommandSubscription = getIt.get<FileManager>().updateFilesListCommand
+    .where((event) => event.uri.path.startsWith(widget._uri.path))
+    .where((event) => !event.isDirectory)
+    .listen((file) {
+      DateTime lastModified = file.lastModified;
+      DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
+      
       setState((){
-        print("updating list state"); 
-        DateTime lastModified = file.lastModified;
-        DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);  
-
         if(!this._dates.contains(date)) {
           this._dates.add(date);
           this._dates.sort((date1, date2) => date2.compareTo(date1));
@@ -42,6 +46,18 @@ class CategoryWidgetState extends State<CategoryWidget> {
         _sortedFiles[key].add(file);
       });
     });
+  }
+
+  @override
+  void dispose() {
+    this._updateFilesListCommandSubscription.cancel();
+    super.dispose();
+  }
+
+  void _updateFilesAndFolders() {
+    this._dates = [];
+    this._sortedFiles = Map();
+    getIt.get<FileManager>().listFilesCommand(widget._uri);
   }
 
   @override
@@ -83,7 +99,11 @@ class CategoryWidgetState extends State<CategoryWidget> {
         sliver: SliverGrid(
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
-              return Image.file(_sortedFiles[key][index].localFile, cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].uri.path),);
+              return InkWell(
+                onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: _sortedFiles[key][index]),
+                child: RemoteImageWidget(_sortedFiles[key][index], key: ValueKey(_sortedFiles[key][index].uri.path),),
+              );
+              //return Image.file(_sortedFiles[key][index].localFile, cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].uri.path),);
             },
             childCount: _sortedFiles[key].length
           ), 

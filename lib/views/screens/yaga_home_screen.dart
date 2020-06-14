@@ -47,7 +47,7 @@ class YagaHomeScreen extends StatelessWidget {
     getIt.get<SettingsManager>().newLoadSettingCommand(pref);
   }
 
-  Widget _getView(path, onFolderTap) {
+  Widget _getView(Uri path, onFolderTap) {
     switch(this._view) {
       case YagaHomeViews.folder:
         return FolderWidget(path, onFolderTap);
@@ -123,7 +123,7 @@ class YagaHomeScreen extends StatelessWidget {
           if(snapshot.data == null) {
             return LinearProgressIndicator();
           }
-          return _getView(snapshot.data.value, () {});
+          return _getView(Uri.parse(snapshot.data.value), () {});
         },
       ),
       

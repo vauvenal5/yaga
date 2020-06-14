@@ -7,7 +7,7 @@ import 'package:yaga/utils/service_locator.dart';
 class RemoteImageWidget extends StatelessWidget {
   final NcFile _file;
 
-  RemoteImageWidget(this._file) {
+  RemoteImageWidget(this._file, {Key key}) : super(key: key) {
     this._file.localFile.exists().asStream()
     .doOnData((event) => print("Event:$event"))
     .where((event) => !event)

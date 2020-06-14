@@ -1,43 +1,96 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/utils/download_file_image.dart';
 import 'package:yaga/utils/service_locator.dart';
+import 'package:yaga/views/widgets/remote_image_widget.dart';
 
-class ImageScreen extends StatelessWidget {
+class ImageScreen extends StatefulWidget {
   static const String route = "/image";
-  final NcFile _image;
+  final List<NcFile> _images;
+  final PageController pageController;
+  final String title;
 
-  ImageScreen(this._image) {
-    this._image.localFile.exists().asStream()
-    .where((event) => !event)
-    .listen((event) => getIt.get<FileManager>().downloadImageCommand(_image));
+  ImageScreen(this._images, int index, this.title) : pageController = PageController(initialPage: index);
+
+  @override
+  State<StatefulWidget> createState() => ImageScreenState();
+}
+
+class ImageScreenState extends State<ImageScreen> {
+  String _title;
+  int _currentIndex;
+
+  @override
+  void initState() {
+    this._currentIndex = widget.pageController.initialPage;
+    this._title = widget._images[_currentIndex].name;
+    super.initState();
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      this._currentIndex = index;
+      this._title = widget._images[index].name;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder<NcFile>(
-        stream: getIt.get<FileManager>().updateImageCommand.where((event) => event.uri.path == _image.uri.path),
-        initialData: this._image,
-        builder: (context, snapshot) {
-          if(snapshot.data.localFile != null && snapshot.data.localFile.existsSync()) {
-            return PhotoView(imageProvider: FileImage(snapshot.data.localFile));
-          }
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: 
+      Stack(
+        children: [
+          PhotoViewGallery.builder(
+            pageController: widget.pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: widget._images.length, 
+            builder: (BuildContext context, int index) {
+              NcFile image = widget._images[index];
 
-          if(snapshot.data.previewFile != null && snapshot.data.previewFile.existsSync()) {
-            return PhotoView(imageProvider: FileImage(snapshot.data.previewFile));
-          }
+              Future<File> localFileAvailable = Future.value(image.localFile);
+              if(!image.localFile.existsSync()) {
+                localFileAvailable = getIt.get<FileManager>().updateImageCommand
+                  .where((event) => event.uri.path == image.uri.path)
+                  .map((event) => event.localFile)
+                  .first;
+                getIt.get<FileManager>().downloadImageCommand(image);
+              }
 
-          return Container(
-            height: 32,
-            width: 32,
-            child: CircularProgressIndicator(),
-          );
-        }
+              return PhotoViewGalleryPageOptions(
+                key: ValueKey(image.uri.path),
+                imageProvider: DownloadFileImage(image.localFile, localFileAvailable),
+              );
+            },
+            loadingBuilder: (context, event) {
+              return Stack(
+                children: [
+                  Container(
+                    color: Colors.black,
+                    child: Image.file(
+                      widget._images[_currentIndex].previewFile, 
+                      width: double.infinity, 
+                      height: double.infinity, 
+                      fit: BoxFit.contain
+                    ),
+                  ),
+                  LinearProgressIndicator()
+                ]
+              );
+            },
+          ),
+        ]
       )
-      // body: PhotoView(imageProvider: FileImage(this._image.previewFile)),
     );
   }
+
 }

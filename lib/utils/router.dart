@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yaga/utils/image_screen_arguments.dart';
 import 'package:yaga/utils/path_selector_screen_arguments.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
@@ -26,7 +27,8 @@ class Router {
       case NextCloudLoginScreen.route:
         return MaterialPageRoute(settings: settings, builder: (context) => NextCloudLoginScreen(settings.arguments));
       case ImageScreen.route:
-        return MaterialPageRoute(settings: settings, builder: (context) => ImageScreen(settings.arguments));
+        ImageScreenArguments args = settings.arguments as ImageScreenArguments;
+        return MaterialPageRoute(settings: settings, builder: (context) => ImageScreen(args.images, args.index, args.title));
       default:
         return MaterialPageRoute(settings: settings, builder: (context) => YagaHomeScreen(settings.arguments??YagaHomeViews.grid));
     }

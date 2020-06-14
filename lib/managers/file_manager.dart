@@ -38,7 +38,7 @@ class FileManager {
     _getPreviewCommand.asyncMap((ncFile) => getIt.get<NextCloudService>().getPreview(ncFile.uri.path)
       .then((value) async {
         ncFile.previewFile.createSync(recursive: true);
-        ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value); 
+        ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value, flush: true); 
         return ncFile;
       }, 
       onError: (err) {
@@ -53,7 +53,7 @@ class FileManager {
     _getImageCommand.asyncMap((ncFile) => getIt.get<NextCloudService>().downloadImage(ncFile.uri.path)
       .then((value) async {
         ncFile.localFile.createSync(recursive: true);
-        ncFile.localFile = await ncFile.localFile.writeAsBytes(value); 
+        ncFile.localFile = await ncFile.localFile.writeAsBytes(value, flush: true); 
         return ncFile;
       }, 
       onError: (err) {

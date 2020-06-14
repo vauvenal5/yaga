@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/utils/image_screen_arguments.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:rxdart/rxdart.dart';
@@ -43,7 +44,10 @@ class CategoryWidgetState extends State<CategoryWidget> {
 
         String key = this._createKey(date);
         _sortedFiles.putIfAbsent(key, () => []);
-        _sortedFiles[key].add(file);
+        //todo-sv: this has to be solved in a better way... double calling happens for example when in path selector screen navigating to same path
+        if(!_sortedFiles[key].contains(file)) {
+          _sortedFiles[key].add(file);
+        }
       });
     });
   }
@@ -100,24 +104,24 @@ class CategoryWidgetState extends State<CategoryWidget> {
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               return InkWell(
-                onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: _sortedFiles[key][index]),
-                child: RemoteImageWidget(_sortedFiles[key][index], key: ValueKey(_sortedFiles[key][index].uri.path),),
+                onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: ImageScreenArguments(_sortedFiles[key], index, key)),
+                child: RemoteImageWidget(_sortedFiles[key][index], key: ValueKey(_sortedFiles[key][index].uri.path), cacheWidth: 512, ),
               );
               //return Image.file(_sortedFiles[key][index].localFile, cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].uri.path),);
             },
             childCount: _sortedFiles[key].length
           ), 
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 100.0,
-            mainAxisSpacing: 2.0,
-            crossAxisSpacing: 2.0,
-            childAspectRatio: 1.0,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 2,
+            mainAxisSpacing: 2,
           )
         )
       ));
     });
     
     return CustomScrollView(
+
       slivers: slivers,
     );
   }

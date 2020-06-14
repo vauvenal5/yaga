@@ -13,6 +13,7 @@ import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
 import 'package:yaga/views/widgets/category_widget.dart';
 import 'package:yaga/views/widgets/folder_widget.dart';
+import 'package:yaga/views/widgets/path_widget.dart';
 
 enum YagaHomeMenu {settings}
 enum YagaHomeViews {grid, folder}
@@ -80,7 +81,6 @@ class YagaHomeScreen extends StatelessWidget {
             ],
           ),
         ],
-
       ),
       drawer: Drawer(
         child: ListView(
@@ -127,37 +127,32 @@ class YagaHomeScreen extends StatelessWidget {
         },
       ),
       
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _getCurrentIndex(),
-        onTap: (index) {
-          if(index == _getCurrentIndex()) {
-            return;
-          }
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: _getCurrentIndex(),
+      //   onTap: (index) {
+      //     if(index == _getCurrentIndex()) {
+      //       return;
+      //     }
 
-          switch(index) {
-            case 1:
-              Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.folder);
-              return;
-            default:
-              Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.grid);
-          }
-        },
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('Home View'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.folder),
-            title: Text('Folder View'),
-          ),
-        ],
-      ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: getIt.get<CounterManager>().incrementCommand,
-      //   tooltip: 'Increment',
-      //   child: Icon(Icons.add),
-      // ), // This trailing comma makes auto-formatting nicer for build methods.
+      //     switch(index) {
+      //       case 1:
+      //         Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.folder);
+      //         return;
+      //       default:
+      //         Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.grid);
+      //     }
+      //   },
+      //   items: const <BottomNavigationBarItem>[
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.home),
+      //       title: Text('Home View'),
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.folder),
+      //       title: Text('Folder View'),
+      //     ),
+      //   ],
+      // ),
     );
   }
 }

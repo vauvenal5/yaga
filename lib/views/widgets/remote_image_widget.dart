@@ -6,8 +6,10 @@ import 'package:yaga/utils/service_locator.dart';
 
 class RemoteImageWidget extends StatelessWidget {
   final NcFile _file;
+  final int cacheWidth;
+  final int cacheHeight;
 
-  RemoteImageWidget(this._file, {Key key}) : super(key: key) {
+  RemoteImageWidget(this._file, {Key key, this.cacheWidth, this.cacheHeight}) : super(key: key) {
     this._file.localFile.exists().asStream()
     .doOnData((event) => print("Event:$event"))
     .where((event) => !event)
@@ -17,16 +19,28 @@ class RemoteImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return StreamBuilder<NcFile>(
       stream: getIt.get<FileManager>().updatePreviewCommand.where((event) => event.uri.path == _file.uri.path),
       initialData: this._file,
       builder: (context, snapshot) {
-        if(snapshot.data.localFile != null && snapshot.data.localFile.existsSync()) {
-          return Image.file(snapshot.data.localFile, cacheWidth: 128, cacheHeight: 128,);
+        NcFile file = snapshot.data;
+
+        if(file.localFile != null && file.localFile.existsSync()) {
+          return Image.file(
+            snapshot.data.localFile, 
+            cacheWidth: this.cacheWidth, 
+            cacheHeight: this.cacheHeight, 
+            fit: BoxFit.cover,);
         }
 
-        if(snapshot.data.previewFile != null && snapshot.data.previewFile.existsSync()) {
-          return Image.file(snapshot.data.previewFile, cacheWidth: 128, cacheHeight: 128,);
+        if(file.previewFile != null && file.previewFile.existsSync()) {
+          return Image.file(
+            snapshot.data.previewFile, 
+            cacheWidth: this.cacheWidth, 
+            cacheHeight: this.cacheHeight, 
+            fit: BoxFit.cover,
+          );
         }
 
         return Container(

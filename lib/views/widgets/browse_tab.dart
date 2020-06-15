@@ -39,7 +39,8 @@ class BrowseTab extends StatelessWidget {
             context, 
             PathSelectorScreen.route, 
             arguments: PathSelectorScreenArguments(
-              uri: origin,
+              //todo-sv: is this path really necessary 2/2
+              uri: Uri(scheme: origin.scheme, userInfo: origin.userInfo, host: origin.host, path: "/"),
               onCancel: null, 
               onSelect: null
             )

@@ -54,6 +54,7 @@ class PathWidget extends StatelessWidget {
               underline: Container(),
               onChanged: (value) {
                 Uri origin = Uri.parse(value);
+                //todo-sv: is this path really necessary 1/2
                 _onTap(Uri(scheme: origin.scheme, host: origin.host, userInfo: origin.userInfo, path: "/"));
               },
               items: items,

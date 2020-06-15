@@ -19,6 +19,27 @@ class PathSelectorScreen extends StatelessWidget {
     Navigator.pushNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(uri: path, onCancel: _onCancel, onSelect: _onSelect));
   }
 
+  void _popUntilSelf(BuildContext context, Uri path) {
+    Navigator.popUntil(context, (route) {
+      if(route.settings.arguments is PathSelectorScreenArguments) {
+        PathSelectorScreenArguments args = route.settings.arguments as PathSelectorScreenArguments;
+        if(args.uri.toString() == path.toString()) {
+          return true;
+        }
+
+        if(args.uri.scheme != path.scheme && args.uri.path == "/") {
+          return true;
+        }
+      }
+
+      return false;
+    });
+
+    if(_uri.scheme != path.scheme) {
+      Navigator.pushReplacementNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(uri: path, onCancel: _onCancel, onSelect: _onSelect));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget bottomBar;
@@ -52,7 +73,7 @@ class PathSelectorScreen extends StatelessWidget {
             // padding: EdgeInsets.only(bottom: 10),
             child: Align(
               alignment: Alignment.topLeft,
-              child: PathWidget(this._uri, (Uri subPath) => this._navigateToSelf(context, subPath))
+              child: PathWidget(this._uri, (Uri subPath) => this._popUntilSelf(context, subPath))
             )
           ), 
           preferredSize: Size.fromHeight(40)

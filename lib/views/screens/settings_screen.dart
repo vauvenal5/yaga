@@ -15,6 +15,39 @@ class SettingsScreen extends StatelessWidget {
 
   SettingsScreen(this._defaultPreferences);
 
+  Uri _buildSubUri(Uri uri, String segment) {
+    String path = "";
+    int index = uri.pathSegments.indexOf(segment);
+    for(int i =0;i<=index;i++) {
+      path += "/${uri.pathSegments[i]}";
+    }
+    return Uri(scheme: uri.scheme, userInfo: uri.userInfo, host: uri.host, path: path);
+  }
+
+  void _pushToNavigation(BuildContext context, StringPreference pref, Uri uri) {
+    Navigator.pushNamed(
+      context, 
+      PathSelectorScreen.route, 
+      arguments: PathSelectorScreenArguments(
+        uri: uri,
+        onCancel: () => Navigator.popUntil(context, ModalRoute.withName(SettingsScreen.route)), 
+        onSelect: (Uri path) {
+          Navigator.popUntil(context, ModalRoute.withName(SettingsScreen.route));
+          getIt.get<SettingsManager>().updateSettingCommand(StringPreference(pref.key, pref.title, path.toString()));
+        }
+      )
+    );
+  }
+
+  //todo: track issue https://github.com/flutter/flutter/issues/45938 and improve this madness when possible
+  void _pushViews(BuildContext context, StringPreference pref) {
+    Uri uri = Uri.parse(pref.value);
+    _pushToNavigation(context, pref, Uri(scheme: uri.scheme, userInfo: uri.userInfo, host: uri.host, path: "/"));
+    for(String segment in uri.pathSegments) {
+      _pushToNavigation(context, pref, _buildSubUri(uri, segment));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,18 +61,7 @@ class SettingsScreen extends StatelessWidget {
           if(defaultPref is StringPreference) {
             return StringPreferenceWidget(
               defaultPref, 
-              (pref) => Navigator.pushNamed(
-                context, 
-                PathSelectorScreen.route, 
-                arguments: PathSelectorScreenArguments(
-                  uri: Uri.parse(pref.value),//UriUtils.createLocalUri(pref.value),
-                  onCancel: () => Navigator.popUntil(context, ModalRoute.withName(SettingsScreen.route)), 
-                  onSelect: (Uri path) {
-                    Navigator.popUntil(context, ModalRoute.withName(SettingsScreen.route));
-                    getIt.get<SettingsManager>().updateSettingCommand(StringPreference(pref.key, pref.title, path.toString()));
-                  }
-                )
-              )
+              (pref) => _pushViews(context, pref)
             );
           }
           

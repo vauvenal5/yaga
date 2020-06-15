@@ -20,7 +20,8 @@ class Router {
           builder: (context) => PathSelectorScreen(
             pathSelectorScreenArguments.uri,
             pathSelectorScreenArguments.onCancel,
-            pathSelectorScreenArguments.onSelect
+            pathSelectorScreenArguments.onSelect,
+            onFileTap: pathSelectorScreenArguments.onFileTap,
           ));
       case NextCloudAddressScreen.route:
         return MaterialPageRoute(settings: settings, builder: (context) => NextCloudAddressScreen());
@@ -28,7 +29,7 @@ class Router {
         return MaterialPageRoute(settings: settings, builder: (context) => NextCloudLoginScreen(settings.arguments));
       case ImageScreen.route:
         ImageScreenArguments args = settings.arguments as ImageScreenArguments;
-        return MaterialPageRoute(settings: settings, builder: (context) => ImageScreen(args.images, args.index, args.title));
+        return MaterialPageRoute(settings: settings, builder: (context) => ImageScreen(args.images, args.index, title: args.title));
       default:
         return MaterialPageRoute(settings: settings, builder: (context) => YagaHomeScreen(settings.arguments??YagaHomeViews.grid));
     }

@@ -5,5 +5,5 @@ class ImageScreenArguments {
   final int index;
   final String title;
 
-  ImageScreenArguments(this.images, this.index, this.title);
+  ImageScreenArguments(this.images, this.index, {this.title});
 }

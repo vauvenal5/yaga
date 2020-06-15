@@ -9,9 +9,10 @@ import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class FolderWidget extends StatefulWidget {
   final Uri _uri;
-  final Function _onFolderTap;
+  final Function(NcFile) onFolderTap;
+  final Function(List<NcFile>, int) onFileTap;
 
-  FolderWidget(this._uri, this._onFolderTap);
+  FolderWidget(this._uri, {this.onFolderTap, this.onFileTap});
 
   @override
   State<StatefulWidget> createState() => FolderWidgetState();
@@ -85,7 +86,7 @@ class FolderWidgetState extends State<FolderWidget> {
                 (context, index) => ListTile(
                   leading: Icon(Icons.folder, size: 32,),
                   title: Text(_folders[index].name),
-                  onTap: () => widget._onFolderTap(_folders[index]),
+                  onTap: widget.onFolderTap != null ? () => widget.onFolderTap(_folders[index]) : null,
                 ),
                 childCount: _folders.length
               )
@@ -98,6 +99,7 @@ class FolderWidgetState extends State<FolderWidget> {
                   //   Image.memory(_files[index].inMemoryPreview, cacheWidth: 32,) : 
                   //   Image.file(_files[index].localFile, cacheWidth: 32,),
                   title: Text(_files[index].name),
+                  onTap: widget.onFileTap != null ? () => widget.onFileTap(_files, index) : null,
                 ),
                 childCount: _files.length
               )

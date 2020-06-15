@@ -17,7 +17,7 @@ class ImageScreen extends StatefulWidget {
   final PageController pageController;
   final String title;
 
-  ImageScreen(this._images, int index, this.title) : pageController = PageController(initialPage: index);
+  ImageScreen(this._images, int index, {this.title}) : pageController = PageController(initialPage: index);
 
   @override
   State<StatefulWidget> createState() => ImageScreenState();
@@ -45,7 +45,7 @@ class ImageScreenState extends State<ImageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title??_title),
       ),
       body: 
       Stack(

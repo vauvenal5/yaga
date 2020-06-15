@@ -12,11 +12,17 @@ class PathSelectorScreen extends StatelessWidget {
   final Uri _uri;
   final void Function() _onCancel;
   final void Function(Uri) _onSelect;
+  final void Function(List<NcFile>, int) onFileTap;
 
-  PathSelectorScreen(this._uri, this._onCancel, this._onSelect);
+  PathSelectorScreen(this._uri, this._onCancel, this._onSelect, {this.onFileTap});
 
   void _navigateToSelf(BuildContext context, Uri path) {
-    Navigator.pushNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(uri: path, onCancel: _onCancel, onSelect: _onSelect));
+    Navigator.pushNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(
+      uri: path, 
+      onCancel: _onCancel, 
+      onSelect: _onSelect,
+      onFileTap: onFileTap
+    ));
   }
 
   void _popUntilSelf(BuildContext context, Uri path) {
@@ -36,7 +42,12 @@ class PathSelectorScreen extends StatelessWidget {
     });
 
     if(_uri.scheme != path.scheme) {
-      Navigator.pushReplacementNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(uri: path, onCancel: _onCancel, onSelect: _onSelect));
+      Navigator.pushReplacementNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(
+        uri: path, 
+        onCancel: _onCancel, 
+        onSelect: _onSelect,
+        onFileTap: onFileTap
+      ));
     }
   }
 
@@ -80,7 +91,7 @@ class PathSelectorScreen extends StatelessWidget {
         ),
       ),
       //todo: is it possible to directly pass the folder.uri?
-      body: FolderWidget(this._uri, (NcFile folder) => this._navigateToSelf(context, folder.uri)),
+      body: FolderWidget(this._uri, onFolderTap: (NcFile folder) => this._navigateToSelf(context, folder.uri), onFileTap: this.onFileTap,),
       bottomNavigationBar: bottomBar,
     );
   }

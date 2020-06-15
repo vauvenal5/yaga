@@ -111,7 +111,7 @@ class CategoryWidgetState extends State<CategoryWidget> {
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               return InkWell(
-                onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: ImageScreenArguments(_sortedFiles[key], index, key)),
+                onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: ImageScreenArguments(_sortedFiles[key], index, title: key)),
                 child: RemoteImageWidget(_sortedFiles[key][index], key: ValueKey(_sortedFiles[key][index].uri.path), cacheWidth: 512, ),
               );
               //return Image.file(_sortedFiles[key][index].localFile, cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].uri.path),);

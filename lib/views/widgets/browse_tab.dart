@@ -42,6 +42,7 @@ class BrowseTab extends StatelessWidget {
             context, 
             PathSelectorScreen.route, 
             arguments: PathSelectorScreenArguments(
+              title: "Browse",
               //todo-sv: is this path really necessary 2/2
               uri: Uri(scheme: origin.scheme, userInfo: origin.userInfo, host: origin.host, path: "/"),
               onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(

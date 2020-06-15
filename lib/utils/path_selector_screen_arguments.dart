@@ -6,6 +6,7 @@ class PathSelectorScreenArguments {
   final void Function() onCancel;
   final void Function(Uri) onSelect;
   final void Function(List<NcFile>, int) onFileTap;
+  final String title;
 
-  PathSelectorScreenArguments({@required this.uri, this.onCancel, this.onSelect, this.onFileTap});
+  PathSelectorScreenArguments({@required this.uri, this.onCancel, this.onSelect, this.onFileTap, this.title});
 }

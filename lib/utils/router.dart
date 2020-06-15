@@ -22,6 +22,7 @@ class Router {
             pathSelectorScreenArguments.onCancel,
             pathSelectorScreenArguments.onSelect,
             onFileTap: pathSelectorScreenArguments.onFileTap,
+            title: pathSelectorScreenArguments.title,
           ));
       case NextCloudAddressScreen.route:
         return MaterialPageRoute(settings: settings, builder: (context) => NextCloudAddressScreen());

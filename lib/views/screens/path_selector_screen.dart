@@ -6,6 +6,7 @@ import 'package:yaga/utils/path_selector_screen_arguments.dart';
 import 'package:yaga/views/widgets/folder_widget.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
 
+//todo: rename this since it is also used for browse view... maybe clean up a little
 class PathSelectorScreen extends StatelessWidget {
   static const String route = "/pathSelector";
 
@@ -13,8 +14,9 @@ class PathSelectorScreen extends StatelessWidget {
   final void Function() _onCancel;
   final void Function(Uri) _onSelect;
   final void Function(List<NcFile>, int) onFileTap;
+  final String title;
 
-  PathSelectorScreen(this._uri, this._onCancel, this._onSelect, {this.onFileTap});
+  PathSelectorScreen(this._uri, this._onCancel, this._onSelect, {this.onFileTap, this.title});
 
   void _navigateToSelf(BuildContext context, Uri path) {
     Navigator.pushNamed(context, PathSelectorScreen.route, arguments: PathSelectorScreenArguments(
@@ -72,7 +74,7 @@ class PathSelectorScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Select path..."),
+        title: Text(this.title??"Select path..."),
         // title: DropdownButton(
         //   value: this._path.split("/").last,
         //   onChanged: (String value) => Navigator.pushNamed(context, PathSelectorPage.route, arguments: this._path.split("/"+value).first),

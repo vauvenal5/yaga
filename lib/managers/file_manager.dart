@@ -20,9 +20,6 @@ class FileManager {
   RxCommand<NcFile, NcFile> downloadImageCommand;
   RxCommand<NcFile, NcFile> updateImageCommand;
 
-  RxCommand<Uri, Uri> listFilesCommand;
-  RxCommand<NcFile, NcFile> updateFilesListCommand;
-
   NextCloudService _nextCloudService;
   LocalImageProviderService _localFileService;
   Map<String, FileProviderService> _fileProviders = Map();
@@ -35,6 +32,7 @@ class FileManager {
 
     _getPreviewCommand = RxCommand.createSync((param) => param);
     //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
+    //todo: bug: this also tries to fetch previews for local files; no check if the file is local or remote
     _getPreviewCommand.asyncMap((ncFile) => getIt.get<NextCloudService>().getPreview(ncFile.uri.path)
       .then((value) async {
         ncFile.previewFile.createSync(recursive: true);
@@ -83,17 +81,15 @@ class FileManager {
 
     updatePreviewCommand = RxCommand.createSync((param) => param);
     updateImageCommand = RxCommand.createSync((param) => param);
+  }
 
-    updateFilesListCommand = RxCommand.createSync((param) => param);
-    listFilesCommand = RxCommand.createSync((param) => param);
-    listFilesCommand.flatMap((uri) => _fileProviders[uri.scheme].list(uri))
-    .listen((file) {
+  Stream<NcFile> listFiles(Uri uri) {
+    return _fileProviders[uri.scheme].list(uri).doOnData((file) {
       if(file.localFile == null) {
         //todo: this is actually already a "mapping" activity and has to be handled by the FileMapperManager in future
         file.localFile = _localFileService.getLocalFile(file.uri.path);
         file.previewFile = _localFileService.getTmpFile(file.uri.path);
       }
-      updateFilesListCommand(file);
     });
   }
 }

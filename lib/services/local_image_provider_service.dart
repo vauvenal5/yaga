@@ -37,11 +37,12 @@ class LocalImageProviderService implements FileProviderService {
 
   @override
   Stream<NcFile> list(Uri directory) {
+    //todo: bug: for local files we are missing file type filtering
     return Permission.storage.request().asStream()
       .where((event) => event.isGranted)
       .map((event) => new Directory(_internalUriToSystemPath(directory)))
       .flatMap((dir) => dir.list(recursive: false, followLinks: false)
-      .map((event) async {
+      .map((event) {
         NcFile file = NcFile();
         file.uri = _systemEntityToInternalUri(event);
         file.name = file.uri.pathSegments.last;
@@ -56,7 +57,6 @@ class LocalImageProviderService implements FileProviderService {
 
         return file;
       })
-      .flatMap((value) => value.asStream())
         //.where((entity) => entity is File)
         //.map((entity) => entity as File)
         //.where((file) => file.path.endsWith(".bmp") || file.path.endsWith(".jpg"))

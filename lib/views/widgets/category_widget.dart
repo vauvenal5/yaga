@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,8 +7,6 @@ import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/image_screen_arguments.dart';
 import 'package:yaga/utils/service_locator.dart';
-import 'package:yaga/services/local_image_provider_service.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
 
@@ -27,30 +24,7 @@ class CategoryWidgetState extends State<CategoryWidget> {
   List<DateTime> _dates = [];
   Map<String, List<NcFile>> _sortedFiles = Map();
   StreamSubscription<NcFile> _updateFilesListCommandSubscription;
-
-  CategoryWidgetState() {
-    this._updateFilesListCommandSubscription = getIt.get<FileManager>().updateFilesListCommand
-    .where((event) => event.uri.path.startsWith(widget._uri.path))
-    .where((event) => !event.isDirectory)
-    .listen((file) {
-      DateTime lastModified = file.lastModified;
-      DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
-      
-      setState((){
-        if(!this._dates.contains(date)) {
-          this._dates.add(date);
-          this._dates.sort((date1, date2) => date2.compareTo(date1));
-        }
-
-        String key = this._createKey(date);
-        _sortedFiles.putIfAbsent(key, () => []);
-        //todo-sv: this has to be solved in a better way... double calling happens for example when in path selector screen navigating to same path
-        if(!_sortedFiles[key].contains(file)) {
-          _sortedFiles[key].add(file);
-        }
-      });
-    });
-  }
+  bool _loading;
 
   @override
   void dispose() {
@@ -61,7 +35,40 @@ class CategoryWidgetState extends State<CategoryWidget> {
   void _updateFilesAndFolders() {
     this._dates = [];
     this._sortedFiles = Map();
-    getIt.get<FileManager>().listFilesCommand(widget._uri);
+
+    setState(() {
+      _loading = true;
+    });
+
+    //cancel old subscription
+    this._updateFilesListCommandSubscription?.cancel();
+    
+    this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(widget._uri)
+    .where((event) => !event.isDirectory)
+    .listen(
+      (file) {
+        DateTime lastModified = file.lastModified;
+        DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
+        
+        setState((){
+          if(!this._dates.contains(date)) {
+            this._dates.add(date);
+            this._dates.sort((date1, date2) => date2.compareTo(date1));
+          }
+
+          String key = this._createKey(date);
+          _sortedFiles.putIfAbsent(key, () => []);
+          //todo-sv: this has to be solved in a better way... double calling happens for example when in path selector screen navigating to same path
+          if(!_sortedFiles[key].contains(file)) {
+            _sortedFiles[key].add(file);
+            _sortedFiles[key].sort((a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          }
+        });
+      },
+      onDone: () => setState((){
+        _loading=false;
+      })
+    );
   }
 
   @override
@@ -120,9 +127,13 @@ class CategoryWidgetState extends State<CategoryWidget> {
       ));
     });
     
-    return CustomScrollView(
-
-      slivers: slivers,
+    return Stack(
+      children: [
+        CustomScrollView(
+          slivers: slivers,
+        ),
+        _loading ? LinearProgressIndicator() : Container()
+      ]
     );
   }
 }

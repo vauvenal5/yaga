@@ -26,17 +26,18 @@ class RemoteImageWidget extends StatelessWidget {
       builder: (context, snapshot) {
         NcFile file = snapshot.data;
 
-        if(file.localFile != null && file.localFile.existsSync()) {
-          return Image.file(
-            snapshot.data.localFile, 
-            cacheWidth: this.cacheWidth, 
-            cacheHeight: this.cacheHeight, 
-            fit: BoxFit.cover,);
-        }
-
         if(file.previewFile != null && file.previewFile.existsSync()) {
           return Image.file(
             snapshot.data.previewFile, 
+            cacheWidth: this.cacheWidth, 
+            cacheHeight: this.cacheHeight, 
+            fit: BoxFit.cover,
+          );
+        }
+
+        if(file.localFile != null && file.localFile.existsSync()) {
+          return Image.file(
+            snapshot.data.localFile, 
             cacheWidth: this.cacheWidth, 
             cacheHeight: this.cacheHeight, 
             fit: BoxFit.cover,

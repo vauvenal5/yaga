@@ -11,6 +11,7 @@ import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/nc_login_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
+import 'package:yaga/views/widgets/browse_tab.dart';
 import 'package:yaga/views/widgets/category_widget.dart';
 import 'package:yaga/views/widgets/folder_widget.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
@@ -51,7 +52,7 @@ class YagaHomeScreen extends StatelessWidget {
   Widget _getView(Uri path, onFolderTap) {
     switch(this._view) {
       case YagaHomeViews.folder:
-        return FolderWidget(path, onFolderTap);
+        return BrowseTab();
       default:
         return CategoryWidget(path, onFolderTap);
     }
@@ -127,32 +128,32 @@ class YagaHomeScreen extends StatelessWidget {
         },
       ),
       
-      // bottomNavigationBar: BottomNavigationBar(
-      //   currentIndex: _getCurrentIndex(),
-      //   onTap: (index) {
-      //     if(index == _getCurrentIndex()) {
-      //       return;
-      //     }
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _getCurrentIndex(),
+        onTap: (index) {
+          if(index == _getCurrentIndex()) {
+            return;
+          }
 
-      //     switch(index) {
-      //       case 1:
-      //         Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.folder);
-      //         return;
-      //       default:
-      //         Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.grid);
-      //     }
-      //   },
-      //   items: const <BottomNavigationBarItem>[
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.home),
-      //       title: Text('Home View'),
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.folder),
-      //       title: Text('Folder View'),
-      //     ),
-      //   ],
-      // ),
+          switch(index) {
+            case 1:
+              Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.folder);
+              return;
+            default:
+              Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.grid);
+          }
+        },
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home View'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.folder),
+            title: Text('Browse View'),
+          ),
+        ],
+      ),
     );
   }
 }

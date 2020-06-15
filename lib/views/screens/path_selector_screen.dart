@@ -21,6 +21,23 @@ class PathSelectorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget bottomBar;
+    if(_onSelect != null || _onCancel != null) {
+      bottomBar = ButtonBar(
+        children: <Widget>[
+          OutlineButton(
+            onPressed: () => _onCancel(),
+            child: Text("Cancel"),
+          ),
+          RaisedButton(
+            onPressed: () => _onSelect(this._uri),
+            color: Theme.of(context).accentColor,
+            child: Text("Select"),
+          )
+        ],
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Select path..."),
@@ -43,19 +60,7 @@ class PathSelectorScreen extends StatelessWidget {
       ),
       //todo: is it possible to directly pass the folder.uri?
       body: FolderWidget(this._uri, (NcFile folder) => this._navigateToSelf(context, folder.uri)),
-      bottomNavigationBar: ButtonBar(
-        children: <Widget>[
-          OutlineButton(
-            onPressed: () => _onCancel(),
-            child: Text("Cancel"),
-          ),
-          RaisedButton(
-            onPressed: () => _onSelect(this._uri),
-            color: Theme.of(context).accentColor,
-            child: Text("Select"),
-          )
-        ],
-      )
+      bottomNavigationBar: bottomBar,
     );
   }
 }

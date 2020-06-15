@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
@@ -35,6 +36,11 @@ class LocalImageProviderService implements FileProviderService {
     return "/${uri.userInfo}/${uri.host.replaceAll(".", "/")}${uri.path}";
   }
 
+  bool _checkMimeType(String path) {
+    String type = lookupMimeType(path);
+    return type != null && type.startsWith("image");
+  }
+
   @override
   Stream<NcFile> list(Uri directory) {
     //todo: bug: for local files we are missing file type filtering
@@ -42,6 +48,7 @@ class LocalImageProviderService implements FileProviderService {
       .where((event) => event.isGranted)
       .map((event) => new Directory(_internalUriToSystemPath(directory)))
       .flatMap((dir) => dir.list(recursive: false, followLinks: false)
+      .where((event) => event is Directory || _checkMimeType(event.path))
       .map((event) {
         NcFile file = NcFile();
         file.uri = _systemEntityToInternalUri(event);

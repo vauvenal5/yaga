@@ -49,10 +49,10 @@ class YagaHomeScreen extends StatelessWidget {
     getIt.get<SettingsManager>().newLoadSettingCommand(pref);
   }
 
-  Widget _getView(Uri path, onFolderTap) {
+  Widget _getView(Uri path, onFolderTap, Widget bottomNavBar) {
     switch(this._view) {
       case YagaHomeViews.folder:
-        return BrowseTab();
+        return BrowseTab(bottomNavBar: bottomNavBar,);
       default:
         return CategoryWidget(path, onFolderTap);
     }
@@ -69,6 +69,35 @@ class YagaHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BottomNavigationBar bottomNavBar = BottomNavigationBar(
+      currentIndex: _getCurrentIndex(),
+      onTap: (index) {
+        Navigator.popUntil(context, ModalRoute.withName(YagaHomeScreen.route));
+
+        if(index == _getCurrentIndex()) {
+          return;
+        }
+
+        switch(index) {
+          case 1:
+            Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.folder);
+            return;
+          default:
+            Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.grid);
+        }
+      },
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          title: Text('Home View'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.folder),
+          title: Text('Browse View'),
+        ),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -124,36 +153,11 @@ class YagaHomeScreen extends StatelessWidget {
           if(snapshot.data == null) {
             return LinearProgressIndicator();
           }
-          return _getView(Uri.parse(snapshot.data.value), () {});
+          return _getView(Uri.parse(snapshot.data.value), () {}, bottomNavBar);
         },
       ),
       
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _getCurrentIndex(),
-        onTap: (index) {
-          if(index == _getCurrentIndex()) {
-            return;
-          }
-
-          switch(index) {
-            case 1:
-              Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.folder);
-              return;
-            default:
-              Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.grid);
-          }
-        },
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('Home View'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.folder),
-            title: Text('Browse View'),
-          ),
-        ],
-      ),
+      bottomNavigationBar: bottomNavBar,
     );
   }
 }

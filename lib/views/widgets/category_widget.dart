@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/utils/image_screen_arguments.dart';
+import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:yaga/utils/image_screen_arguments.dart';
-import 'package:yaga/utils/path_selector_screen_arguments.dart';
+import 'package:yaga/model/route_args/directory_navigation_arguments.dart';
+import 'package:yaga/model/route_args/image_screen_arguments.dart';
+import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
+import 'package:yaga/views/screens/directory_navigation_screen.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/nc_login_screen.dart';
@@ -24,6 +26,14 @@ class Router {
             onFileTap: pathSelectorScreenArguments.onFileTap,
             title: pathSelectorScreenArguments.title,
           ));
+      case DirectoryNavigationScreen.route:
+        DirectoryNavigationArguments args = settings.arguments as DirectoryNavigationArguments;
+        return MaterialPageRoute(settings: settings, builder: (context) => DirectoryNavigationScreen(
+          uri: args.uri,
+          title: args.title,
+          bottomBar: args.bottomBar,
+          onFileTap: args.onFileTap,
+        ));
       case NextCloudAddressScreen.route:
         return MaterialPageRoute(settings: settings, builder: (context) => NextCloudAddressScreen());
       case NextCloudLoginScreen.route:

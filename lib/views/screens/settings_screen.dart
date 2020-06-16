@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/utils/service_locator.dart';
-import 'package:yaga/utils/path_selector_screen_arguments.dart';
-import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/widgets/preferences/section_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/string_preference_widget.dart';

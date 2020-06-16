@@ -94,7 +94,11 @@ class FolderWidgetState extends State<FolderWidget> {
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) => ListTile(
-                  leading: RemoteImageWidget(_files[index], key: ValueKey(_files[index].uri.path), cacheWidth: 128, cacheHeight: 128,),
+                  leading: Container(
+                    width: 64,
+                    height: 64,
+                    child: RemoteImageWidget(_files[index], key: ValueKey(_files[index].uri.path), cacheWidth: 128,),
+                  ),
                   // _files[index].localFile==null ?
                   //   Image.memory(_files[index].inMemoryPreview, cacheWidth: 32,) : 
                   //   Image.file(_files[index].localFile, cacheWidth: 32,),

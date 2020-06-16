@@ -12,9 +12,8 @@ import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class CategoryWidget extends StatefulWidget {
   final Uri _uri;
-  final Function _onFolderTap;
 
-  CategoryWidget(this._uri, this._onFolderTap);
+  CategoryWidget(this._uri);
 
   @override
   State<StatefulWidget> createState() => CategoryWidgetState();

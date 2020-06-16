@@ -3,7 +3,8 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
 
 class PathSelectorScreen extends StatelessWidget {
-  static const String route = "/pathSelector";
+  // PathSelectorScreen is only a wrapper for DirecotryNavigationScreen to abstract the builderFunction
+  static const String route = DirectoryNavigationScreen.route;
 
   final Uri _uri;
   final void Function() _onCancel;
@@ -15,16 +16,16 @@ class PathSelectorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget bottomBar;
+    Widget Function(BuildContext, Uri) bottomBarBuilder;
     if(_onSelect != null || _onCancel != null) {
-      bottomBar = ButtonBar(
+      bottomBarBuilder = (BuildContext context, Uri uri) => ButtonBar(
         children: <Widget>[
           OutlineButton(
             onPressed: () => _onCancel(),
             child: Text("Cancel"),
           ),
           RaisedButton(
-            onPressed: () => _onSelect(this._uri),
+            onPressed: () => _onSelect(uri),
             color: Theme.of(context).accentColor,
             child: Text("Select"),
           )
@@ -32,6 +33,11 @@ class PathSelectorScreen extends StatelessWidget {
       );
     }
 
-    return DirectoryNavigationScreen(uri: this._uri, bottomBar: bottomBar, onFileTap: this.onFileTap, title: this.title,);
+    return DirectoryNavigationScreen(
+      uri: this._uri, 
+      bottomBarBuilder: bottomBarBuilder, 
+      onFileTap: this.onFileTap, 
+      title: this.title??"Select path...",
+    );
   }
 }

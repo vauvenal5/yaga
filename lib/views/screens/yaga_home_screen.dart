@@ -17,18 +17,24 @@ import 'package:yaga/views/widgets/folder_widget.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
 
 enum YagaHomeMenu {settings}
-enum YagaHomeViews {grid, folder}
+enum YagaHomeTab {grid, folder}
 
-class YagaHomeScreen extends StatelessWidget {
+class YagaHomeScreen extends StatefulWidget {
   static const String route = "/";
+  
+  @override
+  State<StatefulWidget> createState() => YagaHomeScreenState();
+  
+}
 
-  final YagaHomeViews _view;
+class YagaHomeScreenState extends State<YagaHomeScreen> {
+  YagaHomeTab _selectedTab;
 
   final List<Preference> _defaultViewPreferences = [];
   StringPreference _path;
 
-  YagaHomeScreen(this._view) {
-    SectionPreference general = SectionPreference.route(route, "general", "General");
+  YagaHomeScreenState() {
+    SectionPreference general = SectionPreference.route(YagaHomeScreen.route, "general", "General");
     this._path = StringPreference.section(general, "path", "Path", "");
 
     this._addAndLoadPreference(general);
@@ -49,22 +55,19 @@ class YagaHomeScreen extends StatelessWidget {
     getIt.get<SettingsManager>().newLoadSettingCommand(pref);
   }
 
-  Widget _getView(Uri path, onFolderTap, Widget bottomNavBar) {
-    switch(this._view) {
-      case YagaHomeViews.folder:
-        return BrowseTab(bottomNavBar: bottomNavBar,);
-      default:
-        return CategoryWidget(path, onFolderTap);
-    }
-  }
-
   int _getCurrentIndex() {
-    switch(this._view) {
-      case YagaHomeViews.folder:
+    switch(this._selectedTab) {
+      case YagaHomeTab.folder:
         return 1;
       default:
         return 0;
     }
+  }
+
+  void _setSelectedTab(YagaHomeTab tab) {
+    setState(() {
+      _selectedTab = tab;
+    });
   }
 
   @override
@@ -80,10 +83,10 @@ class YagaHomeScreen extends StatelessWidget {
 
         switch(index) {
           case 1:
-            Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.folder);
+            _setSelectedTab(YagaHomeTab.folder);
             return;
           default:
-            Navigator.pushReplacementNamed(context, YagaHomeScreen.route, arguments: YagaHomeViews.grid);
+            _setSelectedTab(YagaHomeTab.grid);
         }
       },
       items: const <BottomNavigationBarItem>[
@@ -153,7 +156,13 @@ class YagaHomeScreen extends StatelessWidget {
           if(snapshot.data == null) {
             return LinearProgressIndicator();
           }
-          return _getView(Uri.parse(snapshot.data.value), () {}, bottomNavBar);
+          
+          switch(this._selectedTab) {
+            case YagaHomeTab.folder:
+              return BrowseTab(bottomNavBar: bottomNavBar,);
+            default:
+              return CategoryWidget(Uri.parse(snapshot.data.value));
+          }
         },
       ),
       

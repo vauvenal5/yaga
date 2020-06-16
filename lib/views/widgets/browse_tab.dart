@@ -29,7 +29,7 @@ class BrowseTab extends StatelessWidget {
           ImageScreen.route, 
           arguments: ImageScreenArguments(files, index)
         ),
-        bottomBar: bottomNavBar
+        bottomBarBuilder: (context, uri) => bottomNavBar
       )
     );
   }

@@ -15,23 +15,26 @@ class Router {
     switch(settings.name) {
       case SettingsScreen.route:
         return MaterialPageRoute(settings: settings, builder: (context) => SettingsScreen(settings.arguments??[]));
-      case PathSelectorScreen.route:
-        PathSelectorScreenArguments pathSelectorScreenArguments = settings.arguments as PathSelectorScreenArguments;
-        return MaterialPageRoute(
-          settings: settings, 
-          builder: (context) => PathSelectorScreen(
-            pathSelectorScreenArguments.uri,
-            pathSelectorScreenArguments.onCancel,
-            pathSelectorScreenArguments.onSelect,
-            onFileTap: pathSelectorScreenArguments.onFileTap,
-            title: pathSelectorScreenArguments.title,
-          ));
       case DirectoryNavigationScreen.route:
+        if(settings.arguments is PathSelectorScreenArguments) {
+          PathSelectorScreenArguments pathSelectorScreenArguments = settings.arguments as PathSelectorScreenArguments;
+          return MaterialPageRoute(
+            settings: settings, 
+            builder: (context) => PathSelectorScreen(
+              pathSelectorScreenArguments.uri,
+              pathSelectorScreenArguments.onCancel,
+              pathSelectorScreenArguments.onSelect,
+              onFileTap: pathSelectorScreenArguments.onFileTap,
+              title: pathSelectorScreenArguments.title,
+            )
+          );
+        }
+
         DirectoryNavigationArguments args = settings.arguments as DirectoryNavigationArguments;
         return MaterialPageRoute(settings: settings, builder: (context) => DirectoryNavigationScreen(
           uri: args.uri,
           title: args.title,
-          bottomBar: args.bottomBar,
+          bottomBarBuilder: args.bottomBarBuilder,
           onFileTap: args.onFileTap,
         ));
       case NextCloudAddressScreen.route:
@@ -42,7 +45,7 @@ class Router {
         ImageScreenArguments args = settings.arguments as ImageScreenArguments;
         return MaterialPageRoute(settings: settings, builder: (context) => ImageScreen(args.images, args.index, title: args.title));
       default:
-        return MaterialPageRoute(settings: settings, builder: (context) => YagaHomeScreen(settings.arguments??YagaHomeViews.grid));
+        return MaterialPageRoute(settings: settings, builder: (context) => YagaHomeScreen());
     }
   } 
 }

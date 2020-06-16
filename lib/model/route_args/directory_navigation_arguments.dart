@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';
 
-class DirectoryNavigationArguments {
-  final Uri uri;
+class DirectoryNavigationArguments extends NavigatableScreenArguments {
   final void Function(List<NcFile>, int) onFileTap;
   final String title;
-  final Widget bottomBar;
+  final Widget Function(BuildContext, Uri) bottomBarBuilder;
 
-  DirectoryNavigationArguments({@required this.uri, this.title, this.onFileTap, this.bottomBar});
+  DirectoryNavigationArguments({@required Uri uri, this.title, this.onFileTap, this.bottomBarBuilder}) : super(uri: uri);
 }

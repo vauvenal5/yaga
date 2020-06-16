@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/route_args/directory_navigation_arguments.dart';
+import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';
 import 'package:yaga/views/widgets/folder_widget.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
 
@@ -13,16 +14,16 @@ class DirectoryNavigationScreen extends StatelessWidget {
   final Uri uri;
   final void Function(List<NcFile>, int) onFileTap;
   final String title;
-  final Widget bottomBar;
+  final Widget Function(BuildContext, Uri) bottomBarBuilder;
 
-  DirectoryNavigationScreen({@required this.uri, this.onFileTap, this.title, this.bottomBar});
+  DirectoryNavigationScreen({@required this.uri, this.onFileTap, this.title, this.bottomBarBuilder});
 
   DirectoryNavigationArguments _getSelfArgs(Uri path) {
     return DirectoryNavigationArguments(
       uri: path, 
       onFileTap: this.onFileTap,
       title: this.title,
-      bottomBar: this.bottomBar
+      bottomBarBuilder: this.bottomBarBuilder
     );
   }
 
@@ -32,8 +33,8 @@ class DirectoryNavigationScreen extends StatelessWidget {
 
   void _popUntilSelf(BuildContext context, Uri path) {
     Navigator.popUntil(context, (route) {
-      if(route.settings.arguments is DirectoryNavigationArguments) {
-        DirectoryNavigationArguments args = route.settings.arguments as DirectoryNavigationArguments;
+      if(route.settings.arguments is NavigatableScreenArguments) {
+        NavigatableScreenArguments args = route.settings.arguments as NavigatableScreenArguments;
         if(args.uri.toString() == path.toString()) {
           return true;
         }
@@ -55,7 +56,7 @@ class DirectoryNavigationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(this.title??"Select path..."),
+        title: Text(this.title??uri.pathSegments.last),
         bottom: PreferredSize(
           child: Container(
             height: 40,
@@ -69,7 +70,7 @@ class DirectoryNavigationScreen extends StatelessWidget {
       ),
       //todo: is it possible to directly pass the folder.uri?
       body: FolderWidget(this.uri, onFolderTap: (NcFile folder) => this._navigateToSelf(context, folder.uri), onFileTap: this.onFileTap,),
-      bottomNavigationBar: bottomBar,
+      bottomNavigationBar: bottomBarBuilder == null ? null : bottomBarBuilder(context, uri),
     );
   }
 }

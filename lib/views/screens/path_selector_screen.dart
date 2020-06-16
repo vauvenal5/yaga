@@ -23,7 +23,8 @@ class PathSelectorScreen extends StatelessWidget {
       uri: path, 
       onCancel: _onCancel, 
       onSelect: _onSelect,
-      onFileTap: onFileTap
+      onFileTap: onFileTap,
+      title: this.title
     ));
   }
 
@@ -48,7 +49,8 @@ class PathSelectorScreen extends StatelessWidget {
         uri: path, 
         onCancel: _onCancel, 
         onSelect: _onSelect,
-        onFileTap: onFileTap
+        onFileTap: onFileTap,
+        title: this.title
       ));
     }
   }

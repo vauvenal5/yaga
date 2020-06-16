@@ -11,6 +11,23 @@ import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
 
 class BrowseTab extends StatelessWidget {
+
+  void _navigateToBrowseView(BuildContext context, Uri origin) {
+    Navigator.pushNamed(
+      context, 
+      PathSelectorScreen.route, 
+      arguments: PathSelectorScreenArguments(
+        title: "Browse",
+        //todo-sv: is this path really necessary 2/2
+        uri: Uri(scheme: origin.scheme, userInfo: origin.userInfo, host: origin.host, path: "/"),
+        onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
+          context, 
+          ImageScreen.route, 
+          arguments: ImageScreenArguments(files, index))
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -20,15 +37,7 @@ class BrowseTab extends StatelessWidget {
       ListTile(
         leading: Icon(Icons.phone_android,),
         title: Text("Internal Memory"),
-        onTap: () => Navigator.pushNamed(
-          context, 
-          PathSelectorScreen.route, 
-          arguments: PathSelectorScreenArguments(
-            uri: getIt.get<LocalImageProviderService>().getOrigin(),
-            onCancel: null, 
-            onSelect: null
-          )
-        ),
+        onTap: () => _navigateToBrowseView(context, getIt.get<LocalImageProviderService>().getOrigin()),
       )
     );
     
@@ -38,19 +47,7 @@ class BrowseTab extends StatelessWidget {
         ListTile(
           leading: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 12,),
           title: Text(origin.authority),
-          onTap: () => Navigator.pushNamed(
-            context, 
-            PathSelectorScreen.route, 
-            arguments: PathSelectorScreenArguments(
-              title: "Browse",
-              //todo-sv: is this path really necessary 2/2
-              uri: Uri(scheme: origin.scheme, userInfo: origin.userInfo, host: origin.host, path: "/"),
-              onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
-                context, 
-                ImageScreen.route, 
-                arguments: ImageScreenArguments(files, index))
-            )
-          ),
+          onTap: () => _navigateToBrowseView(context, origin),
         )
       );
     }

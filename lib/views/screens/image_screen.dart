@@ -72,16 +72,17 @@ class ImageScreenState extends State<ImageScreen> {
               );
             },
             loadingBuilder: (context, event) {
+              bool previewExists = widget._images[_currentIndex].previewFile != null && widget._images[_currentIndex].previewFile.existsSync();
               return Stack(
                 children: [
                   Container(
                     color: Colors.black,
-                    child: Image.file(
+                    child: previewExists ? Image.file(
                       widget._images[_currentIndex].previewFile, 
                       width: double.infinity, 
                       height: double.infinity, 
                       fit: BoxFit.contain
-                    ),
+                    ) : null,
                   ),
                   LinearProgressIndicator()
                 ]

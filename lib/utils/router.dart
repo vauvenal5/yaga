@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:yaga/model/route_args/directory_navigation_arguments.dart';
+import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
@@ -15,22 +15,20 @@ class Router {
     switch(settings.name) {
       case SettingsScreen.route:
         return MaterialPageRoute(settings: settings, builder: (context) => SettingsScreen(settings.arguments??[]));
+      case PathSelectorScreen.route:
+        PathSelectorScreenArguments pathSelectorScreenArguments = settings.arguments as PathSelectorScreenArguments;
+        return MaterialPageRoute(
+          settings: settings, 
+          builder: (context) => PathSelectorScreen(
+            pathSelectorScreenArguments.uri,
+            pathSelectorScreenArguments.onCancel,
+            pathSelectorScreenArguments.onSelect,
+            onFileTap: pathSelectorScreenArguments.onFileTap,
+            title: pathSelectorScreenArguments.title,
+          )
+        );
       case DirectoryNavigationScreen.route:
-        if(settings.arguments is PathSelectorScreenArguments) {
-          PathSelectorScreenArguments pathSelectorScreenArguments = settings.arguments as PathSelectorScreenArguments;
-          return MaterialPageRoute(
-            settings: settings, 
-            builder: (context) => PathSelectorScreen(
-              pathSelectorScreenArguments.uri,
-              pathSelectorScreenArguments.onCancel,
-              pathSelectorScreenArguments.onSelect,
-              onFileTap: pathSelectorScreenArguments.onFileTap,
-              title: pathSelectorScreenArguments.title,
-            )
-          );
-        }
-
-        DirectoryNavigationArguments args = settings.arguments as DirectoryNavigationArguments;
+        DirectoryNavigationScreenArguments args = settings.arguments as DirectoryNavigationScreenArguments;
         return MaterialPageRoute(settings: settings, builder: (context) => DirectoryNavigationScreen(
           uri: args.uri,
           title: args.title,

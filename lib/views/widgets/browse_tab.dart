@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/model/route_args/directory_navigation_arguments.dart';
+import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
@@ -20,7 +20,7 @@ class BrowseTab extends StatelessWidget {
     Navigator.pushNamed(
       context, 
       DirectoryNavigationScreen.route, 
-      arguments: DirectoryNavigationArguments(
+      arguments: DirectoryNavigationScreenArguments(
         title: "Browse",
         //todo-sv: is this path really necessary 2/2
         uri: Uri(scheme: origin.scheme, userInfo: origin.userInfo, host: origin.host, path: "/"),

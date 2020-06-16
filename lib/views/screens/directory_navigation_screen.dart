@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/model/route_args/directory_navigation_arguments.dart';
+import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';
 import 'package:yaga/views/widgets/folder_widget.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
@@ -15,20 +15,26 @@ class DirectoryNavigationScreen extends StatelessWidget {
   final void Function(List<NcFile>, int) onFileTap;
   final String title;
   final Widget Function(BuildContext, Uri) bottomBarBuilder;
+  final String navigationRoute;
+  final NavigatableScreenArguments Function(DirectoryNavigationScreenArguments) getNavigationArgs;
 
-  DirectoryNavigationScreen({@required this.uri, this.onFileTap, this.title, this.bottomBarBuilder});
+  DirectoryNavigationScreen({@required this.uri, this.onFileTap, this.title, this.bottomBarBuilder, this.navigationRoute, this.getNavigationArgs});
 
-  DirectoryNavigationArguments _getSelfArgs(Uri path) {
-    return DirectoryNavigationArguments(
+  NavigatableScreenArguments _getSelfArgs(Uri path) {
+    var args = DirectoryNavigationScreenArguments(
       uri: path, 
       onFileTap: this.onFileTap,
       title: this.title,
       bottomBarBuilder: this.bottomBarBuilder
     );
+
+    return this.getNavigationArgs?.call(args)??args;
   }
 
+  String _getRoute() => this.navigationRoute??DirectoryNavigationScreen.route;
+
   void _navigateToSelf(BuildContext context, Uri path) {
-    Navigator.pushNamed(context, DirectoryNavigationScreen.route, arguments: _getSelfArgs(path));
+    Navigator.pushNamed(context, _getRoute(), arguments: _getSelfArgs(path));
   }
 
   void _popUntilSelf(BuildContext context, Uri path) {
@@ -48,7 +54,7 @@ class DirectoryNavigationScreen extends StatelessWidget {
     });
 
     if(uri.scheme != path.scheme) {
-      Navigator.pushReplacementNamed(context, DirectoryNavigationScreen.route, arguments: _getSelfArgs(path));
+      Navigator.pushReplacementNamed(context, _getRoute(), arguments: _getSelfArgs(path));
     }
   }
 

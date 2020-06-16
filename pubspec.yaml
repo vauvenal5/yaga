@@ -44,6 +44,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.7.3"
 
 
 # For information on the generic Dart part of this file, see the
@@ -87,3 +88,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_icons:
+  android: true
+  ios: false
+  image_path: assets/icon/ic_launcher_xxxhdpi.png
+  adaptive_icon_background: "#0082c9"
+  adaptive_icon_foreground: assets/icon/ic_foreground.png

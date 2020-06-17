@@ -36,7 +36,8 @@ class FileManager {
     _getPreviewCommand.asyncMap((ncFile) => getIt.get<NextCloudService>().getPreview(ncFile.uri.path)
       .then((value) async {
         ncFile.previewFile.createSync(recursive: true);
-        ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value, flush: true); 
+        ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value, flush: true);
+        await ncFile.previewFile.setLastModified(ncFile.lastModified);
         return ncFile;
       }, 
       onError: (err) {
@@ -52,6 +53,7 @@ class FileManager {
       .then((value) async {
         ncFile.localFile.createSync(recursive: true);
         ncFile.localFile = await ncFile.localFile.writeAsBytes(value, flush: true); 
+        await ncFile.localFile.setLastModified(ncFile.lastModified);
         return ncFile;
       }, 
       onError: (err) {
@@ -87,8 +89,8 @@ class FileManager {
     return _fileProviders[uri.scheme].list(uri).doOnData((file) {
       if(file.localFile == null) {
         //todo: this is actually already a "mapping" activity and has to be handled by the FileMapperManager in future
-        file.localFile = _localFileService.getLocalFile(file.uri.path);
-        file.previewFile = _localFileService.getTmpFile(file.uri.path);
+        file.localFile = _localFileService.getLocalFile(Uri.decodeComponent(file.uri.path));
+        file.previewFile = _localFileService.getTmpFile(Uri.decodeComponent(file.uri.path));
       }
     });
   }

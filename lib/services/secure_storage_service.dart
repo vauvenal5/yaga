@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:yaga/services/service.dart';
 
-class SecureStorageService {
+class SecureStorageService extends Service<SecureStorageService>{
   FlutterSecureStorage _storage;
 
   SecureStorageService() {

@@ -1,16 +1,15 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yaga/model/preference.dart';
+import 'package:yaga/services/service.dart';
 
-class SharedPreferencesService {
+class SharedPreferencesService implements Service<SharedPreferencesService> {
   SharedPreferences _instance;
 
-  Future<SharedPreferences> _getOrLoadSharedPreferences() async {
-    if(_instance == null) {
-      _instance = await SharedPreferences.getInstance();
-    }
-
-    return _instance;
+  @override
+  Future<SharedPreferencesService> init() async {
+    _instance = await SharedPreferences.getInstance();
+    return this;
   }
 
   // Future<String> loadStringPreference(Preferences pref) {
@@ -19,14 +18,13 @@ class SharedPreferencesService {
   //     .map((prefs) => prefs.getString(pref.toString()) ?? defaults[pref]).first;
   // }
 
-  Stream<String> loadStringPreference(StringPreference pref) {
-    print(pref.toString());
-    return _getOrLoadSharedPreferences().asStream()
-      .map((prefs) => prefs.getString(pref.key) ?? pref.value);
-  }
+  StringListPreference loadStringListPreference(StringListPreference pref) 
+    => StringListPreference(pref.key, pref.title, _instance.getStringList(pref.key)??pref.value);
 
-  Stream<bool> saveStringPreference(StringPreference pref) {
-    return _getOrLoadSharedPreferences().asStream()
-      .flatMap((prefs) => prefs.setString(pref.key, pref.value).asStream());
-  }
+  Future<bool> saveStringListPreference(StringListPreference pref) => _instance.setStringList(pref.key, pref.value);
+
+  StringPreference loadStringPreference(StringPreference pref) => 
+    StringPreference(pref.key, pref.title, _instance.getString(pref.key) ?? pref.value);
+
+  Future<bool> saveStringPreference(StringPreference pref) => _instance.setString(pref.key, pref.value);
 }

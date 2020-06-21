@@ -8,7 +8,6 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
-import 'package:yaga/utils/service_locator.dart';
 
 class FileManager {
   RxCommand<NcFile, NcFile> _getPreviewCommand;
@@ -24,16 +23,14 @@ class FileManager {
   LocalImageProviderService _localFileService;
   Map<String, FileProviderService> _fileProviders = Map();
 
-  FileManager() {
-    _nextCloudService = getIt.get<NextCloudService>();
-    _localFileService = getIt.get<LocalImageProviderService>();
+  FileManager(this._nextCloudService, this._localFileService) {
     _fileProviders.putIfAbsent(_localFileService.scheme, () => _localFileService);
     _fileProviders.putIfAbsent(_nextCloudService.scheme, () => _nextCloudService);
 
     _getPreviewCommand = RxCommand.createSync((param) => param);
     //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
     //todo: bug: this also tries to fetch previews for local files; no check if the file is local or remote
-    _getPreviewCommand.asyncMap((ncFile) => getIt.get<NextCloudService>().getPreview(ncFile.uri.path)
+    _getPreviewCommand.asyncMap((ncFile) => this._nextCloudService.getPreview(ncFile.uri.path)
       .then((value) async {
         ncFile.previewFile.createSync(recursive: true);
         ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value, flush: true);
@@ -49,7 +46,7 @@ class FileManager {
 
     _getImageCommand = RxCommand.createSync((param) => param);
     //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
-    _getImageCommand.asyncMap((ncFile) => getIt.get<NextCloudService>().downloadImage(ncFile.uri.path)
+    _getImageCommand.asyncMap((ncFile) => this._nextCloudService.downloadImage(ncFile.uri.path)
       .then((value) async {
         ncFile.localFile.createSync(recursive: true);
         ncFile.localFile = await ncFile.localFile.writeAsBytes(value, flush: true); 

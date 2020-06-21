@@ -13,8 +13,9 @@ import 'package:yaga/views/widgets/avatar_widget.dart';
 class BrowseTab extends StatelessWidget {
 
   Widget bottomNavBar;
+  Widget drawer;
 
-  BrowseTab({this.bottomNavBar});
+  BrowseTab({@required this.bottomNavBar, @required this.drawer});
 
   void _navigateToBrowseView(BuildContext context, Uri origin) {
     Navigator.pushNamed(
@@ -58,7 +59,16 @@ class BrowseTab extends StatelessWidget {
       );
     }
 
-    return ListView(children: children,);
+    return Scaffold(
+      appBar: AppBar(
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text("Nextcloud Yaga"),
+      ),
+      drawer: drawer,
+      body: ListView(children: children,),
+      bottomNavigationBar: bottomNavBar,
+    );
   }
 
 }

@@ -5,7 +5,6 @@ import 'package:yaga/model/nc_login_data.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
-import 'package:yaga/utils/service_locator.dart';
 
 class NextCloudManager {
   RxCommand<NextCloudLoginData, NextCloudLoginData> loginCommand;
@@ -19,10 +18,7 @@ class NextCloudManager {
   SecureStorageService _secureStorageService;
   NextCloudService _nextCloudService;
 
-  NextCloudManager() {
-    _secureStorageService = getIt.get<SecureStorageService>();
-    _nextCloudService = getIt.get<NextCloudService>();
-
+  NextCloudManager(this._nextCloudService, this._secureStorageService) {
     this.loginCommand = RxCommand.createFromStream((param) => this._createLoginDataPersisStream(param));
     this.loginCommand.listen((value) => this._internalLoginCommand(value));
 

@@ -7,15 +7,17 @@ import 'package:rxdart/rxdart.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
 
-class LocalImageProviderService implements FileProviderService {
+class LocalImageProviderService implements FileProviderService<LocalImageProviderService> {
   final String scheme = "file";
   final String _android = "Android";
   Directory _tmpDir;
   Directory _externalAppDir;
 
-  Future<void> init() async {
+  @override
+  Future<LocalImageProviderService> init() async {
     _tmpDir = await getTemporaryDirectory();
     _externalAppDir = await getExternalStorageDirectory();
+    return this;
   }
 
   Uri _getOriginInternalStorage() {
@@ -72,10 +74,7 @@ class LocalImageProviderService implements FileProviderService {
 
   String _normalizePath(String path) => path.startsWith("/")?path.replaceFirst("/", ""):path;
 
-  Future<Uri> getExternalAppDirUri() async {
-    // Directory dir = await _checkSetExcternalAppDir();
-    return _systemEntityToInternalUri(_externalAppDir);
-  }
+  Uri get externalAppDirUri => _systemEntityToInternalUri(_externalAppDir);
 
   File getTmpFile(String path) {
     // String tmpPath = "${(await _checkSetTmpDir()).path}/${_normalizePath(path)}";

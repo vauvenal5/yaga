@@ -7,8 +7,9 @@ import 'package:nextcloud/nextcloud.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
+import 'package:yaga/services/service.dart';
 
-class NextCloudService implements FileProviderService {
+class NextCloudService with Service<NextCloudService> implements FileProviderService<NextCloudService> {
   final String scheme = "nc";
   Uri _host;
   NextCloudClient _client;

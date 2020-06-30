@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/route_args/settings_screen_arguments.dart';
+import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
+import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
 import 'package:yaga/views/widgets/browse_tab.dart';
 import 'package:yaga/views/widgets/category_tab.dart';
@@ -26,12 +29,24 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
   final List<Preference> _globalAppPreferences = [];
 
   YagaHomeScreenState() {
-    getIt.getAsync<NextCloudManager>().then((value) => value.loadLoginDataCommand());
+    getIt.getAsync<NextCloudManager>().then((ncService) => ncService.loadLoginDataCommand());
 
     SectionPreference ncSection = SectionPreference("nc", "Nextcloud");
-    StringListPreference mappings = StringListPreference.section(ncSection, "mappings", "Mappings", []);
     _globalAppPreferences.add(ncSection);
-    _globalAppPreferences.add(mappings);
+
+    getIt.getAsync<NextCloudService>().then((ncService) {
+      getIt.getAsync<LocalImageProviderService>().then((localService) {
+        MappingPreference mapping = MappingPreference.section(
+          ncSection, 
+          "mapping", 
+          "Root Mapping",
+          active: false,
+          local: localService.externalAppDirUri,
+          remote: ncService.getRoot()
+        );
+        _globalAppPreferences.add(mapping);
+      });
+    });
   }
 
   int _getCurrentIndex() {
@@ -109,6 +124,11 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
                 );
               }
             )
+          ),
+          ListTile(
+            leading: Icon(Icons.settings), 
+            title: Text("Global Settings"),
+            onTap: () => Navigator.pushNamed(context, SettingsScreen.route, arguments: new SettingsScreenArguments(preferences: _globalAppPreferences)),
           )
         ],
       )

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:yaga/managers/file_manager.dart';
+import 'package:yaga/managers/mapping_manager.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/image_screen.dart';
@@ -23,11 +25,13 @@ class CategoryWidgetState extends State<CategoryWidget> {
   List<DateTime> _dates = [];
   Map<String, List<NcFile>> _sortedFiles = Map();
   StreamSubscription<NcFile> _updateFilesListCommandSubscription;
+  StreamSubscription<MappingPreference> _updatedMappingPreferenceCommandSubscription;
   bool _loading;
 
   @override
   void dispose() {
     this._updateFilesListCommandSubscription.cancel();
+    this._updatedMappingPreferenceCommandSubscription.cancel();
     super.dispose();
   }
 
@@ -72,8 +76,10 @@ class CategoryWidgetState extends State<CategoryWidget> {
 
   @override
   void initState() {
-    super.initState();
     this._updateFilesAndFolders();
+    this._updatedMappingPreferenceCommandSubscription = getIt.get<MappingManager>().mappingUpdatedCommand
+      .listen((value) => this._updateFilesAndFolders());
+    super.initState();
   }
   
 

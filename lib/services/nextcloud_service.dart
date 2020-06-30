@@ -65,4 +65,10 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
   Uri getOrigin() {
     return Uri(scheme: this.scheme, userInfo: _client.username, host: _host.host);
   }
+
+  Uri getRoot() {
+    return Uri(scheme: this.scheme, userInfo: _client.username, host: _host.host, path: "/");
+  }
+
+  bool isUriOfService(Uri uri) => uri.scheme == this.scheme;
 }

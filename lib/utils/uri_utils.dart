@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
+
 class UriUtils {
-  static const String NCSCHEMA = "nc";
-  static const String FILESCHEMA = "file";
-
-  static Uri createNextCloudUri(String path) => Uri(scheme: NCSCHEMA, path: path);
-  static Uri createLocalUri(String path) => Uri(scheme: FILESCHEMA, path: path);
-
-  static bool isNextCloudUri(Uri uri) => uri.scheme == NCSCHEMA;
+  static Uri fromUri({@required Uri uri, String scheme, String userInfo, String host, int port, String path}) => Uri(
+    scheme: scheme??uri.scheme, 
+    userInfo: userInfo??uri.userInfo, 
+    host: host??uri.host, 
+    port: port??uri.port, 
+    path: path??uri.path
+  );
 }

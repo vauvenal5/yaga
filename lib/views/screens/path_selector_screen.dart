@@ -3,6 +3,7 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
+import 'package:yaga/views/widgets/ok_cancel_button_bar.dart';
 
 class PathSelectorScreen extends StatelessWidget {
   static const String route = "/pathSelector";
@@ -20,19 +21,7 @@ class PathSelectorScreen extends StatelessWidget {
     Widget Function(BuildContext, Uri) bottomBarBuilder;
     
     if(_onSelect != null || _onCancel != null) {
-      bottomBarBuilder = (BuildContext context, Uri uri) => ButtonBar(
-        children: <Widget>[
-          OutlineButton(
-            onPressed: () => _onCancel(),
-            child: Text("Cancel"),
-          ),
-          RaisedButton(
-            onPressed: () => _onSelect(uri),
-            color: Theme.of(context).accentColor,
-            child: Text("Select"),
-          )
-        ],
-      );
+      bottomBarBuilder = (BuildContext context, Uri uri) => OkCancelButtonBar(onCommit: () => _onSelect(uri), onCancel: () => _onCancel());
     }
 
     return DirectoryNavigationScreen(

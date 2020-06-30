@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:rxdart/rxdart.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
+import 'package:yaga/managers/mapping_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
@@ -23,7 +24,9 @@ class FileManager {
   LocalImageProviderService _localFileService;
   Map<String, FileProviderService> _fileProviders = Map();
 
-  FileManager(this._nextCloudService, this._localFileService) {
+  MappingManager mappingManager;
+
+  FileManager(this._nextCloudService, this._localFileService, this.mappingManager) {
     _fileProviders.putIfAbsent(_localFileService.scheme, () => _localFileService);
     _fileProviders.putIfAbsent(_nextCloudService.scheme, () => _nextCloudService);
 
@@ -83,11 +86,10 @@ class FileManager {
   }
 
   Stream<NcFile> listFiles(Uri uri) {
-    return _fileProviders[uri.scheme].list(uri).doOnData((file) {
+    return _fileProviders[uri.scheme].list(uri).doOnData((file) async {
       if(file.localFile == null) {
-        //todo: this is actually already a "mapping" activity and has to be handled by the FileMapperManager in future
-        file.localFile = _localFileService.getLocalFile(Uri.decodeComponent(file.uri.path));
-        file.previewFile = _localFileService.getTmpFile(Uri.decodeComponent(file.uri.path));
+        file.localFile = await mappingManager.mapToLocalFile(file);
+        file.previewFile = _localFileService.getTmpFile(file.uri.path);
       }
     });
   }

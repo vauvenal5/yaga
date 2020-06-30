@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yaga/managers/file_manager.dart';
+import 'package:yaga/managers/mapping_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
@@ -20,15 +21,19 @@ void setupServiceLocator() {
 
   // Managers
   getIt.registerSingletonAsync<SettingsManager>(() async => SettingsManager(
-    await getIt.getAsync<SharedPreferencesService>(), 
-    await getIt.getAsync<LocalImageProviderService>(), 
+    await getIt.getAsync<SharedPreferencesService>(),
   ));
   getIt.registerSingletonAsync<NextCloudManager>(() async => NextCloudManager(
     await getIt.getAsync<NextCloudService>(),
     await getIt.getAsync<SecureStorageService>()
   ));
+  getIt.registerSingletonAsync(() async => MappingManager(
+    await getIt.getAsync<SettingsManager>(),
+    await getIt.getAsync<LocalImageProviderService>()
+  ));
   getIt.registerSingletonAsync(() async => FileManager(
     await getIt.getAsync<NextCloudService>(),
-    await getIt.getAsync<LocalImageProviderService>()
+    await getIt.getAsync<LocalImageProviderService>(),
+    await getIt.getAsync<MappingManager>()
   ));
 }

@@ -25,6 +25,19 @@ class SharedPreferencesService implements Service<SharedPreferencesService> {
 
   StringPreference loadStringPreference(StringPreference pref) => 
     StringPreference(pref.key, pref.title, _instance.getString(pref.key) ?? pref.value);
-
+  
   Future<bool> saveStringPreference(StringPreference pref) => _instance.setString(pref.key, pref.value);
+
+  UriPreference loadUriPreference(UriPreference pref) {
+    String value = _instance.getString(pref.key);
+    Uri uri = value != null ? Uri.parse(value) : pref.value;
+    return UriPreference(pref.key, pref.title, uri);
+  }
+
+  Future<bool> saveUriPreference(UriPreference pref) => _instance.setString(pref.key, pref.value.toString());
+
+  Future<bool> saveComplexPreference(ComplexPreference pref, {bool overrideValue}) => _instance.setBool(pref.key, overrideValue??pref.value);
+
+  MappingPreference loadMappingPreference(MappingPreference pref) => 
+    MappingPreference(pref.key, pref.title, pref.remote, pref.local, active: _instance.getBool(pref.key));
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
+import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
@@ -14,7 +15,13 @@ class Router {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch(settings.name) {
       case SettingsScreen.route:
-        return MaterialPageRoute(settings: settings, builder: (context) => SettingsScreen(settings.arguments??[]));
+        SettingsScreenArguments args = settings.arguments as SettingsScreenArguments;
+        return MaterialPageRoute(settings: settings, builder: (context) => SettingsScreen(
+          args.preferences,
+          onCancel: args.onCancel,
+          onCommit: args.onCommit,
+          onPreferenceChangedCommand: args.onSettingChangedCommand,
+        ));
       case PathSelectorScreen.route:
         PathSelectorScreenArguments pathSelectorScreenArguments = settings.arguments as PathSelectorScreenArguments;
         return MaterialPageRoute(

@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class LocalImageProviderService implements FileProviderService<LocalImageProviderService> {
   final String scheme = "file";
@@ -31,11 +32,11 @@ class LocalImageProviderService implements FileProviderService<LocalImageProvide
     var origin = _getOriginInternalStorage();
     print(origin.toString());
     var path = entity.path.replaceFirst(_internalUriToSystemPath(origin), "");
-    return Uri(scheme: origin.scheme, host: origin.host, userInfo: origin.userInfo, path: path);
+    return UriUtils.fromUri(uri: origin, path: path);
   }
 
   String _internalUriToSystemPath(Uri uri) {
-    return "/${uri.userInfo}/${uri.host.replaceAll(".", "/")}${uri.path}";
+    return "/${uri.userInfo}/${uri.host.replaceAll(".", "/")}${Uri.decodeComponent(uri.path)}";
   }
 
   bool _checkMimeType(String path) {
@@ -72,7 +73,10 @@ class LocalImageProviderService implements FileProviderService<LocalImageProvide
       );
   }
 
-  String _normalizePath(String path) => path.startsWith("/")?path.replaceFirst("/", ""):path;
+  String _normalizePath(String path) {
+    path = Uri.decodeComponent(path);
+    return path.startsWith("/")?path.replaceFirst("/", ""):path;
+  }
 
   Uri get externalAppDirUri => _systemEntityToInternalUri(_externalAppDir);
 
@@ -82,9 +86,13 @@ class LocalImageProviderService implements FileProviderService<LocalImageProvide
     return File(tmpPath);
   }
 
-  File getLocalFile(String path) {
+  File getLocalFile(String path, {Uri internalPathPrefix}) {
     // String localPath = "${(await _checkSetExcternalAppDir()).path}/${_normalizePath(path)}";
-    String localPath = "${_externalAppDir.path}/${_normalizePath(path)}";
+    String prefix = _externalAppDir.path;
+    if(internalPathPrefix != null) {
+      prefix = _internalUriToSystemPath(internalPathPrefix);
+    }
+    String localPath = "$prefix/${_normalizePath(path)}";
     return File(localPath);
   }
 

@@ -1,56 +1,50 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/model/preference.dart';
-import 'package:yaga/services/local_image_provider_service.dart';
-// import 'package:yaga/utils/service_locator.dart';
+import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
+
+typedef PrefFunction = T Function<T extends ValuePreference>(T);
 
 class SettingsManager {
   SharedPreferencesService _sharedPreferencesService;
-  LocalImageProviderService _localImageProviderService;
-  // RxCommand<Preferences, String> loadSettingCommand;
+  NextCloudService _nextCloudService;
 
-  // RxCommand<void, String> loadSourceSettingCommand;
-  // RxCommand<String, String> updateSourceSettingCommand;
-
-  RxCommand<Preference, Preference> newLoadSettingCommand;
   RxCommand<Preference, Preference> updateSettingCommand;
 
-  // RxCommand<StringPreference, StringPreference> loadDefaultPath;
+  RxCommand<StringPreference, void> persistStringSettingCommand;
+  RxCommand<UriPreference, void> persistUriSettingCommand;
+  RxCommand<MappingPreference, MappingPreference> persistMappingPreferenceCommand;
 
-  // RxCommand<ValuePreference, ValuePreference> loadSettingCommand;
+  SettingsManager(this._sharedPreferencesService) {
 
-  SettingsManager(this._sharedPreferencesService, this._localImageProviderService) {
-    //loadSettingCommand = RxCommand.createSync((Preferences pref) => pref);
-    // loadSettingCommand = RxCommand.createFromStream((Preferences pref) => getIt.get<SharedPreferencesService>().loadStringPreference(pref));
-    // loadSettingCommand.listen((value) { })
-
-    // loadSourceSettingCommand = RxCommand.createAsyncNoParam(
-    //   () => getIt.get<SharedPreferencesService>().loadStringPreference(Preferences.source),
-    //   canExecute: loadSettingCommand.map((event) => event == Preferences.source)
-    // );
-    // updateSourceSettingCommand = RxCommand.createSync((param) => param);
-
-    // loadDefaultPath = RxCommand.createSync((param) => param);
-    // loadDefaultPath.listen((value) async {
-    //   value.value = (await _localImageProviderService.getExternalAppDirUri()).toString();
-    //   newLoadSettingCommand(value);
-    // });
-
-    newLoadSettingCommand = RxCommand.createSync((param) => _sharedPreferencesService.loadStringPreference(param));
-    //todo: refactor settings handling
     updateSettingCommand = RxCommand.createSync((param) => param);
-    updateSettingCommand
-      .where((event) => event is StringPreference)
-      .flatMap((value) => _sharedPreferencesService.saveStringPreference(value as StringPreference).asStream().map((event) => value))
-      .listen((event) => newLoadSettingCommand(event));
 
-    // loadSettingCommand = RxCommand.createSync((param) => param);
-    // loadSettingCommand.flatMap((value) => Rx.merge([
-    //   Stream.value(value)
-    //     .where((event) => event is StringListPreference)
-    //     .map((event) => event as StringListPreference)
-    //     .map((value) => _sharedPreferencesService.loadStringListPreference(value))
-    // ]));
+    persistStringSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveStringPreference(param)
+      .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadStringPreference))
+    );
+
+    persistUriSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveUriPreference(param)
+      .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadUriPreference))
+    );
+
+    persistMappingPreferenceCommand = RxCommand.createSync((param) => param);
+    persistMappingPreferenceCommand.listen((value) async {
+      //todo: add error handling in case one of those fails
+      await _sharedPreferencesService.saveComplexPreference(value, overrideValue: false);
+      await _sharedPreferencesService.saveUriPreference(value.remote);
+      await _sharedPreferencesService.saveUriPreference(value.local);
+      _sharedPreferencesService.saveComplexPreference(value)
+        .then((res) => _checkPersistResult(res, value, _sharedPreferencesService.loadMappingPreference));
+    });
+  }
+
+  void _checkPersistResult<T extends Preference>(bool res, T defaultPref, T Function(T) onLoadPref) {
+    if(!res) {
+      //todo: add error handling if value==false
+      //return;
+    }
+      
+    updateSettingCommand(onLoadPref(defaultPref));
   }
 }

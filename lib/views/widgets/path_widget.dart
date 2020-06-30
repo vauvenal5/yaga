@@ -19,7 +19,7 @@ class PathWidget extends StatelessWidget {
     for(int i = 0; i<=index;i++) {
       subPath += "/"+this._uri.pathSegments[i];
     }
-    return Uri(scheme: _uri.scheme, host: _uri.host, userInfo: _uri.userInfo, path: subPath);
+    return UriUtils.fromUri(uri: _uri, path: subPath);
   }
 
   @override

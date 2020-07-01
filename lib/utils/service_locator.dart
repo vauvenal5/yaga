@@ -8,15 +8,20 @@ import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
+import 'package:yaga/utils/nextcloud_client_factory.dart';
 
 GetIt getIt = GetIt.instance;
 
 void setupServiceLocator() {
+  // Factories
+  getIt.registerSingletonAsync<NextCloudClientFactory>(() async => NextCloudClientFactory());
 
   // Services
   getIt.registerSingletonAsync<LocalImageProviderService>(() => LocalImageProviderService().init());
   getIt.registerSingletonAsync<SharedPreferencesService>(() => SharedPreferencesService().init());
-  getIt.registerSingletonAsync<NextCloudService>(() => NextCloudService().init());
+  getIt.registerSingletonAsync<NextCloudService>(() async => NextCloudService(
+    await getIt.getAsync<NextCloudClientFactory>(),
+  ).init());
   getIt.registerSingletonAsync<SecureStorageService>(() => SecureStorageService().init());
 
   // Managers

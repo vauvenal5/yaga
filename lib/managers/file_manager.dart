@@ -33,7 +33,7 @@ class FileManager {
     _getPreviewCommand = RxCommand.createSync((param) => param);
     //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
     //todo: bug: this also tries to fetch previews for local files; no check if the file is local or remote
-    _getPreviewCommand.asyncMap((ncFile) => this._nextCloudService.getPreview(ncFile.uri.path)
+    _getPreviewCommand.asyncMap((ncFile) => this._nextCloudService.getPreview(ncFile.uri)
       .then((value) async {
         ncFile.previewFile.createSync(recursive: true);
         ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value, flush: true);
@@ -49,7 +49,7 @@ class FileManager {
 
     _getImageCommand = RxCommand.createSync((param) => param);
     //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
-    _getImageCommand.asyncMap((ncFile) => this._nextCloudService.downloadImage(ncFile.uri.path)
+    _getImageCommand.asyncMap((ncFile) => this._nextCloudService.downloadImage(ncFile.uri)
       .then((value) async {
         ncFile.localFile.createSync(recursive: true);
         ncFile.localFile = await ncFile.localFile.writeAsBytes(value, flush: true); 

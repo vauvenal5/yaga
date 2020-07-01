@@ -5,7 +5,7 @@ import 'package:rx_command/rx_command.dart';
 
 class AvatarWidget extends StatelessWidget {
   final Uint8List _avatarBytes;
-  final RxCommand<String, Uint8List> _command;
+  final RxCommand<void, Uint8List> _command;
   final double _radius;
 
   AvatarWidget(this._avatarBytes, {double radius = 20}) : this._command = null, this._radius = radius;

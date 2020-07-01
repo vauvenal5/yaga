@@ -13,7 +13,7 @@ class NextCloudManager {
   RxCommand<NextCloudLoginData, NextCloudLoginData> updateLoginStateCommand;
   RxCommand<void, NextCloudLoginData> logoutCommand;
 
-  RxCommand<String, Uint8List> updateAvatarCommand;
+  RxCommand<void, Uint8List> updateAvatarCommand;
 
   SecureStorageService _secureStorageService;
   NextCloudService _nextCloudService;
@@ -27,7 +27,7 @@ class NextCloudManager {
       .doOnData((event) => _nextCloudService.login(event.server, event.user, event.password))
       .listen((event) {
         updateLoginStateCommand(event);
-        updateAvatarCommand(event.user);
+        updateAvatarCommand();
       });
 
     this.updateLoginStateCommand = RxCommand.createSync((param) => param, initialLastResult: NextCloudLoginData(null, "", ""));
@@ -48,7 +48,7 @@ class NextCloudManager {
     this.logoutCommand.doOnData((event) => _nextCloudService.logout())
     .listen((value) => this.updateLoginStateCommand(value));
 
-    this.updateAvatarCommand = RxCommand.createAsync((user) => this._nextCloudService.getAvatar(user), initialLastResult: null);
+    this.updateAvatarCommand = RxCommand.createAsync((_) => this._nextCloudService.getAvatar(), initialLastResult: null);
   }
 
   Stream<NextCloudLoginData> _createLoginDataPersisStream(NextCloudLoginData data) {

@@ -6,6 +6,7 @@ import 'package:yaga/model/mapping_node.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class MappingManager {
   
@@ -56,26 +57,32 @@ class MappingManager {
     _addMappingPreferenceToTree(pref, pathIndex+1, currentNode.nodes[pathSegment]);
   }
 
-  MappingPreference _getMappingPrefernce(NcFile file, MappingPreference selected, int pathIndex, MappingNode currentNode) {
+  MappingPreference _getMappingPrefernce(Uri uri, MappingPreference selected, int pathIndex, MappingNode currentNode) {
     if(currentNode == null) {
       return selected;
     }
 
-    if(file.uri.pathSegments.length == pathIndex) {
+    if(uri.pathSegments.length == pathIndex) {
       return currentNode.mapping??selected;
     }
 
-    return _getMappingPrefernce(file, currentNode.mapping??selected, pathIndex+1, currentNode.nodes[file.uri.pathSegments[pathIndex]]);
+    return _getMappingPrefernce(uri, currentNode.mapping??selected, pathIndex+1, currentNode.nodes[uri.pathSegments[pathIndex]]);
   }
 
-  Future<File> mapToLocalFile(NcFile file) async {
-    MappingPreference mapping = _getMappingPrefernce(file, null, 0, root);
+  Future<File> mapToLocalFile(Uri remoteUri) async {
+    MappingPreference mapping = _getMappingPrefernce(remoteUri, null, 0, root);
 
     if(mapping == null) {
-      return this._localImageProviderService.getLocalFile(file.uri.path);
+      return this._localImageProviderService.getLocalFile(remoteUri.path);
     }
 
-    String mappedPath = file.uri.path.replaceFirst(mapping.remote.value.path, "");
+    String mappedPath = remoteUri.path.replaceFirst(mapping.remote.value.path, "");
     return this._localImageProviderService.getLocalFile(mappedPath, internalPathPrefix: mapping.local.value);
+  }
+
+  Future<Uri> mapToRemoteUri(Uri local, Uri remote, Uri defaultInternal) async {
+    MappingPreference mapping = _getMappingPrefernce(remote, null, 0, root);
+    String relativePath = local.path.replaceFirst(mapping==null ? defaultInternal.path : mapping.local.value.path, "");
+    return UriUtils.fromUri(uri: remote, path: mapping == null ? relativePath : mapping.remote.value.path+relativePath);
   }
 }

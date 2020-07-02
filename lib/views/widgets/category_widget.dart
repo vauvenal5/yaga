@@ -62,6 +62,7 @@ class CategoryWidgetState extends State<CategoryWidget> {
           String key = this._createKey(date);
           _sortedFiles.putIfAbsent(key, () => []);
           //todo-sv: this has to be solved in a better way... double calling happens for example when in path selector screen navigating to same path
+          //todo-sv: dart magic matches the files properly however it will be better to add a custom equals --> how does dart runtime hashcode work? Oo
           if(!_sortedFiles[key].contains(file)) {
             _sortedFiles[key].add(file);
             _sortedFiles[key].sort((a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));

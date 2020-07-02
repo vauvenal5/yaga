@@ -86,11 +86,39 @@ class FileManager {
   }
 
   Stream<NcFile> listFiles(Uri uri) {
-    return _fileProviders[uri.scheme].list(uri).doOnData((file) async {
+    Stream<NcFile> defaultStream = _fileProviders[uri.scheme].list(uri).asyncMap((file) async {
       if(file.localFile == null) {
-        file.localFile = await mappingManager.mapToLocalFile(file);
+        //todo: should this be a FileSystemEntity?
+        file.localFile = await mappingManager.mapToLocalFile(file.uri);
         file.previewFile = _localFileService.getTmpFile(file.uri.path);
       }
+      return file;
     });
+    //todo: we have to fix the issue with recognizing remotely deleted files
+    if(this._nextCloudService.isUriOfService(uri)) {
+      File previewFile = _localFileService.getTmpFile(uri.path);
+      return Rx.merge([
+        this._localFileService.list(previewFile.uri)
+        .asyncMap((file) async {
+          file.uri = await mappingManager.mapToRemoteUri(file.uri, uri, _localFileService.tmpAppDirUri);
+          //todo: should this be a FileSystemEntity?
+          file.localFile = await mappingManager.mapToLocalFile(file.uri);
+          // file.previewFile = _localFileService.getTmpFile(file.uri.path);
+          return file;
+        }),
+        this.mappingManager.mapToLocalFile(uri).asStream()
+        .flatMap((value) => this._localFileService.list(value.uri))
+        .asyncMap((file) async {
+          file.uri = await mappingManager.mapToRemoteUri(file.uri, uri, _localFileService.externalAppDirUri);
+          //todo: should this be a FileSystemEntity?
+          // file.localFile = await mappingManager.mapToLocalFile(file.uri);
+          file.previewFile = _localFileService.getTmpFile(file.uri.path);
+          return file;
+        }),
+        defaultStream
+      ]);
+    }
+
+    return defaultStream;
   }
 }

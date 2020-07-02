@@ -30,12 +30,19 @@ class LocalImageProviderService implements FileProviderService<LocalImageProvide
 
   Uri _systemEntityToInternalUri(FileSystemEntity entity) {
     var origin = _getOriginInternalStorage();
-    print(origin.toString());
-    var path = entity.path.replaceFirst(_internalUriToSystemPath(origin), "");
+    String originAsPath = _internalUriToSystemPath(origin);
+    if(!entity.path.startsWith(originAsPath)) {
+      return UriUtils.fromUri(uri: entity.uri, path: entity.path);
+    }
+    var path = entity.path.replaceFirst(originAsPath, "");
     return UriUtils.fromUri(uri: origin, path: path);
   }
 
   String _internalUriToSystemPath(Uri uri) {
+    //uri is absolut: this is the case for tmp files
+    if(uri.userInfo == "") {
+      return uri.path;
+    }
     return "/${uri.userInfo}/${uri.host.replaceAll(".", "/")}${Uri.decodeComponent(uri.path)}";
   }
 
@@ -61,7 +68,12 @@ class LocalImageProviderService implements FileProviderService<LocalImageProvide
         if(event is Directory) {
           file.isDirectory = true;
         } else {
-          file.localFile = event;
+          //todo: also set for directories? or at least don't set anything (see file_manager: list)
+          if(file.uri.userInfo == "") {
+            file.previewFile = event;
+          } else {
+            file.localFile = event;
+          }
           file.lastModified =  (event as File).lastModifiedSync();
         }
 
@@ -79,6 +91,8 @@ class LocalImageProviderService implements FileProviderService<LocalImageProvide
   }
 
   Uri get externalAppDirUri => _systemEntityToInternalUri(_externalAppDir);
+
+  Uri get tmpAppDirUri => _systemEntityToInternalUri(_tmpDir);
 
   File getTmpFile(String path) {
     // String tmpPath = "${(await _checkSetTmpDir()).path}/${_normalizePath(path)}";

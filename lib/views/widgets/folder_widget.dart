@@ -43,13 +43,13 @@ class FolderWidgetState extends State<FolderWidget> {
     this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(widget._uri)
     .listen(
       (file) {
-        setState((){
-          if(!file.isDirectory) {
-            _files.add(file);
-          } else {
-            _folders.add(file);
-          }
-        });
+        if(file.isDirectory && !_folders.contains(file)) {
+          setState(() => _folders.add(file));
+        }
+
+        if(!file.isDirectory && !_files.contains(file)) {
+          setState(() => _files.add(file));
+        }
       },
       onDone: () => setState((){
         _loading=false;

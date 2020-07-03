@@ -124,16 +124,24 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
             title: Text("Global Settings"),
             onTap: () => Navigator.pushNamed(context, SettingsScreen.route, arguments: new SettingsScreenArguments(preferences: _globalAppPreferences)),
           ),
-          getIt.get<NextCloudService>().isLoggedIn() ?
-          ListTile(
-            leading: Icon(Icons.power_settings_new), 
-            title: Text("Logout"),
-            onTap: () => getIt.get<NextCloudManager>().logoutCommand(),
-          ) :
-          ListTile(
-            leading: Icon(Icons.add_to_home_screen), 
-            title: Text("Login"),
-            onTap: () => Navigator.pushNamed(context, NextCloudAddressScreen.route),
+          StreamBuilder<NextCloudLoginData>(
+            stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
+            initialData: getIt.get<NextCloudManager>().updateLoginStateCommand.lastResult,
+            builder: (context, snapshot) {
+              if(getIt.get<NextCloudService>().isLoggedIn()) {
+                return ListTile(
+                  leading: Icon(Icons.power_settings_new), 
+                  title: Text("Logout"),
+                  onTap: () => getIt.get<NextCloudManager>().logoutCommand(),
+                );
+              }
+
+              return ListTile(
+                leading: Icon(Icons.add_to_home_screen), 
+                title: Text("Login"),
+                onTap: () => Navigator.pushNamed(context, NextCloudAddressScreen.route),
+              );
+            }
           )
         ],
       )

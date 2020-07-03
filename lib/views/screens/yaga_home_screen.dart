@@ -107,21 +107,15 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
               initialData: getIt.get<NextCloudManager>().updateLoginStateCommand.lastResult,
               builder: (context, snapshot) {
                 if(getIt.get<NextCloudService>().isLoggedIn()) {
-                  return Column(
-                    children: <Widget>[
-                      AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand),
-                      FlatButton(
-                        onPressed: () => getIt.get<NextCloudManager>().logoutCommand(), 
-                        child: Text("Logout")
-                      )
-                    ]
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: ListTile(
+                      leading: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 25,),
+                      title: Text(getIt.get<NextCloudService>().username, style: TextStyle(color: Colors.white),),
+                      subtitle: Text(getIt.get<NextCloudService>().host, style: TextStyle(color: Colors.white),),
+                    )
                   );
                 }
-
-                return FlatButton(
-                  onPressed: () => Navigator.pushNamed(context, NextCloudAddressScreen.route), 
-                  child: Text("Login")
-                );
               }
             )
           ),
@@ -129,6 +123,17 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
             leading: Icon(Icons.settings), 
             title: Text("Global Settings"),
             onTap: () => Navigator.pushNamed(context, SettingsScreen.route, arguments: new SettingsScreenArguments(preferences: _globalAppPreferences)),
+          ),
+          getIt.get<NextCloudService>().isLoggedIn() ?
+          ListTile(
+            leading: Icon(Icons.power_settings_new), 
+            title: Text("Logout"),
+            onTap: () => getIt.get<NextCloudManager>().logoutCommand(),
+          ) :
+          ListTile(
+            leading: Icon(Icons.add_to_home_screen), 
+            title: Text("Login"),
+            onTap: () => Navigator.pushNamed(context, NextCloudAddressScreen.route),
           )
         ],
       )

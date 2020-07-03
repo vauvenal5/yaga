@@ -29,6 +29,10 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
 
   bool isLoggedIn() => _client==null ? false : true;
 
+  String get username => _client.username;
+
+  String get host => _host.host;
+
   @override
   Stream<NcFile> list(Uri dir) {
     String basePath = "files/${_client.username}";

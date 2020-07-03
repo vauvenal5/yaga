@@ -53,7 +53,7 @@ class CategoryWidgetState extends State<CategoryWidget> {
         DateTime lastModified = file.lastModified;
         DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
         
-        setState((){
+        setState(() {
           if(!this._dates.contains(date)) {
             this._dates.add(date);
             this._dates.sort((date1, date2) => date2.compareTo(date1));
@@ -92,52 +92,70 @@ class CategoryWidgetState extends State<CategoryWidget> {
 
   String _createKey(DateTime date) => date.toString().split(" ")[0];
 
+
+  Widget _buildHeader(String key) {
+    return Container(
+      height: 30.0,
+      color: Theme.of(context).accentColor,
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      alignment: Alignment.centerLeft,
+      child: Text(
+        key,
+        style: const TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  SliverStickyHeader _buildCategory(String key) {
+    return SliverStickyHeader(
+      key: ValueKey(key),
+      header: _buildHeader(key),
+      sliver: SliverGrid(
+        key: ValueKey(key+"_grid"),
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return InkWell(
+              onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: ImageScreenArguments(_sortedFiles[key], index, title: key)),
+              child: RemoteImageWidget(_sortedFiles[key][index], key: ValueKey(_sortedFiles[key][index].uri.path), cacheWidth: 512, ),
+            );
+            //return Image.file(_sortedFiles[key][index].localFile, cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].uri.path),);
+          },
+          childCount: _sortedFiles[key].length
+        ), 
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
+        )
+      )
+    );
+  }
+
+  List<Widget> _slivers = [];
+
   @override
   Widget build(BuildContext context) {
     print("drawing list");
 
     List<Widget> slivers = [];
 
+    //todo: the actual issue behind the performance problems is that for many categorise we are keepint all headers in memory at once and also a tone of images
+    //--> it seems the headerSliver is not cleaning up properly
+    //--> long terme we need to find a solution for this!
     _dates.forEach((element) {
       print("rebuilding list");
       String key = this._createKey(element);
-      slivers.add(SliverStickyHeader(
-        key: ValueKey(key),
-        header: Container(
-          height: 30.0,
-          color: Theme.of(context).accentColor,
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            key,
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-        sliver: SliverGrid(
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              return InkWell(
-                onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: ImageScreenArguments(_sortedFiles[key], index, title: key)),
-                child: RemoteImageWidget(_sortedFiles[key][index], key: ValueKey(_sortedFiles[key][index].uri.path), cacheWidth: 512, ),
-              );
-              //return Image.file(_sortedFiles[key][index].localFile, cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].uri.path),);
-            },
-            childCount: _sortedFiles[key].length
-          ), 
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 2,
-            mainAxisSpacing: 2,
-          )
-        )
-      ));
+      slivers.add(_buildCategory(key));
     });
     
     return Stack(
       children: [
-        CustomScrollView(
-          slivers: slivers,
-        ),
+        DefaultStickyHeaderController(
+          key: ValueKey("mainGrid"),
+          child: CustomScrollView(
+            key: ValueKey("mainGridView"),
+            slivers: slivers,
+        )),
         _loading ? LinearProgressIndicator() : Container()
       ]
     );

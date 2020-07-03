@@ -68,6 +68,7 @@ class ImageScreenState extends State<ImageScreen> {
 
               return PhotoViewGalleryPageOptions(
                 key: ValueKey(image.uri.path),
+                minScale: PhotoViewComputedScale.contained,
                 imageProvider: DownloadFileImage(image.localFile, localFileAvailable),
               );
             },

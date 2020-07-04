@@ -88,6 +88,7 @@ class FileManager {
   Stream<NcFile> listFiles(Uri uri) {
     Stream<NcFile> defaultStream = _fileProviders[uri.scheme].list(uri).asyncMap((file) async {
       if(file.localFile == null) {
+        //todo: add reverse mapping to recognize local files which are coming from the cloud
         //todo: should this be a FileSystemEntity?
         file.localFile = await mappingManager.mapToLocalFile(file.uri);
         file.previewFile = _localFileService.getTmpFile(file.uri.path);

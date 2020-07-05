@@ -3,19 +3,24 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:sticky_infinite_list/sticky_infinite_list.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/mapping_manager.dart';
+import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
+import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/image_screen.dart';
+import 'package:yaga/views/widgets/preferences/BoolPreferenceWidget.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class CategoryWidget extends StatefulWidget {
   final Uri _uri;
+  final BoolPreference _experimental;
 
-  CategoryWidget(this._uri);
+  CategoryWidget(this._uri, this._experimental);
 
   @override
   State<StatefulWidget> createState() => CategoryWidgetState();
@@ -114,10 +119,7 @@ class CategoryWidgetState extends State<CategoryWidget> {
         key: ValueKey(key+"_grid"),
         delegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
-            return InkWell(
-              onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: ImageScreenArguments(_sortedFiles[key], index, title: key)),
-              child: RemoteImageWidget(_sortedFiles[key][index], key: ValueKey(_sortedFiles[key][index].uri.path), cacheWidth: 512, ),
-            );
+            return _buildImage(key, index);
             //return Image.file(_sortedFiles[key][index].localFile, cacheWidth: 64, key: ValueKey(_sortedFiles[key][index].uri.path),);
           },
           childCount: _sortedFiles[key].length
@@ -131,12 +133,52 @@ class CategoryWidgetState extends State<CategoryWidget> {
     );
   }
 
-  List<Widget> _slivers = [];
+  Widget _buildImage(String key, int itemIndex) {
+    return InkWell(
+      onTap: () => Navigator.pushNamed(context, ImageScreen.route, arguments: ImageScreenArguments(_sortedFiles[key], itemIndex, title: key)),
+      child: RemoteImageWidget(_sortedFiles[key][itemIndex], key: ValueKey(_sortedFiles[key][itemIndex].uri.path), cacheWidth: 512, ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    print("drawing list");
+  Widget _buildExperimental() {
+    ScrollController scrollController = ScrollController();
 
+    InfiniteList infiniteList = InfiniteList(
+      posChildCount: _dates.length,
+      controller: scrollController,
+      builder: (BuildContext context, int indexCategory) {
+        String key = this._createKey(_dates[indexCategory]);
+        /// Builder requires [InfiniteList] to be returned
+        return InfiniteListItem(
+          /// Header builder
+          headerBuilder: (BuildContext context) {
+            return _buildHeader(key);
+          },
+          /// Content builder
+          contentBuilder: (BuildContext context) {
+            return GridView.builder(
+              key: ValueKey(key+"_grid"),
+              controller: scrollController,
+              shrinkWrap: true,
+              itemCount: _sortedFiles[key].length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 2,
+                mainAxisSpacing: 2,
+              ), 
+              itemBuilder: (context, itemIndex) {
+                return _buildImage(key, itemIndex);
+              }
+            );
+          },
+        );
+      }
+    );
+
+    return infiniteList;
+  }
+
+  Widget _buildStickyList() {
     List<Widget> slivers = [];
 
     //todo: the actual issue behind the performance problems is that for many categorise we are keepint all headers in memory at once and also a tone of images
@@ -147,15 +189,31 @@ class CategoryWidgetState extends State<CategoryWidget> {
       String key = this._createKey(element);
       slivers.add(_buildCategory(key));
     });
+
+    DefaultStickyHeaderController sticky = DefaultStickyHeaderController(
+      key: ValueKey("mainGrid"),
+      child: CustomScrollView(
+        key: ValueKey("mainGridView"),
+        slivers: slivers,
+    ));
+
+    return sticky;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print("drawing list");
     
+    //todo: generalize stream builder for preferences
     return Stack(
       children: [
-        DefaultStickyHeaderController(
-          key: ValueKey("mainGrid"),
-          child: CustomScrollView(
-            key: ValueKey("mainGridView"),
-            slivers: slivers,
-        )),
+        StreamBuilder<BoolPreference>(
+          initialData: getIt.get<SharedPreferencesService>().loadBoolPreference(widget._experimental),
+          stream: getIt.get<SettingsManager>().updateSettingCommand
+            .where((event) => event.key == widget._experimental.key)
+            .map((event) => event as BoolPreference),
+          builder: (context, snapshot) => snapshot.data.value ? _buildExperimental() : _buildStickyList()
+        ),
         _loading ? LinearProgressIndicator() : Container()
       ]
     );

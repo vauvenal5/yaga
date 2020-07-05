@@ -26,7 +26,12 @@ class SharedPreferencesService implements Service<SharedPreferencesService> {
   StringPreference loadStringPreference(StringPreference pref) => 
     StringPreference(pref.key, pref.title, _instance.getString(pref.key) ?? pref.value);
   
+  BoolPreference loadBoolPreference(BoolPreference pref) => 
+    BoolPreference(pref.key, pref.title, _instance.getBool(pref.key) ?? pref.value);
+  
   Future<bool> saveStringPreference(StringPreference pref) => _instance.setString(pref.key, pref.value);
+
+  Future<bool> saveBoolPreference(BoolPreference pref) => _instance.setBool(pref.key, pref.value);
 
   UriPreference loadUriPreference(UriPreference pref) {
     String value = _instance.getString(pref.key);

@@ -7,7 +7,7 @@ import 'package:yaga/utils/service_locator.dart';
 class PreferenceListTileWidget<T extends Preference> extends StatelessWidget {
 
   final T initData;
-  final ListTile Function(BuildContext, T) listTileBuilder;
+  final Widget Function(BuildContext, T) listTileBuilder;
 
   PreferenceListTileWidget({@required this.initData, @required this.listTileBuilder});
 

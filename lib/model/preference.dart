@@ -52,3 +52,8 @@ class MappingPreference extends ComplexPreference {
     this.local = UriPreference("local", "Local Path", local??Uri(), prefix: this.key);
   }
 }
+
+class BoolPreference extends ValuePreference<bool> {
+  BoolPreference(key, title, value) : super(key, title, value);
+  BoolPreference.section(SectionPreference section, key, title, bool value) : super.section(section, key, title, value);
+}

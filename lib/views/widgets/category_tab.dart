@@ -16,6 +16,7 @@ class CategoryTab extends StatelessWidget {
 
   final List<Preference> _defaultViewPreferences = [];
   UriPreference _path;
+  BoolPreference _experimentalView;
 
   Widget bottomNavBar;
   Widget drawer;
@@ -23,9 +24,11 @@ class CategoryTab extends StatelessWidget {
   CategoryTab({@required this.bottomNavBar, @required this.drawer}) {
     SectionPreference general = SectionPreference.route(_pref, "general", "General");
     this._path = UriPreference.section(general, "path", "Path", getIt.get<LocalImageProviderService>().externalAppDirUri);
+    this._experimentalView = BoolPreference.section(general, "experimentalView", "Experimental View", true);
 
     this._defaultViewPreferences.add(general);
     this._defaultViewPreferences.add(_path);
+    this._defaultViewPreferences.add(_experimentalView);
   }
 
   @override
@@ -55,7 +58,7 @@ class CategoryTab extends StatelessWidget {
             return LinearProgressIndicator();
           }
         
-          return CategoryWidget(snapshot.data.value);
+          return CategoryWidget(snapshot.data.value, this._experimentalView);
         },
       ),
       bottomNavigationBar: bottomNavBar,

@@ -22,11 +22,13 @@ class FolderWidgetState extends State<FolderWidget> {
   List<NcFile> _files = [];
   List<NcFile> _folders = [];
   StreamSubscription<NcFile> _updateFilesListCommandSubscription;
+  StreamSubscription<NcFile> _updateFileListSubscripton;
   bool _loading;
 
   @override
   void dispose() {
     _updateFilesListCommandSubscription?.cancel();
+    _updateFileListSubscripton.cancel();
     super.dispose();
   }
 
@@ -62,6 +64,15 @@ class FolderWidgetState extends State<FolderWidget> {
   @override
   void initState() {
     this._updateFilesAndFolders();
+    this._updateFileListSubscripton = getIt.get<FileManager>().updateFileList.listen((file) {
+      setState(() {
+        if(file.isDirectory) {
+          _folders.remove(file);
+        } else {
+          _files.remove(file);
+        }
+      });
+    });
     super.initState();
   }
   

@@ -113,4 +113,11 @@ class LocalImageProviderService implements FileProviderService<LocalImageProvide
   Uri getOrigin() {
     return _getOriginInternalStorage();
   }
+
+  //todo: refactor when adding remote delete function
+  void deleteFile(File file) {
+    if(file.existsSync()) {
+      file.deleteSync();
+    }
+  }
 }

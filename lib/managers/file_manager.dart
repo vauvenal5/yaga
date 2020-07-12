@@ -5,6 +5,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/mapping_manager.dart';
+import 'package:yaga/managers/sync_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
@@ -20,13 +21,20 @@ class FileManager {
   RxCommand<NcFile, NcFile> downloadImageCommand;
   RxCommand<NcFile, NcFile> updateImageCommand;
 
+  RxCommand<NcFile, NcFile> removeLocal;
+  RxCommand<NcFile, NcFile> removeTmp;
+
+  RxCommand<NcFile, NcFile> updateFileList;
+
   NextCloudService _nextCloudService;
   LocalImageProviderService _localFileService;
   Map<String, FileProviderService> _fileProviders = Map();
 
+  //todo: private
   MappingManager mappingManager;
+  SyncManager syncManager;
 
-  FileManager(this._nextCloudService, this._localFileService, this.mappingManager) {
+  FileManager(this._nextCloudService, this._localFileService, this.mappingManager, this.syncManager) {
     _fileProviders.putIfAbsent(_localFileService.scheme, () => _localFileService);
     _fileProviders.putIfAbsent(_nextCloudService.scheme, () => _nextCloudService);
 
@@ -83,6 +91,18 @@ class FileManager {
 
     updatePreviewCommand = RxCommand.createSync((param) => param);
     updateImageCommand = RxCommand.createSync((param) => param);
+
+    removeLocal = RxCommand.createSync((param) => param);
+    removeLocal.listen((value) {
+      _localFileService.deleteFile(value.localFile);
+    });
+
+    removeTmp = RxCommand.createSync((param) => param);
+    removeTmp.listen((value) {
+      _localFileService.deleteFile(value.previewFile);
+    });
+
+    updateFileList = RxCommand.createSync((param) => param);
   }
 
   Stream<NcFile> listFiles(Uri uri) {
@@ -94,7 +114,8 @@ class FileManager {
         file.previewFile = _localFileService.getTmpFile(file.uri.path);
       }
       return file;
-    });
+    })
+    .doOnData((file) => syncManager.addRemoteFile(uri, file));
     //todo: we have to fix the issue with recognizing remotely deleted files
     if(this._nextCloudService.isUriOfService(uri)) {
       File previewFile = _localFileService.getTmpFile(uri.path);
@@ -106,7 +127,8 @@ class FileManager {
           file.localFile = await mappingManager.mapToLocalFile(file.uri);
           // file.previewFile = _localFileService.getTmpFile(file.uri.path);
           return file;
-        }),
+        })
+        .doOnData((file) => syncManager.addTmpFile(uri, file)),
         this.mappingManager.mapToLocalFile(uri).asStream()
         .flatMap((value) => this._localFileService.list(value.uri))
         .asyncMap((file) async {
@@ -115,9 +137,17 @@ class FileManager {
           // file.localFile = await mappingManager.mapToLocalFile(file.uri);
           file.previewFile = _localFileService.getTmpFile(file.uri.path);
           return file;
-        }),
-        defaultStream
-      ]);
+        })
+        .doOnData((file) => syncManager.addLocalFile(uri, file)),
+        defaultStream.doOnError((err, stack) {
+          syncManager.removeUri(uri);
+          throw err;
+        })
+      ]).doOnDone(() => syncManager.syncUri(uri).then((value) => value.forEach((element) {
+        this.updateFileList(element);
+        this.removeLocal(element);
+        this.removeTmp(element);
+      })));
     }
 
     return defaultStream;

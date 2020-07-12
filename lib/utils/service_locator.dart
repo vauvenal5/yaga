@@ -4,6 +4,7 @@ import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/mapping_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
+import 'package:yaga/managers/sync_manager.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
@@ -36,9 +37,11 @@ void setupServiceLocator() {
     await getIt.getAsync<SettingsManager>(),
     await getIt.getAsync<LocalImageProviderService>()
   ));
+  getIt.registerSingletonAsync(() async => SyncManager());
   getIt.registerSingletonAsync(() async => FileManager(
     await getIt.getAsync<NextCloudService>(),
     await getIt.getAsync<LocalImageProviderService>(),
-    await getIt.getAsync<MappingManager>()
+    await getIt.getAsync<MappingManager>(),
+    await getIt.getAsync<SyncManager>()
   ));
 }

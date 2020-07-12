@@ -29,14 +29,17 @@ class CategoryWidget extends StatefulWidget {
 class CategoryWidgetState extends State<CategoryWidget> {
   List<DateTime> _dates = [];
   Map<String, List<NcFile>> _sortedFiles = Map();
+  
   StreamSubscription<NcFile> _updateFilesListCommandSubscription;
   StreamSubscription<MappingPreference> _updatedMappingPreferenceCommandSubscription;
+  StreamSubscription<NcFile> _updateFileListSubscripton;
   bool _loading;
 
   @override
   void dispose() {
     this._updateFilesListCommandSubscription.cancel();
     this._updatedMappingPreferenceCommandSubscription.cancel();
+    this._updateFileListSubscripton.cancel();
     super.dispose();
   }
 
@@ -85,6 +88,18 @@ class CategoryWidgetState extends State<CategoryWidget> {
     this._updateFilesAndFolders();
     this._updatedMappingPreferenceCommandSubscription = getIt.get<MappingManager>().mappingUpdatedCommand
       .listen((value) => this._updateFilesAndFolders());
+    this._updateFileListSubscripton = getIt.get<FileManager>().updateFileList.listen((file) {
+      DateTime lastModified = file.lastModified;
+      DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
+      String key = this._createKey(date);
+      setState(() {
+        this._sortedFiles[key].remove(file);
+        if(this._sortedFiles[key].isEmpty) {
+          this._dates.remove(date);
+          this._sortedFiles.remove(key);
+        }
+      });
+    });
     super.initState();
   }
   

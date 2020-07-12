@@ -49,7 +49,10 @@ class RemoteImageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return StreamBuilder<NcFile>(
-      stream: getIt.get<FileManager>().updatePreviewCommand.where((event) => event.uri.path == _file.uri.path),
+      stream: Rx.merge([
+        getIt.get<FileManager>().updatePreviewCommand,
+        getIt.get<FileManager>().updateImageCommand
+      ]).where((event) => event.uri.path == _file.uri.path),
       initialData: this._file,
       builder: (context, snapshot) {
         NcFile file = snapshot.data;

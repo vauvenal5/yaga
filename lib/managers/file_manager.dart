@@ -119,7 +119,7 @@ class FileManager {
     //todo: we have to fix the issue with recognizing remotely deleted files
     if(this._nextCloudService.isUriOfService(uri)) {
       File previewFile = _localFileService.getTmpFile(uri.path);
-      return Rx.merge([
+      return syncManager.addUri(uri).asStream().flatMap((value) => Rx.merge([
         this._localFileService.list(previewFile.uri)
         .asyncMap((file) async {
           file.uri = await mappingManager.mapToRemoteUri(file.uri, uri, _localFileService.tmpAppDirUri);
@@ -127,8 +127,7 @@ class FileManager {
           file.localFile = await mappingManager.mapToLocalFile(file.uri);
           // file.previewFile = _localFileService.getTmpFile(file.uri.path);
           return file;
-        })
-        .doOnData((file) => syncManager.addTmpFile(uri, file)),
+        }),
         this.mappingManager.mapToLocalFile(uri).asStream()
         .flatMap((value) => this._localFileService.list(value.uri))
         .asyncMap((file) async {
@@ -137,17 +136,17 @@ class FileManager {
           // file.localFile = await mappingManager.mapToLocalFile(file.uri);
           file.previewFile = _localFileService.getTmpFile(file.uri.path);
           return file;
-        })
-        .doOnData((file) => syncManager.addLocalFile(uri, file)),
+        }),
         defaultStream.doOnError((err, stack) {
           syncManager.removeUri(uri);
-          throw err;
         })
-      ]).doOnDone(() => syncManager.syncUri(uri).then((value) => value.forEach((element) {
+      ])
+      .doOnData((file) => syncManager.addFile(uri, file))
+      .doOnDone(() => syncManager.syncUri(uri).then((value) => value.forEach((element) {
         this.updateFileList(element);
         this.removeLocal(element);
         this.removeTmp(element);
-      })));
+      }))));
     }
 
     return defaultStream;

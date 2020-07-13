@@ -4,24 +4,23 @@ import 'package:yaga/model/sync_file.dart';
 class SyncManager {
   Map<Uri, Map<Uri, SyncFile>> _syncMatrix = {}; 
 
-  Map<Uri, SyncFile> _addKey(Uri key) {
+  Future<void> addUri(Uri key) async {
     return _syncMatrix.putIfAbsent(key, () => {});
   }
 
   SyncFile _addFile(Uri key, NcFile file) {
-    return _addKey(key).putIfAbsent(file.uri, () => SyncFile(file));
+    if(!_syncMatrix.containsKey(key)) {
+      return null;
+    }
+    return _syncMatrix[key].putIfAbsent(file.uri, () => SyncFile(file));
   }
 
-  Future<void> addLocalFile(Uri key, NcFile file) {
+  Future<void> addFile(Uri key, NcFile file) async {
     _addFile(key, file);
   }
 
-  Future<void> addTmpFile(Uri key, NcFile file) {
-    _addFile(key, file);
-  }
-
-  Future<void> addRemoteFile(Uri key, NcFile file) {
-    _addFile(key, file).remote = true;
+  Future<void> addRemoteFile(Uri key, NcFile file) async {
+    _addFile(key, file)?.remote = true;
   }
 
   Future<List<NcFile>> syncUri(Uri key) async {

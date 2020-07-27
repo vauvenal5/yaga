@@ -9,7 +9,7 @@ import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/download_file_image.dart';
 import 'package:yaga/utils/service_locator.dart';
-import 'package:yaga/views/widgets/remote_image_widget.dart';
+import 'package:wc_flutter_share/wc_flutter_share.dart';
 
 class ImageScreen extends StatefulWidget {
   static const String route = "/image";
@@ -46,6 +46,17 @@ class ImageScreenState extends State<ImageScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title??_title),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.share), 
+            onPressed: () => WcFlutterShare.share( //todo: dp we need to move this to a service or controller?
+	            sharePopupTitle: 'share',
+              fileName: widget._images[_currentIndex].name,
+              mimeType: 'image/jpeg', //todo: get real mime type
+              bytesOfFile: widget._images[_currentIndex].localFile.readAsBytesSync()
+            ),
+          )
+        ],
       ),
       body: 
       Stack(

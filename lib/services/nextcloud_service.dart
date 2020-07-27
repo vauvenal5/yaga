@@ -63,7 +63,7 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
   }
 
   Future<Uint8List> downloadImage(Uri file) {
-    String basePath = "files/${_client.username}";
+    String basePath = "files/${_client.username}"; //todo: add proper logging and check if download gets called on real device multiple times
     return this._client.webDav.download(basePath+file.path);
   }
 

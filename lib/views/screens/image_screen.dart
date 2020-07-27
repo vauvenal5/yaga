@@ -49,7 +49,7 @@ class ImageScreenState extends State<ImageScreen> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.share), 
-            onPressed: () => WcFlutterShare.share( //todo: dp we need to move this to a service or controller?
+            onPressed: () async => await WcFlutterShare.share( //todo: dp we need to move this to a service or controller?
 	            sharePopupTitle: 'share',
               fileName: widget._images[_currentIndex].name,
               mimeType: 'image/jpeg', //todo: get real mime type

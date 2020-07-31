@@ -11,27 +11,29 @@
 
 ## Gallery
 
-<img src="screenshots/Screenshot_1596214419.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214426.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214442.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214449.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214461.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214498.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214508.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214531.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214569.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214591.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214907.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596214912.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215077.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215087.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215104.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215132.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215143.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215160.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215176.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215217.png" alt="Clean Installation" width="250">
-<img src="screenshots/Screenshot_1596215222.png" alt="Clean Installation" width="250">
+<p float="left">
+   <img src="screenshots/Screenshot_1596214419.png" alt="Clean Installation 1" width="250"/>
+   <img src="screenshots/Screenshot_1596214426.png" alt="Clean Installation 2" width="250"/>
+   <img src="screenshots/Screenshot_1596214442.png" alt="Clean Installation 3" width="250"/>
+   <img src="screenshots/Screenshot_1596214449.png" alt="Login Process 1" width="250"/>
+   <img src="screenshots/Screenshot_1596214461.png" alt="Login Process 2" width="250"/>
+   <img src="screenshots/Screenshot_1596214498.png" alt="Login Process 3" width="250"/>
+   <img src="screenshots/Screenshot_1596214508.png" alt="Login Process 4" width="250"/>
+   <img src="screenshots/Screenshot_1596214531.png" alt="Login Process 5" width="250"/>
+   <img src="screenshots/Screenshot_1596214569.png" alt="Login Process 6" width="250"/>
+   <img src="screenshots/Screenshot_1596214591.png" alt="Login Process 7" width="250"/>
+   <img src="screenshots/Screenshot_1596214907.png" alt="Setting Folder 1" width="250"/>
+   <img src="screenshots/Screenshot_1596214912.png" alt="Setting Folder 2" width="250"/>
+   <img src="screenshots/Screenshot_1596215077.png" alt="Category View 1" width="250"/>
+   <img src="screenshots/Screenshot_1596215087.png" alt="Image View" width="250"/>
+   <img src="screenshots/Screenshot_1596215104.png" alt="Category View 2" width="250"/>
+   <img src="screenshots/Screenshot_1596215132.png" alt="Share Image" width="250"/>
+   <img src="screenshots/Screenshot_1596215143.png" alt="Browse View 1" width="250"/>
+   <img src="screenshots/Screenshot_1596215160.png" alt="Browse View 2" width="250"/>
+   <img src="screenshots/Screenshot_1596215176.png" alt="Browse View 3" width="250"/>
+   <img src="screenshots/Screenshot_1596215217.png" alt="Mapping Setting 1" width="250"/>
+   <img src="screenshots/Screenshot_1596215222.png" alt="Mapping Setting 2" width="250"/>
+</p>
 
 ## State of Yaga
 

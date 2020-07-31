@@ -9,6 +9,30 @@
 * [iOS Support](#ios-support)
     * [Necessary work](#necessary-work)
 
+## Gallery
+
+<img src="screenshots/Screenshot_1596214419.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214426.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214442.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214449.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214461.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214498.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214508.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214531.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214569.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214591.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214907.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596214912.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215077.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215087.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215104.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215132.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215143.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215160.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215176.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215217.png" alt="Clean Installation" width="250">
+<img src="screenshots/Screenshot_1596215222.png" alt="Clean Installation" width="250">
+
 ## State of Yaga
 
 This app is in an early alpha stage. It is tested and fairly stable on an Android One device with Android version 10.

@@ -38,28 +38,6 @@ class BrowseTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    List<ListTile> children = [];
-
-    children.add(
-      ListTile(
-        leading: Icon(Icons.phone_android,),
-        title: Text("Internal Memory"),
-        onTap: () => _navigateToBrowseView(context, getIt.get<LocalImageProviderService>().getOrigin()),
-      )
-    );
-    
-    if(getIt.get<NextCloudService>().isLoggedIn()) {
-      Uri origin = getIt.get<NextCloudService>().getOrigin();
-      children.add(
-        ListTile(
-          leading: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 12,),
-          title: Text(origin.authority),
-          onTap: () => _navigateToBrowseView(context, origin),
-        )
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -67,7 +45,33 @@ class BrowseTab extends StatelessWidget {
         title: Text("Nextcloud Yaga"),
       ),
       drawer: drawer,
-      body: ListView(children: children,),
+      body: StreamBuilder(
+        stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
+        builder: (context, snapshot) {
+          List<ListTile> children = [];
+
+          children.add(
+            ListTile(
+              leading: Icon(Icons.phone_android,),
+              title: Text("Internal Memory"),
+              onTap: () => _navigateToBrowseView(context, getIt.get<LocalImageProviderService>().getOrigin()),
+            )
+          );
+          
+          if(getIt.get<NextCloudService>().isLoggedIn()) {
+            Uri origin = getIt.get<NextCloudService>().getOrigin();
+            children.add(
+              ListTile(
+                leading: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 12,),
+                title: Text(origin.authority),
+                onTap: () => _navigateToBrowseView(context, origin),
+              )
+            );
+          }
+
+          return ListView(children: children,);
+        }
+      ),
       bottomNavigationBar: bottomNavBar,
     );
   }

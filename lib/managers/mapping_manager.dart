@@ -83,6 +83,15 @@ class MappingManager {
   Future<Uri> mapToRemoteUri(Uri local, Uri remote, Uri defaultInternal) async {
     MappingPreference mapping = _getMappingPrefernce(remote, null, 0, root);
     String relativePath = local.path.replaceFirst(mapping==null ? defaultInternal.path : mapping.local.value.path, "");
-    return UriUtils.fromUri(uri: remote, path: mapping == null ? relativePath : mapping.remote.value.path+relativePath);
+    //todo: solve this in a more elegant way
+    if(mapping != null && mapping.remote.value.path != "/") {
+      relativePath = mapping.remote.value.path + relativePath;
+    }
+    return UriUtils.fromUri(uri: remote, path: relativePath);
+  }
+
+  Future<Uri> mapTmpToRemoteUri(Uri local, Uri remote, Uri defaultInternal) async {
+    String relativePath = local.path.replaceFirst(defaultInternal.path, "");
+    return UriUtils.fromUri(uri: remote, path: relativePath);
   }
 }

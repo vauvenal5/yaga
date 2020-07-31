@@ -105,6 +105,7 @@ class FileManager {
     updateFileList = RxCommand.createSync((param) => param);
   }
 
+  //todo: FileManager and MappingManger should be split more clearly
   Stream<NcFile> listFiles(Uri uri) {
     Stream<NcFile> defaultStream = _fileProviders[uri.scheme].list(uri).asyncMap((file) async {
       if(file.localFile == null) {
@@ -122,7 +123,7 @@ class FileManager {
       return syncManager.addUri(uri).asStream().flatMap((value) => Rx.merge([
         this._localFileService.list(previewFile.uri)
         .asyncMap((file) async {
-          file.uri = await mappingManager.mapToRemoteUri(file.uri, uri, _localFileService.tmpAppDirUri);
+          file.uri = await mappingManager.mapTmpToRemoteUri(file.uri, uri, _localFileService.tmpAppDirUri);
           //todo: should this be a FileSystemEntity?
           file.localFile = await mappingManager.mapToLocalFile(file.uri);
           // file.previewFile = _localFileService.getTmpFile(file.uri.path);

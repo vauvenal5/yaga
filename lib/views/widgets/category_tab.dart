@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
@@ -29,6 +30,11 @@ class CategoryTab extends StatelessWidget {
     this._defaultViewPreferences.add(general);
     this._defaultViewPreferences.add(_path);
     this._defaultViewPreferences.add(_experimentalView);
+
+    //todo: refactor
+    getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt.get<SettingsManager>()
+      .persistUriSettingCommand(UriPreference.section(general, "path", "Path", getIt.get<LocalImageProviderService>().externalAppDirUri))
+    );
   }
 
   @override

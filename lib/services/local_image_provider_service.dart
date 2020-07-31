@@ -116,7 +116,11 @@ class LocalImageProviderService implements FileProviderService<LocalImageProvide
 
   //todo: refactor when adding remote delete function
   void deleteFile(File file) {
-    if(file.existsSync()) {
+    //todo: null exception comes from webview cache files
+    //todo: subtask1: local files in cache and default app dir should be in a user@cloud.bla folder
+    //todo: subtask2: check if file is null before delete --> done
+    //todo: subtask3: webview should not cache data
+    if(file != null && file.existsSync()) {
       file.deleteSync();
     }
   }

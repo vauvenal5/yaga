@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
+import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
@@ -29,24 +30,45 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
   final List<Preference> _globalAppPreferences = [];
 
   YagaHomeScreenState() {
-    getIt.getAsync<NextCloudManager>().then((ncService) => ncService.loadLoginDataCommand());
-
     SectionPreference ncSection = SectionPreference("nc", "Nextcloud");
     _globalAppPreferences.add(ncSection);
 
-    getIt.getAsync<NextCloudService>().then((ncService) {
-      getIt.getAsync<LocalImageProviderService>().then((localService) {
-        MappingPreference mapping = MappingPreference.section(
-          ncSection, 
-          "mapping", 
-          "Root Mapping",
-          active: false,
-          local: localService.externalAppDirUri,
-          remote: ncService.getRoot()
-        );
-        _globalAppPreferences.add(mapping);
+    //todo: on logged out disable setting instead removing it
+    getIt.getAsync<NextCloudManager>().then((ncManager) => ncManager.updateLoginStateCommand.listen((value) {
+      getIt.getAsync<NextCloudService>().then((ncService) {
+        getIt.getAsync<LocalImageProviderService>().then((localService) {
+          getIt.getAsync<SettingsManager>().then((settingsManager) {
+            //todo: refactor
+            if(ncService.isLoggedIn()) {
+              MappingPreference mapping = MappingPreference.section(
+                ncSection, 
+                "mapping", 
+                "Root Mapping",
+                active: false,
+                local: localService.externalAppDirUri,
+                remote: ncService.getRoot()
+              );
+              _globalAppPreferences.add(mapping);
+              settingsManager.loadMappingPreferenceCommand(mapping);
+              return;
+            }
+          
+            MappingPreference mapping = MappingPreference.section(
+              ncSection, 
+              "mapping", 
+              "Root Mapping",
+              active: false,
+              local: localService.externalAppDirUri,
+              remote: null
+            );
+
+            settingsManager.removeMappingPreferenceCommand(mapping);
+            _globalAppPreferences.removeWhere((element) => element.key == mapping.key);
+          });
+        });
       });
-    });
+    }));
+    getIt.getAsync<NextCloudManager>().then((ncService) => ncService.loadLoginDataCommand());
   }
 
   int _getCurrentIndex() {
@@ -106,16 +128,15 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
               stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
               initialData: getIt.get<NextCloudManager>().updateLoginStateCommand.lastResult,
               builder: (context, snapshot) {
-                if(getIt.get<NextCloudService>().isLoggedIn()) {
-                  return Align(
-                    alignment: Alignment.centerLeft,
-                    child: ListTile(
-                      leading: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 25,),
-                      title: Text(getIt.get<NextCloudService>().username, style: TextStyle(color: Colors.white),),
-                      subtitle: Text(getIt.get<NextCloudService>().host, style: TextStyle(color: Colors.white),),
-                    )
-                  );
-                }
+                NextCloudService ncService = getIt.get<NextCloudService>();
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: ListTile(
+                    leading: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 25,),
+                    title: Text(ncService.isLoggedIn()?ncService.username:"", style: TextStyle(color: Colors.white),),
+                    subtitle: Text(ncService.isLoggedIn()?ncService.host:"", style: TextStyle(color: Colors.white),),
+                  )
+                );
               }
             )
           ),

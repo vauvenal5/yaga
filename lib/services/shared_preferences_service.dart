@@ -45,4 +45,6 @@ class SharedPreferencesService implements Service<SharedPreferencesService> {
 
   MappingPreference loadMappingPreference(MappingPreference pref) => 
     MappingPreference(pref.key, pref.title, pref.remote, pref.local, active: _instance.getBool(pref.key));
+
+  Future<bool> removePreference(Preference pref) => _instance.remove(pref.key);
 }

@@ -16,6 +16,8 @@ class SettingsManager {
   RxCommand<BoolPreference, void> persistBoolSettingCommand;
   RxCommand<UriPreference, void> persistUriSettingCommand;
   RxCommand<MappingPreference, MappingPreference> persistMappingPreferenceCommand;
+  RxCommand<MappingPreference, MappingPreference> removeMappingPreferenceCommand;
+  RxCommand<MappingPreference, MappingPreference> loadMappingPreferenceCommand;
 
   SettingsManager(this._sharedPreferencesService) {
 
@@ -41,6 +43,20 @@ class SettingsManager {
       await _sharedPreferencesService.saveUriPreference(value.local);
       _sharedPreferencesService.saveComplexPreference(value)
         .then((res) => _checkPersistResult(res, value, _sharedPreferencesService.loadMappingPreference));
+    });
+
+    removeMappingPreferenceCommand = RxCommand.createSync((param) => param);
+    removeMappingPreferenceCommand.listen((value) async {
+      await _sharedPreferencesService.removePreference(value.local);
+      await _sharedPreferencesService.removePreference(value.remote);
+      await _sharedPreferencesService.removePreference(value);
+    });
+
+    loadMappingPreferenceCommand = RxCommand.createSync((param) => param);
+    loadMappingPreferenceCommand.listen((value) {
+      value.remote = _sharedPreferencesService.loadUriPreference(value.remote);
+      value.local = _sharedPreferencesService.loadUriPreference(value.local);
+      updateSettingCommand(_sharedPreferencesService.loadMappingPreference(value));
     });
   }
 

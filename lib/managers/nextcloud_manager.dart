@@ -46,9 +46,12 @@ class NextCloudManager {
 
     this.logoutCommand = RxCommand.createFromStream((_) => this._createLoginDataPersisStream(NextCloudLoginData(null,"","")));
     this.logoutCommand.doOnData((event) => _nextCloudService.logout())
-    .listen((value) => this.updateLoginStateCommand(value));
+    .listen((value) {
+      this.updateLoginStateCommand(value);
+      this.updateAvatarCommand();
+    });
 
-    this.updateAvatarCommand = RxCommand.createAsync((_) => this._nextCloudService.getAvatar(), initialLastResult: null);
+    this.updateAvatarCommand = RxCommand.createAsync((_) => this._nextCloudService.isLoggedIn()?this._nextCloudService.getAvatar():null, initialLastResult: null);
   }
 
   Stream<NextCloudLoginData> _createLoginDataPersisStream(NextCloudLoginData data) {

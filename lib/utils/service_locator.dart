@@ -35,7 +35,8 @@ void setupServiceLocator() {
   ));
   getIt.registerSingletonAsync(() async => MappingManager(
     await getIt.getAsync<SettingsManager>(),
-    await getIt.getAsync<LocalImageProviderService>()
+    await getIt.getAsync<LocalImageProviderService>(),
+    await getIt.getAsync<NextCloudService>()
   ));
   getIt.registerSingletonAsync(() async => SyncManager());
   getIt.registerSingletonAsync(() async => FileManager(

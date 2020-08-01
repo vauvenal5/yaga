@@ -1,8 +1,5 @@
-import 'dart:io';
-import 'dart:typed_data';
-
+import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/mapping_manager.dart';
 import 'package:yaga/managers/sync_manager.dart';
@@ -12,6 +9,7 @@ import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
 
 class FileManager {
+  Logger _logger = Logger();
   RxCommand<NcFile, NcFile> _getPreviewCommand;
   RxCommand<NcFile, NcFile> _getImageCommand;
 
@@ -43,6 +41,7 @@ class FileManager {
     //todo: bug: this also tries to fetch previews for local files; no check if the file is local or remote
     _getPreviewCommand.asyncMap((ncFile) => this._nextCloudService.getPreview(ncFile.uri)
       .then((value) async {
+        _logger.d("Creating preview file ${ncFile.previewFile.path}");
         ncFile.previewFile.createSync(recursive: true);
         ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value, flush: true);
         await ncFile.previewFile.setLastModified(ncFile.lastModified);
@@ -94,11 +93,13 @@ class FileManager {
 
     removeLocal = RxCommand.createSync((param) => param);
     removeLocal.listen((value) {
+      _logger.d("Removing local file ${value.localFile.path}");
       _localFileService.deleteFile(value.localFile);
     });
 
     removeTmp = RxCommand.createSync((param) => param);
     removeTmp.listen((value) {
+      _logger.d("Removing preview file ${value.previewFile.path}");
       _localFileService.deleteFile(value.previewFile);
     });
 
@@ -112,16 +113,16 @@ class FileManager {
         //todo: add reverse mapping to recognize local files which are coming from the cloud
         //todo: should this be a FileSystemEntity?
         file.localFile = await mappingManager.mapToLocalFile(file.uri);
-        file.previewFile = _localFileService.getTmpFile(file.uri.path);
+        file.previewFile = await mappingManager.mapToTmpFile(file.uri);
       }
       return file;
     })
     .doOnData((file) => syncManager.addRemoteFile(uri, file));
     //todo: we have to fix the issue with recognizing remotely deleted files
     if(this._nextCloudService.isUriOfService(uri)) {
-      File previewFile = _localFileService.getTmpFile(uri.path);
       return syncManager.addUri(uri).asStream().flatMap((value) => Rx.merge([
-        this._localFileService.list(previewFile.uri)
+        this.mappingManager.mapToTmpFile(uri).asStream()
+        .flatMap((previewFile) => this._localFileService.list(previewFile.uri))
         .asyncMap((file) async {
           file.uri = await mappingManager.mapTmpToRemoteUri(file.uri, uri, _localFileService.tmpAppDirUri);
           //todo: should this be a FileSystemEntity?
@@ -135,7 +136,7 @@ class FileManager {
           file.uri = await mappingManager.mapToRemoteUri(file.uri, uri, _localFileService.externalAppDirUri);
           //todo: should this be a FileSystemEntity?
           // file.localFile = await mappingManager.mapToLocalFile(file.uri);
-          file.previewFile = _localFileService.getTmpFile(file.uri.path);
+          file.previewFile = await mappingManager.mapToTmpFile(file.uri);
           return file;
         }),
         defaultStream.doOnError((err, stack) {
@@ -144,6 +145,7 @@ class FileManager {
       ])
       .doOnData((file) => syncManager.addFile(uri, file))
       .doOnDone(() => syncManager.syncUri(uri).then((value) => value.forEach((element) {
+        _logger.w("Removing local file! (${element.uri.path})");
         this.updateFileList(element);
         this.removeLocal(element);
         this.removeTmp(element);

@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/mapping_node.dart';
-import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
+import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class MappingManager {
@@ -14,12 +14,14 @@ class MappingManager {
 
   LocalImageProviderService _localImageProviderService;
 
+  NextCloudService _nextCloudService;
+
   RxCommand<MappingPreference, MappingPreference> mappingUpdatedCommand;
 
   MappingNode root;
   Map<String, MappingPreference> mappings = {};
   
-  MappingManager(this._settingsManager, this._localImageProviderService) {
+  MappingManager(this._settingsManager, this._localImageProviderService, this._nextCloudService) {
     root = MappingNode();
 
     this.mappingUpdatedCommand = RxCommand.createSync((param) => param);
@@ -69,15 +71,27 @@ class MappingManager {
     return _getMappingPrefernce(uri, currentNode.mapping??selected, pathIndex+1, currentNode.nodes[uri.pathSegments[pathIndex]]);
   }
 
+  String _prependLocalMappingFolder(String path) {
+    return "/${_nextCloudService.getUserDomain()}$path";
+  }
+
+  String _appendLocalMappingFolder(String path) {
+    return "$path/${_nextCloudService.getUserDomain()}";
+  }
+
   Future<File> mapToLocalFile(Uri remoteUri) async {
     MappingPreference mapping = _getMappingPrefernce(remoteUri, null, 0, root);
 
     if(mapping == null) {
-      return this._localImageProviderService.getLocalFile(remoteUri.path);
+      return this._localImageProviderService.getLocalFile(_prependLocalMappingFolder(remoteUri.path));
     }
 
     String mappedPath = remoteUri.path.replaceFirst(mapping.remote.value.path, "");
     return this._localImageProviderService.getLocalFile(mappedPath, internalPathPrefix: mapping.local.value);
+  }
+
+  Future<File> mapToTmpFile(Uri remoteUri) async {
+    return _localImageProviderService.getTmpFile(_prependLocalMappingFolder(remoteUri.path));
   }
 
   Future<Uri> mapToRemoteUri(Uri local, Uri remote, Uri defaultInternal) async {
@@ -91,7 +105,7 @@ class MappingManager {
   }
 
   Future<Uri> mapTmpToRemoteUri(Uri local, Uri remote, Uri defaultInternal) async {
-    String relativePath = local.path.replaceFirst(defaultInternal.path, "");
+    String relativePath = local.path.replaceFirst(_appendLocalMappingFolder(defaultInternal.path), "");
     return UriUtils.fromUri(uri: remote, path: relativePath);
   }
 }

@@ -1,20 +1,25 @@
+import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
 
 class RemoteImageWidget extends StatelessWidget {
+  final Logger _logger = getLogger(RemoteImageWidget);
   final NcFile _file;
   final int cacheWidth;
   final int cacheHeight;
 
   RemoteImageWidget(this._file, {Key key, this.cacheWidth, this.cacheHeight}) : super(key: key) {
     this._file.localFile.exists().asStream()
-    .doOnData((event) => print("Event:$event"))
+    .doOnData((event) => _logger.d("Local file exists: $event (${_file.localFile.path})"))
     .where((event) => !event)
-    .flatMap((value) => this._file.previewFile.exists().asStream().where((exists) => !exists))
+    .flatMap((value) => this._file.previewFile.exists().asStream()
+      .doOnData((event) => _logger.d("Preview file exists: $event (${_file.previewFile.path})"))
+      .where((exists) => !exists))
     .listen((event) => getIt.get<FileManager>().downloadPreviewCommand(_file));
   }
 

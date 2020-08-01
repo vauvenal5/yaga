@@ -2,15 +2,19 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
 import 'package:yaga/services/service.dart';
+import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/nextcloud_client_factory.dart';
 
 class NextCloudService with Service<NextCloudService> implements FileProviderService<NextCloudService> {
+  final Logger _logger = getLogger(NextCloudService);
+  
   final String scheme = "nc";
   Uri _host;
   NextCloudClient _client;
@@ -54,6 +58,7 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
 
   Future<Uint8List> getPreview(Uri file) {
     String path = Uri.decodeComponent(file.path);
+    _logger.d("Fetching preview $path");
     return this._client.preview.getPreview(path, 128, 128);
     //todo: implement proper error handling
     // .catchError((err) {
@@ -76,4 +81,6 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
   }
 
   bool isUriOfService(Uri uri) => uri.scheme == this.scheme;
+
+  String getUserDomain() => "${this.username}@${this.host}";
 }

@@ -7,6 +7,7 @@ import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
 import 'package:yaga/utils/service_locator.dart';
+import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
@@ -45,7 +46,11 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
                 "mapping", 
                 "Root Mapping",
                 active: false,
-                local: localService.externalAppDirUri,
+                //todo: this should be moved in some form to the mapping manger... maybe when enabling multi user
+                local: UriUtils.fromUri(
+                  uri: localService.externalAppDirUri, 
+                  path: "${localService.externalAppDirUri.path}/${ncService.getUserDomain()}"
+                ),
                 remote: ncService.getRoot()
               );
               _globalAppPreferences.add(mapping);

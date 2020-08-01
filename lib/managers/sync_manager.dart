@@ -1,7 +1,10 @@
+import 'package:logger/logger.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/sync_file.dart';
+import 'package:yaga/utils/logger.dart';
 
 class SyncManager {
+  final Logger _logger = getLogger(SyncManager);
   Map<Uri, Map<Uri, SyncFile>> _syncMatrix = {}; 
 
   Future<void> addUri(Uri key) async {
@@ -16,10 +19,12 @@ class SyncManager {
   }
 
   Future<void> addFile(Uri key, NcFile file) async {
+    _logger.d("Adding file ${file.uri.path}");
     _addFile(key, file);
   }
 
   Future<void> addRemoteFile(Uri key, NcFile file) async {
+    _logger.d("Adding remote file ${file.uri.path}");
     _addFile(key, file)?.remote = true;
   }
 

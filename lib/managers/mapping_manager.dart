@@ -1,27 +1,29 @@
 import 'dart:io';
 
+import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/mapping_node.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/system_location_service.dart';
+import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class MappingManager {
-  
-  SettingsManager _settingsManager;
-
-  LocalImageProviderService _localImageProviderService;
-
-  NextCloudService _nextCloudService;
+  final Logger _logger = getLogger(MappingManager);
+  final SettingsManager _settingsManager;
+  // final LocalImageProviderService _localImageProviderService;
+  final NextCloudService _nextCloudService;
+  final SystemLocationService _systemLocationService;
 
   RxCommand<MappingPreference, MappingPreference> mappingUpdatedCommand;
 
   MappingNode root;
   Map<String, MappingPreference> mappings = {};
   
-  MappingManager(this._settingsManager, this._localImageProviderService, this._nextCloudService) {
+  MappingManager(this._settingsManager, this._nextCloudService, this._systemLocationService) {
     root = MappingNode();
 
     this.mappingUpdatedCommand = RxCommand.createSync((param) => param);
@@ -71,30 +73,43 @@ class MappingManager {
     return _getMappingPrefernce(uri, currentNode.mapping??selected, pathIndex+1, currentNode.nodes[uri.pathSegments[pathIndex]]);
   }
 
-  String _prependLocalMappingFolder(String path) {
-    return "/${_nextCloudService.getUserDomain()}$path";
-  }
-
   String _appendLocalMappingFolder(String path) {
     return "$path/${_nextCloudService.getUserDomain()}";
   }
 
-  Future<File> mapToLocalFile(Uri remoteUri) async {
+  Future<Uri> mapToLocalUri(Uri remoteUri) async {
     MappingPreference mapping = _getMappingPrefernce(remoteUri, null, 0, root);
-
+    
     if(mapping == null) {
-      return this._localImageProviderService.getLocalFile(_prependLocalMappingFolder(remoteUri.path));
-    }
-
-    String mappedPath = remoteUri.path.replaceFirst(mapping.remote.value.path, "");
-    return this._localImageProviderService.getLocalFile(mappedPath, internalPathPrefix: mapping.local.value);
+      mapping = _getDefaultMapping(this._systemLocationService.externalAppDirUri);
+    } 
+    
+    return _mapUri(remoteUri, mapping);
   }
 
-  Future<File> mapToTmpFile(Uri remoteUri) async {
-    return _localImageProviderService.getTmpFile(_prependLocalMappingFolder(remoteUri.path));
+  Future<Uri> mapToTmpUri(Uri remoteUri) async {
+    return _mapUri(remoteUri, _getDefaultMapping(this._systemLocationService.tmpAppDirUri));
   }
 
-  Future<Uri> mapToRemoteUri(Uri local, Uri remote, Uri defaultInternal) async {
+  Uri _mapUri(Uri remoteUri, MappingPreference mapping) {
+    _logger.d("Mapping remoteUri: "+remoteUri.toString());
+    _logger.d("Mapping local: "+mapping.local.value.toString());
+    _logger.d("Mapping remote: "+mapping.remote.value.toString());
+    String mappedPath = mapping.local.value.path + "/" + remoteUri.path.replaceFirst(mapping.remote.value.path, "");
+    Uri mappedUri = UriUtils.fromUri(uri: mapping.local.value, path: mappedPath);
+    _logger.d("Mapped uri: "+mappedUri.toString());
+    //todo: is returning an absolute uri from mapping manager the best option?
+    return this._systemLocationService.absoluteUriFromInternal(mappedUri);
+  }
+
+  MappingPreference _getDefaultMapping(Uri root) {
+    UriPreference local = UriPreference("localDefault", "local deafult", UriUtils.fromUri(uri: root, path: _appendLocalMappingFolder(root.path)));
+    UriPreference remote = UriPreference("remoteDefault", "remote default", this._nextCloudService.getRoot());
+    return MappingPreference("default", "default", remote, local);
+  }
+
+  Future<Uri> mapToRemoteUri(Uri local, Uri remote) async {
+    Uri defaultInternal = this._systemLocationService.externalAppDirUri;
     MappingPreference mapping = _getMappingPrefernce(remote, null, 0, root);
     String relativePath = local.path.replaceFirst(mapping==null ? defaultInternal.path : mapping.local.value.path, "");
     //todo: solve this in a more elegant way
@@ -104,7 +119,8 @@ class MappingManager {
     return UriUtils.fromUri(uri: remote, path: relativePath);
   }
 
-  Future<Uri> mapTmpToRemoteUri(Uri local, Uri remote, Uri defaultInternal) async {
+  Future<Uri> mapTmpToRemoteUri(Uri local, Uri remote) async {
+    Uri defaultInternal = this._systemLocationService.tmpAppDirUri;
     String relativePath = local.path.replaceFirst(_appendLocalMappingFolder(defaultInternal.path), "");
     return UriUtils.fromUri(uri: remote, path: relativePath);
   }

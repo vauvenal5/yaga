@@ -3,8 +3,8 @@ import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
-import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
@@ -54,7 +54,7 @@ class BrowseTab extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.phone_android,),
               title: Text("Internal Memory"),
-              onTap: () => _navigateToBrowseView(context, getIt.get<LocalImageProviderService>().getOrigin()),
+              onTap: () => _navigateToBrowseView(context, getIt.get<SystemLocationService>().getOrigin()),
             )
           );
           

@@ -1,12 +1,15 @@
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:rx_command/rx_command.dart';
+import 'package:yaga/managers/file_sub_manager.dart';
 import 'package:yaga/managers/mapping_manager.dart';
 import 'package:yaga/managers/sync_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
+import 'package:yaga/services/local_file_service.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/system_location_service.dart';
 
 class FileManager {
   Logger _logger = Logger();
@@ -25,26 +28,20 @@ class FileManager {
   RxCommand<NcFile, NcFile> updateFileList;
 
   NextCloudService _nextCloudService;
-  LocalImageProviderService _localFileService;
-  Map<String, FileProviderService> _fileProviders = Map();
+  LocalFileService _localFileService;
+  Map<String, FileSubManager> _fileSubManagers = Map();
 
-  //todo: private
-  MappingManager mappingManager;
-  SyncManager syncManager;
-
-  FileManager(this._nextCloudService, this._localFileService, this.mappingManager, this.syncManager) {
-    _fileProviders.putIfAbsent(_localFileService.scheme, () => _localFileService);
-    _fileProviders.putIfAbsent(_nextCloudService.scheme, () => _nextCloudService);
-
+  FileManager(this._nextCloudService, this._localFileService) {
     _getPreviewCommand = RxCommand.createSync((param) => param);
     //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
     //todo: bug: this also tries to fetch previews for local files; no check if the file is local or remote
     _getPreviewCommand.asyncMap((ncFile) => this._nextCloudService.getPreview(ncFile.uri)
       .then((value) async {
-        _logger.d("Creating preview file ${ncFile.previewFile.path}");
-        ncFile.previewFile.createSync(recursive: true);
-        ncFile.previewFile = await ncFile.previewFile.writeAsBytes(value, flush: true);
-        await ncFile.previewFile.setLastModified(ncFile.lastModified);
+        ncFile.previewFile = await _localFileService.createFile(
+          file: ncFile.previewFile, 
+          bytes: value, 
+          lastModified: ncFile.lastModified
+        );
         return ncFile;
       }, 
       onError: (err) {
@@ -58,9 +55,11 @@ class FileManager {
     //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
     _getImageCommand.asyncMap((ncFile) => this._nextCloudService.downloadImage(ncFile.uri)
       .then((value) async {
-        ncFile.localFile.createSync(recursive: true);
-        ncFile.localFile = await ncFile.localFile.writeAsBytes(value, flush: true); 
-        await ncFile.localFile.setLastModified(ncFile.lastModified);
+        ncFile.localFile = await _localFileService.createFile(
+          file: ncFile.localFile, 
+          bytes: value, 
+          lastModified: ncFile.lastModified
+        );
         return ncFile;
       }, 
       onError: (err) {
@@ -106,52 +105,11 @@ class FileManager {
     updateFileList = RxCommand.createSync((param) => param);
   }
 
-  //todo: FileManager and MappingManger should be split more clearly
-  Stream<NcFile> listFiles(Uri uri) {
-    Stream<NcFile> defaultStream = _fileProviders[uri.scheme].list(uri).asyncMap((file) async {
-      if(file.localFile == null) {
-        //todo: add reverse mapping to recognize local files which are coming from the cloud
-        //todo: should this be a FileSystemEntity?
-        file.localFile = await mappingManager.mapToLocalFile(file.uri);
-        file.previewFile = await mappingManager.mapToTmpFile(file.uri);
-      }
-      return file;
-    })
-    .doOnData((file) => syncManager.addRemoteFile(uri, file));
-    //todo: we have to fix the issue with recognizing remotely deleted files
-    if(this._nextCloudService.isUriOfService(uri)) {
-      return syncManager.addUri(uri).asStream().flatMap((value) => Rx.merge([
-        this.mappingManager.mapToTmpFile(uri).asStream()
-        .flatMap((previewFile) => this._localFileService.list(previewFile.uri))
-        .asyncMap((file) async {
-          file.uri = await mappingManager.mapTmpToRemoteUri(file.uri, uri, _localFileService.tmpAppDirUri);
-          //todo: should this be a FileSystemEntity?
-          file.localFile = await mappingManager.mapToLocalFile(file.uri);
-          // file.previewFile = _localFileService.getTmpFile(file.uri.path);
-          return file;
-        }),
-        this.mappingManager.mapToLocalFile(uri).asStream()
-        .flatMap((value) => this._localFileService.list(value.uri))
-        .asyncMap((file) async {
-          file.uri = await mappingManager.mapToRemoteUri(file.uri, uri, _localFileService.externalAppDirUri);
-          //todo: should this be a FileSystemEntity?
-          // file.localFile = await mappingManager.mapToLocalFile(file.uri);
-          file.previewFile = await mappingManager.mapToTmpFile(file.uri);
-          return file;
-        }),
-        defaultStream.doOnError((err, stack) {
-          syncManager.removeUri(uri);
-        })
-      ])
-      .doOnData((file) => syncManager.addFile(uri, file))
-      .doOnDone(() => syncManager.syncUri(uri).then((value) => value.forEach((element) {
-        _logger.w("Removing local file! (${element.uri.path})");
-        this.updateFileList(element);
-        this.removeLocal(element);
-        this.removeTmp(element);
-      }))));
-    }
+  void registerFileManager(FileSubManager fileSubManager) {
+    this._fileSubManagers.putIfAbsent(fileSubManager.scheme, () => fileSubManager);
+  }
 
-    return defaultStream;
+  Stream<NcFile> listFiles(Uri uri) {
+    return this._fileSubManagers[uri.scheme].listFiles(uri);
   }
 }

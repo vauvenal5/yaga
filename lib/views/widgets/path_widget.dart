@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
@@ -36,7 +37,7 @@ class PathWidget extends StatelessWidget {
           if(index == 0) {
             List<DropdownMenuItem<String>> items = [
               DropdownMenuItem<String>(
-                  value: getIt.get<LocalImageProviderService>().getOrigin().toString(),
+                  value: getIt.get<SystemLocationService>().getOrigin().toString(),
                   child: Icon(Icons.phone_android, color: Colors.white,)
                 ),
             ];

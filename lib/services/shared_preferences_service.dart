@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/services/service.dart';
 
-class SharedPreferencesService implements Service<SharedPreferencesService> {
+class SharedPreferencesService extends Service<SharedPreferencesService> {
   SharedPreferences _instance;
 
   @override

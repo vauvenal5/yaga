@@ -3,8 +3,8 @@ import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
-import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
+import 'package:yaga/services/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/category_widget.dart';
@@ -24,7 +24,7 @@ class CategoryTab extends StatelessWidget {
 
   CategoryTab({@required this.bottomNavBar, @required this.drawer}) {
     SectionPreference general = SectionPreference.route(_pref, "general", "General");
-    this._path = UriPreference.section(general, "path", "Path", getIt.get<LocalImageProviderService>().externalAppDirUri);
+    this._path = UriPreference.section(general, "path", "Path", getIt.get<SystemLocationService>().externalAppDirUri);
     this._experimentalView = BoolPreference.section(general, "experimentalView", "Experimental View", true);
 
     this._defaultViewPreferences.add(general);
@@ -33,7 +33,7 @@ class CategoryTab extends StatelessWidget {
 
     //todo: refactor
     getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt.get<SettingsManager>()
-      .persistUriSettingCommand(UriPreference.section(general, "path", "Path", getIt.get<LocalImageProviderService>().externalAppDirUri))
+      .persistUriSettingCommand(UriPreference.section(general, "path", "Path", getIt.get<SystemLocationService>().externalAppDirUri))
     );
   }
 

@@ -4,8 +4,8 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
-import 'package:yaga/services/local_image_provider_service.dart';
 import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
@@ -37,7 +37,7 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
     //todo: on logged out disable setting instead removing it
     getIt.getAsync<NextCloudManager>().then((ncManager) => ncManager.updateLoginStateCommand.listen((value) {
       getIt.getAsync<NextCloudService>().then((ncService) {
-        getIt.getAsync<LocalImageProviderService>().then((localService) {
+        getIt.getAsync<SystemLocationService>().then((systemLocationService) {
           getIt.getAsync<SettingsManager>().then((settingsManager) {
             //todo: refactor
             if(ncService.isLoggedIn()) {
@@ -48,8 +48,8 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
                 active: false,
                 //todo: this should be moved in some form to the mapping manger... maybe when enabling multi user
                 local: UriUtils.fromUri(
-                  uri: localService.externalAppDirUri, 
-                  path: "${localService.externalAppDirUri.path}/${ncService.getUserDomain()}"
+                  uri: systemLocationService.externalAppDirUri, 
+                  path: "${systemLocationService.externalAppDirUri.path}/${ncService.getUserDomain()}"
                 ),
                 remote: ncService.getRoot()
               );
@@ -63,7 +63,7 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
               "mapping", 
               "Root Mapping",
               active: false,
-              local: localService.externalAppDirUri,
+              local: systemLocationService.externalAppDirUri,
               remote: null
             );
 

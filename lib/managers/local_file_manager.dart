@@ -12,7 +12,7 @@ class LocalFileManager implements FileSubManager {
   final SystemLocationService _systemPathService;
   
   @override
-  final String scheme = "file";
+  String get scheme => _systemPathService.getOrigin().scheme;
 
   LocalFileManager(this._fileManager, this._localFileService, this._systemPathService);
 
@@ -25,19 +25,18 @@ class LocalFileManager implements FileSubManager {
   //todo: should add a wrapper around uri to distinguish between internal and absolute uri
   // --> for example this serivce requires a internal uri but the call from within the nextcloudFileManager passes an absolute uri!
   Stream<NcFile> listFiles(Uri uri) {
-    // _systemPathService.absoluteUriFromInternal(uri)
     //todo: add uri check? or simply handle exception?
     return _localFileService.list(Directory.fromUri(this._systemPathService.absoluteUriFromInternal(uri)))
       .map((event) {
         NcFile file = NcFile();
-        // file.uri = _systemEntityToInternalUri(event);
         file.uri = this._systemPathService.internalUriFromAbsolute(event.uri);
-        file.name = file.uri.pathSegments.last;
-        file.isDirectory = false;
 
         if(event is Directory) {
           file.isDirectory = true;
+          file.name = file.uri.pathSegments[file.uri.pathSegments.length-2];
         } else {
+          file.isDirectory = false;
+          file.name = file.uri.pathSegments.last;
           //todo: also set for directories? or at least don't set anything (see file_manager: list)
           file.localFile = event;
           file.lastModified =  (event as File).lastModifiedSync();

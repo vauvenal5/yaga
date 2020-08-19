@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
-import 'package:string_validator/string_validator.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
 import 'package:yaga/services/service.dart';
@@ -48,7 +47,7 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
       file.isDirectory = webDavFile.isDirectory;
       file.lastModified = webDavFile.lastModified;
       file.name = webDavFile.name;
-      var path = rtrim(webDavFile.path.replaceFirst("/$basePath", ""), "/");
+      var path = webDavFile.path.replaceFirst("/$basePath", "");
       file.uri = Uri(scheme: this.scheme, userInfo: _client.username, host: _host.host, path: path);
       return file;
     });//.toList --> should this return a Future<List> since the data is actually allready downloaded?
@@ -73,10 +72,6 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
   }
 
   Uri getOrigin() {
-    return Uri(scheme: this.scheme, userInfo: _client.username, host: _host.host);
-  }
-
-  Uri getRoot() {
     return Uri(scheme: this.scheme, userInfo: _client.username, host: _host.host, path: "/");
   }
 

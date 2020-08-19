@@ -51,7 +51,7 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
                   uri: systemLocationService.externalAppDirUri, 
                   path: "${systemLocationService.externalAppDirUri.path}/${ncService.getUserDomain()}"
                 ),
-                remote: ncService.getRoot()
+                remote: ncService.getOrigin()
               );
               _globalAppPreferences.add(mapping);
               settingsManager.loadMappingPreferenceCommand(mapping);

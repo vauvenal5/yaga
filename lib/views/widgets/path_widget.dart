@@ -15,14 +15,6 @@ class PathWidget extends StatelessWidget {
 
   PathWidget(this._uri, this._onTap);
 
-  Uri _subPath(int index) {
-    String subPath = "";
-    for(int i = 0; i<=index;i++) {
-      subPath += "/"+this._uri.pathSegments[i];
-    }
-    return UriUtils.fromUri(uri: _uri, path: subPath);
-  }
-
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
@@ -32,7 +24,7 @@ class PathWidget extends StatelessWidget {
         shrinkWrap: true,
         padding: EdgeInsets.symmetric(horizontal: 20),
         scrollDirection: Axis.horizontal,
-        itemCount: _uri.pathSegments.length+1,
+        itemCount: _uri.pathSegments.length==0?1:_uri.pathSegments.length,
         itemBuilder: (context, index) {
           if(index == 0) {
             List<DropdownMenuItem<String>> items = [
@@ -50,20 +42,18 @@ class PathWidget extends StatelessWidget {
             }
 
             return DropdownButton<String>(
-              value: Uri(scheme: _uri.scheme, userInfo: _uri.userInfo, host: _uri.host).toString(),
+              value: UriUtils.getRootFromUri(_uri).toString(),
               dropdownColor: Theme.of(context).accentColor,
               underline: Container(),
               onChanged: (value) {
-                Uri origin = Uri.parse(value);
-                //todo-sv: is this path really necessary 1/2
-                _onTap(Uri(scheme: origin.scheme, host: origin.host, userInfo: origin.userInfo, path: "/"));
+                _onTap(Uri.parse(value));
               },
               items: items,
             );
           }
           return  FlatButton(
             textColor: Colors.white,
-            onPressed: () => _onTap(_subPath(index-1)), 
+            onPressed: () => _onTap(UriUtils.fromUriPathSegments(_uri, index-1)), 
             child: Text(_uri.pathSegments[index-1]),
           );
         },

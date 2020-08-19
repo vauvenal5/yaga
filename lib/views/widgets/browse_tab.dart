@@ -24,8 +24,7 @@ class BrowseTab extends StatelessWidget {
       DirectoryNavigationScreen.route, 
       arguments: DirectoryNavigationScreenArguments(
         title: "Browse",
-        //todo-sv: is this path really necessary 2/2
-        uri: UriUtils.fromUri(uri: origin, path: "/"),
+        uri: origin,
         onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
           context, 
           ImageScreen.route, 

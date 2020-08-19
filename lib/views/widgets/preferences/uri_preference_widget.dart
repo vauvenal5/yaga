@@ -16,15 +16,6 @@ class UriPreferenceWidget extends StatelessWidget{
 
   UriPreferenceWidget(this._defaultPref, {this.onChangeCommand});
 
-  Uri _buildSubUri(Uri uri, String segment) {
-    String path = "";
-    int index = uri.pathSegments.indexOf(segment);
-    for(int i =0;i<=index;i++) {
-      path += "/${uri.pathSegments[i]}";
-    }
-    return UriUtils.fromUri(uri: uri, path: path);
-  }
-
   void _notifyChange(UriPreference pref) {
     if(onChangeCommand != null) {
       onChangeCommand(pref);
@@ -51,10 +42,11 @@ class UriPreferenceWidget extends StatelessWidget{
   //todo: track issue https://github.com/flutter/flutter/issues/45938 and improve this madness when possible
   void _pushViews(BuildContext context, UriPreference pref) {
     Uri uri = pref.value;
-    _pushToNavigation(context, pref, UriUtils.fromUri(uri: uri, path: "/"));
-    for(String segment in uri.pathSegments) {
-      _pushToNavigation(context, pref, _buildSubUri(uri, segment));
-    }
+    _pushToNavigation(context, pref, UriUtils.getRootFromUri(uri));
+    int index = 0;
+    uri.pathSegments.where((element) => element.isNotEmpty).forEach((segment) {
+      _pushToNavigation(context, pref, UriUtils.fromUriPathSegments(uri, index++));
+    });
   }
 
   @override

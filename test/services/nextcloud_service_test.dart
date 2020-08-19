@@ -57,7 +57,7 @@ void main() {
     group("list", () {
       bool _verifyNcFile(NcFile actual, WebDavFile expected) {
         expect(actual.name, expected.name);
-        expect(actual.uri, Uri(scheme: "nc", host: host.host, userInfo: "test", path: rtrim(expected.path, "/")));
+        expect(actual.uri, Uri(scheme: "nc", host: host.host, userInfo: "test", path: expected.path));
         expect(actual.isDirectory, expected.isDirectory);
         expect(actual.lastModified, expected.lastModified);
         expect(actual.localFile, null);
@@ -117,16 +117,7 @@ void main() {
 
       when(clientMock.username).thenAnswer((_) => "test");
 
-      expect(service.getOrigin(), Uri(scheme: "nc", host: host.host, userInfo: "test"));
-    });
-
-    test("check root", () {
-      NextCloudService service = NextCloudService(factoryMock);
-      service.login(host, "test", "password");
-
-      when(clientMock.username).thenAnswer((_) => "test");
-
-      expect(service.getRoot(), Uri(scheme: "nc", host: host.host, userInfo: "test", path: "/"));
+      expect(service.getOrigin(), Uri(scheme: "nc", host: host.host, userInfo: "test", path: "/"));
     });
 
     group("isUriOfService", () {

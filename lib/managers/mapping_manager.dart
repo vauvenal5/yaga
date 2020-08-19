@@ -74,15 +74,11 @@ class MappingManager {
   }
 
   String _appendLocalMappingFolder(String path) {
-    return "$path/${_nextCloudService.getUserDomain()}";
+    return UriUtils.chainPathSegments(path, _nextCloudService.getUserDomain());
   }
 
   Future<Uri> mapToLocalUri(Uri remoteUri) async {
-    MappingPreference mapping = _getMappingPrefernce(remoteUri, null, 0, root);
-    
-    if(mapping == null) {
-      mapping = _getDefaultMapping(this._systemLocationService.externalAppDirUri);
-    } 
+    MappingPreference mapping = _getMappingPrefernce(remoteUri, _getDefaultMapping(this._systemLocationService.externalAppDirUri), 0, root);
     
     return _mapUri(remoteUri, mapping);
   }
@@ -95,8 +91,10 @@ class MappingManager {
     _logger.d("Mapping remoteUri: "+remoteUri.toString());
     _logger.d("Mapping local: "+mapping.local.value.toString());
     _logger.d("Mapping remote: "+mapping.remote.value.toString());
-    String mappedPath = mapping.local.value.path + "/" + remoteUri.path.replaceFirst(mapping.remote.value.path, "");
-    Uri mappedUri = UriUtils.fromUri(uri: mapping.local.value, path: mappedPath);
+    Uri mappedUri = UriUtils.fromPathSegments(uri: mapping.local.value, pathSegments: [
+      mapping.local.value.path, 
+      remoteUri.path.replaceFirst(mapping.remote.value.path, "")
+    ]);
     _logger.d("Mapped uri: "+mappedUri.toString());
     //todo: is returning an absolute uri from mapping manager the best option?
     return this._systemLocationService.absoluteUriFromInternal(mappedUri);
@@ -104,19 +102,15 @@ class MappingManager {
 
   MappingPreference _getDefaultMapping(Uri root) {
     UriPreference local = UriPreference("localDefault", "local deafult", UriUtils.fromUri(uri: root, path: _appendLocalMappingFolder(root.path)));
-    UriPreference remote = UriPreference("remoteDefault", "remote default", this._nextCloudService.getRoot());
+    UriPreference remote = UriPreference("remoteDefault", "remote default", this._nextCloudService.getOrigin());
     return MappingPreference("default", "default", remote, local);
   }
 
   Future<Uri> mapToRemoteUri(Uri local, Uri remote) async {
     Uri defaultInternal = this._systemLocationService.externalAppDirUri;
-    MappingPreference mapping = _getMappingPrefernce(remote, null, 0, root);
+    MappingPreference mapping = _getMappingPrefernce(remote, _getDefaultMapping(defaultInternal), 0, root);
     String relativePath = local.path.replaceFirst(mapping==null ? defaultInternal.path : mapping.local.value.path, "");
-    //todo: solve this in a more elegant way
-    if(mapping != null && mapping.remote.value.path != "/") {
-      relativePath = mapping.remote.value.path + relativePath;
-    }
-    return UriUtils.fromUri(uri: remote, path: relativePath);
+    return UriUtils.fromPathSegments(uri: remote, pathSegments: [mapping.remote.value.path, relativePath]);
   }
 
   Future<Uri> mapTmpToRemoteUri(Uri local, Uri remote) async {

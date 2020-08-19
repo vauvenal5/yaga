@@ -16,8 +16,8 @@ class SystemLocationService extends Service<SystemLocationService> {
   }
 
   Uri getOrigin({SystemLocationHost host = SystemLocationHost.local}) {
-    SystemLocation locaion = _locations[host.name];
-    return Uri(scheme: locaion.directory.uri.scheme, host: host.name, path: "");
+    SystemLocation location = _locations[host.name];
+    return Uri(scheme: location.directory.uri.scheme, host: host.name, path: "/");
   }
 
   //todo: think about this -> there are two ways of solving this
@@ -48,7 +48,7 @@ class SystemLocationService extends Service<SystemLocationService> {
   }
 
   String _internalUriNormalizePath(Uri absolute, SystemLocation location) {
-    return rtrim(absolute.path.replaceFirst(location.privatePath, ""), "/");
+    return absolute.path.replaceFirst(location.privatePath, "");
   }
 
   Uri absoluteUriFromInternal(Uri internal) {

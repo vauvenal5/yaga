@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:yaga/model/system_location_host.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class SystemLocation {
   final Directory directory;
@@ -13,5 +14,5 @@ class SystemLocation {
     privatePath = directory.path.split(splitter)[0],
     publicPath = splitter+directory.path.split(splitter)[1];
 
-  String get absolutePath => privatePath + publicPath;
+  String get absolutePath => UriUtils.chainPathSegments(privatePath, publicPath);
 }

@@ -12,6 +12,25 @@ class ImageSearch extends SearchDelegate {
   ImageSearch(this.dates, this.sortedFiles, this._experimental);
 
   @override
+  ThemeData appBarTheme(BuildContext context) {
+    //todo: keep track of this issue and improve: https://github.com/flutter/flutter/issues/45498
+    assert(context != null);
+    final ThemeData theme = Theme.of(context);
+    assert(theme != null);
+    return theme.copyWith(
+      inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: theme.primaryTextTheme.headline.color)),
+      textTheme: theme.textTheme.copyWith(
+        headline: theme.textTheme.headline.copyWith(color: theme.primaryTextTheme.headline.color),
+        title: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.normal,
+          fontSize: 18,
+        ),
+      )
+    );
+  }
+
+  @override
   List<Widget> buildActions(BuildContext context) {
     return <Widget>[
       IconButton(icon: Icon(Icons.close), onPressed: () => query="")

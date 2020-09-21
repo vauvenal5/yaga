@@ -32,6 +32,7 @@ class _CategoryTabState extends State<CategoryTab> {
   final List<Preference> _defaultViewPreferences = [];
   UriPreference _path;
   BoolPreference _experimentalView;
+  BoolPreference _recursive;
 
   StreamSubscription<UriPreference> _updateUriSubscription;
   CategoryImageStateWrapper _imageStateWrapper;
@@ -40,17 +41,23 @@ class _CategoryTabState extends State<CategoryTab> {
     SectionPreference general = SectionPreference.route(_pref, "general", "General");
     this._path = UriPreference.section(general, "path", "Path", getIt.get<SystemLocationService>().externalAppDirUri);
     this._experimentalView = BoolPreference.section(general, "experimentalView", "Experimental View", true);
+    this._recursive = BoolPreference.section(general, "recursiveLoad", "Load Recursively", false);
 
     this._defaultViewPreferences.add(general);
     this._defaultViewPreferences.add(_path);
     this._defaultViewPreferences.add(_experimentalView);
+    this._defaultViewPreferences.add(_recursive);
 
     //todo: refactor
     getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt.get<SettingsManager>()
       .persistUriSettingCommand(UriPreference.section(general, "path", "Path", getIt.get<SystemLocationService>().externalAppDirUri))
     );
 
-    this._imageStateWrapper = new CategoryImageStateWrapper(this, getIt.get<SharedPreferencesService>().loadUriPreference(this._path).value);
+    this._imageStateWrapper = new CategoryImageStateWrapper(
+      this, 
+      getIt.get<SharedPreferencesService>().loadUriPreference(this._path).value,
+      getIt.get<SharedPreferencesService>().loadBoolPreference(this._recursive)
+    );
   }
 
   @override

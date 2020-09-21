@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/mapping_manager.dart';
+import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/utils/service_locator.dart';
@@ -12,22 +14,26 @@ import 'package:yaga/utils/service_locator.dart';
 class CategoryImageStateWrapper {
   List<DateTime> dates = [];
   Map<String, List<NcFile>> sortedFiles = Map();
+  //todo: i thind loading is not used anymore -> remove
   bool loading;
+  BoolPreference recursive;
 
   StreamSubscription<NcFile> _updateFilesListCommandSubscription;
   StreamSubscription<MappingPreference> _updatedMappingPreferenceCommandSubscription;
   StreamSubscription<NcFile> _updateFileListSubscripton;
+  StreamSubscription<BoolPreference> _updateRecursiveSubscription;
   
   //todo: refactor to pass only setState function
   State wrappedState;
   Uri uri;
 
-  CategoryImageStateWrapper(this.wrappedState, this.uri);
+  CategoryImageStateWrapper(this.wrappedState, this.uri, this.recursive);
 
   void dispose() {
     this._updateFilesListCommandSubscription.cancel();
     this._updatedMappingPreferenceCommandSubscription.cancel();
     this._updateFileListSubscripton.cancel();
+    this._updateRecursiveSubscription.cancel();
   }
 
   void updateFilesAndFolders() {
@@ -42,6 +48,7 @@ class CategoryImageStateWrapper {
     this._updateFilesListCommandSubscription?.cancel();
     
     this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(uri)
+    .flatMap((event) => event.isDirectory && this.recursive.value ? getIt.get<FileManager>().listFiles(event.uri) : Stream.value(event))
     .where((event) => !event.isDirectory)
     .listen(
       (file) {
@@ -72,8 +79,10 @@ class CategoryImageStateWrapper {
 
   void initState() {
     this.updateFilesAndFolders();
+    
     this._updatedMappingPreferenceCommandSubscription = getIt.get<MappingManager>().mappingUpdatedCommand
       .listen((value) => this.updateFilesAndFolders());
+    
     this._updateFileListSubscripton = getIt.get<FileManager>().updateFileList.listen((file) {
       DateTime lastModified = file.lastModified;
       DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
@@ -86,6 +95,15 @@ class CategoryImageStateWrapper {
         }
       });
     });
+
+    this._updateRecursiveSubscription = getIt.get<SettingsManager>().updateSettingCommand
+      .where((event) => event.key == this.recursive.key)
+      .map((event) => event as BoolPreference)
+      .where((event) => event.value != this.recursive.value)
+      .listen((event) {
+        this.recursive = event;
+        this.updateFilesAndFolders();
+      });
   }
 
   static String createKey(DateTime date) => date.toString().split(" ")[0];

@@ -16,7 +16,7 @@ class RemoteImageWidget extends StatelessWidget {
   RemoteImageWidget(this._file, {Key key, this.cacheWidth, this.cacheHeight}) : super(key: key) {
     this._file.localFile.exists().asStream()
     .doOnData((event) => _logger.d("Local file exists: $event (${_file.localFile.path})"))
-    .where((event) => !event)
+    //.where((event) => !event)
     .flatMap((value) => this._file.previewFile.exists().asStream()
       .doOnData((event) => _logger.d("Preview file exists: $event (${_file.previewFile.path})"))
       .where((exists) => !exists))

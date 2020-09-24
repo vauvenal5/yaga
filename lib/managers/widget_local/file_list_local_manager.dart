@@ -20,7 +20,7 @@ class FileListLocalManager {
   RxCommand<bool, bool> loadingChangedCommand;
   RxCommand<List<NcFile>, List<NcFile>> filesChangedCommand;
 
-  StreamSubscription<NcFile> _updateFilesListCommandSubscription;
+  StreamSubscription<List<NcFile>> _updateFilesListCommandSubscription;
   StreamSubscription<MappingPreference> _updatedMappingPreferenceCommandSubscription;
   StreamSubscription<NcFile> _updateFileListSubscripton;
   StreamSubscription<BoolPreference> _updateRecursiveSubscription;
@@ -47,12 +47,31 @@ class FileListLocalManager {
     //cancel old subscription
     this._updateFilesListCommandSubscription?.cancel();
     
-    this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(uri, recursive: this.recursive.value)
+    // this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(uri, recursive: this.recursive.value)
+    // .listen(
+    //   (file) {
+    //     //todo-sv: dart magic matches the files properly however it will be better to add a custom equals --> how does dart runtime hashcode work? Oo
+    //     if(!files.contains(file)) {
+    //       files.add(file);
+    //       this.filesChangedCommand(files);
+    //     }
+    //   },
+    //   onDone: () => this.loadingChangedCommand(false)
+    // );
+
+    this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFileLists(uri, recursive: this.recursive.value)
     .listen(
-      (file) {
+      (fileList) {
+        bool changed = false;
         //todo-sv: dart magic matches the files properly however it will be better to add a custom equals --> how does dart runtime hashcode work? Oo
-        if(!files.contains(file)) {
-          files.add(file);
+        fileList.forEach((file) { 
+          if(!files.contains(file)) {
+            files.add(file);
+            changed = true;
+          }
+        });
+
+        if(changed) {
           this.filesChangedCommand(files);
         }
       },

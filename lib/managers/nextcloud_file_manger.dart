@@ -98,4 +98,44 @@ class NextcloudFileManager implements FileSubManager {
         return file;
       });
   }
+
+  @override
+  Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false}) {
+    //todo: add uri check
+    return _syncManager.addUri(uri).asStream().flatMap((value) => Rx.merge([
+        this._listTmpFiles(uri)
+          .doOnData((file) => _syncManager.addFile(uri, file))
+          .toList().asStream(),
+        this._listLocalFiles(uri)
+          .doOnData((file) => _syncManager.addFile(uri, file))
+          .toList().asStream(),
+        this._listNextcloudFiles(uri)
+        .doOnData((file) => _syncManager.addRemoteFile(uri, file))
+        .doOnError((err, stack) {
+          _syncManager.removeUri(uri);
+        })
+        .toList()
+        .asStream()
+        .flatMap((list) {
+          if(!recursive) {
+            return Stream.value(list);
+          }
+
+          return Rx.merge([
+            Stream.value(list),
+            Stream.fromIterable(list)
+            .where((file) => file.isDirectory)
+            .flatMap((file) => this.listFileList(file.uri, recursive: recursive))
+          ]);
+        })
+      ])
+      .doOnDone(() => _syncManager.syncUri(uri).then((value) => value.forEach((element) {
+        _logger.w("Removing local file! (${element.uri.path})");
+        this._fileManager.updateFileList(element);
+        //todo: syncManager does not guarantee that files are set
+        this._localFileService.deleteFile(element.localFile);
+        this._localFileService.deleteFile(element.previewFile);
+      })))
+    );
+  }
 }

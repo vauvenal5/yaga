@@ -45,4 +45,10 @@ class LocalFileManager implements FileSubManager {
         return file;
       });
   }
+
+  @override
+  Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false}) {
+    //todo: implement recursive
+    return this.listFiles(uri).toList().asStream();
+  }
 }

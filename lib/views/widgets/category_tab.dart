@@ -98,7 +98,7 @@ class _CategoryTabState extends State<CategoryTab> {
           //todo: image search button goes here 
           IconButton(icon: Icon(Icons.search), onPressed: () => showSearch(
             context: context, 
-            delegate: ImageSearch(_imageStateWrapper.dates, _imageStateWrapper.sortedFiles, this._experimentalView)
+            delegate: ImageSearch(_imageStateWrapper.files, this._experimentalView)
           )),
           PopupMenuButton<CategoryViewMenu>(
             onSelected: (CategoryViewMenu result) => Navigator.pushNamed(context, SettingsScreen.route, arguments: new SettingsScreenArguments(preferences: _defaultViewPreferences)),
@@ -111,7 +111,7 @@ class _CategoryTabState extends State<CategoryTab> {
       drawer: widget.drawer,
       body: Stack(
         children: [
-          CategoryWidget(_imageStateWrapper.dates, _imageStateWrapper.sortedFiles, this._experimentalView),
+          CategoryWidget(_imageStateWrapper.files, this._experimentalView),
           this._imageStateWrapper.loading ? LinearProgressIndicator() : Container()
         ]
       ),

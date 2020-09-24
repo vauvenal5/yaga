@@ -11,10 +11,11 @@ import 'package:yaga/utils/service_locator.dart';
 
 //todo-sv: refactor this class? see also category_tab.dart
 //--> this is a very messed up mix of different concerns
+//--> setState should be moved out of here
+//--> maybe this itself should be a manager? However a non singleton manager, build by a factory? --> a widget specific manager?
+//--> loading could be a stream of bool events
 class CategoryImageStateWrapper {
-  List<DateTime> dates = [];
-  Map<String, List<NcFile>> sortedFiles = Map();
-  //todo: i thind loading is not used anymore -> remove
+  List<NcFile> files = List();
   bool loading;
   BoolPreference recursive;
 
@@ -37,8 +38,7 @@ class CategoryImageStateWrapper {
   }
 
   void updateFilesAndFolders() {
-    this.dates = [];
-    this.sortedFiles = Map();
+    this.files = [];
     
     wrappedState.setState(() {
       loading = true;
@@ -49,25 +49,12 @@ class CategoryImageStateWrapper {
     
     this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(uri)
     .flatMap((event) => event.isDirectory && this.recursive.value ? getIt.get<FileManager>().listFiles(event.uri) : Stream.value(event))
-    .where((event) => !event.isDirectory)
     .listen(
       (file) {
-        DateTime lastModified = file.lastModified;
-        DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
-        
         wrappedState.setState(() {
-          if(!this.dates.contains(date)) {
-            this.dates.add(date);
-            this.dates.sort((date1, date2) => date2.compareTo(date1));
-          }
-
-          String key = createKey(date);
-          sortedFiles.putIfAbsent(key, () => []);
-          //todo-sv: this has to be solved in a better way... double calling happens for example when in path selector screen navigating to same path
           //todo-sv: dart magic matches the files properly however it will be better to add a custom equals --> how does dart runtime hashcode work? Oo
-          if(!sortedFiles[key].contains(file)) {
-            sortedFiles[key].add(file);
-            sortedFiles[key].sort((a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          if(!files.contains(file)) {
+            files.add(file);
           }
         });
       },
@@ -84,15 +71,8 @@ class CategoryImageStateWrapper {
       .listen((value) => this.updateFilesAndFolders());
     
     this._updateFileListSubscripton = getIt.get<FileManager>().updateFileList.listen((file) {
-      DateTime lastModified = file.lastModified;
-      DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
-      String key = createKey(date);
       wrappedState.setState(() {
-        this.sortedFiles[key].remove(file);
-        if(this.sortedFiles[key].isEmpty) {
-          this.dates.remove(date);
-          this.sortedFiles.remove(key);
-        }
+        this.files.remove(file);
       });
     });
 
@@ -105,6 +85,4 @@ class CategoryImageStateWrapper {
         this.updateFilesAndFolders();
       });
   }
-
-  static String createKey(DateTime date) => date.toString().split(" ")[0];
 }

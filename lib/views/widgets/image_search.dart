@@ -5,11 +5,10 @@ import 'package:yaga/views/widgets/category_widget.dart';
 
 class ImageSearch extends SearchDelegate {
 
-  final List<DateTime> dates;
-  final Map<String, List<NcFile>> sortedFiles;
+  final List<NcFile> sortedFiles;
   final BoolPreference _experimental;
 
-  ImageSearch(this.dates, this.sortedFiles, this._experimental);
+  ImageSearch(this.sortedFiles, this._experimental);
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -44,13 +43,8 @@ class ImageSearch extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    Map<String, List<NcFile>> filteredFiles = Map();
-    sortedFiles.keys
-      .where((element) => element.contains(this.query))
-      .forEach((element) => filteredFiles[element] = sortedFiles[element]);
-    List<DateTime> filteredDates = [];
-    dates.where((element) => element.toString().contains(this.query)).forEach((element) => filteredDates.add(element));
-    return CategoryWidget(filteredDates, filteredFiles, _experimental);
+    List<NcFile> filteredFiles = sortedFiles.where((file) => file.lastModified.toString().contains(this.query)).toList();
+    return CategoryWidget(filteredFiles, _experimental);
   }
 
   @override

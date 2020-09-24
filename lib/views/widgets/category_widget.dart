@@ -15,10 +15,11 @@ import 'package:yaga/views/widgets/state_wrappers/category_image_state_wrapper.d
 class CategoryWidget extends StatelessWidget {
   // final Uri _uri;
   final BoolPreference _experimental;
-  final List<DateTime> dates;
-  final Map<String, List<NcFile>> sortedFiles;
+  final List<DateTime> dates = [];
+  final List<NcFile> files;
+  final Map<String, List<NcFile>> sortedFiles = Map();
 
-  CategoryWidget(this.dates, this.sortedFiles, this._experimental);
+  CategoryWidget(this.files, this._experimental);
 
   Widget _buildHeader(String key, BuildContext context) {
     return Container(
@@ -77,7 +78,7 @@ class CategoryWidget extends StatelessWidget {
       posChildCount: this.dates.length,
       controller: scrollController,
       builder: (BuildContext context, int indexCategory) {
-        String key = CategoryImageStateWrapper.createKey(this.dates[indexCategory]);
+        String key = _createKey(this.dates[indexCategory]);
         /// Builder requires [InfiniteList] to be returned
         return InfiniteListItem(
           /// Header builder
@@ -116,7 +117,7 @@ class CategoryWidget extends StatelessWidget {
     //--> long terme we need to find a solution for this!
     this.dates.forEach((element) {
       print("rebuilding list");
-      String key = CategoryImageStateWrapper.createKey(element);
+      String key = _createKey(element);
       slivers.add(_buildCategory(key, context));
     });
 
@@ -130,9 +131,35 @@ class CategoryWidget extends StatelessWidget {
     return sticky;
   }
 
+  void _sort() {
+    this.files.where((file) => !file.isDirectory)
+    .forEach((file) {
+      DateTime lastModified = file.lastModified;
+      DateTime date = DateTime(lastModified.year, lastModified.month, lastModified.day);
+      
+      if(!this.dates.contains(date)) {
+        this.dates.add(date);
+        this.dates.sort((date1, date2) => date2.compareTo(date1));
+      }
+
+      String key = _createKey(date);
+      sortedFiles.putIfAbsent(key, () => []);
+      //todo-sv: this has to be solved in a better way... double calling happens for example when in path selector screen navigating to same path
+      //todo-sv: dart magic matches the files properly however it will be better to add a custom equals --> how does dart runtime hashcode work? Oo
+      if(!sortedFiles[key].contains(file)) {
+        sortedFiles[key].add(file);
+        sortedFiles[key].sort((a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      }
+    });
+  }
+
+  static String _createKey(DateTime date) => date.toString().split(" ")[0];
+
   @override
   Widget build(BuildContext context) {
     print("drawing list");
+
+    _sort();
     
     //todo: generalize stream builder for preferences
     return StreamBuilder<BoolPreference>(

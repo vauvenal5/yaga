@@ -112,7 +112,11 @@ class _CategoryTabState extends State<CategoryTab> {
       body: Stack(
         children: [
           CategoryWidget(_imageStateWrapper.files, this._experimentalView),
-          this._imageStateWrapper.loading ? LinearProgressIndicator() : Container()
+          StreamBuilder<bool>(
+            initialData: true,
+            stream: this._imageStateWrapper.loadingChangedCommand,
+            builder: (context, snapshot) => snapshot.data ? LinearProgressIndicator() : Container(),
+          )
         ]
       ),
       bottomNavigationBar: widget.bottomNavBar,

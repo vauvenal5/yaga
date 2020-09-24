@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/file_manager.dart';
@@ -16,8 +17,9 @@ import 'package:yaga/utils/service_locator.dart';
 //--> loading could be a stream of bool events
 class CategoryImageStateWrapper {
   List<NcFile> files = List();
-  bool loading;
   BoolPreference recursive;
+
+  RxCommand<bool, bool> loadingChangedCommand;
 
   StreamSubscription<NcFile> _updateFilesListCommandSubscription;
   StreamSubscription<MappingPreference> _updatedMappingPreferenceCommandSubscription;
@@ -28,7 +30,9 @@ class CategoryImageStateWrapper {
   State wrappedState;
   Uri uri;
 
-  CategoryImageStateWrapper(this.wrappedState, this.uri, this.recursive);
+  CategoryImageStateWrapper(this.wrappedState, this.uri, this.recursive) {
+    loadingChangedCommand = RxCommand.createSync((param) => param);
+  }
 
   void dispose() {
     this._updateFilesListCommandSubscription.cancel();
@@ -40,9 +44,7 @@ class CategoryImageStateWrapper {
   void updateFilesAndFolders() {
     this.files = [];
     
-    wrappedState.setState(() {
-      loading = true;
-    });
+    this.loadingChangedCommand(true);
 
     //cancel old subscription
     this._updateFilesListCommandSubscription?.cancel();
@@ -58,9 +60,7 @@ class CategoryImageStateWrapper {
           }
         });
       },
-      onDone: () => wrappedState.setState((){
-        loading=false;
-      })
+      onDone: () => this.loadingChangedCommand(false)
     );
   }
 
@@ -70,6 +70,7 @@ class CategoryImageStateWrapper {
     this._updatedMappingPreferenceCommandSubscription = getIt.get<MappingManager>().mappingUpdatedCommand
       .listen((value) => this.updateFilesAndFolders());
     
+    //todo: here we do need a check if the file is part of this list also in regard of the upcoming persistend tab state feature
     this._updateFileListSubscripton = getIt.get<FileManager>().updateFileList.listen((file) {
       wrappedState.setState(() {
         this.files.remove(file);

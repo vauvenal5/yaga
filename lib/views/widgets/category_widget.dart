@@ -10,7 +10,6 @@ import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
-import 'package:yaga/views/widgets/state_wrappers/category_image_state_wrapper.dart';
 
 class CategoryWidget extends StatelessWidget {
   // final Uri _uri;

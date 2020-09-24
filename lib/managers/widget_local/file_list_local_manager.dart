@@ -11,9 +11,9 @@ import 'package:yaga/utils/service_locator.dart';
 
 //todo-sv: refactor this class? see also category_tab.dart
 //--> passing uri should be solved differently
-//--> maybe this itself should be a manager? However a non singleton manager, build by a factory? --> a widget specific manager?
 //--> try performence behaviour when handling full lists from backend instead of single files
-class CategoryImageStateWrapper {
+// this is a widget local manager, meaning that it is intendet to exist per widget that needs its functionality
+class FileListLocalManager {
   List<NcFile> files = List();
   BoolPreference recursive;
 
@@ -27,7 +27,7 @@ class CategoryImageStateWrapper {
   
   Uri uri;
 
-  CategoryImageStateWrapper(this.uri, this.recursive) {
+  FileListLocalManager(this.uri, this.recursive) {
     loadingChangedCommand = RxCommand.createSync((param) => param, initialLastResult: true);
     filesChangedCommand = RxCommand.createSync((param) => param, initialLastResult: []);
   }
@@ -47,8 +47,7 @@ class CategoryImageStateWrapper {
     //cancel old subscription
     this._updateFilesListCommandSubscription?.cancel();
     
-    this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(uri)
-    .flatMap((event) => event.isDirectory && this.recursive.value ? getIt.get<FileManager>().listFiles(event.uri) : Stream.value(event))
+    this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(uri, recursive: this.recursive.value)
     .listen(
       (file) {
         //todo-sv: dart magic matches the files properly however it will be better to add a custom equals --> how does dart runtime hashcode work? Oo

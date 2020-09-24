@@ -3,14 +3,14 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/views/widgets/category_widget.dart';
 import 'package:yaga/views/widgets/image_views/category_view.dart';
-import 'package:yaga/views/widgets/state_wrappers/category_image_state_wrapper.dart';
+import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 
 class ImageSearch extends SearchDelegate {
 
-  final CategoryImageStateWrapper _imageStateWrapper;
+  final FileListLocalManager _fileListLocalManager;
   final BoolPreference _experimental;
 
-  ImageSearch(this._imageStateWrapper, this._experimental);
+  ImageSearch(this._fileListLocalManager, this._experimental);
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -46,7 +46,7 @@ class ImageSearch extends SearchDelegate {
   @override
   Widget buildResults(BuildContext context) {
     return CategoryView(
-      this._imageStateWrapper, 
+      this._fileListLocalManager, 
       _experimental, 
       filter: (List<NcFile> files) => files.where((file) => file.lastModified.toString().contains(this.query)).toList()
     );

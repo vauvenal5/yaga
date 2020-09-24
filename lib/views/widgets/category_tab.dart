@@ -3,17 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
-import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/services/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
-import 'package:yaga/views/widgets/category_widget.dart';
 import 'package:yaga/views/widgets/image_search.dart';
 import 'package:yaga/views/widgets/image_views/category_view.dart';
-import 'package:yaga/views/widgets/state_wrappers/category_image_state_wrapper.dart';
+import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 
 enum CategoryViewMenu {settings}
 
@@ -28,7 +26,7 @@ class CategoryTab extends StatefulWidget {
   _CategoryTabState createState() => _CategoryTabState();
 }
 
-class _CategoryTabState extends State<CategoryTab> {
+class _CategoryTabState extends State<CategoryTab> with AutomaticKeepAliveClientMixin<CategoryTab> {
   final String _pref = "category";
 
   final List<Preference> _defaultViewPreferences = [];
@@ -37,7 +35,7 @@ class _CategoryTabState extends State<CategoryTab> {
   BoolPreference _recursive;
 
   StreamSubscription<UriPreference> _updateUriSubscription;
-  CategoryImageStateWrapper _imageStateWrapper;
+  FileListLocalManager _fileListLocalManager;
 
   _CategoryTabState() {
     SectionPreference general = SectionPreference.route(_pref, "general", "General");
@@ -57,7 +55,7 @@ class _CategoryTabState extends State<CategoryTab> {
 
     //todo: is it still necessary for tab to be a stateful widget?
     //image state wrapper ist a widget local manager
-    this._imageStateWrapper = new CategoryImageStateWrapper(
+    this._fileListLocalManager = new FileListLocalManager(
       getIt.get<SharedPreferencesService>().loadUriPreference(this._path).value,
       getIt.get<SharedPreferencesService>().loadBoolPreference(this._recursive)
     );
@@ -70,29 +68,25 @@ class _CategoryTabState extends State<CategoryTab> {
       .where((event) => event.key == this._path.key)
       .map((event) => event as UriPreference)
       .listen((event) {
-        this._imageStateWrapper.uri = event.value;
-        this._imageStateWrapper.updateFilesAndFolders();
+        this._fileListLocalManager.uri = event.value;
+        this._fileListLocalManager.updateFilesAndFolders();
       });
     
-    this._imageStateWrapper.initState();
+    this._fileListLocalManager.initState();
     super.initState();
   }
 
   @override
   void dispose() {
     _updateUriSubscription.cancel();
-    this._imageStateWrapper.dispose();
+    this._fileListLocalManager.dispose();
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(CategoryTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    this._imageStateWrapper.updateFilesAndFolders();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -102,7 +96,7 @@ class _CategoryTabState extends State<CategoryTab> {
           //todo: image search button goes here 
           IconButton(icon: Icon(Icons.search), onPressed: () => showSearch(
             context: context, 
-            delegate: ImageSearch(_imageStateWrapper, this._experimentalView)
+            delegate: ImageSearch(_fileListLocalManager, this._experimentalView)
           )),
           PopupMenuButton<CategoryViewMenu>(
             onSelected: (CategoryViewMenu result) => Navigator.pushNamed(context, SettingsScreen.route, arguments: new SettingsScreenArguments(preferences: _defaultViewPreferences)),
@@ -113,8 +107,11 @@ class _CategoryTabState extends State<CategoryTab> {
         ],
       ),
       drawer: widget.drawer,
-      body: CategoryView(_imageStateWrapper, _experimentalView),
+      body: CategoryView(_fileListLocalManager, _experimentalView),
       bottomNavigationBar: widget.bottomNavBar,
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

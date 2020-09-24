@@ -109,7 +109,8 @@ class FileManager {
     this._fileSubManagers.putIfAbsent(fileSubManager.scheme, () => fileSubManager);
   }
 
-  Stream<NcFile> listFiles(Uri uri) {
-    return this._fileSubManagers[uri.scheme].listFiles(uri);
+  Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
+    return this._fileSubManagers[uri.scheme].listFiles(uri)
+    .flatMap((file) => file.isDirectory && recursive ? this.listFiles(file.uri, recursive: recursive) : Stream.value(file));
   }
 }

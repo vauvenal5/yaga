@@ -26,7 +26,6 @@ class YagaHomeScreen extends StatefulWidget {
 
 class YagaHomeScreenState extends State<YagaHomeScreen> {
   YagaHomeTab _selectedTab;
-
   
   final List<Preference> _globalAppPreferences = [];
 
@@ -181,12 +180,13 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
           return CircularProgressIndicator();
         }
 
-        switch(this._selectedTab) {
-          case YagaHomeTab.folder:
-            return BrowseTab(bottomNavBar: bottomNavBar, drawer: drawer,);
-          default:
-            return CategoryTab(bottomNavBar: bottomNavBar, drawer: drawer,);
-        }
+        return IndexedStack(
+          index: this._getCurrentIndex(),
+          children: <Widget>[
+            CategoryTab(bottomNavBar: bottomNavBar, drawer: drawer,),
+            BrowseTab(bottomNavBar: bottomNavBar, drawer: drawer,)
+          ]
+        );
       }
     );
   }

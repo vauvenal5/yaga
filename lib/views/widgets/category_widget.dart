@@ -18,8 +18,9 @@ class CategoryWidget extends StatelessWidget {
   final List<DateTime> dates = [];
   final List<NcFile> files;
   final Map<String, List<NcFile>> sortedFiles = Map();
+  final Future Function() _refresh;
 
-  CategoryWidget(this.files, this._experimental);
+  CategoryWidget(this.files, this._experimental, this._refresh);
 
   Widget _buildHeader(String key, BuildContext context) {
     return Container(
@@ -77,6 +78,7 @@ class CategoryWidget extends StatelessWidget {
     InfiniteList infiniteList = InfiniteList(
       posChildCount: this.dates.length,
       controller: scrollController,
+      physics: AlwaysScrollableScrollPhysics(),
       builder: (BuildContext context, int indexCategory) {
         String key = _createKey(this.dates[indexCategory]);
         /// Builder requires [InfiniteList] to be returned
@@ -126,6 +128,7 @@ class CategoryWidget extends StatelessWidget {
       child: CustomScrollView(
         key: ValueKey("mainGridView"),
         slivers: slivers,
+        physics: AlwaysScrollableScrollPhysics(),
     ));
 
     return sticky;
@@ -167,7 +170,10 @@ class CategoryWidget extends StatelessWidget {
       stream: getIt.get<SettingsManager>().updateSettingCommand
         .where((event) => event.key == _experimental.key)
         .map((event) => event as BoolPreference),
-      builder: (context, snapshot) => snapshot.data.value ? _buildExperimental() : _buildStickyList(context)
+      builder: (context, snapshot) => RefreshIndicator(
+        child: snapshot.data.value ? _buildExperimental() : _buildStickyList(context), 
+        onRefresh: () => _refresh()
+      )
     );
   }
 }

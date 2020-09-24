@@ -28,8 +28,8 @@ class CategoryImageStateWrapper {
   Uri uri;
 
   CategoryImageStateWrapper(this.uri, this.recursive) {
-    loadingChangedCommand = RxCommand.createSync((param) => param);
-    filesChangedCommand = RxCommand.createSync((param) => param);
+    loadingChangedCommand = RxCommand.createSync((param) => param, initialLastResult: true);
+    filesChangedCommand = RxCommand.createSync((param) => param, initialLastResult: []);
   }
 
   void dispose() {

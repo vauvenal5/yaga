@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/views/widgets/category_widget.dart';
+import 'package:yaga/views/widgets/image_views/category_view.dart';
+import 'package:yaga/views/widgets/state_wrappers/category_image_state_wrapper.dart';
 
 class ImageSearch extends SearchDelegate {
 
-  final List<NcFile> sortedFiles;
+  final CategoryImageStateWrapper _imageStateWrapper;
   final BoolPreference _experimental;
 
-  ImageSearch(this.sortedFiles, this._experimental);
+  ImageSearch(this._imageStateWrapper, this._experimental);
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -43,8 +45,11 @@ class ImageSearch extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    List<NcFile> filteredFiles = sortedFiles.where((file) => file.lastModified.toString().contains(this.query)).toList();
-    return CategoryWidget(filteredFiles, _experimental);
+    return CategoryView(
+      this._imageStateWrapper, 
+      _experimental, 
+      filter: (List<NcFile> files) => files.where((file) => file.lastModified.toString().contains(this.query)).toList()
+    );
   }
 
   @override

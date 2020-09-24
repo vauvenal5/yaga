@@ -12,6 +12,7 @@ import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/category_widget.dart';
 import 'package:yaga/views/widgets/image_search.dart';
+import 'package:yaga/views/widgets/image_views/category_view.dart';
 import 'package:yaga/views/widgets/state_wrappers/category_image_state_wrapper.dart';
 
 enum CategoryViewMenu {settings}
@@ -101,7 +102,7 @@ class _CategoryTabState extends State<CategoryTab> {
           //todo: image search button goes here 
           IconButton(icon: Icon(Icons.search), onPressed: () => showSearch(
             context: context, 
-            delegate: ImageSearch(_imageStateWrapper.files, this._experimentalView)
+            delegate: ImageSearch(_imageStateWrapper, this._experimentalView)
           )),
           PopupMenuButton<CategoryViewMenu>(
             onSelected: (CategoryViewMenu result) => Navigator.pushNamed(context, SettingsScreen.route, arguments: new SettingsScreenArguments(preferences: _defaultViewPreferences)),
@@ -112,20 +113,7 @@ class _CategoryTabState extends State<CategoryTab> {
         ],
       ),
       drawer: widget.drawer,
-      body: Stack(
-        children: [
-          StreamBuilder<List<NcFile>>(
-            initialData: [],
-            stream: this._imageStateWrapper.filesChangedCommand,
-            builder: (context, snapshot) => CategoryWidget(snapshot.data, this._experimentalView),
-          ),
-          StreamBuilder<bool>(
-            initialData: true,
-            stream: this._imageStateWrapper.loadingChangedCommand,
-            builder: (context, snapshot) => snapshot.data ? LinearProgressIndicator() : Container(),
-          )
-        ]
-      ),
+      body: CategoryView(_imageStateWrapper, _experimentalView),
       bottomNavigationBar: widget.bottomNavBar,
     );
   }

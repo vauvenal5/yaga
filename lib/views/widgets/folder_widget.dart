@@ -1,11 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/utils/service_locator.dart';
+import 'package:yaga/model/preference.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
+import 'package:yaga/views/widgets/state_wrappers/category_image_state_wrapper.dart';
 
 class FolderWidget extends StatefulWidget {
   final Uri _uri;
@@ -19,67 +17,31 @@ class FolderWidget extends StatefulWidget {
 }
 
 class FolderWidgetState extends State<FolderWidget> {
-  List<NcFile> _files = [];
-  List<NcFile> _folders = [];
-  StreamSubscription<NcFile> _updateFilesListCommandSubscription;
-  StreamSubscription<NcFile> _updateFileListSubscripton;
-  bool _loading;
+  CategoryImageStateWrapper _imageStateWrapper;
 
   @override
   void dispose() {
-    _updateFilesListCommandSubscription?.cancel();
-    _updateFileListSubscripton.cancel();
+    this._imageStateWrapper.dispose();
     super.dispose();
-  }
-
-  void _updateFilesAndFolders() {
-    this._files = [];
-    this._folders = [];
-
-    setState(() {
-      _loading = true;
-    });
-
-    this._updateFilesListCommandSubscription?.cancel();
-    
-    this._updateFilesListCommandSubscription = getIt.get<FileManager>().listFiles(widget._uri)
-    .listen(
-      (file) {
-        if(file.isDirectory && !_folders.contains(file)) {
-          setState(() => _folders.add(file));
-        }
-
-        if(!file.isDirectory && !_files.contains(file)) {
-          setState(() => _files.add(file));
-        }
-      },
-      onDone: () => setState((){
-        _loading=false;
-        _folders.sort((a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        _files.sort((a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-      })
-    );
   }
 
   @override
   void initState() {
-    this._updateFilesAndFolders();
-    this._updateFileListSubscripton = getIt.get<FileManager>().updateFileList.listen((file) {
-      setState(() {
-        if(file.isDirectory) {
-          _folders.remove(file);
-        } else {
-          _files.remove(file);
-        }
-      });
-    });
+    //todo: clean up properties
+    SectionPreference general = SectionPreference.route("browse", "general", "General");
+    _imageStateWrapper = CategoryImageStateWrapper(
+      widget._uri,
+      BoolPreference.section(general, "recursiveLoad", "Load Recursively", false)
+    );
+
+    this._imageStateWrapper.updateFilesAndFolders();
     super.initState();
   }
   
 
   @override
   void didUpdateWidget(FolderWidget oldWidget) {
-    this._updateFilesAndFolders();
+    this._imageStateWrapper.updateFilesAndFolders();
     super.didUpdateWidget(oldWidget);
   }
 
@@ -90,38 +52,64 @@ class FolderWidgetState extends State<FolderWidget> {
     
     return Stack(
       children: [
-        CustomScrollView(
-          slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => ListTile(
-                  leading: Icon(Icons.folder, size: 32,),
-                  title: Text(_folders[index].name),
-                  onTap: widget.onFolderTap != null ? () => widget.onFolderTap(_folders[index]) : null,
+        StreamBuilder<List<NcFile>>(
+          initialData: [],
+          stream: this._imageStateWrapper.filesChangedCommand,
+          builder: (context, snapshot) {
+            List<NcFile> files = [];
+            List<NcFile> folders = [];
+
+            snapshot.data.forEach((file) {
+              if(file.isDirectory && !folders.contains(file)) {
+                folders.add(file);
+                folders.sort((a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+              }
+
+              if(!file.isDirectory && !files.contains(file)) {
+                files.add(file);
+                files.sort((a,b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+              }
+            });
+
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => ListTile(
+                      leading: Icon(Icons.folder, size: 32,),
+                      title: Text(folders[index].name),
+                      onTap: widget.onFolderTap != null ? () => widget.onFolderTap(folders[index]) : null,
+                    ),
+                    childCount: folders.length
+                  )
                 ),
-                childCount: _folders.length
-              )
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => ListTile(
-                  leading: Container(
-                    width: 64,
-                    height: 64,
-                    child: RemoteImageWidget(_files[index], key: ValueKey(_files[index].uri.path), cacheWidth: 128,),
-                  ),
-                  // _files[index].localFile==null ?
-                  //   Image.memory(_files[index].inMemoryPreview, cacheWidth: 32,) : 
-                  //   Image.file(_files[index].localFile, cacheWidth: 32,),
-                  title: Text(_files[index].name),
-                  onTap: widget.onFileTap != null ? () => widget.onFileTap(_files, index) : null,
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => ListTile(
+                      leading: Container(
+                        width: 64,
+                        height: 64,
+                        child: RemoteImageWidget(files[index], key: ValueKey(files[index].uri.path), cacheWidth: 128,),
+                      ),
+                      // _files[index].localFile==null ?
+                      //   Image.memory(_files[index].inMemoryPreview, cacheWidth: 32,) : 
+                      //   Image.file(_files[index].localFile, cacheWidth: 32,),
+                      title: Text(files[index].name),
+                      onTap: widget.onFileTap != null ? () => widget.onFileTap(files, index) : null,
+                    ),
+                    childCount: files.length
+                  )
                 ),
-                childCount: _files.length
-              )
-            ),
-          ],
-        ),
-        _loading ? LinearProgressIndicator() : Container()
+              ],
+            );
+          }
+        )
+        ,
+        StreamBuilder<bool>(
+          initialData: true,
+          stream: this._imageStateWrapper.loadingChangedCommand,
+          builder: (context, snapshot) => snapshot.data ? LinearProgressIndicator() : Container(),
+        )
       ],
     );
   }

@@ -33,10 +33,10 @@ class CategoryImageStateWrapper {
   }
 
   void dispose() {
-    this._updateFilesListCommandSubscription.cancel();
-    this._updatedMappingPreferenceCommandSubscription.cancel();
-    this._updateFileListSubscripton.cancel();
-    this._updateRecursiveSubscription.cancel();
+    this._updateFilesListCommandSubscription?.cancel();
+    this._updatedMappingPreferenceCommandSubscription?.cancel();
+    this._updateFileListSubscripton?.cancel();
+    this._updateRecursiveSubscription?.cancel();
   }
 
   void updateFilesAndFolders() {

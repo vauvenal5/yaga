@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
+import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
@@ -53,8 +54,9 @@ class _CategoryTabState extends State<CategoryTab> {
       .persistUriSettingCommand(UriPreference.section(general, "path", "Path", getIt.get<SystemLocationService>().externalAppDirUri))
     );
 
+    //todo: is it still necessary for tab to be a stateful widget?
+    //image state wrapper ist a widget local manager
     this._imageStateWrapper = new CategoryImageStateWrapper(
-      this, 
       getIt.get<SharedPreferencesService>().loadUriPreference(this._path).value,
       getIt.get<SharedPreferencesService>().loadBoolPreference(this._recursive)
     );
@@ -62,6 +64,7 @@ class _CategoryTabState extends State<CategoryTab> {
 
   @override
   void initState() {
+    //todo: this could be moved into imageStateWrapper
     _updateUriSubscription = getIt.get<SettingsManager>().updateSettingCommand
       .where((event) => event.key == this._path.key)
       .map((event) => event as UriPreference)
@@ -111,7 +114,11 @@ class _CategoryTabState extends State<CategoryTab> {
       drawer: widget.drawer,
       body: Stack(
         children: [
-          CategoryWidget(_imageStateWrapper.files, this._experimentalView),
+          StreamBuilder<List<NcFile>>(
+            initialData: [],
+            stream: this._imageStateWrapper.filesChangedCommand,
+            builder: (context, snapshot) => CategoryWidget(snapshot.data, this._experimentalView),
+          ),
           StreamBuilder<bool>(
             initialData: true,
             stream: this._imageStateWrapper.loadingChangedCommand,

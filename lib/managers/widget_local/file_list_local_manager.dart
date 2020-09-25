@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_manager.dart';
@@ -7,6 +8,7 @@ import 'package:yaga/managers/mapping_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
+import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
 
 //todo-sv: refactor this class? see also category_tab.dart
@@ -14,6 +16,7 @@ import 'package:yaga/utils/service_locator.dart';
 //--> try performence behaviour when handling full lists from backend instead of single files
 // this is a widget local manager, meaning that it is intendet to exist per widget that needs its functionality
 class FileListLocalManager {
+  Logger _logger = getLogger(FileListLocalManager);
   List<NcFile> files = List();
   BoolPreference recursive;
 
@@ -72,6 +75,7 @@ class FileListLocalManager {
         });
 
         if(changed) {
+          _logger.w("Re-setting list! (${fileList[0].uri.path})");
           this.filesChangedCommand(files);
         }
       },

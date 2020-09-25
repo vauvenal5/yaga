@@ -102,13 +102,9 @@ class NextcloudFileManager implements FileSubManager {
   @override
   Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false}) {
     //todo: add uri check
-    return _syncManager.addUri(uri).asStream().flatMap((value) => Rx.merge([
-        this._listTmpFiles(uri)
-          .doOnData((file) => _syncManager.addFile(uri, file))
-          .toList().asStream(),
-        this._listLocalFiles(uri)
-          .doOnData((file) => _syncManager.addFile(uri, file))
-          .toList().asStream(),
+    _logger.d("Listing... $uri");
+    return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
+        this._listLocalFileList(uri),
         this._listNextcloudFiles(uri)
         .doOnData((file) => _syncManager.addRemoteFile(uri, file))
         .doOnError((err, stack) {
@@ -125,10 +121,12 @@ class NextcloudFileManager implements FileSubManager {
             Stream.value(list),
             Stream.fromIterable(list)
             .where((file) => file.isDirectory)
+            .doOnData((file) => _logger.d("Emiting from recursive. (${file.uri.path})"))
             .flatMap((file) => this.listFileList(file.uri, recursive: recursive))
           ]);
         })
       ])
+      .doOnData((event) {_logger.d("Emiting list! (${uri})");})
       .doOnDone(() => _syncManager.syncUri(uri).then((value) => value.forEach((element) {
         _logger.w("Removing local file! (${element.uri.path})");
         this._fileManager.updateFileList(element);
@@ -137,5 +135,17 @@ class NextcloudFileManager implements FileSubManager {
         this._localFileService.deleteFile(element.previewFile);
       })))
     );
+  }
+
+  Stream<List<NcFile>> _listLocalFileList(Uri uri) {
+    return Rx.merge([
+      this._listTmpFiles(uri)
+        .doOnData((file) => _syncManager.addFile(uri, file)),
+      this._listLocalFiles(uri)
+        .doOnData((file) => _syncManager.addFile(uri, file))
+    ])
+    .distinctUnique()
+    .toList()
+    .asStream();
   }
 }

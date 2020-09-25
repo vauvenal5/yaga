@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 
-Logger getLogger(Type className) {
-  return Logger(printer: SimpleLogPrinter(className.toString()));
+Logger getLogger(Type className, {level: Level.debug}) {
+  return Logger(printer: SimpleLogPrinter(className.toString()), level: level);
 }
 
 class SimpleLogPrinter extends LogPrinter {

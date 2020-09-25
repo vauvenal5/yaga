@@ -8,7 +8,7 @@ import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
 
 class RemoteImageWidget extends StatelessWidget {
-  final Logger _logger = getLogger(RemoteImageWidget);
+  final Logger _logger = getLogger(RemoteImageWidget, level: Level.warning);
   final NcFile _file;
   final int cacheWidth;
   final int cacheHeight;

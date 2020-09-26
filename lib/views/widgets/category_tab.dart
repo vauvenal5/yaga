@@ -12,6 +12,9 @@ import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/image_search.dart';
 import 'package:yaga/views/widgets/image_views/category_view.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
+import 'package:yaga/views/widgets/image_views/category_view_exp.dart';
+import 'package:yaga/views/widgets/image_view_container.dart';
+import 'package:yaga/views/widgets/image_views/grid_view.dart';
 
 enum CategoryViewMenu {settings}
 
@@ -31,8 +34,8 @@ class _CategoryTabState extends State<CategoryTab> with AutomaticKeepAliveClient
 
   final List<Preference> _defaultViewPreferences = [];
   UriPreference _path;
-  BoolPreference _experimentalView;
   BoolPreference _recursive;
+  ChoicePreference _view;
 
   StreamSubscription<UriPreference> _updateUriSubscription;
   FileListLocalManager _fileListLocalManager;
@@ -40,13 +43,17 @@ class _CategoryTabState extends State<CategoryTab> with AutomaticKeepAliveClient
   _CategoryTabState() {
     SectionPreference general = SectionPreference.route(_pref, "general", "General");
     this._path = UriPreference.section(general, "path", "Path", getIt.get<SystemLocationService>().externalAppDirUri);
-    this._experimentalView = BoolPreference.section(general, "experimentalView", "Experimental View", true);
     this._recursive = BoolPreference.section(general, "recursiveLoad", "Load Recursively", false);
+    this._view = ChoicePreference.section(general, "view", "View Type", "category_exp", {
+      GridViewWidget.viewKey:"Simple Grid View",
+      CategoryView.viewKey:"Category View",
+      CategoryViewExp.viewKey:"Category View (experimental)"
+    });
 
     this._defaultViewPreferences.add(general);
     this._defaultViewPreferences.add(_path);
-    this._defaultViewPreferences.add(_experimentalView);
     this._defaultViewPreferences.add(_recursive);
+    this._defaultViewPreferences.add(_view);
 
     //todo: refactor
     getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt.get<SettingsManager>()
@@ -96,10 +103,14 @@ class _CategoryTabState extends State<CategoryTab> with AutomaticKeepAliveClient
           //todo: image search button goes here 
           IconButton(icon: Icon(Icons.search), onPressed: () => showSearch(
             context: context, 
-            delegate: ImageSearch(_fileListLocalManager, this._experimentalView)
+            delegate: ImageSearch(_fileListLocalManager, this._view)
           )),
           PopupMenuButton<CategoryViewMenu>(
-            onSelected: (CategoryViewMenu result) => Navigator.pushNamed(context, SettingsScreen.route, arguments: new SettingsScreenArguments(preferences: _defaultViewPreferences)),
+            onSelected: (CategoryViewMenu result) => Navigator.pushNamed(
+              context, 
+              SettingsScreen.route,
+              arguments: new SettingsScreenArguments(preferences: _defaultViewPreferences)
+            ),
             itemBuilder: (BuildContext context) => <PopupMenuEntry<CategoryViewMenu>>[
               const PopupMenuItem(child: Text("Settings"), value: CategoryViewMenu.settings),
             ],
@@ -107,7 +118,7 @@ class _CategoryTabState extends State<CategoryTab> with AutomaticKeepAliveClient
         ],
       ),
       drawer: widget.drawer,
-      body: CategoryView(_fileListLocalManager, _experimentalView),
+      body: ImageViewContainer(fileListLocalManager: this._fileListLocalManager, choicePreference: this._view),
       bottomNavigationBar: widget.bottomNavBar,
     );
   }

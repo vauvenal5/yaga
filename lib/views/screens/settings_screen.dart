@@ -3,6 +3,7 @@ import 'package:rx_command/rx_command.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/views/widgets/ok_cancel_button_bar.dart';
 import 'package:yaga/views/widgets/preferences/BoolPreferenceWidget.dart';
+import 'package:yaga/views/widgets/preferences/choice_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/mapping_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/section_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/uri_preference_widget.dart';
@@ -37,6 +38,10 @@ class SettingsScreen extends StatelessWidget {
 
           if(defaultPref is BoolPreference) {
             return BoolPreferenceWidget(defaultPref, onChangeCommand: this.onPreferenceChangedCommand,);
+          }
+          
+          if(defaultPref is ChoicePreference) {
+            return ChoicePreferenceWidget(defaultPref, this.onPreferenceChangedCommand,);
           }
           
           return SectionPreferenceWidget(defaultPref);

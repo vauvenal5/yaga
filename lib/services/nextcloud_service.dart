@@ -58,6 +58,7 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
   Future<Uint8List> getPreview(Uri file) {
     String path = Uri.decodeComponent(file.path);
     _logger.d("Fetching preview $path");
+    //todo: think about image sizes vs in code scaling
     return this._client.preview.getPreview(path, 128, 128);
     //todo: implement proper error handling
     // .catchError((err) {

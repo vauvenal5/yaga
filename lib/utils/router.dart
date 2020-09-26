@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:yaga/model/route_args/choice_selector_screen_arguments.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
+import 'package:yaga/views/screens/choice_selector_screen.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
@@ -49,6 +51,9 @@ class Router {
       case ImageScreen.route:
         ImageScreenArguments args = settings.arguments as ImageScreenArguments;
         return MaterialPageRoute(settings: settings, builder: (context) => ImageScreen(args.images, args.index, title: args.title));
+      case ChoiceSelectorScreen.route:
+        ChoiceSelectorScreenArguments args = settings.arguments as ChoiceSelectorScreenArguments;
+        return MaterialPageRoute(settings: settings, builder: (context) => ChoiceSelectorScreen(args.choicePreference, args.onSelect, args.onCancel));
       default:
         return MaterialPageRoute(settings: settings, builder: (context) => YagaHomeScreen());
     }

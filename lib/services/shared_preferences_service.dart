@@ -29,6 +29,11 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
   BoolPreference loadBoolPreference(BoolPreference pref) => 
     BoolPreference(pref.key, pref.title, _instance.getBool(pref.key) ?? pref.value);
   
+  ChoicePreference loadChoicePreference(ChoicePreference pref) => 
+    ChoicePreference(pref.key, pref.title, _instance.getString(pref.key) ?? pref.value, pref.choices);
+
+  Future<bool> saveChoicePreference(ChoicePreference pref) => _instance.setString(pref.key, pref.value);
+  
   Future<bool> saveStringPreference(StringPreference pref) => _instance.setString(pref.key, pref.value);
 
   Future<bool> saveBoolPreference(BoolPreference pref) => _instance.setBool(pref.key, pref.value);

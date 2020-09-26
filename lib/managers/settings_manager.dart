@@ -15,6 +15,7 @@ class SettingsManager {
   RxCommand<StringPreference, void> persistStringSettingCommand;
   RxCommand<BoolPreference, void> persistBoolSettingCommand;
   RxCommand<UriPreference, void> persistUriSettingCommand;
+  RxCommand<ChoicePreference, void> persistChoiceSettingCommand;
   RxCommand<MappingPreference, MappingPreference> persistMappingPreferenceCommand;
   RxCommand<MappingPreference, MappingPreference> removeMappingPreferenceCommand;
   RxCommand<MappingPreference, MappingPreference> loadMappingPreferenceCommand;
@@ -33,6 +34,10 @@ class SettingsManager {
 
     persistUriSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveUriPreference(param)
       .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadUriPreference))
+    );
+
+    persistChoiceSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveChoicePreference(param)
+      .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadChoicePreference))
     );
 
     persistMappingPreferenceCommand = RxCommand.createSync((param) => param);

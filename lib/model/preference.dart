@@ -57,3 +57,10 @@ class BoolPreference extends ValuePreference<bool> {
   BoolPreference(key, title, value) : super(key, title, value);
   BoolPreference.section(SectionPreference section, key, title, bool value) : super.section(section, key, title, value);
 }
+
+class ChoicePreference extends StringPreference {
+  final Map<String, String> choices;
+
+  ChoicePreference(key, title, value, this.choices) : super(key, title, value);
+  ChoicePreference.section(SectionPreference section, key, title, value, this.choices) : super.section(section, key, title, value);
+}

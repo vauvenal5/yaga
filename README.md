@@ -75,7 +75,7 @@ The following things are on my roadmap and will be developed during the next mon
 ## Getting Started
 
 - Generate your own keystore as described in the flutter docs.
-- From the main directory run: `flutter build apk`
+- From the main directory run: `flutter build apk --flavor local`
 - Copy the app to your device and make a local installation.
 
 ## Recomendations

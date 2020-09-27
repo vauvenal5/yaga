@@ -44,7 +44,7 @@ class _CategoryTabState extends State<CategoryTab> with AutomaticKeepAliveClient
     SectionPreference general = SectionPreference.route(_pref, "general", "General");
     this._path = UriPreference.section(general, "path", "Path", getIt.get<SystemLocationService>().externalAppDirUri);
     this._recursive = BoolPreference.section(general, "recursiveLoad", "Load Recursively", false);
-    this._view = ChoicePreference.section(general, "view", "View Type", "category_exp", {
+    this._view = ChoicePreference.section(general, "view", "View Type", CategoryViewExp.viewKey, {
       GridViewWidget.viewKey:"Simple Grid View",
       CategoryView.viewKey:"Category View",
       CategoryViewExp.viewKey:"Category View (experimental)"

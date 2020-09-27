@@ -108,6 +108,7 @@ class NextcloudFileManager with Isolateable<NextcloudFileManager> implements Fil
         })
         .toList()
         .asStream()
+        .onErrorReturn([])
         .flatMap((list) {
           if(!recursive) {
             return Stream.value(list);

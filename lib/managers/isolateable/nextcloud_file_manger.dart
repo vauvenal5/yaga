@@ -1,23 +1,22 @@
 import 'dart:io';
 
 import 'package:logger/logger.dart';
-import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:yaga/managers/file_manager.dart';
+import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
-import 'package:yaga/managers/local_file_manager.dart';
-import 'package:yaga/managers/mapping_manager.dart';
-import 'package:yaga/managers/sync_manager.dart';
+import 'package:yaga/managers/isolateable/mapping_manager.dart';
+import 'package:yaga/managers/isolateable/sync_manager.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/services/local_file_service.dart';
-import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/isolateable/local_file_service.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
+import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/logger.dart';
 
-class NextcloudFileManager implements FileSubManager {
+class NextcloudFileManager with Isolateable<NextcloudFileManager> implements FileSubManager {
   Logger _logger = getLogger(NextcloudFileManager);
 
   final NextCloudService _nextCloudService;
-  final FileManager _fileManager;
+  final FileManagerBase _fileManager;
   final MappingManager _mappingManager;
   final SyncManager _syncManager;
   final LocalFileService _localFileService;
@@ -28,11 +27,8 @@ class NextcloudFileManager implements FileSubManager {
     this._localFileService, 
     this._mappingManager, 
     this._syncManager,
-  );
-
-  Future<NextcloudFileManager> init() async {
+  ) {
     this._fileManager.registerFileManager(this);
-    return this;
   }
 
   @override
@@ -126,7 +122,7 @@ class NextcloudFileManager implements FileSubManager {
           ]);
         })
       ])
-      .doOnData((event) {_logger.d("Emiting list! (${uri})");})
+      .doOnData((event) {_logger.w("Emiting list! (${uri})");})
       .doOnDone(() => _syncManager.syncUri(uri).then((value) => value.forEach((element) {
         _logger.w("Removing local file! (${element.uri.path})");
         this._fileManager.updateFileList(element);
@@ -139,11 +135,10 @@ class NextcloudFileManager implements FileSubManager {
 
   Stream<List<NcFile>> _listLocalFileList(Uri uri) {
     return Rx.merge([
-      this._listTmpFiles(uri)
-        .doOnData((file) => _syncManager.addFile(uri, file)),
+      this._listTmpFiles(uri),
       this._listLocalFiles(uri)
-        .doOnData((file) => _syncManager.addFile(uri, file))
     ])
+    .doOnData((file) => _syncManager.addFile(uri, file))
     .distinctUnique()
     .toList()
     .asStream();

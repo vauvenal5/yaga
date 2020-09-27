@@ -3,7 +3,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
 

@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
 
 class NextCloudManager {
@@ -24,7 +24,7 @@ class NextCloudManager {
 
     this._internalLoginCommand = RxCommand.createSync((param) => param);
     this._internalLoginCommand
-      .doOnData((event) => _nextCloudService.login(event.server, event.user, event.password))
+      .doOnData((event) => _nextCloudService.login(event))
       .listen((event) {
         updateLoginStateCommand(event);
         updateAvatarCommand();

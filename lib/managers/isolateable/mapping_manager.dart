@@ -1,22 +1,19 @@
-import 'dart:io';
-
 import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
-import 'package:yaga/managers/settings_manager.dart';
+import 'package:yaga/managers/settings_manager_base.dart';
 import 'package:yaga/model/mapping_node.dart';
 import 'package:yaga/model/preference.dart';
-import 'package:yaga/services/local_image_provider_service.dart';
-import 'package:yaga/services/nextcloud_service.dart';
-import 'package:yaga/services/system_location_service.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
+import 'package:yaga/services/isolateable/system_location_service.dart';
+import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
-class MappingManager {
+class MappingManager with Isolateable<MappingManager> {
   final Logger _logger = getLogger(MappingManager);
-  final SettingsManager _settingsManager;
-  // final LocalImageProviderService _localImageProviderService;
   final NextCloudService _nextCloudService;
   final SystemLocationService _systemLocationService;
+  final SettingsManagerBase _settingsManager;
 
   RxCommand<MappingPreference, MappingPreference> mappingUpdatedCommand;
 
@@ -27,8 +24,9 @@ class MappingManager {
     root = MappingNode();
 
     this.mappingUpdatedCommand = RxCommand.createSync((param) => param);
-    
-    this._settingsManager.updateSettingCommand.where((event) => event is MappingPreference)
+
+    this._settingsManager.updateSettingCommand
+      .where((event) => event is MappingPreference)
       .listen((event) {
         if(mappings.containsKey(event.key)) {
           _removeFromTree(mappings[event.key].remote.value.pathSegments, 0, root);

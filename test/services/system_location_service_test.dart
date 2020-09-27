@@ -1,12 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:yaga/model/system_location_host.dart';
-import 'package:yaga/services/system_location_service.dart';
+import 'package:yaga/services/isolateable/system_location_service.dart';
 
 class MockPathProviderPlatform extends Mock with MockPlatformInterfaceMixin implements PathProviderPlatform {}
 

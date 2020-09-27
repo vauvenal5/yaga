@@ -1,14 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:logger/logger.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
-import 'package:yaga/services/system_location_service.dart';
+import 'package:yaga/services/isolateable/system_location_service.dart';
 
 class LocalImageProviderService extends FileProviderService<LocalImageProviderService> {
   final String schemeLocal = "local";

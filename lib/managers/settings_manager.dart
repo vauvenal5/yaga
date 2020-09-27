@@ -1,16 +1,14 @@
-import 'package:rxdart/rxdart.dart';
 import 'package:rx_command/rx_command.dart';
+import 'package:yaga/managers/settings_manager_base.dart';
 import 'package:yaga/model/preference.dart';
-import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 
 typedef PrefFunction = T Function<T extends ValuePreference>(T);
 
-class SettingsManager {
+class SettingsManager extends SettingsManagerBase {
   SharedPreferencesService _sharedPreferencesService;
   NextCloudService _nextCloudService;
-
-  RxCommand<Preference, Preference> updateSettingCommand;
 
   RxCommand<StringPreference, void> persistStringSettingCommand;
   RxCommand<BoolPreference, void> persistBoolSettingCommand;
@@ -21,8 +19,6 @@ class SettingsManager {
   RxCommand<MappingPreference, MappingPreference> loadMappingPreferenceCommand;
 
   SettingsManager(this._sharedPreferencesService) {
-
-    updateSettingCommand = RxCommand.createSync((param) => param);
 
     persistStringSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveStringPreference(param)
       .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadStringPreference))

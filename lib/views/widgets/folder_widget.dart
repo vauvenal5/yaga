@@ -34,7 +34,7 @@ class FolderWidgetState extends State<FolderWidget> {
       BoolPreference.section(general, "recursiveLoad", "Load Recursively", false)
     );
 
-    this._fileListLocalManager.updateFilesAndFolders();
+    this._fileListLocalManager.initState();
     super.initState();
   }
   

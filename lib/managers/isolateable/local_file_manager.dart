@@ -1,24 +1,24 @@
 import 'dart:io';
 
 import 'package:yaga/managers/file_manager.dart';
+import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/services/local_file_service.dart';
-import 'package:yaga/services/system_location_service.dart';
+import 'package:yaga/services/isolateable/local_file_service.dart';
+import 'package:yaga/services/isolateable/system_location_service.dart';
+import 'package:yaga/utils/forground_worker/isolateable.dart';
+import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 
-class LocalFileManager implements FileSubManager {
-  final FileManager _fileManager;
+class LocalFileManager with Isolateable<LocalFileManager> implements FileSubManager {
+  final FileManagerBase _fileManager;
   final LocalFileService _localFileService;
   final SystemLocationService _systemPathService;
   
   @override
   String get scheme => _systemPathService.getOrigin().scheme;
 
-  LocalFileManager(this._fileManager, this._localFileService, this._systemPathService);
-
-  Future<LocalFileManager> init() async {
+  LocalFileManager(this._fileManager, this._localFileService, this._systemPathService) {
     this._fileManager.registerFileManager(this);
-    return this;
   }
 
   @override
@@ -34,6 +34,8 @@ class LocalFileManager implements FileSubManager {
         if(event is Directory) {
           file.isDirectory = true;
           file.name = file.uri.pathSegments[file.uri.pathSegments.length-2];
+          //todo: think about this!
+          file.lastModified = DateTime.now();
         } else {
           file.isDirectory = false;
           file.name = file.uri.pathSegments.last;

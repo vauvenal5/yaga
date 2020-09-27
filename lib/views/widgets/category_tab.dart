@@ -6,7 +6,7 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
-import 'package:yaga/services/system_location_service.dart';
+import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/image_search.dart';
@@ -76,7 +76,7 @@ class _CategoryTabState extends State<CategoryTab> with AutomaticKeepAliveClient
       .map((event) => event as UriPreference)
       .listen((event) {
         this._fileListLocalManager.uri = event.value;
-        this._fileListLocalManager.updateFilesAndFolders();
+        this._fileListLocalManager.refetch();
       });
     
     this._fileListLocalManager.initState();

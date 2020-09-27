@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:nextcloud/nextcloud.dart';
-import 'package:string_validator/string_validator.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/services/nextcloud_service.dart';
+import 'package:yaga/model/nc_login_data.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/nextcloud_client_factory.dart';
 
 class NextCloudClientFactoryMock extends Mock implements NextCloudClientFactory {}
@@ -22,6 +22,7 @@ void main() {
   AvatarClientMock avatarClientMock;
   PreviewClientMock previewClientMock;
   Uri host;
+  NextCloudLoginData loginData;
 
   group("NextCloudService", () {
     setUp(() async {
@@ -32,6 +33,7 @@ void main() {
       previewClientMock = PreviewClientMock();
 
       host = Uri(host: "cloud.test.com", scheme: "https");
+      loginData = NextCloudLoginData(host, "test", "password");
 
       when(factoryMock.createNextCloudClient(host.toString(), "test", "password"))
         .thenAnswer((_) => clientMock);
@@ -45,7 +47,7 @@ void main() {
       
       expect(service.isLoggedIn(), false);
 
-      service.login(host, "test", "password");
+      service.login(loginData);
 
       expect(service.isLoggedIn(), true);
 
@@ -67,7 +69,7 @@ void main() {
 
       test("list files and folders", () {
         NextCloudService service = NextCloudService(factoryMock);
-        service.login(host, "test", "password");
+        service.login(loginData);
         Uri uri = Uri(path: "/path");
         String remotePath = "files/test${uri.path}";
 
@@ -91,7 +93,7 @@ void main() {
 
       test("filter wrong mime types", () {
         NextCloudService service = NextCloudService(factoryMock);
-        service.login(host, "test", "password");
+        service.login(loginData);
         Uri uri = Uri(path: "/path");
         String remotePath = "files/test${uri.path}";
 
@@ -113,7 +115,7 @@ void main() {
 
     test("check origin", () {
       NextCloudService service = NextCloudService(factoryMock);
-      service.login(host, "test", "password");
+      service.login(loginData);
 
       when(clientMock.username).thenAnswer((_) => "test");
 
@@ -135,7 +137,7 @@ void main() {
     test("decode avatar", () async {
       NextCloudService service = NextCloudService(factoryMock);
       String value = "testing";
-      service.login(host, "test", "password");
+      service.login(loginData);
 
       when(clientMock.username).thenAnswer((_) => "test");
       when(avatarClientMock.getAvatar("test", 100)).thenAnswer((_) async => base64.encode(utf8.encode(value)));
@@ -145,7 +147,7 @@ void main() {
 
     test("decodes preview path before request", () {
       NextCloudService service = NextCloudService(factoryMock);
-      service.login(host, "test", "password");
+      service.login(loginData);
       String file = "[test]-file.png";
 
       when(previewClientMock.getPreview(file, 128, 128)).thenAnswer((_) => Future.value(Uint8List(5)));
@@ -157,7 +159,7 @@ void main() {
 
     test("download image path gets adapted", () {
       NextCloudService service = NextCloudService(factoryMock);
-      service.login(host, "test", "password");
+      service.login(loginData);
       when(clientMock.username).thenAnswer((_) => "test");
 
       Uri file = Uri(path: "/path/[test]-file.png");

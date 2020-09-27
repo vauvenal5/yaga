@@ -1,18 +1,31 @@
+import 'dart:io';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:yaga/model/system_location.dart';
 import 'package:yaga/model/system_location_host.dart';
 import 'package:yaga/services/service.dart';
+import 'package:yaga/utils/forground_worker/isolateable.dart';
+import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/uri_utils.dart';
-import 'package:string_validator/string_validator.dart';
 
-class SystemLocationService extends Service<SystemLocationService> {
+class SystemLocationService extends Service<SystemLocationService> implements Isolateable<SystemLocationService>{
   Map<String, SystemLocation> _locations = Map();
 
   @override
   Future<SystemLocationService> init() async {
-    _locations[SystemLocationHost.local.name] = SystemLocation.fromSplitter(await getExternalStorageDirectory(), SystemLocationHost.local, "/Android");
-    _locations[SystemLocationHost.tmp.name] = SystemLocation.fromSplitter(await getTemporaryDirectory(), SystemLocationHost.tmp, "/cache");
+    _init(await getExternalStorageDirectory(), await getTemporaryDirectory());
     return this;
+  }
+
+  @override
+  Future<SystemLocationService> initIsolated(InitMsg init) async {
+    _init(init.externalPath, init.tmpPath);
+    return this;
+  }
+
+  void _init(Directory externalDir, Directory tmpDir) {
+    _locations[SystemLocationHost.local.name] = SystemLocation.fromSplitter(externalDir, SystemLocationHost.local, "/Android");
+    _locations[SystemLocationHost.tmp.name] = SystemLocation.fromSplitter(tmpDir, SystemLocationHost.tmp, "/cache");
   }
 
   Uri getOrigin({SystemLocationHost host = SystemLocationHost.local}) {

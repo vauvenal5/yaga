@@ -1,17 +1,11 @@
 import 'package:logger/logger.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:rx_command/rx_command.dart';
-import 'package:yaga/managers/file_sub_manager.dart';
-import 'package:yaga/managers/mapping_manager.dart';
-import 'package:yaga/managers/sync_manager.dart';
+import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/services/file_provider_service.dart';
-import 'package:yaga/services/local_file_service.dart';
-import 'package:yaga/services/local_image_provider_service.dart';
-import 'package:yaga/services/nextcloud_service.dart';
-import 'package:yaga/services/system_location_service.dart';
+import 'package:yaga/services/isolateable/local_file_service.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
 
-class FileManager {
+class FileManager extends FileManagerBase {
   Logger _logger = Logger();
   RxCommand<NcFile, NcFile> _getPreviewCommand;
   RxCommand<NcFile, NcFile> _getImageCommand;
@@ -25,11 +19,9 @@ class FileManager {
   RxCommand<NcFile, NcFile> removeLocal;
   RxCommand<NcFile, NcFile> removeTmp;
 
-  RxCommand<NcFile, NcFile> updateFileList;
-
+  
   NextCloudService _nextCloudService;
-  LocalFileService _localFileService;
-  Map<String, FileSubManager> _fileSubManagers = Map();
+  LocalFileService _localFileService;  
 
   FileManager(this._nextCloudService, this._localFileService) {
     _getPreviewCommand = RxCommand.createSync((param) => param);
@@ -101,20 +93,5 @@ class FileManager {
       _logger.d("Removing preview file ${value.previewFile.path}");
       _localFileService.deleteFile(value.previewFile);
     });
-
-    updateFileList = RxCommand.createSync((param) => param);
-  }
-
-  void registerFileManager(FileSubManager fileSubManager) {
-    this._fileSubManagers.putIfAbsent(fileSubManager.scheme, () => fileSubManager);
-  }
-
-  Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
-    return this._fileSubManagers[uri.scheme].listFiles(uri)
-    .flatMap((file) => file.isDirectory && recursive ? this.listFiles(file.uri, recursive: recursive) : Stream.value(file));
-  }
-
-  Stream<List<NcFile>> listFileLists(Uri uri, {bool recursive = false}) {
-    return this._fileSubManagers[uri.scheme].listFileList(uri, recursive: recursive);
   }
 }

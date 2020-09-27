@@ -6,12 +6,14 @@ import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/services/file_provider_service.dart';
 import 'package:yaga/services/service.dart';
+import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/nextcloud_client_factory.dart';
 
-class NextCloudService with Service<NextCloudService> implements FileProviderService<NextCloudService> {
+class NextCloudService with Service<NextCloudService>, Isolateable<NextCloudService> implements FileProviderService<NextCloudService> {
   final Logger _logger = getLogger(NextCloudService);
   
   final String scheme = "nc";
@@ -21,9 +23,9 @@ class NextCloudService with Service<NextCloudService> implements FileProviderSer
 
   NextCloudService(this.nextCloudClientFactory);
 
-  void login(Uri host, String username, String password) {
-    this._host = host;
-    this._client = this.nextCloudClientFactory.createNextCloudClient(_host.toString(), username, password);
+  void login(NextCloudLoginData loginData) {
+    this._host = loginData.server;
+    this._client = this.nextCloudClientFactory.createNextCloudClient(_host.toString(), loginData.user, loginData.password);
   }
 
   void logout() {

@@ -1,9 +1,10 @@
 import 'package:logger/logger.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/sync_file.dart';
+import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/logger.dart';
 
-class SyncManager {
+class SyncManager with Isolateable<SyncManager> {
   final Logger _logger = getLogger(SyncManager);
   Map<Uri, Map<Uri, SyncFile>> _syncMatrix = {}; 
 

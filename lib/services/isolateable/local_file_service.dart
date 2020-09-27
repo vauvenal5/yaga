@@ -4,10 +4,27 @@ import 'package:mime/mime.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:yaga/managers/local_file_manager.dart';
+import 'package:yaga/managers/isolateable/local_file_manager.dart';
 import 'package:yaga/services/service.dart';
+import 'package:yaga/utils/forground_worker/isolateable.dart';
+import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 
-class LocalFileService extends Service<LocalFileService>{
+class LocalFileService extends Service<LocalFileService> implements Isolateable<LocalFileService>{
+
+  PermissionStatus _permissionState;
+
+  @override
+  Future<LocalFileService> init() async {
+    _permissionState = await Permission.storage.request();
+    return this;
+  }
+
+  @override
+  Future<LocalFileService> initIsolated(InitMsg init) async {
+    _permissionState = PermissionStatus.granted;
+    return this;
+  }
+
   Future<File> createFile({@required File file, @required List<int> bytes, DateTime lastModified}) async {
     logger.d("Creating file ${file.path}");
     await file.create(recursive: true);
@@ -30,7 +47,7 @@ class LocalFileService extends Service<LocalFileService>{
   }
 
   Stream<FileSystemEntity> list(Directory directory) {
-    return Permission.storage.request().asStream()
+    return Stream.value(_permissionState)
       .where((permissionState) => permissionState.isGranted)
       .flatMap((_) => directory.exists().asStream())
       .where((exists) => exists)

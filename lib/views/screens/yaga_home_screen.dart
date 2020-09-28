@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:package_info/package_info.dart';
+import 'package:yaga/main.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
@@ -53,6 +55,9 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
                 remote: ncService.getOrigin()
               );
               _globalAppPreferences.add(mapping);
+              
+              _globalAppPreferences.add(MyApp.appSection);
+              _globalAppPreferences.add(MyApp.theme);
               settingsManager.loadMappingPreferenceCommand(mapping);
               return;
             }
@@ -121,7 +126,31 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
       ],
     );
 
-    Drawer drawer = Drawer(
+    
+
+    return FutureBuilder(
+      future: getIt.allReady(),
+      builder: (context, snapshot) {
+        if(!snapshot.hasData) {
+          //todo: at some point replace this simple indicator with a proper flash screen
+          return CircularProgressIndicator();
+        }
+
+        Drawer drawer = _getDrawer();
+
+        return IndexedStack(
+          index: this._getCurrentIndex(),
+          children: <Widget>[
+            CategoryTab(bottomNavBar: bottomNavBar, drawer: drawer,),
+            BrowseTab(bottomNavBar: bottomNavBar, drawer: drawer,)
+          ]
+        );
+      }
+    );
+  }
+
+  Drawer _getDrawer() {
+    return Drawer(
       child: ListView(
         children: <Widget>[
           DrawerHeader(
@@ -167,27 +196,15 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
                 onTap: () => Navigator.pushNamed(context, NextCloudAddressScreen.route),
               );
             }
+          ),
+          //todo: improve this (fill text and move to bottom)
+          AboutListTile(
+            icon: Icon(Icons.info_outline),
+            applicationVersion: "v"+getIt.get<PackageInfo>().version,
+            applicationIcon: Image.asset('assets/icon/ic_launcher_xxxhdpi.png', width: 56,),
           )
         ],
       )
-    );
-
-    return FutureBuilder(
-      future: getIt.allReady(),
-      builder: (context, snapshot) {
-        if(!snapshot.hasData) {
-          //todo: at some point replace this simple indicator with a proper flash screen
-          return CircularProgressIndicator();
-        }
-
-        return IndexedStack(
-          index: this._getCurrentIndex(),
-          children: <Widget>[
-            CategoryTab(bottomNavBar: bottomNavBar, drawer: drawer,),
-            BrowseTab(bottomNavBar: bottomNavBar, drawer: drawer,)
-          ]
-        );
-      }
     );
   }
 }

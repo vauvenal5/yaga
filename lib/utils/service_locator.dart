@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:package_info/package_info.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
@@ -75,6 +76,7 @@ void setupServiceLocator() {
     await getIt.getAsync<ForegroundWorker>()
   ).init());
 
+  getIt.registerSingletonAsync(() async => await PackageInfo.fromPlatform());
 }
 
 void setupIsolatedServiceLocator(InitMsg init) {

@@ -26,10 +26,10 @@
    <img src="screenshots/Screenshot_1596214912.png" alt="Setting Folder 2" width="250"/>
    <img src="screenshots/Screenshot_1596215077.png" alt="Category View 1" width="250"/>
    <img src="screenshots/Screenshot_1596215087.png" alt="Image View" width="250"/>
-   <img src="screenshots/Screenshot_1596215104.png" alt="Category View 2" width="250"/>
+   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" alt="Category View 2" width="250"/>
    <img src="screenshots/Screenshot_1596215132.png" alt="Share Image" width="250"/>
    <img src="screenshots/Screenshot_1596215143.png" alt="Browse View 1" width="250"/>
-   <img src="screenshots/Screenshot_1596215160.png" alt="Browse View 2" width="250"/>
+   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" alt="Browse View 2" width="250"/>
    <img src="screenshots/Screenshot_1596215176.png" alt="Browse View 3" width="250"/>
    <img src="screenshots/Screenshot_1596215217.png" alt="Mapping Setting 1" width="250"/>
    <img src="screenshots/Screenshot_1596215222.png" alt="Mapping Setting 2" width="250"/>

@@ -1,0 +1,2 @@
+A Nextcloud first gallery app for Android.
+For details on the development state and currently implemented features, have a look on the Github page.

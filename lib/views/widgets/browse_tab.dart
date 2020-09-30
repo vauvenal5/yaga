@@ -9,29 +9,36 @@ import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
+import 'package:yaga/views/widgets/image_views/nc_list_view.dart';
+import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 
 class BrowseTab extends StatelessWidget {
+  final String _pref = "browse_tab";
 
   Widget bottomNavBar;
   Widget drawer;
 
-  BrowseTab({@required this.bottomNavBar, @required this.drawer});
+  ViewConfiguration viewConfig;
+
+  BrowseTab({@required this.bottomNavBar, @required this.drawer}) {
+    this.viewConfig = ViewConfiguration.browse(
+        route: _pref,
+        defaultView: NcListView.viewKey,
+        onFolderTap: null,
+        onFileTap: null);
+  }
 
   void _navigateToBrowseView(BuildContext context, Uri origin) {
-    Navigator.pushNamed(
-      context, 
-      DirectoryNavigationScreen.route, 
-      arguments: DirectoryNavigationScreenArguments(
-        title: "Browse",
-        uri: origin,
-        onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
-          context, 
-          ImageScreen.route, 
-          arguments: ImageScreenArguments(files, index)
-        ),
-        bottomBarBuilder: (context, uri) => bottomNavBar
-      )
-    );
+    this.viewConfig.onFileTap = (List<NcFile> files, int index) =>
+        Navigator.pushNamed(context, ImageScreen.route,
+            arguments: ImageScreenArguments(files, index));
+
+    Navigator.pushNamed(context, DirectoryNavigationScreen.route,
+        arguments: DirectoryNavigationScreenArguments(
+            title: "Browse",
+            uri: origin,
+            viewConfig: this.viewConfig,
+            bottomBarBuilder: (context, uri) => bottomNavBar));
   }
 
   @override
@@ -44,34 +51,36 @@ class BrowseTab extends StatelessWidget {
       ),
       drawer: drawer,
       body: StreamBuilder(
-        stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
-        builder: (context, snapshot) {
-          List<ListTile> children = [];
+          stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
+          builder: (context, snapshot) {
+            List<ListTile> children = [];
 
-          children.add(
-            ListTile(
-              leading: Icon(Icons.phone_android,),
+            children.add(ListTile(
+              leading: Icon(
+                Icons.phone_android,
+              ),
               title: Text("Internal Memory"),
-              onTap: () => _navigateToBrowseView(context, getIt.get<SystemLocationService>().getOrigin()),
-            )
-          );
-          
-          if(getIt.get<NextCloudService>().isLoggedIn()) {
-            Uri origin = getIt.get<NextCloudService>().getOrigin();
-            children.add(
-              ListTile(
-                leading: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 12,),
+              onTap: () => _navigateToBrowseView(
+                  context, getIt.get<SystemLocationService>().getOrigin()),
+            ));
+
+            if (getIt.get<NextCloudService>().isLoggedIn()) {
+              Uri origin = getIt.get<NextCloudService>().getOrigin();
+              children.add(ListTile(
+                leading: AvatarWidget.command(
+                  getIt.get<NextCloudManager>().updateAvatarCommand,
+                  radius: 12,
+                ),
                 title: Text(origin.authority),
                 onTap: () => _navigateToBrowseView(context, origin),
-              )
-            );
-          }
+              ));
+            }
 
-          return ListView(children: children,);
-        }
-      ),
+            return ListView(
+              children: children,
+            );
+          }),
       bottomNavigationBar: bottomNavBar,
     );
   }
-
 }

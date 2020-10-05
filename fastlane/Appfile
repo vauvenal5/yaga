@@ -1,0 +1,2 @@
+json_key_file("./android/pc-api-8450607264656584451-700-2ab59242f037.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name("com.github.vauvenal5.yaga") # e.g. com.krausefx.app

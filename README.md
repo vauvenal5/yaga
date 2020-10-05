@@ -18,7 +18,7 @@
    <img src="screenshots/Screenshot_1596214449.png" alt="Login Process 1" width="250"/>
    <img src="screenshots/Screenshot_1596214461.png" alt="Login Process 2" width="250"/>
    <img src="screenshots/Screenshot_1596214498.png" alt="Login Process 3" width="250"/>
-   <img src="screenshots/Screenshot_1596214508.png" alt="Login Process 4" width="250"/>
+   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" alt="Login Process 4" width="250"/>
    <img src="screenshots/Screenshot_1596214531.png" alt="Login Process 5" width="250"/>
    <img src="screenshots/Screenshot_1596214569.png" alt="Login Process 6" width="250"/>
    <img src="screenshots/Screenshot_1596214591.png" alt="Login Process 7" width="250"/>
@@ -27,7 +27,7 @@
    <img src="screenshots/Screenshot_1596215077.png" alt="Category View 1" width="250"/>
    <img src="screenshots/Screenshot_1596215087.png" alt="Image View" width="250"/>
    <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" alt="Category View 2" width="250"/>
-   <img src="screenshots/Screenshot_1596215132.png" alt="Share Image" width="250"/>
+   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" alt="Share Image" width="250"/>
    <img src="screenshots/Screenshot_1596215143.png" alt="Browse View 1" width="250"/>
    <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" alt="Browse View 2" width="250"/>
    <img src="screenshots/Screenshot_1596215176.png" alt="Browse View 3" width="250"/>

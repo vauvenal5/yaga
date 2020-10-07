@@ -37,3 +37,5 @@ lib/generated_plugin_registrant.dart
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 android/key.properties
 android/pc-api-8450607264656584451-700-2ab59242f037.json
+fastlane/README.md
+fastlane/report.xml

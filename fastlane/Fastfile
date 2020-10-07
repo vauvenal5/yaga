@@ -17,7 +17,14 @@ default_platform(:android)
 
 platform :android do
   lane :internal do
-    upload_to_play_store(track: 'internal', aab: './build/app/outputs/bundle/playRelease/app-play-release.aab')
+    upload_to_play_store(
+      track: 'internal', 
+      aab: './build/app/outputs/bundle/playRelease/app-play-release.aab',
+      skip_upload_apk: 'true',
+      skip_upload_metadata: 'true',
+      skip_upload_images: 'true',
+      skip_upload_screenshots: 'true',
+    )
   end
 
   lane :alpha do

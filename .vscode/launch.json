@@ -7,13 +7,19 @@
         {
             "name": "Flutter",
             "request": "launch",
-            "args": ["--flavor", "local"],
+            "args": [
+                "--flavor",
+                "play"
+            ],
             "type": "dart"
         },
         {
             "name": "Flutter Profile",
             "request": "launch",
-            "args": ["--flavor", "local"],
+            "args": [
+                "--flavor",
+                "play"
+            ],
             "type": "dart",
             "flutterMode": "profile"
         }

@@ -1,0 +1,17 @@
+img {
+    flex-grow: 0; 
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.align-flex-start {
+    align-items: flex-start;
+}
+
+.align-flex-start.flipped {
+    flex-direction: row-reverse;
+}
+
+.align-flex-start.content {
+    flex: 1;
+}

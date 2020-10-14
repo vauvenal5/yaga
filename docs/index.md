@@ -3,4 +3,14 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
+title: Home
+nav_order: 0
 ---
+
+<img src="{{site.baseurl}}/assets/feature_graphic.png" alt="Feature Graphic"/>
+
+# What is Nextcloud Yaga?
+
+Nextcloud Yaga is a Nextcloud first gallery app. It aimes to give you the full functionality of a modern gallery app while utilizing your private Nextcloud server as backend.
+
+Please have a look on the [quickstart guide]({{site.baseurl}}/quickstart/) for first steps.

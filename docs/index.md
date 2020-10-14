@@ -7,10 +7,7 @@ title: Home
 nav_order: 0
 ---
 
-<!-- local file path -->
-<!-- <img src="{{site.baseurl}}/assets/feature_graphic.png" alt="Feature Graphic"/> -->
-<!-- github pages file path -->
-<img src="https://media.githubusercontent.com/media/vauvenal5/yaga/feature/docs/docs/assets/feature_graphic.png" alt="Feature Graphic"/>
+<img src="{{site.data.yaga.asset_url}}/assets/feature_graphic.png" alt="Feature Graphic"/>
 
 # What is Nextcloud Yaga?
 

@@ -1,3 +1,5 @@
+Nextcloud Yaga is a Nextcloud first gallery app. It aimes to give you the full functionality of a modern gallery app while utilizing your private Nextcloud server as backend.
+
 You can find the documentation here: https://vauvenal5.github.io/yaga/
 
 For details on the development state and currently implemented features, have a look on the Github page. https://github.com/vauvenal5/yaga

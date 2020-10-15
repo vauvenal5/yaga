@@ -61,6 +61,12 @@ plugins:
 # Footer content
 # appears at the bottom of every page's main content
 
+aux_links:
+  "Playstore":
+    - "https://play.google.com/store/apps/details?id=com.github.vauvenal5.yaga"
+  "GitHub":
+    - "https://github.com/vauvenal5/yaga"
+
 # Back to top link
 back_to_top: true
 back_to_top_text: "Back to top"

@@ -34,7 +34,7 @@ nav_order: 1
         Login to your Nextcloud server by following this steps:
         <ul >
             <li> Open the application drawer </li>
-            <li> Press "Login" </li>
+            <li> Press <b>Login</b> </li>
             <li> Enter your servers URL </li>
             <li> Authenticate with your server </li>
             <li> Grant access to Nextcloud Yaga </li>
@@ -50,10 +50,10 @@ nav_order: 1
         Next you need to set the view path to point to the directory with your pictures.
         <ul >
             <li> Open the Home-View settings </li>
-            <li> Select the "Path" setting </li>
+            <li> Select the <b>Path</b> setting </li>
             <li> Change the destination from your local phone to your Nextcloud server </li>
             <li> Navigate to your pictures directory </li>
-            <li> Click "Select" </li>
+            <li> Click <b>Select</b> </li>
             <li> Leave the settings menu </li>
         </ul>
     </div>

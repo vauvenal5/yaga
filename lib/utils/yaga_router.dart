@@ -13,7 +13,7 @@ import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
 
-class Router {
+class YagaRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case SettingsScreen.route:

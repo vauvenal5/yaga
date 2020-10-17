@@ -3,7 +3,7 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
-import 'package:yaga/utils/router.dart';
+import 'package:yaga/utils/yaga_router.dart';
 import 'package:yaga/views/screens/splash_screen.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
 
@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
                 theme: light,
                 darkTheme: dark,
                 initialRoute: YagaHomeScreen.route,
-                onGenerateRoute: Router.generateRoute,
+                onGenerateRoute: YagaRouter.generateRoute,
               );
             }
 
@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
               title: title,
               theme: snapshot.data.value == "light" ? light : dark,
               initialRoute: YagaHomeScreen.route,
-              onGenerateRoute: Router.generateRoute,
+              onGenerateRoute: YagaRouter.generateRoute,
             );
           },
         );

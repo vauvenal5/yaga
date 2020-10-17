@@ -11,7 +11,7 @@ description: A Nextcloud gallary app.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.13.3+0133
+version: 0.13.4+0134
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -69,6 +69,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/icon/ic_launcher_xxxhdpi.png
+    - assets/icon/ic_foreground.png
   #  - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

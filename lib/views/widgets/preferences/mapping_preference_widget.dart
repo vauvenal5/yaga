@@ -17,41 +17,46 @@ class MappingPreferenceWidget extends StatefulWidget {
 }
 
 class _MappingPreferenceState extends State<MappingPreferenceWidget> {
-
   _MappingPreferenceState() {
-    getIt.get<SettingsManager>().updateSettingCommand
-      .where((event) => event.key == widget.pref.remote.key || event.key == widget.pref.local.key)
-      .map((event) => event as UriPreference)
-      .listen((pref) {
-        if(pref.key.endsWith("remote")) {
-          widget.pref.remote = pref;
-        } else {
-          widget.pref.local = pref;
-        }
-      });
+    getIt
+        .get<SettingsManager>()
+        .updateSettingCommand
+        .where((event) =>
+            event.key == widget.pref.remote.key ||
+            event.key == widget.pref.local.key)
+        .map((event) => event as UriPreference)
+        .listen((pref) {
+      if (pref.key.endsWith("remote")) {
+        widget.pref.remote = pref;
+      } else {
+        widget.pref.local = pref;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return PreferenceListTileWidget<MappingPreference>(
-      initData: widget.pref, 
+      initData: widget.pref,
       listTileBuilder: (context, pref) => ListTile(
         title: Text(pref.title),
         onTap: () => Navigator.pushNamed(
-          context, 
-          SettingsScreen.route, 
+          context,
+          SettingsScreen.route,
           arguments: SettingsScreenArguments(
-            onSettingChangedCommand: getIt.get<SettingsManager>().updateSettingCommand, 
+            onSettingChangedCommand:
+                getIt.get<SettingsManager>().updateSettingCommand,
             preferences: [pref.remote, pref.local],
             onCancel: () => Navigator.pop(context),
             onCommit: () {
               Navigator.pop(context);
-              getIt.get<SettingsManager>().persistMappingPreferenceCommand(widget.pref);
-            }
-          )
+              getIt
+                  .get<SettingsManager>()
+                  .persistMappingPreferenceCommand(widget.pref);
+            },
+          ),
         ),
-      )
+      ),
     );
   }
-
 }

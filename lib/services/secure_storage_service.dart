@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:yaga/services/service.dart';
 
-class SecureStorageService extends Service<SecureStorageService>{
+class SecureStorageService extends Service<SecureStorageService> {
   FlutterSecureStorage _storage;
 
   SecureStorageService() {
@@ -13,6 +13,6 @@ class SecureStorageService extends Service<SecureStorageService>{
   }
 
   Future<String> loadPreference(String key) {
-    return this._storage.read(key: key).then((value) => value??"");
+    return this._storage.read(key: key).then((value) => value ?? "");
   }
 }

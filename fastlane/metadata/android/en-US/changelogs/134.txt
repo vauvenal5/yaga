@@ -1,0 +1,2 @@
+- fixed general settings login/logout bug
+- added splashscreen

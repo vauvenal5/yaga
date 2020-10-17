@@ -4,6 +4,7 @@ import 'package:yaga/model/preference.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/router.dart';
+import 'package:yaga/views/screens/splash_screen.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
 
 void main() {
@@ -13,10 +14,11 @@ void main() {
 
 class MyApp extends StatelessWidget {
   static SectionPreference appSection = SectionPreference("app", "General");
-  static ChoicePreference theme = ChoicePreference.section(appSection, "theme", "Theme", "system", {
-    "system" : "Follow System Theme",
-    "light" : "Light Theme",
-    "dark" : "Dark Theme"
+  static ChoicePreference theme = ChoicePreference.section(
+      appSection, "theme", "Theme", "system", {
+    "system": "Follow System Theme",
+    "light": "Light Theme",
+    "dark": "Dark Theme"
   });
 
   @override
@@ -34,22 +36,29 @@ class MyApp extends StatelessWidget {
 
     const String title = "Nextcloud Yaga";
 
-    return FutureBuilder<SettingsManager>(
-      future: getIt.getAsync<SettingsManager>(),
+    return FutureBuilder(
+      future: getIt.allReady(),
       builder: (context, snapshot) {
-        if(!snapshot.hasData) {
-          //todo: at some point replace this simple indicator with a proper flash screen
-          return CircularProgressIndicator();
+        if (!snapshot.hasData) {
+          return MaterialApp(
+            title: title,
+            theme: light,
+            darkTheme: dark,
+            home: SplashScreen(),
+          );
         }
 
+        var settingsManager = getIt.get<SettingsManager>();
+
         return StreamBuilder<ChoicePreference>(
-          initialData: getIt.get<SharedPreferencesService>().loadChoicePreference(theme),
-          stream: snapshot.data.updateSettingCommand
-            .where((event) => event.key == theme.key)
-            .where((event) => event is ChoicePreference)
-            .map((event) => event as ChoicePreference),
+          initialData:
+              getIt.get<SharedPreferencesService>().loadChoicePreference(theme),
+          stream: settingsManager.updateSettingCommand
+              .where((event) => event.key == theme.key)
+              .where((event) => event is ChoicePreference)
+              .map((event) => event as ChoicePreference),
           builder: (context, snapshot) {
-            if(snapshot.data.value == "system") {
+            if (snapshot.data.value == "system") {
               return MaterialApp(
                 title: title,
                 theme: light,
@@ -65,10 +74,9 @@ class MyApp extends StatelessWidget {
               initialRoute: YagaHomeScreen.route,
               onGenerateRoute: Router.generateRoute,
             );
-          }
+          },
         );
-      }
+      },
     );
   }
 }
-

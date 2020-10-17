@@ -12,76 +12,75 @@ import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
+import 'package:yaga/views/screens/splash_screen.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
 import 'package:yaga/views/widgets/browse_tab.dart';
 import 'package:yaga/views/widgets/category_tab.dart';
 
-enum YagaHomeTab {grid, folder}
+enum YagaHomeTab { grid, folder }
 
 class YagaHomeScreen extends StatefulWidget {
   static const String route = "/";
-  
+
   @override
   State<StatefulWidget> createState() => YagaHomeScreenState();
-  
 }
 
 class YagaHomeScreenState extends State<YagaHomeScreen> {
   YagaHomeTab _selectedTab;
-  
-  final List<Preference> _globalAppPreferences = [];
 
-  YagaHomeScreenState() {
+  final List<Preference> _globalAppPreferences = [];
+  final nextcloudManger = getIt.get<NextCloudManager>();
+
+  void initState() {
+    super.initState();
+
+    _globalAppPreferences.add(MyApp.appSection);
+    _globalAppPreferences.add(MyApp.theme);
+
     SectionPreference ncSection = SectionPreference("nc", "Nextcloud");
-    _globalAppPreferences.add(ncSection);
 
     //todo: on logged out disable setting instead removing it
-    getIt.getAsync<NextCloudManager>().then((ncManager) => ncManager.updateLoginStateCommand.listen((value) {
-      getIt.getAsync<NextCloudService>().then((ncService) {
-        getIt.getAsync<SystemLocationService>().then((systemLocationService) {
-          getIt.getAsync<SettingsManager>().then((settingsManager) {
-            //todo: refactor
-            if(ncService.isLoggedIn()) {
-              MappingPreference mapping = MappingPreference.section(
-                ncSection, 
-                "mapping", 
-                "Root Mapping",
-                active: false,
-                //todo: this should be moved in some form to the mapping manger... maybe when enabling multi user
-                local: UriUtils.fromUri(
-                  uri: systemLocationService.externalAppDirUri, 
-                  path: "${systemLocationService.externalAppDirUri.path}/${ncService.getUserDomain()}"
-                ),
-                remote: ncService.getOrigin()
-              );
-              _globalAppPreferences.add(mapping);
-              
-              _globalAppPreferences.add(MyApp.appSection);
-              _globalAppPreferences.add(MyApp.theme);
-              settingsManager.loadMappingPreferenceCommand(mapping);
-              return;
-            }
-          
-            MappingPreference mapping = MappingPreference.section(
-              ncSection, 
-              "mapping", 
-              "Root Mapping",
-              active: false,
-              local: systemLocationService.externalAppDirUri,
-              remote: null
-            );
+    var nextcloudService = getIt.get<NextCloudService>();
+    var systemLocationService = getIt.get<SystemLocationService>();
+    var settingsManager = getIt.get<SettingsManager>();
 
-            settingsManager.removeMappingPreferenceCommand(mapping);
-            _globalAppPreferences.removeWhere((element) => element.key == mapping.key);
-          });
-        });
-      });
-    }));
-    getIt.getAsync<NextCloudManager>().then((ncService) => ncService.loadLoginDataCommand());
+    nextcloudManger.updateLoginStateCommand.listen((value) {
+      if (nextcloudService.isLoggedIn()) {
+        MappingPreference mapping = MappingPreference.section(
+            ncSection, "mapping", "Root Mapping",
+            active: false,
+            //todo: this should be moved in some form to the mapping manger... maybe when enabling multi user
+            local: UriUtils.fromUri(
+                uri: systemLocationService.externalAppDirUri,
+                path:
+                    "${systemLocationService.externalAppDirUri.path}/${nextcloudService.getUserDomain()}"),
+            remote: nextcloudService.getOrigin());
+
+        _globalAppPreferences.add(ncSection);
+        _globalAppPreferences.add(mapping);
+
+        settingsManager.loadMappingPreferenceCommand(mapping);
+      }
+    });
+
+    nextcloudManger.logoutCommand.listen((value) {
+      MappingPreference mapping = MappingPreference.section(
+          ncSection, "mapping", "Root Mapping",
+          active: false,
+          local: systemLocationService.externalAppDirUri,
+          remote: null);
+
+      settingsManager.removeMappingPreferenceCommand(mapping);
+      _globalAppPreferences
+          .removeWhere((element) => element.key == mapping.key);
+      _globalAppPreferences
+          .removeWhere((element) => element.key == ncSection.key);
+    });
   }
 
   int _getCurrentIndex() {
-    switch(this._selectedTab) {
+    switch (this._selectedTab) {
       case YagaHomeTab.folder:
         return 1;
       default:
@@ -102,11 +101,11 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
       onTap: (index) {
         Navigator.popUntil(context, ModalRoute.withName(YagaHomeScreen.route));
 
-        if(index == _getCurrentIndex()) {
+        if (index == _getCurrentIndex()) {
           return;
         }
 
-        switch(index) {
+        switch (index) {
           case 1:
             _setSelectedTab(YagaHomeTab.folder);
             return;
@@ -126,14 +125,13 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
       ],
     );
 
-    
-
-    return FutureBuilder(
-      future: getIt.allReady(),
+    return StreamBuilder<bool>(
+      initialData: true,
+      stream: nextcloudManger.loadLoginDataCommand.isExecuting,
       builder: (context, snapshot) {
-        if(!snapshot.hasData) {
-          //todo: at some point replace this simple indicator with a proper flash screen
-          return CircularProgressIndicator();
+        if (snapshot.data) {
+          nextcloudManger.loadLoginDataCommand();
+          return SplashScreen();
         }
 
         Drawer drawer = _getDrawer();
@@ -141,70 +139,92 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
         return IndexedStack(
           index: this._getCurrentIndex(),
           children: <Widget>[
-            CategoryTab(bottomNavBar: bottomNavBar, drawer: drawer,),
-            BrowseTab(bottomNavBar: bottomNavBar, drawer: drawer,)
-          ]
+            CategoryTab(
+              bottomNavBar: bottomNavBar,
+              drawer: drawer,
+            ),
+            BrowseTab(
+              bottomNavBar: bottomNavBar,
+              drawer: drawer,
+            )
+          ],
         );
-      }
+      },
     );
   }
 
   Drawer _getDrawer() {
     return Drawer(
-      child: ListView(
-        children: <Widget>[
-          DrawerHeader(
+        child: ListView(
+      children: <Widget>[
+        DrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).accentColor,
             ),
             child: StreamBuilder<NextCloudLoginData>(
-              stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
-              initialData: getIt.get<NextCloudManager>().updateLoginStateCommand.lastResult,
-              builder: (context, snapshot) {
-                NextCloudService ncService = getIt.get<NextCloudService>();
-                return Align(
-                  alignment: Alignment.centerLeft,
-                  child: ListTile(
-                    leading: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 25,),
-                    title: Text(ncService.isLoggedIn()?ncService.username:"", style: TextStyle(color: Colors.white),),
-                    subtitle: Text(ncService.isLoggedIn()?ncService.host:"", style: TextStyle(color: Colors.white),),
-                  )
-                );
-              }
-            )
-          ),
-          ListTile(
-            leading: Icon(Icons.settings), 
-            title: Text("Global Settings"),
-            onTap: () => Navigator.pushNamed(context, SettingsScreen.route, arguments: new SettingsScreenArguments(preferences: _globalAppPreferences)),
-          ),
-          StreamBuilder<NextCloudLoginData>(
+                stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
+                initialData: getIt
+                    .get<NextCloudManager>()
+                    .updateLoginStateCommand
+                    .lastResult,
+                builder: (context, snapshot) {
+                  NextCloudService ncService = getIt.get<NextCloudService>();
+                  return Align(
+                      alignment: Alignment.centerLeft,
+                      child: ListTile(
+                        leading: AvatarWidget.command(
+                          getIt.get<NextCloudManager>().updateAvatarCommand,
+                          radius: 25,
+                        ),
+                        title: Text(
+                          ncService.isLoggedIn() ? ncService.username : "",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          ncService.isLoggedIn() ? ncService.host : "",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ));
+                })),
+        ListTile(
+          leading: Icon(Icons.settings),
+          title: Text("Global Settings"),
+          onTap: () => Navigator.pushNamed(context, SettingsScreen.route,
+              arguments: new SettingsScreenArguments(
+                  preferences: _globalAppPreferences)),
+        ),
+        StreamBuilder<NextCloudLoginData>(
             stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
-            initialData: getIt.get<NextCloudManager>().updateLoginStateCommand.lastResult,
+            initialData: getIt
+                .get<NextCloudManager>()
+                .updateLoginStateCommand
+                .lastResult,
             builder: (context, snapshot) {
-              if(getIt.get<NextCloudService>().isLoggedIn()) {
+              if (getIt.get<NextCloudService>().isLoggedIn()) {
                 return ListTile(
-                  leading: Icon(Icons.power_settings_new), 
+                  leading: Icon(Icons.power_settings_new),
                   title: Text("Logout"),
                   onTap: () => getIt.get<NextCloudManager>().logoutCommand(),
                 );
               }
 
               return ListTile(
-                leading: Icon(Icons.add_to_home_screen), 
+                leading: Icon(Icons.add_to_home_screen),
                 title: Text("Login"),
-                onTap: () => Navigator.pushNamed(context, NextCloudAddressScreen.route),
+                onTap: () =>
+                    Navigator.pushNamed(context, NextCloudAddressScreen.route),
               );
-            }
+            }),
+        //todo: improve this (fill text and move to bottom)
+        AboutListTile(
+          icon: Icon(Icons.info_outline),
+          applicationVersion: "v" + getIt.get<PackageInfo>().version,
+          applicationIcon: Image.asset(
+            'assets/icon/ic_launcher_xxxhdpi.png',
+            width: 56,
           ),
-          //todo: improve this (fill text and move to bottom)
-          AboutListTile(
-            icon: Icon(Icons.info_outline),
-            applicationVersion: "v"+getIt.get<PackageInfo>().version,
-            applicationIcon: Image.asset('assets/icon/ic_launcher_xxxhdpi.png', width: 56,),
-          )
-        ],
-      )
-    );
+        )
+      ],
+    ));
   }
 }

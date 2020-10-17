@@ -67,7 +67,7 @@ nav_order: 1
         <p>Congrats, you have completed the basic set up of Nextcloud Yaga.</p>
         Some topics to follow up:
         <ul>
-            <li>Read up on the <a href="{{site.baseurl}}/view_concepts/">view concepts</a> in Nextcloud Yaga.</li>
+            <li>Read up on other <a href="{{site.baseurl}}/concepts/">concepts</a> in Nextcloud Yaga.</li>
             <li>Check out the <a href="{{site.baseurl}}/settings/">settings overview</a> for more information on the different settings.</li>
             <li>How to set up an advanced image <a href="{{site.baseurl}}/sync_flow/">sync flow</a> with the Nextcloud app and Nextcloud Yaga.</li>
         </ul>

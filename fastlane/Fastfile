@@ -43,4 +43,21 @@ platform :android do
       skip_upload_screenshots: 'true',
     )
   end
+
+  lane :beta do
+    pubspec = File.read('../pubspec.yaml')
+    regex = /version:\s.+\+(\d+)/
+    code = pubspec[regex, 1]
+    
+    upload_to_play_store(
+      track: 'alpha', 
+      track_promote_to: 'beta', 
+      version_code: code.to_i,
+      skip_upload_aab: 'true', 
+      skip_upload_apk: 'true',
+      skip_upload_metadata: 'true',
+      skip_upload_images: 'true',
+      skip_upload_screenshots: 'true',
+    )
+  end
 end

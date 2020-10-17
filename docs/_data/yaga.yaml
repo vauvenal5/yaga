@@ -1,0 +1,4 @@
+# for local
+# asset_url: /yaga
+# for github (works locally if asset is already pushed)
+asset_url: https://media.githubusercontent.com/media/vauvenal5/yaga/master/docs

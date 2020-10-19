@@ -49,6 +49,8 @@ class MyApp extends StatelessWidget {
         }
 
         var settingsManager = getIt.get<SettingsManager>();
+        settingsManager.registerGlobalSettingCommand(appSection);
+        settingsManager.registerGlobalSettingCommand(theme);
 
         return StreamBuilder<ChoicePreference>(
           initialData:

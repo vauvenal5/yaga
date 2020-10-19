@@ -13,14 +13,14 @@ import 'package:yaga/views/widgets/avatar_widget.dart';
 import 'package:yaga/views/widgets/image_views/nc_list_view.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
+import 'package:yaga/views/widgets/yaga_drawer.dart';
 
 class BrowseTab extends StatelessWidget {
   final String _pref = "browse_tab";
 
-  Widget drawer;
   ViewConfiguration viewConfig;
 
-  BrowseTab({@required this.drawer}) {
+  BrowseTab() {
     this.viewConfig = ViewConfiguration.browse(
         route: _pref,
         defaultView: NcListView.viewKey,
@@ -51,7 +51,7 @@ class BrowseTab extends StatelessWidget {
         // the App.build method, and use it to set our appbar title.
         title: Text("Nextcloud Yaga"),
       ),
-      drawer: drawer,
+      drawer: YagaDrawer(),
       body: StreamBuilder(
           stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
           builder: (context, snapshot) {

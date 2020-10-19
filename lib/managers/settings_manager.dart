@@ -10,40 +10,55 @@ class SettingsManager extends SettingsManagerBase {
   SharedPreferencesService _sharedPreferencesService;
   NextCloudService _nextCloudService;
 
+  List<Preference> _globalSettingsCache = [];
+
   RxCommand<StringPreference, void> persistStringSettingCommand;
   RxCommand<BoolPreference, void> persistBoolSettingCommand;
   RxCommand<UriPreference, void> persistUriSettingCommand;
   RxCommand<ChoicePreference, void> persistChoiceSettingCommand;
-  RxCommand<MappingPreference, MappingPreference> persistMappingPreferenceCommand;
-  RxCommand<MappingPreference, MappingPreference> removeMappingPreferenceCommand;
+  RxCommand<MappingPreference, MappingPreference>
+      persistMappingPreferenceCommand;
+  RxCommand<MappingPreference, MappingPreference>
+      removeMappingPreferenceCommand;
   RxCommand<MappingPreference, MappingPreference> loadMappingPreferenceCommand;
 
+  RxCommand<Preference, Preference> registerGlobalSettingCommand =
+      RxCommand.createSync((param) => param);
+  RxCommand<Preference, void> removeGlobalSettingCommand;
+  RxCommand<List<Preference>, List<Preference>> updateGlobalSettingsCommand =
+      RxCommand.createSync((param) => param);
+
   SettingsManager(this._sharedPreferencesService) {
+    persistStringSettingCommand = RxCommand.createAsync((param) =>
+        _sharedPreferencesService.saveStringPreference(param).then((value) =>
+            _checkPersistResult(
+                value, param, _sharedPreferencesService.loadStringPreference)));
 
-    persistStringSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveStringPreference(param)
-      .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadStringPreference))
-    );
+    persistBoolSettingCommand = RxCommand.createAsync((param) =>
+        _sharedPreferencesService.saveBoolPreference(param).then((value) =>
+            _checkPersistResult(
+                value, param, _sharedPreferencesService.loadBoolPreference)));
 
-    persistBoolSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveBoolPreference(param)
-      .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadBoolPreference))
-    );
+    persistUriSettingCommand = RxCommand.createAsync((param) =>
+        _sharedPreferencesService.saveUriPreference(param).then((value) =>
+            _checkPersistResult(
+                value, param, _sharedPreferencesService.loadUriPreference)));
 
-    persistUriSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveUriPreference(param)
-      .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadUriPreference))
-    );
-
-    persistChoiceSettingCommand = RxCommand.createAsync((param) => _sharedPreferencesService.saveChoicePreference(param)
-      .then((value) => _checkPersistResult(value, param, _sharedPreferencesService.loadChoicePreference))
-    );
+    persistChoiceSettingCommand = RxCommand.createAsync((param) =>
+        _sharedPreferencesService.saveChoicePreference(param).then((value) =>
+            _checkPersistResult(
+                value, param, _sharedPreferencesService.loadChoicePreference)));
 
     persistMappingPreferenceCommand = RxCommand.createSync((param) => param);
     persistMappingPreferenceCommand.listen((value) async {
       //todo: add error handling in case one of those fails
-      await _sharedPreferencesService.saveComplexPreference(value, overrideValue: false);
+      await _sharedPreferencesService.saveComplexPreference(value,
+          overrideValue: false);
       await _sharedPreferencesService.saveUriPreference(value.remote);
       await _sharedPreferencesService.saveUriPreference(value.local);
-      _sharedPreferencesService.saveComplexPreference(value)
-        .then((res) => _checkPersistResult(res, value, _sharedPreferencesService.loadMappingPreference));
+      _sharedPreferencesService.saveComplexPreference(value).then((res) =>
+          _checkPersistResult(
+              res, value, _sharedPreferencesService.loadMappingPreference));
     });
 
     removeMappingPreferenceCommand = RxCommand.createSync((param) => param);
@@ -57,16 +72,32 @@ class SettingsManager extends SettingsManagerBase {
     loadMappingPreferenceCommand.listen((value) {
       value.remote = _sharedPreferencesService.loadUriPreference(value.remote);
       value.local = _sharedPreferencesService.loadUriPreference(value.local);
-      updateSettingCommand(_sharedPreferencesService.loadMappingPreference(value));
+      updateSettingCommand(
+          _sharedPreferencesService.loadMappingPreference(value));
+    });
+
+    registerGlobalSettingCommand.listen((pref) {
+      if (_globalSettingsCache.contains(pref)) {
+        return;
+      }
+      this._globalSettingsCache.add(pref);
+      this.updateGlobalSettingsCommand(this._globalSettingsCache);
+    });
+    removeGlobalSettingCommand = RxCommand.createSync((param) =>
+        _globalSettingsCache
+            .removeWhere((element) => element.key == param.key));
+    removeGlobalSettingCommand.listen((value) {
+      this.updateGlobalSettingsCommand(this._globalSettingsCache);
     });
   }
 
-  void _checkPersistResult<T extends Preference>(bool res, T defaultPref, T Function(T) onLoadPref) {
-    if(!res) {
+  void _checkPersistResult<T extends Preference>(
+      bool res, T defaultPref, T Function(T) onLoadPref) {
+    if (!res) {
       //todo: add error handling if value==false
       //return;
     }
-      
+
     updateSettingCommand(onLoadPref(defaultPref));
   }
 }

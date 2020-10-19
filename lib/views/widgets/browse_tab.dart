@@ -17,12 +17,10 @@ import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
 class BrowseTab extends StatelessWidget {
   final String _pref = "browse_tab";
 
-  final void Function(YagaHomeTab) onTabChanged;
   Widget drawer;
-
   ViewConfiguration viewConfig;
 
-  BrowseTab({@required this.onTabChanged, @required this.drawer}) {
+  BrowseTab({@required this.drawer}) {
     this.viewConfig = ViewConfiguration.browse(
         route: _pref,
         defaultView: NcListView.viewKey,
@@ -42,7 +40,7 @@ class BrowseTab extends StatelessWidget {
             viewConfig: this.viewConfig,
             //todo: this can now be probably be removed and YagaBottomNavBar can be created directly in DirectoryNavigationScreen
             bottomBarBuilder: (context, uri) =>
-                YagaBottomNavBar(YagaHomeTab.folder, onTabChanged)));
+                YagaBottomNavBar(YagaHomeTab.folder)));
   }
 
   @override
@@ -84,7 +82,7 @@ class BrowseTab extends StatelessWidget {
               children: children,
             );
           }),
-      bottomNavigationBar: YagaBottomNavBar(YagaHomeTab.folder, onTabChanged),
+      bottomNavigationBar: YagaBottomNavBar(YagaHomeTab.folder),
     );
   }
 }

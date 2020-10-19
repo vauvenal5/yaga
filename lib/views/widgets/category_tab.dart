@@ -19,14 +19,11 @@ import 'package:yaga/views/widgets/image_views/category_view_exp.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
+import 'package:yaga/views/widgets/yaga_drawer.dart';
 
 enum CategoryViewMenu { settings }
 
 class CategoryTab extends StatefulWidget {
-  final Widget drawer;
-
-  CategoryTab({@required this.drawer});
-
   @override
   _CategoryTabState createState() => _CategoryTabState();
 }
@@ -136,7 +133,7 @@ class _CategoryTabState extends State<CategoryTab>
           ),
         ],
       ),
-      drawer: widget.drawer,
+      drawer: YagaDrawer(),
       body: ImageViewContainer(
           fileListLocalManager: this._fileListLocalManager,
           viewConfig: this._viewConfig),

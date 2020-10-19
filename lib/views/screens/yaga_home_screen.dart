@@ -96,35 +96,6 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    BottomNavigationBar bottomNavBar = BottomNavigationBar(
-      currentIndex: _getCurrentIndex(),
-      onTap: (index) {
-        Navigator.popUntil(context, ModalRoute.withName(YagaHomeScreen.route));
-
-        if (index == _getCurrentIndex()) {
-          return;
-        }
-
-        switch (index) {
-          case 1:
-            _setSelectedTab(YagaHomeTab.folder);
-            return;
-          default:
-            _setSelectedTab(YagaHomeTab.grid);
-        }
-      },
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          title: Text('Home View'),
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.folder),
-          title: Text('Browse View'),
-        ),
-      ],
-    );
-
     return StreamBuilder<bool>(
       initialData: true,
       stream: nextcloudManger.loadLoginDataCommand.isExecuting,
@@ -140,11 +111,11 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
           index: this._getCurrentIndex(),
           children: <Widget>[
             CategoryTab(
-              bottomNavBar: bottomNavBar,
+              onTabChanged: (YagaHomeTab tab) => _setSelectedTab(tab),
               drawer: drawer,
             ),
             BrowseTab(
-              bottomNavBar: bottomNavBar,
+              onTabChanged: (YagaHomeTab tab) => _setSelectedTab(tab),
               drawer: drawer,
             )
           ],

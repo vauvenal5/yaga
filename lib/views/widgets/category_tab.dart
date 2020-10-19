@@ -12,19 +12,21 @@ import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
+import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:yaga/views/widgets/image_search.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/views/widgets/image_views/category_view_exp.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
+import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
 
 enum CategoryViewMenu { settings }
 
 class CategoryTab extends StatefulWidget {
-  final Widget bottomNavBar;
+  final void Function(YagaHomeTab) onTabChanged;
   final Widget drawer;
 
-  CategoryTab({@required this.bottomNavBar, @required this.drawer});
+  CategoryTab({@required this.onTabChanged, @required this.drawer});
 
   @override
   _CategoryTabState createState() => _CategoryTabState();
@@ -139,7 +141,8 @@ class _CategoryTabState extends State<CategoryTab>
       body: ImageViewContainer(
           fileListLocalManager: this._fileListLocalManager,
           viewConfig: this._viewConfig),
-      bottomNavigationBar: widget.bottomNavBar,
+      bottomNavigationBar:
+          YagaBottomNavBar(YagaHomeTab.grid, widget.onTabChanged),
     );
   }
 

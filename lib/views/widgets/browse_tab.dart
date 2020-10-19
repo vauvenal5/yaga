@@ -8,19 +8,21 @@ import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
 import 'package:yaga/views/screens/image_screen.dart';
+import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
 import 'package:yaga/views/widgets/image_views/nc_list_view.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
+import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
 
 class BrowseTab extends StatelessWidget {
   final String _pref = "browse_tab";
 
-  Widget bottomNavBar;
+  final void Function(YagaHomeTab) onTabChanged;
   Widget drawer;
 
   ViewConfiguration viewConfig;
 
-  BrowseTab({@required this.bottomNavBar, @required this.drawer}) {
+  BrowseTab({@required this.onTabChanged, @required this.drawer}) {
     this.viewConfig = ViewConfiguration.browse(
         route: _pref,
         defaultView: NcListView.viewKey,
@@ -38,7 +40,9 @@ class BrowseTab extends StatelessWidget {
             title: "Browse",
             uri: origin,
             viewConfig: this.viewConfig,
-            bottomBarBuilder: (context, uri) => bottomNavBar));
+            //todo: this can now be probably be removed and YagaBottomNavBar can be created directly in DirectoryNavigationScreen
+            bottomBarBuilder: (context, uri) =>
+                YagaBottomNavBar(YagaHomeTab.folder, onTabChanged)));
   }
 
   @override
@@ -80,7 +84,7 @@ class BrowseTab extends StatelessWidget {
               children: children,
             );
           }),
-      bottomNavigationBar: bottomNavBar,
+      bottomNavigationBar: YagaBottomNavBar(YagaHomeTab.folder, onTabChanged),
     );
   }
 }

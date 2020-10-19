@@ -23,10 +23,9 @@ import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
 enum CategoryViewMenu { settings }
 
 class CategoryTab extends StatefulWidget {
-  final void Function(YagaHomeTab) onTabChanged;
   final Widget drawer;
 
-  CategoryTab({@required this.onTabChanged, @required this.drawer});
+  CategoryTab({@required this.drawer});
 
   @override
   _CategoryTabState createState() => _CategoryTabState();
@@ -141,8 +140,7 @@ class _CategoryTabState extends State<CategoryTab>
       body: ImageViewContainer(
           fileListLocalManager: this._fileListLocalManager,
           viewConfig: this._viewConfig),
-      bottomNavigationBar:
-          YagaBottomNavBar(YagaHomeTab.grid, widget.onTabChanged),
+      bottomNavigationBar: YagaBottomNavBar(YagaHomeTab.grid),
     );
   }
 

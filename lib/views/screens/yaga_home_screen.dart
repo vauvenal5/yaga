@@ -3,6 +3,7 @@ import 'package:package_info/package_info.dart';
 import 'package:yaga/main.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
+import 'package:yaga/managers/tab_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
@@ -26,9 +27,8 @@ class YagaHomeScreen extends StatefulWidget {
   State<StatefulWidget> createState() => YagaHomeScreenState();
 }
 
+//todo: yagaHomeScreen can probably be transoformed into a stateless widget
 class YagaHomeScreenState extends State<YagaHomeScreen> {
-  YagaHomeTab _selectedTab;
-
   final List<Preference> _globalAppPreferences = [];
   final nextcloudManger = getIt.get<NextCloudManager>();
 
@@ -79,19 +79,13 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
     });
   }
 
-  int _getCurrentIndex() {
-    switch (this._selectedTab) {
+  int _getCurrentIndex(YagaHomeTab tab) {
+    switch (tab) {
       case YagaHomeTab.folder:
         return 1;
       default:
         return 0;
     }
-  }
-
-  void _setSelectedTab(YagaHomeTab tab) {
-    setState(() {
-      _selectedTab = tab;
-    });
   }
 
   @override
@@ -107,18 +101,22 @@ class YagaHomeScreenState extends State<YagaHomeScreen> {
 
         Drawer drawer = _getDrawer();
 
-        return IndexedStack(
-          index: this._getCurrentIndex(),
-          children: <Widget>[
-            CategoryTab(
-              onTabChanged: (YagaHomeTab tab) => _setSelectedTab(tab),
-              drawer: drawer,
-            ),
-            BrowseTab(
-              onTabChanged: (YagaHomeTab tab) => _setSelectedTab(tab),
-              drawer: drawer,
-            )
-          ],
+        return StreamBuilder<YagaHomeTab>(
+          initialData: YagaHomeTab.grid,
+          stream: getIt.get<TabManager>().tabChangedCommand,
+          builder: (context, snapshot) {
+            return IndexedStack(
+              index: this._getCurrentIndex(snapshot.data),
+              children: <Widget>[
+                CategoryTab(
+                  drawer: drawer,
+                ),
+                BrowseTab(
+                  drawer: drawer,
+                )
+              ],
+            );
+          },
         );
       },
     );

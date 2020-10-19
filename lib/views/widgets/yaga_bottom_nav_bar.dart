@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:yaga/managers/tab_manager.dart';
+import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
 
 class YagaBottomNavBar extends StatelessWidget {
   final YagaHomeTab _selectedTab;
-  final void Function(YagaHomeTab) _onTabChanged;
 
-  YagaBottomNavBar(this._selectedTab, this._onTabChanged);
+  YagaBottomNavBar(this._selectedTab);
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +21,10 @@ class YagaBottomNavBar extends StatelessWidget {
 
         switch (index) {
           case 1:
-            _onTabChanged(YagaHomeTab.folder);
+            getIt.get<TabManager>().tabChangedCommand(YagaHomeTab.folder);
             return;
           default:
-            _onTabChanged(YagaHomeTab.grid);
+            getIt.get<TabManager>().tabChangedCommand(YagaHomeTab.grid);
         }
       },
       items: const <BottomNavigationBarItem>[

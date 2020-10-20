@@ -23,17 +23,17 @@ import 'package:yaga/views/widgets/yaga_drawer.dart';
 
 enum CategoryViewMenu { settings }
 
-abstract class CategoryTab extends StatefulWidget {
+abstract class CategoryView extends StatefulWidget {
   final CategoryViewConfig _categoryViewConfig;
 
-  CategoryTab(this._categoryViewConfig);
+  CategoryView(this._categoryViewConfig);
 
   @override
-  _CategoryTabState createState() => _CategoryTabState();
+  _CategoryViewState createState() => _CategoryViewState();
 }
 
-class _CategoryTabState extends State<CategoryTab>
-    with AutomaticKeepAliveClientMixin<CategoryTab> {
+class _CategoryViewState extends State<CategoryView>
+    with AutomaticKeepAliveClientMixin<CategoryView> {
   final List<Preference> _defaultViewPreferences = [];
   UriPreference _path;
   ViewConfiguration _viewConfig;

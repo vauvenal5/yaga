@@ -15,12 +15,12 @@ import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
 import 'package:yaga/views/widgets/yaga_drawer.dart';
 
-class BrowseTab extends StatelessWidget {
+class BrowseView extends StatelessWidget {
   final String _pref = "browse_tab";
 
   ViewConfiguration viewConfig;
 
-  BrowseTab() {
+  BrowseView() {
     this.viewConfig = ViewConfiguration.browse(
         route: _pref,
         defaultView: NcListView.viewKey,

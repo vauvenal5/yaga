@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/tab_manager.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/home_view.dart';
-import 'package:yaga/views/widgets/browse_tab.dart';
+import 'package:yaga/views/screens/browse_view.dart';
 
 //todo: this has to be renamed
 enum YagaHomeTab { grid, folder }
@@ -18,7 +18,7 @@ class YagaHomeScreen extends StatelessWidget {
       builder: (context, snapshot) {
         return IndexedStack(
           index: this._getCurrentIndex(snapshot.data),
-          children: <Widget>[HomeView(), BrowseTab()],
+          children: <Widget>[HomeView(), BrowseView()],
         );
       },
     );

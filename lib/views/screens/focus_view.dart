@@ -1,8 +1,8 @@
 import 'package:yaga/model/category_view_config.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
-import 'package:yaga/views/widgets/category_tab.dart';
+import 'package:yaga/views/screens/category_view.dart';
 
-class FocusView extends CategoryTab {
+class FocusView extends CategoryView {
   static const String route = "/focus";
 
   FocusView(Uri path)

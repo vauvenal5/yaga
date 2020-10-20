@@ -1,4 +1,5 @@
 import 'package:yaga/model/category_view_config.dart';
+import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:yaga/views/screens/category_view.dart';
 
@@ -11,5 +12,6 @@ class FocusView extends CategoryView {
             pref: "focus",
             pathEnabled: false,
             hasDrawer: false,
-            selectedTab: YagaHomeTab.folder));
+            selectedTab: YagaHomeTab.folder,
+            title: UriUtils.getNameFromUri(path)));
 }

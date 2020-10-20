@@ -1,0 +1,2 @@
+- introduced focus mode to browse view
+- fix title in focus mode

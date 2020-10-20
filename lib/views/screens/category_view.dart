@@ -112,7 +112,10 @@ class _CategoryViewState extends State<CategoryView>
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Nextcloud Yaga"),
+        title: Text(
+          widget._categoryViewConfig.title,
+          overflow: TextOverflow.fade,
+        ),
         actions: <Widget>[
           //todo: image search button goes here
           IconButton(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
+import 'package:yaga/model/category_view_config.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
@@ -12,7 +13,6 @@ import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
-import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:yaga/views/widgets/image_search.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/views/widgets/image_views/category_view_exp.dart';
@@ -23,15 +23,17 @@ import 'package:yaga/views/widgets/yaga_drawer.dart';
 
 enum CategoryViewMenu { settings }
 
-class CategoryTab extends StatefulWidget {
+abstract class CategoryTab extends StatefulWidget {
+  final CategoryViewConfig _categoryViewConfig;
+
+  CategoryTab(this._categoryViewConfig);
+
   @override
   _CategoryTabState createState() => _CategoryTabState();
 }
 
 class _CategoryTabState extends State<CategoryTab>
     with AutomaticKeepAliveClientMixin<CategoryTab> {
-  final String _pref = "category";
-
   final List<Preference> _defaultViewPreferences = [];
   UriPreference _path;
   ViewConfiguration _viewConfig;
@@ -39,13 +41,15 @@ class _CategoryTabState extends State<CategoryTab>
   StreamSubscription<UriPreference> _updateUriSubscription;
   FileListLocalManager _fileListLocalManager;
 
-  _CategoryTabState() {
-    SectionPreference general =
-        SectionPreference.route(_pref, "general", "General");
-    this._path = UriPreference.section(general, "path", "Path",
-        getIt.get<SystemLocationService>().externalAppDirUri);
+  @override
+  void initState() {
+    SectionPreference general = SectionPreference.route(
+        widget._categoryViewConfig.pref, "general", "General");
+    this._path = UriPreference.section(
+        general, "path", "Path", widget._categoryViewConfig.defaultPath,
+        enabled: widget._categoryViewConfig.pathEnabled);
     this._viewConfig = ViewConfiguration(
-      route: _pref,
+      route: widget._categoryViewConfig.pref,
       defaultView: CategoryViewExp.viewKey,
       onFolderTap: null,
       onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
@@ -77,10 +81,7 @@ class _CategoryTabState extends State<CategoryTab>
         getIt
             .get<SharedPreferencesService>()
             .loadBoolPreference(this._viewConfig.recursive));
-  }
 
-  @override
-  void initState() {
     //todo: this could be moved into imageStateWrapper
     _updateUriSubscription = getIt
         .get<SettingsManager>()
@@ -133,11 +134,12 @@ class _CategoryTabState extends State<CategoryTab>
           ),
         ],
       ),
-      drawer: YagaDrawer(),
+      drawer: widget._categoryViewConfig.hasDrawer ? YagaDrawer() : null,
       body: ImageViewContainer(
           fileListLocalManager: this._fileListLocalManager,
           viewConfig: this._viewConfig),
-      bottomNavigationBar: YagaBottomNavBar(YagaHomeTab.grid),
+      bottomNavigationBar:
+          YagaBottomNavBar(widget._categoryViewConfig.selectedTab),
     );
   }
 

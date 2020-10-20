@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/model/route_args/choice_selector_screen_arguments.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
+import 'package:yaga/model/route_args/focus_view_arguments.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/views/screens/choice_selector_screen.dart';
 import 'package:yaga/views/screens/directory_navigation_screen.dart';
+import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/nc_login_screen.dart';
@@ -70,6 +72,10 @@ class YagaRouter {
             settings: settings,
             builder: (context) => ChoiceSelectorScreen(
                 args.choicePreference, args.onSelect, args.onCancel));
+      case FocusView.route:
+        FocusViewArguments args = settings.arguments as FocusViewArguments;
+        return MaterialPageRoute(
+            settings: settings, builder: (context) => FocusView(args.path));
       default:
         return MaterialPageRoute(
             settings: settings, builder: (context) => YagaHomeScreen());

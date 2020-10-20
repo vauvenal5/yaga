@@ -11,5 +11,6 @@ class HomeView extends CategoryView {
             pref: "category",
             pathEnabled: true,
             hasDrawer: true,
-            selectedTab: YagaHomeTab.grid));
+            selectedTab: YagaHomeTab.grid,
+            title: "Nextcloud Yaga"));
 }

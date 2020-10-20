@@ -12,6 +12,7 @@ import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/image_search.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
+import 'package:yaga/views/widgets/list_menu_entry.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
 
 enum BrowseViewMenu { settings, focus }
@@ -102,20 +103,23 @@ class DirectoryNavigationScreen extends StatelessWidget {
                   context: context,
                   delegate:
                       ImageSearch(_fileListLocalManager, this.viewConfig))),
-          PopupMenuButton<BrowseViewMenu>(
-            onSelected: (BrowseViewMenu result) =>
-                _handleMenuSelection(context, result),
-            itemBuilder: (BuildContext context) =>
-                <PopupMenuEntry<BrowseViewMenu>>[
-              const PopupMenuItem(
-                child: Text("Settings"),
-                value: BrowseViewMenu.settings,
-              ),
-              const PopupMenuItem(
-                child: Text("Focus"),
-                value: BrowseViewMenu.focus,
-              ),
-            ],
+          ListTileTheme(
+            child: PopupMenuButton<BrowseViewMenu>(
+              offset: Offset(0, 10),
+              onSelected: (BrowseViewMenu result) =>
+                  _handleMenuSelection(context, result),
+              itemBuilder: (BuildContext context) =>
+                  <PopupMenuEntry<BrowseViewMenu>>[
+                PopupMenuItem(
+                  child: ListMenuEntry(Icons.settings, "Settings"),
+                  value: BrowseViewMenu.settings,
+                ),
+                PopupMenuItem(
+                  child: ListMenuEntry(Icons.remove_red_eye, "Focus"),
+                  value: BrowseViewMenu.focus,
+                ),
+              ],
+            ),
           ),
         ],
         bottom: PreferredSize(

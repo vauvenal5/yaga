@@ -15,48 +15,67 @@ class PathWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
-      minWidth: 20,
-      padding: EdgeInsets.symmetric(horizontal: 2),
-      child: ListView.separated(
-        shrinkWrap: true,
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        scrollDirection: Axis.horizontal,
-        itemCount: _uri.pathSegments.length==0?1:_uri.pathSegments.length,
-        itemBuilder: (context, index) {
-          if(index == 0) {
-            List<DropdownMenuItem<String>> items = [
-              DropdownMenuItem<String>(
-                  value: getIt.get<SystemLocationService>().getOrigin().toString(),
-                  child: Icon(Icons.phone_android, color: Colors.white,)
+        minWidth: 20,
+        padding: EdgeInsets.symmetric(horizontal: 2),
+        child: ListView.separated(
+          shrinkWrap: true,
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          scrollDirection: Axis.horizontal,
+          itemCount:
+              _uri.pathSegments.length == 0 ? 1 : _uri.pathSegments.length,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              List<DropdownMenuItem<String>> items = [
+                DropdownMenuItem<String>(
+                  value:
+                      getIt.get<SystemLocationService>().getOrigin().toString(),
+                  child: CircleAvatar(
+                    radius: 15,
+                    backgroundColor: Theme.of(context).primaryColor,
+                    child: CircleAvatar(
+                      radius: 14,
+                      backgroundColor: Theme.of(context).primaryIconTheme.color,
+                      child: Icon(
+                        Icons.phone_android,
+                        size: 24,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
                 ),
-            ];
+              ];
 
-            if(getIt.get<NextCloudService>().isLoggedIn()) {
-              items.add(DropdownMenuItem<String>(
-                value: getIt.get<NextCloudService>().getOrigin().toString(),
-                child: AvatarWidget.command(getIt.get<NextCloudManager>().updateAvatarCommand, radius: 12,)
-              ));
+              if (getIt.get<NextCloudService>().isLoggedIn()) {
+                items.add(DropdownMenuItem<String>(
+                    value: getIt.get<NextCloudService>().getOrigin().toString(),
+                    child: CircleAvatar(
+                        radius: 15,
+                        backgroundColor: Theme.of(context).primaryColor,
+                        child: AvatarWidget.command(
+                          getIt.get<NextCloudManager>().updateAvatarCommand,
+                          radius: 14,
+                        ))));
+              }
+
+              return DropdownButtonHideUnderline(
+                child: DropdownButton(
+                  value: UriUtils.getRootFromUri(_uri).toString(),
+                  onChanged: (value) {
+                    _onTap(Uri.parse(value));
+                  },
+                  items: items,
+                ),
+              );
             }
-
-            return DropdownButton<String>(
-              value: UriUtils.getRootFromUri(_uri).toString(),
-              dropdownColor: Theme.of(context).accentColor,
-              underline: Container(),
-              onChanged: (value) {
-                _onTap(Uri.parse(value));
-              },
-              items: items,
+            return FlatButton(
+              textColor: Colors.white,
+              onPressed: () =>
+                  _onTap(UriUtils.fromUriPathSegments(_uri, index - 1)),
+              child: Text(_uri.pathSegments[index - 1]),
             );
-          }
-          return  FlatButton(
-            textColor: Colors.white,
-            onPressed: () => _onTap(UriUtils.fromUriPathSegments(_uri, index-1)), 
-            child: Text(_uri.pathSegments[index-1]),
-          );
-        },
-        separatorBuilder: (context, index) => Icon(Icons.keyboard_arrow_right, color: Colors.white),
-      )
-    );
+          },
+          separatorBuilder: (context, index) =>
+              Icon(Icons.keyboard_arrow_right, color: Colors.white),
+        ));
   }
-
 }

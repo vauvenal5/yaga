@@ -1,0 +1,3 @@
+- introduced focus mode to browse view
+- fix title in focus mode
+- minor improvement to drop down menus

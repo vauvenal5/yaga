@@ -18,6 +18,7 @@ import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/views/widgets/image_views/category_view_exp.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
+import 'package:yaga/views/widgets/list_menu_entry.dart';
 import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
 import 'package:yaga/views/widgets/yaga_drawer.dart';
 
@@ -125,14 +126,17 @@ class _CategoryViewState extends State<CategoryView>
                   delegate:
                       ImageSearch(_fileListLocalManager, this._viewConfig))),
           PopupMenuButton<CategoryViewMenu>(
+            offset: Offset(0, 10),
             onSelected: (CategoryViewMenu result) => Navigator.pushNamed(
                 context, SettingsScreen.route,
                 arguments: new SettingsScreenArguments(
                     preferences: _defaultViewPreferences)),
             itemBuilder: (BuildContext context) =>
                 <PopupMenuEntry<CategoryViewMenu>>[
-              const PopupMenuItem(
-                  child: Text("Settings"), value: CategoryViewMenu.settings),
+              PopupMenuItem(
+                child: ListMenuEntry(Icons.settings, "Settings"),
+                value: CategoryViewMenu.settings,
+              ),
             ],
           ),
         ],

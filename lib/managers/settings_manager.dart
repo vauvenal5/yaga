@@ -10,8 +10,6 @@ class SettingsManager extends SettingsManagerBase {
   SharedPreferencesService _sharedPreferencesService;
   NextCloudService _nextCloudService;
 
-  List<Preference> _globalSettingsCache = [];
-
   RxCommand<StringPreference, void> persistStringSettingCommand;
   RxCommand<BoolPreference, void> persistBoolSettingCommand;
   RxCommand<UriPreference, void> persistUriSettingCommand;
@@ -21,12 +19,6 @@ class SettingsManager extends SettingsManagerBase {
   RxCommand<MappingPreference, MappingPreference>
       removeMappingPreferenceCommand;
   RxCommand<MappingPreference, MappingPreference> loadMappingPreferenceCommand;
-
-  RxCommand<Preference, Preference> registerGlobalSettingCommand =
-      RxCommand.createSync((param) => param);
-  RxCommand<Preference, void> removeGlobalSettingCommand;
-  RxCommand<List<Preference>, List<Preference>> updateGlobalSettingsCommand =
-      RxCommand.createSync((param) => param);
 
   SettingsManager(this._sharedPreferencesService) {
     persistStringSettingCommand = RxCommand.createAsync((param) =>
@@ -74,20 +66,6 @@ class SettingsManager extends SettingsManagerBase {
       value.local = _sharedPreferencesService.loadUriPreference(value.local);
       updateSettingCommand(
           _sharedPreferencesService.loadMappingPreference(value));
-    });
-
-    registerGlobalSettingCommand.listen((pref) {
-      if (_globalSettingsCache.contains(pref)) {
-        return;
-      }
-      this._globalSettingsCache.add(pref);
-      this.updateGlobalSettingsCommand(this._globalSettingsCache);
-    });
-    removeGlobalSettingCommand = RxCommand.createSync((param) =>
-        _globalSettingsCache
-            .removeWhere((element) => element.key == param.key));
-    removeGlobalSettingCommand.listen((value) {
-      this.updateGlobalSettingsCommand(this._globalSettingsCache);
     });
   }
 

@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:package_info/package_info.dart';
 import 'package:yaga/managers/file_manager.dart';
+import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
 import 'package:yaga/managers/isolateable/local_file_manager.dart';
@@ -46,9 +47,12 @@ void setupServiceLocator() {
   getIt.registerSingletonAsync<SettingsManager>(() async => SettingsManager(
         await getIt.getAsync<SharedPreferencesService>(),
       ));
-  getIt.registerSingletonAsync<NextCloudManager>(() async => NextCloudManager(
+  getIt.registerSingletonAsync<NextCloudManager>(
+    () async => NextCloudManager(
       await getIt.getAsync<NextCloudService>(),
-      await getIt.getAsync<SecureStorageService>()));
+      await getIt.getAsync<SecureStorageService>(),
+    ).init(),
+  );
   getIt.registerSingletonAsync(() async => MappingManager(
       await getIt.getAsync<SettingsManager>(),
       await getIt.getAsync<NextCloudService>(),
@@ -69,6 +73,13 @@ void setupServiceLocator() {
         await getIt.getAsync<LocalFileService>(),
         await getIt.getAsync<SystemLocationService>(),
       ));
+  getIt.registerSingletonAsync<GlobalSettingsManager>(
+      () async => GlobalSettingsManager(
+            await getIt.getAsync<NextCloudManager>(),
+            await getIt.getAsync<SettingsManager>(),
+            await getIt.getAsync<NextCloudService>(),
+            await getIt.getAsync<SystemLocationService>(),
+          ).init());
 
   getIt.registerSingletonAsync<ForegroundWorker>(
       () async => ForegroundWorker().init());

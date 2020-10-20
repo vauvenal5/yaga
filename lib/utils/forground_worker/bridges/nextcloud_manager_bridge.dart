@@ -7,11 +7,12 @@ class NextcloudManagerBridge {
   final ForegroundWorker _worker;
 
   NextcloudManagerBridge(this._nextCloudManager, this._worker) {
-    this._nextCloudManager.updateLoginStateCommand
-      .listen((value) {
-        this._worker.sendRequest(LoginStateMsg("", value));
-      });
+    //todo: update loginStateCommand has no logout values... see todo in ncManager
+    this._nextCloudManager.updateLoginStateCommand.listen((value) {
+      this._worker.sendRequest(LoginStateMsg("", value));
+    });
 
-    this._worker.sendRequest(LoginStateMsg("",this._nextCloudManager.updateLoginStateCommand.lastResult));
+    this._worker.sendRequest(LoginStateMsg(
+        "", this._nextCloudManager.updateLoginStateCommand.lastResult));
   }
 }

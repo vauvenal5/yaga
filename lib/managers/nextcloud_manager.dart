@@ -72,6 +72,11 @@ class NextCloudManager {
         initialLastResult: null);
   }
 
+  Future<NextCloudManager> init() async {
+    this.loadLoginDataCommand();
+    return this;
+  }
+
   Stream<NextCloudLoginData> _createLoginDataPersisStream(
       NextCloudLoginData data) {
     return ForkJoinStream.list([

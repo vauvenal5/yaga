@@ -1,19 +1,20 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
+import 'package:yaga/model/route_args/focus_view_arguments.dart';
 import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/utils/uri_utils.dart';
+import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
-import 'package:yaga/views/widgets/category_tab.dart';
 import 'package:yaga/views/widgets/image_search.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
+
+enum BrowseViewMenu { settings, focus }
 
 //todo: rename this since it is also used for browse view... maybe clean up a little
 class DirectoryNavigationScreen extends StatelessWidget {
@@ -101,15 +102,19 @@ class DirectoryNavigationScreen extends StatelessWidget {
                   context: context,
                   delegate:
                       ImageSearch(_fileListLocalManager, this.viewConfig))),
-          PopupMenuButton<CategoryViewMenu>(
-            onSelected: (CategoryViewMenu result) => Navigator.pushNamed(
-                context, SettingsScreen.route,
-                arguments: new SettingsScreenArguments(
-                    preferences: _defaultViewPreferences)),
+          PopupMenuButton<BrowseViewMenu>(
+            onSelected: (BrowseViewMenu result) =>
+                _handleMenuSelection(context, result),
             itemBuilder: (BuildContext context) =>
-                <PopupMenuEntry<CategoryViewMenu>>[
+                <PopupMenuEntry<BrowseViewMenu>>[
               const PopupMenuItem(
-                  child: Text("Settings"), value: CategoryViewMenu.settings),
+                child: Text("Settings"),
+                value: BrowseViewMenu.settings,
+              ),
+              const PopupMenuItem(
+                child: Text("Focus"),
+                value: BrowseViewMenu.focus,
+              ),
             ],
           ),
         ],
@@ -132,5 +137,24 @@ class DirectoryNavigationScreen extends StatelessWidget {
           ? null
           : bottomBarBuilder(context, this._fileListLocalManager.uri),
     );
+  }
+
+  void _handleMenuSelection(BuildContext context, BrowseViewMenu result) {
+    if (result == BrowseViewMenu.settings) {
+      Navigator.pushNamed(
+        context,
+        SettingsScreen.route,
+        arguments:
+            new SettingsScreenArguments(preferences: _defaultViewPreferences),
+      );
+    }
+
+    if (result == BrowseViewMenu.focus) {
+      Navigator.pushNamed(
+        context,
+        FocusView.route,
+        arguments: new FocusViewArguments(_fileListLocalManager.uri),
+      );
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
@@ -13,14 +14,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  static SectionPreference appSection = SectionPreference("app", "General");
-  static ChoicePreference theme = ChoicePreference.section(
-      appSection, "theme", "Theme", "system", {
-    "system": "Follow System Theme",
-    "light": "Light Theme",
-    "dark": "Dark Theme"
-  });
-
   @override
   Widget build(BuildContext context) {
     ThemeData dark = ThemeData(
@@ -49,14 +42,13 @@ class MyApp extends StatelessWidget {
         }
 
         var settingsManager = getIt.get<SettingsManager>();
-        settingsManager.registerGlobalSettingCommand(appSection);
-        settingsManager.registerGlobalSettingCommand(theme);
 
         return StreamBuilder<ChoicePreference>(
-          initialData:
-              getIt.get<SharedPreferencesService>().loadChoicePreference(theme),
+          initialData: getIt
+              .get<SharedPreferencesService>()
+              .loadChoicePreference(GlobalSettingsManager.theme),
           stream: settingsManager.updateSettingCommand
-              .where((event) => event.key == theme.key)
+              .where((event) => event.key == GlobalSettingsManager.theme.key)
               .where((event) => event is ChoicePreference)
               .map((event) => event as ChoicePreference),
           builder: (context, snapshot) {

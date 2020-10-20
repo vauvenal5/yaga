@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
+import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
-import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
@@ -50,10 +50,11 @@ class YagaDrawer extends StatelessWidget {
         ),
         StreamBuilder<List<Preference>>(
           initialData: getIt
-              .get<SettingsManager>()
+              .get<GlobalSettingsManager>()
               .updateGlobalSettingsCommand
               .lastResult,
-          stream: getIt.get<SettingsManager>().updateGlobalSettingsCommand,
+          stream:
+              getIt.get<GlobalSettingsManager>().updateGlobalSettingsCommand,
           builder: (context, snapshot) => ListTile(
             leading: Icon(Icons.settings),
             title: Text("Global Settings"),

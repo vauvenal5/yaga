@@ -1,0 +1,1 @@
+- introduced focus mode to browse view

@@ -30,16 +30,21 @@ class MappingManager with Isolateable<MappingManager> {
         ._settingsManager
         .updateSettingCommand
         .where((event) => event is MappingPreference)
-        .listen((event) {
-      if (mappings.containsKey(event.key)) {
-        _removeFromTree(mappings[event.key].remote.value.pathSegments, 0, root);
-      }
-      //todo: somehow/somewhere the view needs to be refreshed when the mapping changes
-      _addMappingPreferenceToTree(event, 0, root);
-      mappings[event.key] = event;
+        .listen((event) => handleMappingUpdate(event));
+  }
 
-      mappingUpdatedCommand(event);
-    });
+  void handleMappingUpdate(MappingPreference event) {
+    if (event == null) {
+      return;
+    }
+    if (mappings.containsKey(event.key)) {
+      _removeFromTree(mappings[event.key].remote.value.pathSegments, 0, root);
+    }
+    //todo: somehow/somewhere the view needs to be refreshed when the mapping changes
+    _addMappingPreferenceToTree(event, 0, root);
+    mappings[event.key] = event;
+
+    mappingUpdatedCommand(event);
   }
 
   void _removeFromTree(List<String> path, int index, MappingNode current) {

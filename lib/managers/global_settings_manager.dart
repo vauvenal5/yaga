@@ -25,6 +25,9 @@ class GlobalSettingsManager {
   RxCommand<List<Preference>, List<Preference>> updateGlobalSettingsCommand =
       RxCommand.createSync((param) => param);
 
+  RxCommand<MappingPreference, MappingPreference> updateRootMappingPreference =
+      RxCommand.createSync((param) => param);
+
   NextCloudManager _nextcloudManager;
   SettingsManager _settingsManager;
 
@@ -60,6 +63,13 @@ class GlobalSettingsManager {
       this.removeGlobalSettingCommand(mapping);
       this.removeGlobalSettingCommand(ncSection);
     });
+
+    this
+        ._settingsManager
+        .updateSettingCommand
+        .where((event) =>
+            event.key == getDefaultMappingPreference(local: null).key)
+        .listen((event) => updateRootMappingPreference(event));
   }
 
   Future<GlobalSettingsManager> init() async {

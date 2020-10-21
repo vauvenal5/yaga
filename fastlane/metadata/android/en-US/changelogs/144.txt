@@ -1,0 +1,5 @@
+- introduced focus mode to browse view
+- fix title in focus mode
+- minor improvement to drop down menus
+- fix isolates to properly shutdown/startup on app state change
+- fix isolate startup

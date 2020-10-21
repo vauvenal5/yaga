@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:rx_command/rx_command.dart';
@@ -9,7 +10,6 @@ import 'package:yaga/services/secure_storage_service.dart';
 class NextCloudManager {
   RxCommand<NextCloudLoginData, NextCloudLoginData> loginCommand;
   RxCommand<NextCloudLoginData, NextCloudLoginData> _internalLoginCommand;
-  RxCommand<void, NextCloudLoginData> loadLoginDataCommand;
   //todo: this command has a bad naming since it only gets triggered on login not logout
   RxCommand<NextCloudLoginData, NextCloudLoginData> updateLoginStateCommand;
   RxCommand<void, NextCloudLoginData> logoutCommand;
@@ -36,25 +36,6 @@ class NextCloudManager {
     this.updateLoginStateCommand = RxCommand.createSync((param) => param,
         initialLastResult: NextCloudLoginData(null, "", ""));
 
-    this.loadLoginDataCommand = RxCommand.createFromStream((_) =>
-        ForkJoinStream.list([
-          _secureStorageService
-              .loadPreference(NextCloudLoginDataKeys.server)
-              .asStream(),
-          _secureStorageService
-              .loadPreference(NextCloudLoginDataKeys.user)
-              .asStream(),
-          _secureStorageService
-              .loadPreference(NextCloudLoginDataKeys.password)
-              .asStream(),
-        ])
-            .where((event) => event[0] != "")
-            .where((event) => event[1] != "")
-            .where((event) => event[2] != "")
-            .map((event) =>
-                NextCloudLoginData(Uri.parse(event[0]), event[1], event[2])));
-    this.loadLoginDataCommand.listen((event) => _internalLoginCommand(event));
-
     this.logoutCommand = RxCommand.createFromStream((_) =>
         this._createLoginDataPersisStream(NextCloudLoginData(null, "", "")));
     this
@@ -73,7 +54,21 @@ class NextCloudManager {
   }
 
   Future<NextCloudManager> init() async {
-    this.loadLoginDataCommand();
+    String server = await _secureStorageService
+        .loadPreference(NextCloudLoginDataKeys.server);
+    String user =
+        await _secureStorageService.loadPreference(NextCloudLoginDataKeys.user);
+    String password = await _secureStorageService
+        .loadPreference(NextCloudLoginDataKeys.password);
+
+    if (server != "" && user != "" && password != "") {
+      Completer<NextCloudManager> login = Completer();
+      this.updateLoginStateCommand.listen((value) => login.complete(this));
+      this._internalLoginCommand(
+          NextCloudLoginData(Uri.parse(server), user, password));
+      return login.future;
+    }
+
     return this;
   }
 

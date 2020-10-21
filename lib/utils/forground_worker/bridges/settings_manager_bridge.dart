@@ -15,15 +15,12 @@ class SettingsManagerBridge {
 
   Future<SettingsManagerBridge> init() async {
     _settingsManager.updateSettingCommand
-      .doOnData((event) {
-        _logger.w(event);
-      })
-      .where((event) => event is MappingPreference)
-      .listen((event) => _worker.sendRequest(PreferenceMsg("", event)));
+        .doOnData((event) {
+          _logger.w(event);
+        })
+        .where((event) => event is MappingPreference)
+        .listen((event) => _worker.sendRequest(PreferenceMsg("", event)));
 
-    //todo-important: this works by luck(!) we need to solve this properly!
-    // it works only because in the yagahomescreen mappingPref is the last one loaded
-    this._worker.sendRequest(PreferenceMsg("", _settingsManager.updateSettingCommand.lastResult));
     return this;
   }
 }

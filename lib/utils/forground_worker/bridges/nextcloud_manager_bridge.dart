@@ -11,8 +11,5 @@ class NextcloudManagerBridge {
     this._nextCloudManager.updateLoginStateCommand.listen((value) {
       this._worker.sendRequest(LoginStateMsg("", value));
     });
-
-    this._worker.sendRequest(LoginStateMsg(
-        "", this._nextCloudManager.updateLoginStateCommand.lastResult));
   }
 }

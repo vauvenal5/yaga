@@ -81,8 +81,10 @@ void setupServiceLocator() {
             await getIt.getAsync<SystemLocationService>(),
           ).init());
 
-  getIt.registerSingletonAsync<ForegroundWorker>(
-      () async => ForegroundWorker().init());
+  getIt.registerSingletonAsync<ForegroundWorker>(() async => ForegroundWorker(
+          await getIt.getAsync<NextCloudManager>(),
+          await getIt.getAsync<GlobalSettingsManager>())
+      .init());
   getIt.registerSingletonAsync<NextcloudManagerBridge>(() async =>
       NextcloudManagerBridge(await getIt.getAsync<NextCloudManager>(),
           await getIt.getAsync<ForegroundWorker>()));

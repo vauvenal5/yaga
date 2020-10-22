@@ -29,32 +29,19 @@ class PathWidget extends StatelessWidget {
                 DropdownMenuItem<String>(
                   value:
                       getIt.get<SystemLocationService>().getOrigin().toString(),
-                  child: CircleAvatar(
-                    radius: 15,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: CircleAvatar(
-                      radius: 14,
-                      backgroundColor: Theme.of(context).primaryIconTheme.color,
-                      child: Icon(
-                        Icons.phone_android,
-                        size: 24,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
+                  child: AvatarWidget.phone(),
                 ),
               ];
 
               if (getIt.get<NextCloudService>().isLoggedIn()) {
-                items.add(DropdownMenuItem<String>(
+                items.add(
+                  DropdownMenuItem<String>(
                     value: getIt.get<NextCloudService>().getOrigin().toString(),
-                    child: CircleAvatar(
-                        radius: 15,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child: AvatarWidget.command(
-                          getIt.get<NextCloudManager>().updateAvatarCommand,
-                          radius: 14,
-                        ))));
+                    child: AvatarWidget.command(
+                      getIt.get<NextCloudManager>().updateAvatarCommand,
+                    ),
+                  ),
+                );
               }
 
               return DropdownButtonHideUnderline(

@@ -58,9 +58,8 @@ class BrowseView extends StatelessWidget {
             List<ListTile> children = [];
 
             children.add(ListTile(
-              leading: Icon(
-                Icons.phone_android,
-              ),
+              isThreeLine: false,
+              leading: AvatarWidget.phone(),
               title: Text("Internal Memory"),
               onTap: () => _navigateToBrowseView(
                   context, getIt.get<SystemLocationService>().getOrigin()),
@@ -69,9 +68,9 @@ class BrowseView extends StatelessWidget {
             if (getIt.get<NextCloudService>().isLoggedIn()) {
               Uri origin = getIt.get<NextCloudService>().getOrigin();
               children.add(ListTile(
+                isThreeLine: false,
                 leading: AvatarWidget.command(
                   getIt.get<NextCloudManager>().updateAvatarCommand,
-                  radius: 12,
                 ),
                 title: Text(origin.authority),
                 onTap: () => _navigateToBrowseView(context, origin),

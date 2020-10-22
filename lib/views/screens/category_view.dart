@@ -21,6 +21,7 @@ import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 import 'package:yaga/views/widgets/yaga_bottom_nav_bar.dart';
 import 'package:yaga/views/widgets/yaga_drawer.dart';
+import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 
 enum CategoryViewMenu { settings }
 
@@ -120,24 +121,15 @@ class _CategoryViewState extends State<CategoryView>
         actions: <Widget>[
           //todo: image search button goes here
           IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () => showSearch(
-                  context: context,
-                  delegate:
-                      ImageSearch(_fileListLocalManager, this._viewConfig))),
-          PopupMenuButton<CategoryViewMenu>(
-            offset: Offset(0, 10),
-            onSelected: (CategoryViewMenu result) => Navigator.pushNamed(
-                context, SettingsScreen.route,
-                arguments: new SettingsScreenArguments(
-                    preferences: _defaultViewPreferences)),
-            itemBuilder: (BuildContext context) =>
-                <PopupMenuEntry<CategoryViewMenu>>[
-              PopupMenuItem(
-                child: ListMenuEntry(Icons.settings, "Settings"),
-                value: CategoryViewMenu.settings,
-              ),
-            ],
+            icon: Icon(Icons.search),
+            onPressed: () => showSearch(
+              context: context,
+              delegate: ImageSearch(_fileListLocalManager, this._viewConfig),
+            ),
+          ),
+          YagaPopupMenuButton<CategoryViewMenu>(
+            this._buildPopupMenu,
+            this._popupMenuHandler,
           ),
         ],
       ),
@@ -148,6 +140,25 @@ class _CategoryViewState extends State<CategoryView>
       bottomNavigationBar:
           YagaBottomNavBar(widget._categoryViewConfig.selectedTab),
     );
+  }
+
+  void _popupMenuHandler(BuildContext context, CategoryViewMenu result) {
+    Navigator.pushNamed(
+      context,
+      SettingsScreen.route,
+      arguments: new SettingsScreenArguments(
+        preferences: _defaultViewPreferences,
+      ),
+    );
+  }
+
+  List<PopupMenuEntry<CategoryViewMenu>> _buildPopupMenu(BuildContext context) {
+    return [
+      PopupMenuItem(
+        child: ListMenuEntry(Icons.settings, "Settings"),
+        value: CategoryViewMenu.settings,
+      ),
+    ];
   }
 
   @override

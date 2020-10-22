@@ -14,6 +14,7 @@ import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
+import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 
 enum BrowseViewMenu { settings, focus }
 
@@ -98,39 +99,28 @@ class DirectoryNavigationScreen extends StatelessWidget {
         actions: <Widget>[
           //todo: image search button goes here
           IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () => showSearch(
-                  context: context,
-                  delegate:
-                      ImageSearch(_fileListLocalManager, this.viewConfig))),
-          ListTileTheme(
-            child: PopupMenuButton<BrowseViewMenu>(
-              offset: Offset(0, 10),
-              onSelected: (BrowseViewMenu result) =>
-                  _handleMenuSelection(context, result),
-              itemBuilder: (BuildContext context) =>
-                  <PopupMenuEntry<BrowseViewMenu>>[
-                PopupMenuItem(
-                  child: ListMenuEntry(Icons.settings, "Settings"),
-                  value: BrowseViewMenu.settings,
-                ),
-                PopupMenuItem(
-                  child: ListMenuEntry(Icons.remove_red_eye, "Focus"),
-                  value: BrowseViewMenu.focus,
-                ),
-              ],
+            icon: Icon(Icons.search),
+            onPressed: () => showSearch(
+              context: context,
+              delegate: ImageSearch(_fileListLocalManager, this.viewConfig),
             ),
+          ),
+          YagaPopupMenuButton<BrowseViewMenu>(
+            this._buildPopupMenu,
+            this._handleMenuSelection,
           ),
         ],
         bottom: PreferredSize(
             child: Container(
-                height: 40,
-                child: Align(
-                    alignment: Alignment.topLeft,
-                    child: PathWidget(
-                        this._fileListLocalManager.uri,
-                        (Uri subPath) =>
-                            this._popUntilSelf(context, subPath)))),
+              height: 40,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: PathWidget(
+                  this._fileListLocalManager.uri,
+                  (Uri subPath) => this._popUntilSelf(context, subPath),
+                ),
+              ),
+            ),
             preferredSize: Size.fromHeight(40)),
       ),
       //todo: is it possible to directly pass the folder.uri?
@@ -160,5 +150,18 @@ class DirectoryNavigationScreen extends StatelessWidget {
         arguments: new FocusViewArguments(_fileListLocalManager.uri),
       );
     }
+  }
+
+  List<PopupMenuEntry<BrowseViewMenu>> _buildPopupMenu(BuildContext context) {
+    return [
+      PopupMenuItem(
+        child: ListMenuEntry(Icons.settings, "Settings"),
+        value: BrowseViewMenu.settings,
+      ),
+      PopupMenuItem(
+        child: ListMenuEntry(Icons.remove_red_eye, "Focus"),
+        value: BrowseViewMenu.focus,
+      ),
+    ];
   }
 }

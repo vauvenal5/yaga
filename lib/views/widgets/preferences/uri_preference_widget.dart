@@ -25,16 +25,27 @@ class UriPreferenceWidget extends StatelessWidget {
   }
 
   void _pushToNavigation(BuildContext context, UriPreference pref, Uri uri) {
-    Navigator.pushNamed(context, PathSelectorScreen.route,
-        arguments: PathSelectorScreenArguments(
-            uri: uri,
-            onCancel: () => Navigator.popUntil(
-                context, ModalRoute.withName(SettingsScreen.route)),
-            onSelect: (Uri path) {
-              Navigator.popUntil(
-                  context, ModalRoute.withName(SettingsScreen.route));
-              _notifyChange(UriPreference(pref.key, pref.title, path));
-            }));
+    Navigator.pushNamed(
+      context,
+      PathSelectorScreen.route,
+      arguments: PathSelectorScreenArguments(
+        uri: uri,
+        onCancel: () => Navigator.popUntil(
+            context, ModalRoute.withName(SettingsScreen.route)),
+        onSelect: (Uri path) {
+          Navigator.popUntil(
+              context, ModalRoute.withName(SettingsScreen.route));
+          _notifyChange(UriPreference(
+            pref.key,
+            pref.title,
+            path,
+            enabled: pref.enabled,
+            fixedOrigin: pref.fixedOrigin,
+          ));
+        },
+        fixedOrigin: pref.fixedOrigin,
+      ),
+    );
   }
 
   //todo: track issue https://github.com/flutter/flutter/issues/45938 and improve this madness when possible

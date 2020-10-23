@@ -15,9 +15,10 @@ class PathSelectorScreen extends StatelessWidget {
   final void Function(Uri) _onSelect;
   final void Function(List<NcFile>, int) onFileTap;
   final String title;
+  final bool fixedOrigin;
 
   PathSelectorScreen(this._uri, this._onCancel, this._onSelect,
-      {this.onFileTap, this.title});
+      {this.onFileTap, this.title, this.fixedOrigin = false});
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +40,17 @@ class PathSelectorScreen extends StatelessWidget {
       bottomBarBuilder: bottomBarBuilder,
       viewConfig: viewConfig,
       title: this.title ?? "Select path...",
+      fixedOrigin: this.fixedOrigin,
       navigationRoute: PathSelectorScreen.route,
       getNavigationArgs: (DirectoryNavigationScreenArguments args) =>
           PathSelectorScreenArguments(
-              uri: args.uri,
-              onFileTap: args.viewConfig.onFileTap,
-              title: args.title,
-              onCancel: this._onCancel,
-              onSelect: this._onSelect),
+        uri: args.uri,
+        onFileTap: args.viewConfig.onFileTap,
+        title: args.title,
+        onCancel: this._onCancel,
+        onSelect: this._onSelect,
+        fixedOrigin: this.fixedOrigin,
+      ),
     );
   }
 }

@@ -17,7 +17,13 @@ class MappingPreferenceWidget extends StatefulWidget {
 }
 
 class _MappingPreferenceState extends State<MappingPreferenceWidget> {
+  UriPreference _remote;
+  UriPreference _local;
+
   _MappingPreferenceState() {
+    this._remote = widget.pref.remote;
+    this._local = widget.pref.local;
+
     getIt
         .get<SettingsManager>()
         .updateSettingCommand
@@ -27,9 +33,9 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
         .map((event) => event as UriPreference)
         .listen((pref) {
       if (pref.key.endsWith("remote")) {
-        widget.pref.remote = pref;
+        _remote = pref;
       } else {
-        widget.pref.local = pref;
+        _local = pref;
       }
     });
   }
@@ -48,11 +54,16 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
                 getIt.get<SettingsManager>().updateSettingCommand,
             preferences: [pref.remote, pref.local],
             onCancel: () => Navigator.pop(context),
+            //todo: onCommit should return a list of all preferences then we do not need to listen here to the UriPref changes
             onCommit: () {
               Navigator.pop(context);
-              getIt
-                  .get<SettingsManager>()
-                  .persistMappingPreferenceCommand(widget.pref);
+              getIt.get<SettingsManager>().persistMappingPreferenceCommand(
+                    MappingPreference.fromSelf(
+                      pref,
+                      _local,
+                      _remote,
+                    ),
+                  );
             },
           ),
         ),

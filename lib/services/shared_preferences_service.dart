@@ -48,7 +48,13 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
   UriPreference loadUriPreference(UriPreference pref) {
     String value = _instance.getString(pref.key);
     Uri uri = value != null ? Uri.parse(value) : pref.value;
-    return UriPreference(pref.key, pref.title, uri, enabled: pref.enabled);
+    return UriPreference(
+      pref.key,
+      pref.title,
+      uri,
+      enabled: pref.enabled,
+      fixedOrigin: pref.fixedOrigin,
+    );
   }
 
   Future<bool> saveUriPreference(UriPreference pref) =>
@@ -59,8 +65,13 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
       _instance.setBool(pref.key, overrideValue ?? pref.value);
 
   MappingPreference loadMappingPreference(MappingPreference pref) =>
-      MappingPreference(pref.key, pref.title, pref.remote, pref.local,
-          active: _instance.getBool(pref.key));
+      MappingPreference(
+        pref.key,
+        pref.title,
+        pref.remote.value,
+        pref.local.value,
+        active: _instance.getBool(pref.key),
+      );
 
   Future<bool> removePreference(Preference pref) => _instance.remove(pref.key);
 }

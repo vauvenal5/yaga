@@ -7,7 +7,10 @@ class DirectoryNavigationScreenArguments extends NavigatableScreenArguments {
   final String title;
   final Widget Function(BuildContext, Uri) bottomBarBuilder;
 
-  DirectoryNavigationScreenArguments(
-      {@required Uri uri, this.title, this.viewConfig, this.bottomBarBuilder})
-      : super(uri: uri);
+  DirectoryNavigationScreenArguments({
+    @required Uri uri,
+    this.title,
+    this.viewConfig,
+    this.bottomBarBuilder,
+  }) : super(uri: uri);
 }

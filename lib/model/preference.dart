@@ -35,12 +35,14 @@ class StringPreference extends ValuePreference<String> {
 }
 
 class UriPreference extends ValuePreference<Uri> {
+  final bool fixedOrigin;
+
   UriPreference(String key, String title, Uri value,
-      {String prefix, bool enabled = true})
+      {String prefix, bool enabled = true, this.fixedOrigin = false})
       : super(key, title, value, prefix: prefix, enabled: enabled);
   UriPreference.section(
       SectionPreference section, String key, String title, Uri value,
-      {bool enabled = true})
+      {bool enabled = true, this.fixedOrigin = false})
       : super.section(section, key, title, value, enabled: enabled);
 }
 
@@ -59,21 +61,31 @@ abstract class ComplexPreference extends ValuePreference<bool> {
       : super.section(section, key, title, active);
 }
 
+//todo: Preference clone functions should be unified
 class MappingPreference extends ComplexPreference {
-  UriPreference remote;
-  UriPreference local;
+  final UriPreference remote;
+  final UriPreference local;
 
-  MappingPreference(String key, String title, this.remote, this.local,
+  MappingPreference(String key, String title, Uri remote, Uri local,
       {bool active = false})
-      : super(key, title, active);
+      : this.remote = _getRemoteUri(key, remote),
+        this.local = _getLocalUri(key, local),
+        super(key, title, active);
   MappingPreference.section(SectionPreference section, key, title,
       {Uri remote, Uri local, bool active = false})
-      : super.section(section, key, title, active) {
-    this.remote = UriPreference("remote", "Remote Path", remote ?? Uri(),
-        prefix: this.key);
-    this.local =
-        UriPreference("local", "Local Path", local ?? Uri(), prefix: this.key);
-  }
+      : this.remote = _getRemoteUri(key, remote),
+        this.local = _getLocalUri(key, local),
+        super.section(section, key, title, active);
+  MappingPreference.fromSelf(MappingPreference pref, this.local, this.remote)
+      : super(pref.key, pref.title, pref.value);
+
+  static UriPreference _getRemoteUri(String key, Uri remote) =>
+      UriPreference("remote", "Remote Path", remote ?? Uri(),
+          prefix: key, fixedOrigin: true);
+
+  static UriPreference _getLocalUri(String key, Uri local) =>
+      UriPreference("local", "Local Path", local ?? Uri(),
+          prefix: key, fixedOrigin: true);
 }
 
 class BoolPreference extends ValuePreference<bool> {

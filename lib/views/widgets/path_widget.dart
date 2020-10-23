@@ -9,60 +9,80 @@ import 'package:yaga/views/widgets/avatar_widget.dart';
 class PathWidget extends StatelessWidget {
   final Uri _uri;
   final Function(Uri) _onTap;
+  final bool fixedOrigin;
 
-  PathWidget(this._uri, this._onTap);
+  PathWidget(this._uri, this._onTap, {this.fixedOrigin = false});
 
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
-        minWidth: 20,
-        padding: EdgeInsets.symmetric(horizontal: 2),
-        child: ListView.separated(
-          shrinkWrap: true,
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          scrollDirection: Axis.horizontal,
-          itemCount:
-              _uri.pathSegments.length == 0 ? 1 : _uri.pathSegments.length,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              List<DropdownMenuItem<String>> items = [
-                DropdownMenuItem<String>(
-                  value:
-                      getIt.get<SystemLocationService>().getOrigin().toString(),
-                  child: AvatarWidget.phone(),
-                ),
-              ];
+      minWidth: 20,
+      padding: EdgeInsets.symmetric(horizontal: 2),
+      child: ListView.separated(
+        shrinkWrap: true,
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        scrollDirection: Axis.horizontal,
+        itemCount: _uri.pathSegments.length == 0 ? 1 : _uri.pathSegments.length,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            String selected = UriUtils.getRootFromUri(_uri).toString();
 
-              if (getIt.get<NextCloudService>().isLoggedIn()) {
-                items.add(
-                  DropdownMenuItem<String>(
-                    value: getIt.get<NextCloudService>().getOrigin().toString(),
-                    child: AvatarWidget.command(
-                      getIt.get<NextCloudManager>().updateAvatarCommand,
-                    ),
-                  ),
-                );
-              }
-
-              return DropdownButtonHideUnderline(
-                child: DropdownButton(
-                  value: UriUtils.getRootFromUri(_uri).toString(),
-                  onChanged: (value) {
-                    _onTap(Uri.parse(value));
-                  },
-                  items: items,
-                ),
-              );
+            if (fixedOrigin) {
+              return _getDisabledAvatar(selected);
             }
-            return FlatButton(
-              textColor: Colors.white,
-              onPressed: () =>
-                  _onTap(UriUtils.fromUriPathSegments(_uri, index - 1)),
-              child: Text(_uri.pathSegments[index - 1]),
+
+            List<DropdownMenuItem<String>> items = [];
+
+            items.add(_getMenuItem(
+                getIt.get<SystemLocationService>().getOrigin().toString()));
+
+            if (getIt.get<NextCloudService>().isLoggedIn()) {
+              items.add(_getMenuItem(
+                  getIt.get<NextCloudService>().getOrigin().toString()));
+            }
+
+            return DropdownButtonHideUnderline(
+              child: DropdownButton(
+                value: selected,
+                onChanged: (value) => _onTap(Uri.parse(value)),
+                items: items,
+              ),
             );
-          },
-          separatorBuilder: (context, index) =>
-              Icon(Icons.keyboard_arrow_right, color: Colors.white),
-        ));
+          }
+          return FlatButton(
+            textColor: Colors.white,
+            onPressed: () =>
+                _onTap(UriUtils.fromUriPathSegments(_uri, index - 1)),
+            child: Text(_uri.pathSegments[index - 1]),
+          );
+        },
+        separatorBuilder: (context, index) =>
+            Icon(Icons.keyboard_arrow_right, color: Colors.white),
+      ),
+    );
+  }
+
+  DropdownMenuItem<String> _getMenuItem(String origin) {
+    return DropdownMenuItem<String>(
+      value: origin,
+      child: _getAvatarForOrigin(origin),
+    );
+  }
+
+  Widget _getDisabledAvatar(String origin) {
+    return InkWell(
+      onTap: () => _onTap(Uri.parse(origin)),
+      child: _getAvatarForOrigin(origin),
+    );
+  }
+
+  Widget _getAvatarForOrigin(String origin) {
+    if (getIt.get<SystemLocationService>().getOrigin().toString() == origin) {
+      return AvatarWidget.phone();
+    }
+
+    return AvatarWidget.command(
+      getIt.get<NextCloudManager>().updateAvatarCommand,
+    );
   }
 }

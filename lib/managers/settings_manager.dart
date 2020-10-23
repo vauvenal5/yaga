@@ -62,10 +62,13 @@ class SettingsManager extends SettingsManagerBase {
 
     loadMappingPreferenceCommand = RxCommand.createSync((param) => param);
     loadMappingPreferenceCommand.listen((value) {
-      value.remote = _sharedPreferencesService.loadUriPreference(value.remote);
-      value.local = _sharedPreferencesService.loadUriPreference(value.local);
-      updateSettingCommand(
-          _sharedPreferencesService.loadMappingPreference(value));
+      UriPreference remote =
+          _sharedPreferencesService.loadUriPreference(value.remote);
+      UriPreference local =
+          _sharedPreferencesService.loadUriPreference(value.local);
+      updateSettingCommand(_sharedPreferencesService.loadMappingPreference(
+        MappingPreference.fromSelf(value, local, remote),
+      ));
     });
   }
 

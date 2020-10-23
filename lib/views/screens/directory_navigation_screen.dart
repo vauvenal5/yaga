@@ -31,6 +31,7 @@ class DirectoryNavigationScreen extends StatelessWidget {
       getNavigationArgs;
 
   final List<Preference> _defaultViewPreferences = [];
+  final bool fixedOrigin;
 
   DirectoryNavigationScreen(
       {@required uri,
@@ -38,7 +39,8 @@ class DirectoryNavigationScreen extends StatelessWidget {
       this.title,
       this.bottomBarBuilder,
       this.navigationRoute,
-      this.getNavigationArgs})
+      this.getNavigationArgs,
+      this.fixedOrigin = false})
       : _fileListLocalManager =
             FileListLocalManager(uri, viewConfig.recursive) {
     this._fileListLocalManager.initState();
@@ -48,10 +50,11 @@ class DirectoryNavigationScreen extends StatelessWidget {
 
   NavigatableScreenArguments _getSelfArgs(Uri path) {
     var args = DirectoryNavigationScreenArguments(
-        uri: path,
-        viewConfig: this.viewConfig.clone(),
-        title: this.title,
-        bottomBarBuilder: this.bottomBarBuilder);
+      uri: path,
+      viewConfig: this.viewConfig.clone(),
+      title: this.title,
+      bottomBarBuilder: this.bottomBarBuilder,
+    );
 
     return this.getNavigationArgs?.call(args) ?? args;
   }
@@ -118,6 +121,7 @@ class DirectoryNavigationScreen extends StatelessWidget {
                 child: PathWidget(
                   this._fileListLocalManager.uri,
                   (Uri subPath) => this._popUntilSelf(context, subPath),
+                  fixedOrigin: this.fixedOrigin,
                 ),
               ),
             ),

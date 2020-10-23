@@ -7,6 +7,14 @@ class PathSelectorScreenArguments extends NavigatableScreenArguments {
   final void Function(Uri) onSelect;
   final void Function(List<NcFile>, int) onFileTap;
   final String title;
+  final bool fixedOrigin;
 
-  PathSelectorScreenArguments({@required uri, this.onCancel, this.onSelect, this.onFileTap, this.title}) : super(uri: uri);
+  PathSelectorScreenArguments({
+    @required uri,
+    this.onCancel,
+    this.onSelect,
+    this.onFileTap,
+    this.title,
+    this.fixedOrigin = false,
+  }) : super(uri: uri);
 }

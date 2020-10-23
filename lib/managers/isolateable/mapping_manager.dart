@@ -116,15 +116,17 @@ class MappingManager with Isolateable<MappingManager> {
     return this._systemLocationService.absoluteUriFromInternal(mappedUri);
   }
 
+  //todo: check what we are doing with this
   MappingPreference _getDefaultMapping(Uri root) {
-    UriPreference local = UriPreference(
-        "localDefault",
-        "local deafult",
-        UriUtils.fromUri(
-            uri: root, path: _appendLocalMappingFolder(root.path)));
-    UriPreference remote = UriPreference(
-        "remoteDefault", "remote default", this._nextCloudService.getOrigin());
-    return MappingPreference("default", "default", remote, local);
+    return MappingPreference(
+      "default",
+      "default",
+      this._nextCloudService.getOrigin(),
+      UriUtils.fromUri(
+        uri: root,
+        path: _appendLocalMappingFolder(root.path),
+      ),
+    );
   }
 
   Future<Uri> mapToRemoteUri(Uri local, Uri remote) async {

@@ -40,6 +40,7 @@ class YagaRouter {
                   pathSelectorScreenArguments.onSelect,
                   onFileTap: pathSelectorScreenArguments.onFileTap,
                   title: pathSelectorScreenArguments.title,
+                  fixedOrigin: pathSelectorScreenArguments.fixedOrigin,
                 ));
       case DirectoryNavigationScreen.route:
         DirectoryNavigationScreenArguments args =

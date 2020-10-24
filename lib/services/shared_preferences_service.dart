@@ -1,6 +1,13 @@
-import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/bool_preference.dart';
+import 'package:yaga/model/preferences/choice_preference.dart';
+import 'package:yaga/model/preferences/complex_preference.dart';
+import 'package:yaga/model/preferences/mapping_preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
+import 'package:yaga/model/preferences/string_list_preference.dart';
+import 'package:yaga/model/preferences/string_preference.dart';
+import 'package:yaga/model/preferences/uri_preference.dart';
+import 'package:yaga/model/preferences/value_preference.dart';
 import 'package:yaga/services/service.dart';
 
 class SharedPreferencesService extends Service<SharedPreferencesService> {
@@ -74,4 +81,8 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
       );
 
   Future<bool> removePreference(Preference pref) => _instance.remove(pref.key);
+
+  Future<bool> saveValueStringPref(ValuePreference<String> pref) {}
+
+  Future<bool> saveValueBoolPref(ValuePreference<bool> pref) {}
 }

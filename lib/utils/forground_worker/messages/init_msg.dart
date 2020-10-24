@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:yaga/model/nc_login_data.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/mapping_preference.dart';
 
 class InitMsg {
   final SendPort sendPort;

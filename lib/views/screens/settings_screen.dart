@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rx_command/rx_command.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/bool_preference.dart';
+import 'package:yaga/model/preferences/choice_preference.dart';
+import 'package:yaga/model/preferences/mapping_preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
+import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/views/widgets/ok_cancel_button_bar.dart';
 import 'package:yaga/views/widgets/preferences/BoolPreferenceWidget.dart';
 import 'package:yaga/views/widgets/preferences/choice_preference_widget.dart';
@@ -16,7 +20,8 @@ class SettingsScreen extends StatelessWidget {
   final Function onCommit;
   final Function onCancel;
 
-  SettingsScreen(this._defaultPreferences, {this.onPreferenceChangedCommand, this.onCancel, this.onCommit});
+  SettingsScreen(this._defaultPreferences,
+      {this.onPreferenceChangedCommand, this.onCancel, this.onCommit});
 
   @override
   Widget build(BuildContext context) {
@@ -28,32 +33,39 @@ class SettingsScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           Preference defaultPref = _defaultPreferences[index];
 
-          if(defaultPref is UriPreference) {
-            return UriPreferenceWidget(defaultPref, onChangeCommand: this.onPreferenceChangedCommand,);
+          if (defaultPref is UriPreference) {
+            return UriPreferenceWidget(
+              defaultPref,
+              onChangeCommand: this.onPreferenceChangedCommand,
+            );
           }
 
-          if(defaultPref is MappingPreference) {
+          if (defaultPref is MappingPreference) {
             return MappingPreferenceWidget(defaultPref, SettingsScreen.route);
           }
 
-          if(defaultPref is BoolPreference) {
-            return BoolPreferenceWidget(defaultPref, onChangeCommand: this.onPreferenceChangedCommand,);
+          if (defaultPref is BoolPreference) {
+            return BoolPreferenceWidget(
+              defaultPref,
+              onChangeCommand: this.onPreferenceChangedCommand,
+            );
           }
-          
-          if(defaultPref is ChoicePreference) {
-            return ChoicePreferenceWidget(defaultPref, this.onPreferenceChangedCommand,);
+
+          if (defaultPref is ChoicePreference) {
+            return ChoicePreferenceWidget(
+              defaultPref,
+              this.onPreferenceChangedCommand,
+            );
           }
-          
+
           return SectionPreferenceWidget(defaultPref);
-          
-        }, 
-        separatorBuilder: (context, index) => const Divider(), 
+        },
+        separatorBuilder: (context, index) => const Divider(),
         itemCount: _defaultPreferences.length,
       ),
-      bottomNavigationBar: onCommit == null ? null : OkCancelButtonBar(
-        onCommit: this.onCommit, 
-        onCancel: this.onCancel
-      ),
+      bottomNavigationBar: onCommit == null
+          ? null
+          : OkCancelButtonBar(onCommit: this.onCommit, onCancel: this.onCancel),
     );
   }
 }

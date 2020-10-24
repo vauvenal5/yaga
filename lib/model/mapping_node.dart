@@ -1,4 +1,4 @@
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/mapping_preference.dart';
 
 class MappingNode {
   Map<String, MappingNode> nodes = {};

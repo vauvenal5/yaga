@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/views/widgets/ok_cancel_button_bar.dart';
 
 class ChoiceSelectorScreen extends StatefulWidget {
@@ -31,21 +31,19 @@ class _ChoiceSelectorScreenState extends State<ChoiceSelectorScreen> {
         title: Text(this.widget._choicePreference.title),
       ),
       body: ListView.separated(
-        itemBuilder: (context, index) => RadioListTile(
-          title: Text(widget._choicePreference.choices[widget._choicePreference.choices.keys.elementAt(index)]),
-          value: widget._choicePreference.choices.keys.elementAt(index), 
-          groupValue: _choice, 
-          onChanged: (String value) => setState(() => _choice = value)
-        ), 
-        separatorBuilder: (context, index) => const Divider(), 
-        itemCount: widget._choicePreference.choices.length
-      ),
+          itemBuilder: (context, index) => RadioListTile(
+              title: Text(widget._choicePreference.choices[
+                  widget._choicePreference.choices.keys.elementAt(index)]),
+              value: widget._choicePreference.choices.keys.elementAt(index),
+              groupValue: _choice,
+              onChanged: (String value) => setState(() => _choice = value)),
+          separatorBuilder: (context, index) => const Divider(),
+          itemCount: widget._choicePreference.choices.length),
       bottomNavigationBar: OkCancelButtonBar(
-        onCommit: () {
-          this.widget._onSelect(_choice);
-        }, 
-        onCancel: this.widget._onCancel
-      ),
+          onCommit: () {
+            this.widget._onSelect(_choice);
+          },
+          onCancel: this.widget._onCancel),
     );
   }
 }

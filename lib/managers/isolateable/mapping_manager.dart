@@ -2,7 +2,7 @@ import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager_base.dart';
 import 'package:yaga/model/mapping_node.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';

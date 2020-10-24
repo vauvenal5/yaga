@@ -3,7 +3,7 @@ import 'package:package_info/package_info.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/service_locator.dart';

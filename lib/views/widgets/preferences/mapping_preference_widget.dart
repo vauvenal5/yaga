@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/settings_manager.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/mapping_preference.dart';
+import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/settings_screen.dart';

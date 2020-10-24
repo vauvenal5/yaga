@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/bool_preference.dart';
+import 'package:yaga/model/preferences/choice_preference.dart';
+import 'package:yaga/model/preferences/section_preference.dart';
 import 'package:yaga/views/widgets/image_views/category_view.dart';
 import 'package:yaga/views/widgets/image_views/category_view_exp.dart';
 import 'package:yaga/views/widgets/image_views/nc_grid_view.dart';

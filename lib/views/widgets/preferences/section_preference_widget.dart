@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
 
 class SectionPreferenceWidget extends StatelessWidget {
   final Preference _pref;
@@ -10,11 +10,9 @@ class SectionPreferenceWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(
-        _pref.title, 
+        _pref.title,
         style: TextStyle(
-          color: Theme.of(context).accentColor,
-          fontWeight: FontWeight.bold
-        ),
+            color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),
       ),
     );
   }

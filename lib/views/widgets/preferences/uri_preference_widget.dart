@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
+import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';

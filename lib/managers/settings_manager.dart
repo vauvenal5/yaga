@@ -1,6 +1,12 @@
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager_base.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/bool_preference.dart';
+import 'package:yaga/model/preferences/choice_preference.dart';
+import 'package:yaga/model/preferences/mapping_preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
+import 'package:yaga/model/preferences/string_preference.dart';
+import 'package:yaga/model/preferences/uri_preference.dart';
+import 'package:yaga/model/preferences/value_preference.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 

@@ -1,4 +1,4 @@
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
 
 class PreferenceMsg extends Message {

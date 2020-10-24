@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';

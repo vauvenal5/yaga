@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/focus_view_arguments.dart';
 import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';

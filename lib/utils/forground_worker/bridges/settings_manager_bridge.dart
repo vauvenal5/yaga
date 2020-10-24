@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/settings_manager.dart';
-import 'package:yaga/model/preference.dart';
+import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/forground_worker/messages/preference_msg.dart';
 import 'package:yaga/utils/logger.dart';

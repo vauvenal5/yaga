@@ -13,14 +13,22 @@ import 'package:yaga/utils/uri_utils.dart';
 
 class GlobalSettingsManager {
   List<Preference> _globalSettingsCache = [];
-  static SectionPreference ncSection = SectionPreference("nc", "Nextcloud");
-  static SectionPreference appSection = SectionPreference("app", "General");
-  static ChoicePreference theme = ChoicePreference.section(
-      appSection, "theme", "Theme", "system", {
-    "system": "Follow System Theme",
-    "light": "Light Theme",
-    "dark": "Dark Theme"
-  });
+  static const String _MAPPING_KEY = "mapping";
+  static SectionPreference ncSection = SectionPreference((b) => b
+    ..key = "nc"
+    ..title = "Nextcloud");
+  static SectionPreference appSection = SectionPreference((b) => b
+    ..key = "app"
+    ..title = "General");
+  static ChoicePreference theme = ChoicePreference((b) => b
+    ..key = appSection.prepareKey("theme")
+    ..title = "Theme"
+    ..value = "system"
+    ..choices = {
+      "system": "Follow System Theme",
+      "light": "Light Theme",
+      "dark": "Dark Theme"
+    });
 
   RxCommand<Preference, Preference> registerGlobalSettingCommand =
       RxCommand.createSync((param) => param);
@@ -60,7 +68,9 @@ class GlobalSettingsManager {
 
     this._nextcloudManager.logoutCommand.listen((value) {
       MappingPreference mapping = this.getDefaultMappingPreference(
-          local: _systemLocationService.externalAppDirUri);
+        local: _systemLocationService.externalAppDirUri,
+        remote: Uri(),
+      );
 
       _settingsManager.removeMappingPreferenceCommand(mapping);
       this.removeGlobalSettingCommand(mapping);
@@ -70,8 +80,7 @@ class GlobalSettingsManager {
     this
         ._settingsManager
         .updateSettingCommand
-        .where((event) =>
-            event.key == getDefaultMappingPreference(local: null).key)
+        .where((event) => event.key == ncSection.prepareKey(_MAPPING_KEY))
         .listen((event) => updateRootMappingPreference(event));
   }
 
@@ -87,14 +96,12 @@ class GlobalSettingsManager {
 
   MappingPreference getDefaultMappingPreference(
       {@required Uri local, Uri remote}) {
-    return MappingPreference.section(
-      ncSection,
-      "mapping",
-      "Root Mapping",
-      active: false,
-      local: local,
-      remote: remote,
-    );
+    return MappingPreference((b) => b
+      ..key = ncSection.prepareKey(_MAPPING_KEY)
+      ..title = "Root Mapping"
+      ..value = false
+      ..local.value = local
+      ..remote.value = remote);
   }
 
   void _handleLoginState(NextCloudLoginData loginData) {

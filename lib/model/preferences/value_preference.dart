@@ -1,13 +1,22 @@
+library preference;
+
+import 'package:built_value/built_value.dart';
+import 'package:flutter/foundation.dart';
 import 'package:yaga/model/preferences/preference.dart';
-import 'package:yaga/model/preferences/section_preference.dart';
 
-abstract class ValuePreference<T> extends Preference {
-  T value;
+part 'value_preference.g.dart';
 
-  ValuePreference(String key, String title, this.value,
-      {String prefix, bool enabled = true})
-      : super(key, title, prefix: prefix, enabled: enabled);
-  ValuePreference.section(SectionPreference section, key, title, this.value,
-      {bool enabled = true})
-      : super(key, title, prefix: section.key, enabled: enabled);
+@BuiltValue(instantiable: false)
+abstract class ValuePreference<T> implements Preference {
+  T get value;
+
+  static void _initializeBuilder(ValuePreferenceBuilder b) =>
+      ValuePreference.initBuilder(b);
+  @protected
+  static T initBuilder<T extends ValuePreferenceBuilder>(
+          ValuePreferenceBuilder b) =>
+      Preference.initBuilder(b);
+
+  ValuePreference<T> rebuild(void Function(ValuePreferenceBuilder<T>) updates);
+  ValuePreferenceBuilder<T> toBuilder();
 }

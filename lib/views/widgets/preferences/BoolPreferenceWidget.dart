@@ -25,14 +25,15 @@ class BoolPreferenceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PreferenceListTileWidget<BoolPreference>(
-        initData: getIt
-            .get<SharedPreferencesService>()
-            .loadBoolPreference(_defaultPreference),
-        listTileBuilder: (context, pref) => SwitchListTile(
-              title: Text(pref.title),
-              value: pref.value,
-              onChanged: (value) =>
-                  _notifyChange(BoolPreference(pref.key, pref.title, value)),
-            ));
+      initData: getIt
+          .get<SharedPreferencesService>()
+          .loadBoolPreference(_defaultPreference),
+      listTileBuilder: (context, pref) => SwitchListTile(
+        title: Text(pref.title),
+        value: pref.value,
+        onChanged: (value) =>
+            _notifyChange(pref.rebuild((b) => b..value = value)),
+      ),
+    );
   }
 }

@@ -1,11 +1,20 @@
-import 'package:yaga/model/preferences/section_preference.dart';
-import 'package:yaga/model/preferences/string_preference.dart';
+library preference;
 
-class ChoicePreference extends StringPreference {
-  final Map<String, String> choices;
+import 'package:built_value/built_value.dart';
+import 'package:yaga/model/preferences/value_preference.dart';
 
-  ChoicePreference(key, title, value, this.choices) : super(key, title, value);
-  ChoicePreference.section(
-      SectionPreference section, key, title, value, this.choices)
-      : super.section(section, key, title, value);
+part 'choice_preference.g.dart';
+
+abstract class ChoicePreference
+    implements
+        ValuePreference<String>,
+        Built<ChoicePreference, ChoicePreferenceBuilder> {
+  Map<String, String> get choices;
+
+  static void _initializeBuilder(ChoicePreferenceBuilder b) =>
+      ValuePreference.initBuilder(b);
+
+  factory ChoicePreference([void Function(ChoicePreferenceBuilder) updates]) =
+      _$ChoicePreference;
+  ChoicePreference._();
 }

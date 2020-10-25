@@ -39,3 +39,4 @@ android/key.properties
 fastlane/README.md
 fastlane/report.xml
 android/google-play.json
+**/*.g.dart

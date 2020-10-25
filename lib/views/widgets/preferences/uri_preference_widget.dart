@@ -36,13 +36,7 @@ class UriPreferenceWidget extends StatelessWidget {
         onSelect: (Uri path) {
           Navigator.popUntil(
               context, ModalRoute.withName(SettingsScreen.route));
-          _notifyChange(UriPreference(
-            pref.key,
-            pref.title,
-            path,
-            enabled: pref.enabled,
-            fixedOrigin: pref.fixedOrigin,
-          ));
+          _notifyChange(pref.rebuild((b) => b..value = path));
         },
         fixedOrigin: pref.fixedOrigin,
       ),

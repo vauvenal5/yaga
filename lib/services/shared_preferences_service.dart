@@ -26,22 +26,20 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
   // }
 
   StringListPreference loadStringListPreference(StringListPreference pref) =>
-      StringListPreference(pref.key, pref.title,
-          _instance.getStringList(pref.key) ?? pref.value);
+      pref.rebuild(
+          (b) => b..value = _instance.getStringList(pref.key) ?? pref.value);
 
   Future<bool> saveStringListPreference(StringListPreference pref) =>
       _instance.setStringList(pref.key, pref.value);
 
-  StringPreference loadStringPreference(StringPreference pref) =>
-      StringPreference(
-          pref.key, pref.title, _instance.getString(pref.key) ?? pref.value);
+  StringPreference loadStringPreference(StringPreference pref) => pref
+      .rebuild((b) => b..value = _instance.getString(pref.key) ?? pref.value);
 
-  BoolPreference loadBoolPreference(BoolPreference pref) => BoolPreference(
-      pref.key, pref.title, _instance.getBool(pref.key) ?? pref.value);
+  BoolPreference loadBoolPreference(BoolPreference pref) =>
+      pref.rebuild((b) => b.value = _instance.getBool(pref.key) ?? pref.value);
 
-  ChoicePreference loadChoicePreference(ChoicePreference pref) =>
-      ChoicePreference(pref.key, pref.title,
-          _instance.getString(pref.key) ?? pref.value, pref.choices);
+  ChoicePreference loadChoicePreference(ChoicePreference pref) => pref
+      .rebuild((b) => b.value = _instance.getString(pref.key) ?? pref.value);
 
   Future<bool> saveChoicePreference(ChoicePreference pref) =>
       _instance.setString(pref.key, pref.value);
@@ -55,13 +53,7 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
   UriPreference loadUriPreference(UriPreference pref) {
     String value = _instance.getString(pref.key);
     Uri uri = value != null ? Uri.parse(value) : pref.value;
-    return UriPreference(
-      pref.key,
-      pref.title,
-      uri,
-      enabled: pref.enabled,
-      fixedOrigin: pref.fixedOrigin,
-    );
+    return pref.rebuild((b) => b..value = uri);
   }
 
   Future<bool> saveUriPreference(UriPreference pref) =>
@@ -72,17 +64,7 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
       _instance.setBool(pref.key, overrideValue ?? pref.value);
 
   MappingPreference loadMappingPreference(MappingPreference pref) =>
-      MappingPreference(
-        pref.key,
-        pref.title,
-        pref.remote.value,
-        pref.local.value,
-        active: _instance.getBool(pref.key),
-      );
+      pref.rebuild((b) => b..value = _instance.getBool(pref.key));
 
   Future<bool> removePreference(Preference pref) => _instance.remove(pref.key);
-
-  Future<bool> saveValueStringPref(ValuePreference<String> pref) {}
-
-  Future<bool> saveValueBoolPref(ValuePreference<bool> pref) {}
 }

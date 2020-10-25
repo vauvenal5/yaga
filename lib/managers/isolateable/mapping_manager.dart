@@ -119,13 +119,14 @@ class MappingManager with Isolateable<MappingManager> {
   //todo: check what we are doing with this
   MappingPreference _getDefaultMapping(Uri root) {
     return MappingPreference(
-      "default",
-      "default",
-      this._nextCloudService.getOrigin(),
-      UriUtils.fromUri(
-        uri: root,
-        path: _appendLocalMappingFolder(root.path),
-      ),
+      (builder) => builder
+        ..key = "default"
+        ..title = "default"
+        ..remote.value = this._nextCloudService.getOrigin()
+        ..local.value = UriUtils.fromUri(
+          uri: root,
+          path: _appendLocalMappingFolder(root.path),
+        ),
     );
   }
 

@@ -38,8 +38,7 @@ class ChoicePreferenceWidget extends StatelessWidget {
                   arguments:
                       ChoiceSelectorScreenArguments(pref, (String value) {
                     Navigator.pop(context);
-                    this._notifyChange(ChoicePreference(
-                        pref.key, pref.title, value, pref.choices));
+                    this._notifyChange(pref.rebuild((b) => b..value = value));
                   }, () => Navigator.pop(context))),
             ));
   }

@@ -3,11 +3,13 @@ library preference;
 
 import 'package:built_value/built_value.dart';
 import 'package:yaga/model/preferences/complex_preference.dart';
+import 'package:yaga/model/preferences/serializers/base_type_serializer.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 
 part 'mapping_preference.g.dart';
 
 abstract class MappingPreference
+    with BaseTypeSerializer<bool, ComplexPreference>
     implements
         ComplexPreference,
         Built<MappingPreference, MappingPreferenceBuilder> {

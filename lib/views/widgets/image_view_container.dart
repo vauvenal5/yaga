@@ -56,7 +56,7 @@ class ImageViewContainer extends StatelessWidget {
       StreamBuilder<ChoicePreference>(
         initialData: getIt
             .get<SharedPreferencesService>()
-            .loadChoicePreference(this.viewConfig.view),
+            .loadPreferenceFromString(this.viewConfig.view),
         stream: getIt
             .get<SettingsManager>()
             .updateSettingCommand

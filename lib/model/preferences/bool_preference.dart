@@ -1,11 +1,13 @@
 library preference;
 
 import 'package:built_value/built_value.dart';
+import 'package:yaga/model/preferences/serializers/base_type_serializer.dart';
 import 'package:yaga/model/preferences/value_preference.dart';
 
 part 'bool_preference.g.dart';
 
 abstract class BoolPreference
+    with BaseTypeSerializer<bool, BoolPreference>
     implements
         ValuePreference<bool>,
         Built<BoolPreference, BoolPreferenceBuilder> {

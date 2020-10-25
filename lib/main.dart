@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
         return StreamBuilder<ChoicePreference>(
           initialData: getIt
               .get<SharedPreferencesService>()
-              .loadChoicePreference(GlobalSettingsManager.theme),
+              .loadPreferenceFromString(GlobalSettingsManager.theme),
           stream: settingsManager.updateSettingCommand
               .where((event) => event.key == GlobalSettingsManager.theme.key)
               .where((event) => event is ChoicePreference)

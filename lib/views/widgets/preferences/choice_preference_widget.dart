@@ -29,7 +29,7 @@ class ChoicePreferenceWidget extends StatelessWidget {
     return PreferenceListTileWidget<ChoicePreference>(
         initData: getIt
             .get<SharedPreferencesService>()
-            .loadChoicePreference(_choicePreference),
+            .loadPreferenceFromString(_choicePreference),
         listTileBuilder: (context, pref) => ListTile(
               title: Text(pref.title),
               subtitle: Text(pref.choices[pref.value]),

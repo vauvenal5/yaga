@@ -6,7 +6,7 @@ import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/views/widgets/ok_cancel_button_bar.dart';
-import 'package:yaga/views/widgets/preferences/BoolPreferenceWidget.dart';
+import 'package:yaga/views/widgets/preferences/bool_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/choice_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/mapping_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/section_preference_widget.dart';

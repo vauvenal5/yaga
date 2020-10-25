@@ -73,7 +73,9 @@ class SettingsManager extends SettingsManagerBase {
       UriPreference local =
           _sharedPreferencesService.loadUriPreference(value.local);
       updateSettingCommand(_sharedPreferencesService.loadMappingPreference(
-        MappingPreference.fromSelf(value, local, remote),
+        value.rebuild((b) => b
+          ..remote = remote.toBuilder()
+          ..local = local.toBuilder()),
       ));
     });
   }

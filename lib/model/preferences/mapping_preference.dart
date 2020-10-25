@@ -1,30 +1,31 @@
 //todo: Preference clone functions should be unified
+library preference;
+
+import 'package:built_value/built_value.dart';
 import 'package:yaga/model/preferences/complex_preference.dart';
-import 'package:yaga/model/preferences/section_preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 
-class MappingPreference extends ComplexPreference {
-  final UriPreference remote;
-  final UriPreference local;
+part 'mapping_preference.g.dart';
 
-  MappingPreference(String key, String title, Uri remote, Uri local,
-      {bool active = false})
-      : this.remote = _getRemoteUri(key, remote),
-        this.local = _getLocalUri(key, local),
-        super(key, title, active);
-  MappingPreference.section(SectionPreference section, key, title,
-      {Uri remote, Uri local, bool active = false})
-      : this.remote = _getRemoteUri(key, remote),
-        this.local = _getLocalUri(key, local),
-        super.section(section, key, title, active);
-  MappingPreference.fromSelf(MappingPreference pref, this.local, this.remote)
-      : super(pref.key, pref.title, pref.value);
+abstract class MappingPreference
+    implements
+        ComplexPreference,
+        Built<MappingPreference, MappingPreferenceBuilder> {
+  UriPreference get remote;
+  UriPreference get local;
 
-  static UriPreference _getRemoteUri(String key, Uri remote) =>
-      UriPreference("remote", "Remote Path", remote ?? Uri(),
-          prefix: key, fixedOrigin: true);
+  //todo: still need a solution for key prefixes
+  static void _initializeBuilder(MappingPreferenceBuilder b) =>
+      ComplexPreference.initBuilder<MappingPreferenceBuilder>(b)
+        ..value = true
+        ..remote.key = "remote"
+        ..remote.title = "Remote Path"
+        ..remote.fixedOrigin = true
+        ..local.key = "local"
+        ..local.title = "Local Path"
+        ..local.fixedOrigin = true;
 
-  static UriPreference _getLocalUri(String key, Uri local) =>
-      UriPreference("local", "Local Path", local ?? Uri(),
-          prefix: key, fixedOrigin: true);
+  factory MappingPreference([void Function(MappingPreferenceBuilder) updates]) =
+      _$MappingPreference;
+  MappingPreference._();
 }

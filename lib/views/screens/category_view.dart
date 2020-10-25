@@ -47,11 +47,14 @@ class _CategoryViewState extends State<CategoryView>
 
   @override
   void initState() {
-    SectionPreference general = SectionPreference.route(
-        widget._categoryViewConfig.pref, "general", "General");
-    this._path = UriPreference.section(
-        general, "path", "Path", widget._categoryViewConfig.defaultPath,
-        enabled: widget._categoryViewConfig.pathEnabled);
+    SectionPreference general = SectionPreference((b) => b
+      ..key = Preference.prefixKey(widget._categoryViewConfig.pref, "general")
+      ..title = "General");
+    this._path = UriPreference((b) => b
+      ..key = general.prepareKey("path")
+      ..title = "Path"
+      ..value = widget._categoryViewConfig.defaultPath
+      ..enabled = widget._categoryViewConfig.pathEnabled);
     this._viewConfig = ViewConfiguration(
       route: widget._categoryViewConfig.pref,
       defaultView: CategoryViewExp.viewKey,
@@ -72,8 +75,8 @@ class _CategoryViewState extends State<CategoryView>
     //todo: refactor
     getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt
         .get<SettingsManager>()
-        .persistUriSettingCommand(UriPreference.section(general, "path", "Path",
-            getIt.get<SystemLocationService>().externalAppDirUri)));
+        .persistUriSettingCommand(this._path.rebuild((b) =>
+            b..value = getIt.get<SystemLocationService>().externalAppDirUri)));
 
     //todo: is it still necessary for tab to be a stateful widget?
     //image state wrapper ist a widget local manager

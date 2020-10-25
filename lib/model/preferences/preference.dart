@@ -1,11 +1,22 @@
-abstract class Preference {
-  String key;
-  String title;
-  bool enabled;
+library preference;
 
-  Preference(this.key, this.title, {String prefix, this.enabled = true}) {
-    if (prefix != null) {
-      this.key = prefix + ":" + this.key;
-    }
-  }
+import 'package:built_value/built_value.dart';
+import 'package:flutter/foundation.dart';
+
+part 'preference.g.dart';
+
+@BuiltValue(instantiable: false)
+abstract class Preference {
+  String get key;
+  String get title;
+  bool get enabled;
+
+  static String prefixKey(String prefix, String key) => "$prefix:$key";
+
+  @protected
+  static T initBuilder<T extends PreferenceBuilder>(PreferenceBuilder b) =>
+      b..enabled = true;
+
+  Preference rebuild(void Function(PreferenceBuilder) updates);
+  PreferenceBuilder toBuilder();
 }

@@ -21,7 +21,8 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
   UriPreference _remote;
   UriPreference _local;
 
-  _MappingPreferenceState() {
+  @override
+  void initState() {
     this._remote = widget.pref.remote;
     this._local = widget.pref.local;
 
@@ -39,6 +40,8 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
         _local = pref;
       }
     });
+
+    super.initState();
   }
 
   @override
@@ -59,11 +62,9 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
             onCommit: () {
               Navigator.pop(context);
               getIt.get<SettingsManager>().persistMappingPreferenceCommand(
-                    MappingPreference.fromSelf(
-                      pref,
-                      _local,
-                      _remote,
-                    ),
+                    pref.rebuild((b) => b
+                      ..local = _local.toBuilder()
+                      ..remote = _remote.toBuilder()),
                   );
             },
           ),

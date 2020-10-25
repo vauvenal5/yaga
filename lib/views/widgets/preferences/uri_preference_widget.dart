@@ -59,7 +59,7 @@ class UriPreferenceWidget extends StatelessWidget {
     return PreferenceListTileWidget<UriPreference>(
         initData: getIt
             .get<SharedPreferencesService>()
-            .loadUriPreference(_defaultPref),
+            .loadPreferenceFromString(_defaultPref),
         listTileBuilder: (context, pref) => ListTile(
               enabled: pref.enabled,
               title: Text(pref.title),

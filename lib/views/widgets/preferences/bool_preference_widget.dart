@@ -27,7 +27,7 @@ class BoolPreferenceWidget extends StatelessWidget {
     return PreferenceListTileWidget<BoolPreference>(
       initData: getIt
           .get<SharedPreferencesService>()
-          .loadBoolPreference(_defaultPreference),
+          .loadPreferenceFromBool(_defaultPreference),
       listTileBuilder: (context, pref) => SwitchListTile(
         title: Text(pref.title),
         value: pref.value,

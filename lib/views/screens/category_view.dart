@@ -83,11 +83,11 @@ class _CategoryViewState extends State<CategoryView>
     this._fileListLocalManager = new FileListLocalManager(
         getIt
             .get<SharedPreferencesService>()
-            .loadUriPreference(this._path)
+            .loadPreferenceFromString(this._path)
             .value,
         getIt
             .get<SharedPreferencesService>()
-            .loadBoolPreference(this._viewConfig.recursive));
+            .loadPreferenceFromBool(this._viewConfig.recursive));
 
     //todo: this could be moved into imageStateWrapper
     _updateUriSubscription = getIt

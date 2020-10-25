@@ -15,7 +15,7 @@ class StringPreferenceWidget extends StatelessWidget {
     return PreferenceListTileWidget<StringPreference>(
         initData: getIt
             .get<SharedPreferencesService>()
-            .loadStringPreference(_defaultPreference),
+            .loadPreferenceFromString(_defaultPreference),
         listTileBuilder: (context, pref) => ListTile(
               title: Text(pref.title),
               subtitle: Text(pref.value),

@@ -10,8 +10,6 @@ part 'value_preference.g.dart';
 abstract class ValuePreference<T> implements Preference {
   T get value;
 
-  static void _initializeBuilder(ValuePreferenceBuilder b) =>
-      ValuePreference.initBuilder(b);
   @protected
   static T initBuilder<T extends ValuePreferenceBuilder>(
           ValuePreferenceBuilder b) =>

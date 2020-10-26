@@ -1,25 +1,21 @@
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager_base.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
-import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
-import 'package:yaga/model/preferences/string_preference.dart';
+import 'package:yaga/model/preferences/serializable_preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/preferences/value_preference.dart';
-import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 
 typedef PrefFunction = T Function<T extends ValuePreference>(T);
 
 class SettingsManager extends SettingsManagerBase {
   SharedPreferencesService _sharedPreferencesService;
-  NextCloudService _nextCloudService;
 
-  RxCommand<StringPreference, void> persistStringSettingCommand;
+  RxCommand<SerializablePreference<String, dynamic, dynamic>, void>
+      persistStringSettingCommand;
   RxCommand<BoolPreference, void> persistBoolSettingCommand;
-  RxCommand<UriPreference, void> persistUriSettingCommand;
-  RxCommand<ChoicePreference, void> persistChoiceSettingCommand;
   RxCommand<MappingPreference, MappingPreference>
       persistMappingPreferenceCommand;
   RxCommand<MappingPreference, MappingPreference>
@@ -36,16 +32,6 @@ class SettingsManager extends SettingsManagerBase {
         _sharedPreferencesService.savePreferenceToBool(param).then((value) =>
             _checkPersistResult(value, param,
                 _sharedPreferencesService.loadPreferenceFromBool)));
-
-    persistUriSettingCommand = RxCommand.createAsync((param) =>
-        _sharedPreferencesService.savePreferenceToString(param).then((value) =>
-            _checkPersistResult(value, param,
-                _sharedPreferencesService.loadPreferenceFromString)));
-
-    persistChoiceSettingCommand = RxCommand.createAsync((param) =>
-        _sharedPreferencesService.savePreferenceToString(param).then((value) =>
-            _checkPersistResult(value, param,
-                _sharedPreferencesService.loadPreferenceFromString)));
 
     persistMappingPreferenceCommand = RxCommand.createSync((param) => param);
     persistMappingPreferenceCommand.listen((value) async {

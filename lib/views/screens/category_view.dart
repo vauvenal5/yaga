@@ -75,7 +75,7 @@ class _CategoryViewState extends State<CategoryView>
     //todo: refactor
     getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt
         .get<SettingsManager>()
-        .persistUriSettingCommand(this._path.rebuild((b) =>
+        .persistStringSettingCommand(this._path.rebuild((b) =>
             b..value = getIt.get<SystemLocationService>().externalAppDirUri)));
 
     //todo: is it still necessary for tab to be a stateful widget?

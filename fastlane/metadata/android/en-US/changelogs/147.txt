@@ -1,0 +1,2 @@
+- fix recursive loading when offline
+- fix recursive loading for local device

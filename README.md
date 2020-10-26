@@ -9,46 +9,26 @@
 * [iOS Support](#ios-support)
     * [Necessary work](#necessary-work)
 
-## Gallery
-
-<p float="left">
-   <img src="screenshots/Screenshot_1596214419.png" alt="Clean Installation 1" width="250"/>
-   <img src="screenshots/Screenshot_1596214426.png" alt="Clean Installation 2" width="250"/>
-   <img src="screenshots/Screenshot_1596214442.png" alt="Clean Installation 3" width="250"/>
-   <img src="screenshots/Screenshot_1596214449.png" alt="Login Process 1" width="250"/>
-   <img src="screenshots/Screenshot_1596214461.png" alt="Login Process 2" width="250"/>
-   <img src="screenshots/Screenshot_1596214498.png" alt="Login Process 3" width="250"/>
-   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" alt="Login Process 4" width="250"/>
-   <img src="screenshots/Screenshot_1596214531.png" alt="Login Process 5" width="250"/>
-   <img src="screenshots/Screenshot_1596214569.png" alt="Login Process 6" width="250"/>
-   <img src="screenshots/Screenshot_1596214591.png" alt="Login Process 7" width="250"/>
-   <img src="screenshots/Screenshot_1596214907.png" alt="Setting Folder 1" width="250"/>
-   <img src="screenshots/Screenshot_1596214912.png" alt="Setting Folder 2" width="250"/>
-   <img src="screenshots/Screenshot_1596215077.png" alt="Category View 1" width="250"/>
-   <img src="screenshots/Screenshot_1596215087.png" alt="Image View" width="250"/>
-   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" alt="Category View 2" width="250"/>
-   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" alt="Share Image" width="250"/>
-   <img src="screenshots/Screenshot_1596215143.png" alt="Browse View 1" width="250"/>
-   <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" alt="Browse View 2" width="250"/>
-   <img src="screenshots/Screenshot_1596215176.png" alt="Browse View 3" width="250"/>
-   <img src="screenshots/Screenshot_1596215217.png" alt="Mapping Setting 1" width="250"/>
-   <img src="screenshots/Screenshot_1596215222.png" alt="Mapping Setting 2" width="250"/>
-</p>
-
 ## State of Yaga
 
-This app is in an early alpha stage. It is tested and fairly stable on an Android One device with Android version 10.
+This app is in an open beta stage. It is tested and fairly stable on an Android One device with Android version 10. You can download it from Google Play. For more information on how to use the app [read the docs](https://vauvenal5.github.io/yaga/).
+
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
+    alt="Get it on Google Play"
+    height="80"
+    width="250">](https://play.google.com/store/apps/details?id=com.github.vauvenal5.yaga){: .text-decoration: none;}
 
 ### Features
 - Nextcloud login flow is implemented
-    - Flutter WebView itself is in an early stage and errors can occure while in the webview. However simply retrying usually fixes the issue.
+    - Flutter WebView is used and some strange behavior can come from bugs in there. Usually retrying fixes the issue.
     - Login token is being persisted with the `flutter_secure_storage` plugin.
 - Category view
-    - Displays images in groups sorted by date modified.
+    - Displays images in groups sorted by date modified, as list, or as simple grid.
     - Path to display can be set in the view settings.
     - Path can be local or remote.
 - Browse view
     - Allows for browsing local and remote directories.
+    - Has a focus mode implemented which allows to view current folder like in Category view without changing settings.
 - Image view
     - Opening an image from the category or browse view will result in a image view, displaying the image.
     - If opened from category view, displayed images are currently limited to the choosen date.
@@ -61,21 +41,19 @@ This app is in an early alpha stage. It is tested and fairly stable on an Androi
     - Previews are always mapped to cache.
 
 ### Next Steps
-The following things are on my roadmap and will be developed during the next months, however, not necessarily in this order.
+The following things are on my roadmap and will be developed during the next months, however, not necessarily in this order. See also [issues](https://github.com/vauvenal5/yaga/issues) for a up to date state of current issues.
 - [ ] Improve autmated test coverage.
 - [ ] Clean up code base.
 - [ ] Add favourite places to browse view.
-- [ ] **Publish on F-Droid.**
+- [ ] **Publish on F-Droid. - waiting for merge**
 - [ ] Allow for moving/deleting images.
 - [ ] Multiselect.
-- [ ] **Improve readme. (add screenshots)**
-- [ ] Move long running tasks into background.
-- [ ] Local/Remote search.
 
-## Getting Started
+## Building from Sources
 
 - Generate your own keystore as described in the flutter docs.
-- From the main directory run: `flutter build apk --flavor local`
+- The project uses generation for some classes so you have to first run `flutter pub run build_runner build --delete-conflicting-outputs`
+- From the main directory then run: `flutter build apk --flavor play`
 - Copy the app to your device and make a local installation.
 
 ## Recomendations

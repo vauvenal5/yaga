@@ -43,3 +43,7 @@ The small token in the right lower corner of each image shows you the storage st
 <img src="{{site.data.yaga.asset_url}}/assets/images/cloud.png" alt="Cloud" width="100"/>
 <img class="ml-2" src="{{site.data.yaga.asset_url}}/assets/images/check.png" alt="Check" width="100"/>
 <img class="ml-2" src="{{site.data.yaga.asset_url}}/assets/images/phone.png" alt="Phone" width="100"/>
+
+## Focus Mode
+
+Focus mode exists only in the Browse View and alows you to open the current folder in a Home View like view without having to change the path setting of your Home View. This is especially usefull if you want to have a look on recursive files from the current folder.

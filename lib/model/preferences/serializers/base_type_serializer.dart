@@ -1,8 +1,8 @@
-import 'package:yaga/model/preferences/serializers/preference_serializer.dart';
+import 'package:yaga/model/preferences/serializable_preference.dart';
 import 'package:yaga/model/preferences/value_preference.dart';
 
 mixin BaseTypeSerializer<T, P extends ValuePreference<T>>
-    implements PreferenceSerializer<T, T, P> {
+    implements SerializablePreference<T, T, P> {
   @override
   T serialize() {
     return this.value;

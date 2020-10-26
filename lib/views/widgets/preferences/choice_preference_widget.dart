@@ -21,7 +21,7 @@ class ChoicePreferenceWidget extends StatelessWidget {
       onChangeCommand(pref);
       return;
     }
-    getIt.get<SettingsManager>().persistChoiceSettingCommand(pref);
+    getIt.get<SettingsManager>().persistStringSettingCommand(pref);
   }
 
   @override

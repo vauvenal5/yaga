@@ -22,7 +22,7 @@ class UriPreferenceWidget extends StatelessWidget {
       onChangeCommand(pref);
       return;
     }
-    getIt.get<SettingsManager>().persistUriSettingCommand(pref);
+    getIt.get<SettingsManager>().persistStringSettingCommand(pref);
   }
 
   void _pushToNavigation(BuildContext context, UriPreference pref, Uri uri) {

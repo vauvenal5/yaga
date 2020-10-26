@@ -16,7 +16,7 @@ This app is in an open beta stage. It is tested and fairly stable on an Android 
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
     alt="Get it on Google Play"
     height="80"
-    width="250">](https://play.google.com/store/apps/details?id=com.github.vauvenal5.yaga){: .text-decoration: none;}
+    width="250">](https://play.google.com/store/apps/details?id=com.github.vauvenal5.yaga)
 
 ### Features
 - Nextcloud login flow is implemented

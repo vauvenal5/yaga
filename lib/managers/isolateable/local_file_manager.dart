@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -53,18 +52,7 @@ class LocalFileManager
   }
 
   @override
-  Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false}) {
-    return this.listFiles(uri).toList().asStream().flatMap((value) {
-      if (recursive) {
-        return Rx.merge([
-          Stream.value(value),
-          Stream.fromIterable(value)
-              .where((event) => event.isDirectory)
-              .flatMap(
-                  (value) => this.listFileList(value.uri, recursive: recursive))
-        ]);
-      }
-      return Stream.value(value);
-    });
+  Stream<List<NcFile>> listFileList(Uri uri) {
+    return this.listFiles(uri).toList().asStream();
   }
 }

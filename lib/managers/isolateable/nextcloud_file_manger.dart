@@ -70,13 +70,12 @@ class NextcloudFileManager
     });
   }
 
-  Stream<NcFile> _listLocalFiles(Uri uri, {bool recursive = false}) {
+  Stream<NcFile> _listLocalFiles(Uri uri) {
     return this
         ._mappingManager
         .mapToLocalUri(uri)
         .asStream()
-        .flatMap(
-            (value) => this._fileManager.listFiles(value, recursive: recursive))
+        .flatMap((value) => this._fileManager.listFiles(value))
         .asyncMap((file) async {
       file.uri = await _mappingManager.mapToRemoteUri(file.uri, uri);
       //todo: should this be a FileSystemEntity?
@@ -89,13 +88,12 @@ class NextcloudFileManager
     });
   }
 
-  Stream<NcFile> _listTmpFiles(Uri uri, {bool recursive = false}) {
+  Stream<NcFile> _listTmpFiles(Uri uri) {
     return this
         ._mappingManager
         .mapToTmpUri(uri)
         .asStream()
-        .flatMap((previewUri) =>
-            this._fileManager.listFiles(previewUri, recursive: recursive))
+        .flatMap((previewUri) => this._fileManager.listFiles(previewUri))
         .asyncMap((file) async {
       file.uri = await _mappingManager.mapTmpToRemoteUri(file.uri, uri);
       //todo: should this be a FileSystemEntity?
@@ -110,11 +108,11 @@ class NextcloudFileManager
   }
 
   @override
-  Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false}) {
+  Stream<List<NcFile>> listFileList(Uri uri) {
     //todo: add uri check
     _logger.d("Listing... $uri");
     return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
-          this._listLocalFileList(uri, recursive: recursive),
+          this._listLocalFileList(uri),
           this
               ._listNextcloudFiles(uri)
               .doOnData((file) => _syncManager.addRemoteFile(uri, file))
@@ -124,21 +122,6 @@ class NextcloudFileManager
               .toList()
               .asStream()
               .onErrorReturn([])
-              .flatMap((list) {
-                if (!recursive) {
-                  return Stream.value(list);
-                }
-
-                return Rx.merge([
-                  Stream.value(list),
-                  Stream.fromIterable(list)
-                      .where((file) => file.isDirectory)
-                      .doOnData((file) => _logger
-                          .d("Emiting from recursive. (${file.uri.path})"))
-                      .flatMap((file) =>
-                          this.listFileList(file.uri, recursive: recursive))
-                ]);
-              })
         ]).doOnData((event) {
           _logger.w("Emiting list! (${uri})");
         }).doOnDone(() =>
@@ -151,11 +134,8 @@ class NextcloudFileManager
                 }))));
   }
 
-  Stream<List<NcFile>> _listLocalFileList(Uri uri, {bool recursive = false}) {
-    return Rx.merge([
-      this._listTmpFiles(uri, recursive: recursive),
-      this._listLocalFiles(uri, recursive: recursive)
-    ])
+  Stream<List<NcFile>> _listLocalFileList(Uri uri) {
+    return Rx.merge([this._listTmpFiles(uri), this._listLocalFiles(uri)])
         .doOnData((file) => _syncManager.addFile(uri, file))
         .distinctUnique()
         .toList()

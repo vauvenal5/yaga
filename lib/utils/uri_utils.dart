@@ -48,6 +48,10 @@ class UriUtils {
   }
 
   static String getNameFromUri(Uri uri) {
+    if (uri.pathSegments.isEmpty) {
+      return uri.host;
+    }
+
     if (uri.pathSegments.last.isNotEmpty) {
       return uri.pathSegments.last;
     }

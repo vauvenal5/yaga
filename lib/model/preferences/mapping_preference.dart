@@ -3,6 +3,7 @@ library preference;
 
 import 'package:built_value/built_value.dart';
 import 'package:yaga/model/preferences/complex_preference.dart';
+import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/serializers/base_type_serializer.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 
@@ -26,6 +27,10 @@ abstract class MappingPreference
         ..local.key = "local"
         ..local.title = "Local Path"
         ..local.fixedOrigin = true;
+
+  static void _finalizeBuilder(MappingPreferenceBuilder b) => b
+    ..remote.key = Preference.prefixKey(b.key, b.remote.key)
+    ..local.key = Preference.prefixKey(b.key, b.local.key);
 
   factory MappingPreference([void Function(MappingPreferenceBuilder) updates]) =
       _$MappingPreference;

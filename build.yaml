@@ -1,0 +1,8 @@
+targets:
+  $default:
+    auto_apply_builders: false
+    builders:
+      "built_value_generator:built_value":
+        enabled: true
+        generate_for:
+          - lib/model/preferences/*.dart

@@ -16,8 +16,10 @@ class ImageScreen extends StatefulWidget {
   final List<NcFile> _images;
   final PageController pageController;
   final String title;
+  final IconButton Function(BuildContext, NcFile) mainActionBuilder;
 
-  ImageScreen(this._images, int index, {this.title}) : pageController = PageController(initialPage: index);
+  ImageScreen(this._images, int index, {this.title, this.mainActionBuilder})
+      : pageController = PageController(initialPage: index);
 
   @override
   State<StatefulWidget> createState() => ImageScreenState();
@@ -43,67 +45,71 @@ class ImageScreenState extends State<ImageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //todo: move to builder property of calling screen
+    IconButton defaultShare = IconButton(
+      icon: Icon(Icons.share),
+      onPressed: () async => await WcFlutterShare.share(
+          //todo: dp we need to move this to a service or controller?
+          sharePopupTitle: 'share',
+          fileName: widget._images[_currentIndex].name,
+          mimeType: 'image/jpeg', //todo: get real mime type
+          bytesOfFile:
+              widget._images[_currentIndex].localFile.readAsBytesSync()),
+    );
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title??_title),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.share), 
-            onPressed: () async => await WcFlutterShare.share( //todo: dp we need to move this to a service or controller?
-	            sharePopupTitle: 'share',
-              fileName: widget._images[_currentIndex].name,
-              mimeType: 'image/jpeg', //todo: get real mime type
-              bytesOfFile: widget._images[_currentIndex].localFile.readAsBytesSync()
-            ),
-          )
-        ],
-      ),
-      body: 
-      Stack(
-        children: [
+        appBar: AppBar(
+          title: Text(widget.title ?? _title),
+          actions: <Widget>[
+            widget.mainActionBuilder
+                    ?.call(context, widget._images[_currentIndex]) ??
+                defaultShare
+          ],
+        ),
+        body: Stack(children: [
           PhotoViewGallery.builder(
             pageController: widget.pageController,
             onPageChanged: _onPageChanged,
-            itemCount: widget._images.length, 
+            itemCount: widget._images.length,
             builder: (BuildContext context, int index) {
               NcFile image = widget._images[index];
 
               Future<File> localFileAvailable = Future.value(image.localFile);
-              if(!image.localFile.existsSync()) {
-                localFileAvailable = getIt.get<FileManager>().updateImageCommand
-                  .where((event) => event.uri.path == image.uri.path)
-                  .map((event) => event.localFile)
-                  .first;
+              if (!image.localFile.existsSync()) {
+                localFileAvailable = getIt
+                    .get<FileManager>()
+                    .updateImageCommand
+                    .where((event) => event.uri.path == image.uri.path)
+                    .map((event) => event.localFile)
+                    .first;
                 getIt.get<FileManager>().downloadImageCommand(image);
               }
 
               return PhotoViewGalleryPageOptions(
                 key: ValueKey(image.uri.path),
                 minScale: PhotoViewComputedScale.contained,
-                imageProvider: DownloadFileImage(image.localFile, localFileAvailable),
+                imageProvider:
+                    DownloadFileImage(image.localFile, localFileAvailable),
               );
             },
             loadingBuilder: (context, event) {
-              bool previewExists = widget._images[_currentIndex].previewFile != null && widget._images[_currentIndex].previewFile.existsSync();
-              return Stack(
-                children: [
-                  Container(
-                    color: Colors.black,
-                    child: previewExists ? Image.file(
-                      widget._images[_currentIndex].previewFile, 
-                      width: double.infinity, 
-                      height: double.infinity, 
-                      fit: BoxFit.contain
-                    ) : null,
-                  ),
-                  LinearProgressIndicator()
-                ]
-              );
+              bool previewExists =
+                  widget._images[_currentIndex].previewFile != null &&
+                      widget._images[_currentIndex].previewFile.existsSync();
+              return Stack(children: [
+                Container(
+                  color: Colors.black,
+                  child: previewExists
+                      ? Image.file(widget._images[_currentIndex].previewFile,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.contain)
+                      : null,
+                ),
+                LinearProgressIndicator()
+              ]);
             },
           ),
-        ]
-      )
-    );
+        ]));
   }
-
 }

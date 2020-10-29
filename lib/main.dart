@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
+import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/yaga_router.dart';
 import 'package:yaga/views/screens/splash_screen.dart';
-import 'package:yaga/views/screens/yaga_home_screen.dart';
 
 void main() {
   setupServiceLocator();
@@ -42,6 +42,7 @@ class MyApp extends StatelessWidget {
         }
 
         var settingsManager = getIt.get<SettingsManager>();
+        var intentService = getIt.get<IntentService>();
 
         return StreamBuilder<ChoicePreference>(
           initialData: getIt
@@ -57,7 +58,8 @@ class MyApp extends StatelessWidget {
                 title: title,
                 theme: light,
                 darkTheme: dark,
-                initialRoute: YagaHomeScreen.route,
+                initialRoute: YagaRouter.getInitialRoute(
+                    intentService.getCachedIntentAction()),
                 onGenerateRoute: YagaRouter.generateRoute,
               );
             }
@@ -65,7 +67,8 @@ class MyApp extends StatelessWidget {
             return MaterialApp(
               title: title,
               theme: snapshot.data.value == "light" ? light : dark,
-              initialRoute: YagaHomeScreen.route,
+              initialRoute: YagaRouter.getInitialRoute(
+                  intentService.getCachedIntentAction()),
               onGenerateRoute: YagaRouter.generateRoute,
             );
           },

@@ -9,7 +9,7 @@ import 'package:yaga/views/screens/browse_view.dart';
 enum YagaHomeTab { grid, folder }
 
 class YagaHomeScreen extends StatefulWidget {
-  static const String route = "/";
+  static const String route = "home://";
 
   @override
   _YagaHomeScreenState createState() => _YagaHomeScreenState();

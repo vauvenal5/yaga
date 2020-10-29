@@ -11,6 +11,7 @@ import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/managers/isolateable/sync_manager.dart';
 import 'package:yaga/managers/tab_manager.dart';
+import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
@@ -41,6 +42,8 @@ void setupServiceLocator() {
       ).init());
   getIt.registerSingletonAsync<SecureStorageService>(
       () => SecureStorageService().init());
+  getIt.registerSingletonAsync<IntentService>(
+      () async => IntentService().init());
 
   // Managers
   getIt.registerSingletonAsync<TabManager>(() async => TabManager());

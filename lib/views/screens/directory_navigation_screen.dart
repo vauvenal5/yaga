@@ -70,15 +70,7 @@ class DirectoryNavigationScreen extends StatelessWidget {
       if (route.settings.arguments is NavigatableScreenArguments) {
         NavigatableScreenArguments args =
             route.settings.arguments as NavigatableScreenArguments;
-        if (args.uri.toString() == path.toString()) {
-          return true;
-        }
-        //when the root has to be changed
-        if (args.uri.scheme != path.scheme &&
-            UriUtils.getRootFromUri(args.uri).toString() ==
-                args.uri.toString()) {
-          return true;
-        }
+        return _popCheck(args.uri, path);
       }
 
       return false;
@@ -88,6 +80,19 @@ class DirectoryNavigationScreen extends StatelessWidget {
       Navigator.pushReplacementNamed(context, _getRoute(),
           arguments: _getSelfArgs(path));
     }
+  }
+
+  bool _popCheck(Uri uri, Uri path) {
+    if (uri.toString() == path.toString()) {
+      return true;
+    }
+    //when the root has to be changed
+    if (uri.scheme != path.scheme &&
+        UriUtils.getRootFromUri(uri).toString() == uri.toString()) {
+      return true;
+    }
+
+    return false;
   }
 
   @override

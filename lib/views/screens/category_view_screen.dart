@@ -6,7 +6,6 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/category_view_config.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preferences/preference.dart';
-import 'package:yaga/model/preferences/section_preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
@@ -27,34 +26,27 @@ import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 
 enum CategoryViewMenu { settings }
 
-abstract class CategoryView extends StatefulWidget {
+abstract class CategoryViewScreen extends StatefulWidget {
   final CategoryViewConfig _categoryViewConfig;
 
-  CategoryView(this._categoryViewConfig);
+  CategoryViewScreen(this._categoryViewConfig);
 
   @override
-  _CategoryViewState createState() => _CategoryViewState();
+  _CategoryViewScreenState createState() => _CategoryViewScreenState();
 }
 
-class _CategoryViewState extends State<CategoryView>
-    with AutomaticKeepAliveClientMixin<CategoryView> {
+class _CategoryViewScreenState extends State<CategoryViewScreen>
+    with AutomaticKeepAliveClientMixin<CategoryViewScreen> {
   final List<Preference> _defaultViewPreferences = [];
-  UriPreference _path;
   ViewConfiguration _viewConfig;
+
+  // GeneralViewConfig _generalViewConfig;
 
   StreamSubscription<UriPreference> _updateUriSubscription;
   FileListLocalManager _fileListLocalManager;
 
   @override
   void initState() {
-    SectionPreference general = SectionPreference((b) => b
-      ..key = Preference.prefixKey(widget._categoryViewConfig.pref, "general")
-      ..title = "General");
-    this._path = UriPreference((b) => b
-      ..key = general.prepareKey("path")
-      ..title = "Path"
-      ..value = widget._categoryViewConfig.defaultPath
-      ..enabled = widget._categoryViewConfig.pathEnabled);
     this._viewConfig = ViewConfiguration(
       route: widget._categoryViewConfig.pref,
       defaultView: CategoryViewExp.viewKey,
@@ -66,8 +58,12 @@ class _CategoryViewState extends State<CategoryView>
       ),
     );
 
-    this._defaultViewPreferences.add(general);
-    this._defaultViewPreferences.add(_path);
+    this
+        ._defaultViewPreferences
+        .add(widget._categoryViewConfig.generalViewConfig.general);
+    this
+        ._defaultViewPreferences
+        .add(widget._categoryViewConfig.generalViewConfig.path);
     this._defaultViewPreferences.add(this._viewConfig.section);
     this._defaultViewPreferences.add(this._viewConfig.recursive);
     this._defaultViewPreferences.add(this._viewConfig.view);
@@ -75,15 +71,17 @@ class _CategoryViewState extends State<CategoryView>
     //todo: refactor
     getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt
         .get<SettingsManager>()
-        .persistStringSettingCommand(this._path.rebuild((b) =>
-            b..value = getIt.get<SystemLocationService>().externalAppDirUri)));
+        .persistStringSettingCommand(
+            widget._categoryViewConfig.generalViewConfig.path.rebuild((b) => b
+              ..value = getIt.get<SystemLocationService>().externalAppDirUri)));
 
     //todo: is it still necessary for tab to be a stateful widget?
     //image state wrapper ist a widget local manager
     this._fileListLocalManager = new FileListLocalManager(
         getIt
             .get<SharedPreferencesService>()
-            .loadPreferenceFromString(this._path)
+            .loadPreferenceFromString(
+                widget._categoryViewConfig.generalViewConfig.path)
             .value,
         getIt
             .get<SharedPreferencesService>()
@@ -93,7 +91,8 @@ class _CategoryViewState extends State<CategoryView>
     _updateUriSubscription = getIt
         .get<SettingsManager>()
         .updateSettingCommand
-        .where((event) => event.key == this._path.key)
+        .where((event) =>
+            event.key == widget._categoryViewConfig.generalViewConfig.path.key)
         .map((event) => event as UriPreference)
         .listen((event) {
       this._fileListLocalManager.uri = event.value;

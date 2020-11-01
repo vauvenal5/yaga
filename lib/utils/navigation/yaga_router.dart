@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/model/route_args/choice_selector_screen_arguments.dart';
-import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/focus_view_arguments.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/views/screens/choice_selector_screen.dart';
-import 'package:yaga/views/screens/directory_navigation_screen.dart';
 import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/image_selector_screen.dart';
@@ -20,17 +18,6 @@ import 'package:logger/logger.dart';
 
 class YagaRouter {
   static Logger _logger = getLogger(YagaRouter);
-
-  static String getInitialRoute(String intentAction) {
-    _logger.i("Setting main view based on intent-action: $intentAction");
-
-    //todo: find plugin with defined constants
-    if (intentAction == "android.intent.action.GET_CONTENT") {
-      return ImageSelectorScreen.route;
-    }
-
-    return YagaHomeScreen.route;
-  }
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -58,17 +45,17 @@ class YagaRouter {
                   title: pathSelectorScreenArguments.title,
                   fixedOrigin: pathSelectorScreenArguments.fixedOrigin,
                 ));
-      case DirectoryNavigationScreen.route:
-        DirectoryNavigationScreenArguments args =
-            settings.arguments as DirectoryNavigationScreenArguments;
-        return MaterialPageRoute(
-            settings: settings,
-            builder: (context) => DirectoryNavigationScreen(
-                  uri: args.uri,
-                  title: args.title,
-                  bottomBarBuilder: args.bottomBarBuilder,
-                  viewConfig: args.viewConfig,
-                ));
+      // case DirectoryNavigationScreen.route:
+      //   DirectoryNavigationScreenArguments args =
+      //       settings.arguments as DirectoryNavigationScreenArguments;
+      //   return MaterialPageRoute(
+      //       settings: settings,
+      //       builder: (context) => DirectoryNavigator(
+      //             args.uri,
+      //             args.title,
+      //             args.bottomBarBuilder,
+      //             args.viewConfig,
+      //           ));
       case NextCloudAddressScreen.route:
         return MaterialPageRoute(
             settings: settings, builder: (context) => NextCloudAddressScreen());

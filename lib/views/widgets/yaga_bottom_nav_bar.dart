@@ -13,12 +13,6 @@ class YagaBottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: _getCurrentIndex(),
       onTap: (index) {
-        Navigator.popUntil(context, ModalRoute.withName(YagaHomeScreen.route));
-
-        if (index == _getCurrentIndex()) {
-          return;
-        }
-
         switch (index) {
           case 1:
             getIt.get<TabManager>().tabChangedCommand(YagaHomeTab.folder);

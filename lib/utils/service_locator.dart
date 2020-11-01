@@ -7,6 +7,7 @@ import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
 import 'package:yaga/managers/isolateable/local_file_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
+import 'package:yaga/managers/navigation_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/managers/isolateable/sync_manager.dart';
@@ -97,6 +98,8 @@ void setupServiceLocator() {
           .init());
 
   getIt.registerSingletonAsync(() async => await PackageInfo.fromPlatform());
+
+  getIt.registerSingletonAsync(() async => NavigationManager());
 }
 
 void setupIsolatedServiceLocator(InitMsg init) {

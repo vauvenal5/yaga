@@ -43,28 +43,18 @@ class UriPreferenceWidget extends StatelessWidget {
     );
   }
 
-  //todo: track issue https://github.com/flutter/flutter/issues/45938 and improve this madness when possible
-  void _pushViews(BuildContext context, UriPreference pref) {
-    Uri uri = pref.value;
-    _pushToNavigation(context, pref, UriUtils.getRootFromUri(uri));
-    int index = 0;
-    uri.pathSegments.where((element) => element.isNotEmpty).forEach((segment) {
-      _pushToNavigation(
-          context, pref, UriUtils.fromUriPathSegments(uri, index++));
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return PreferenceListTileWidget<UriPreference>(
-        initData: getIt
-            .get<SharedPreferencesService>()
-            .loadPreferenceFromString(_defaultPref),
-        listTileBuilder: (context, pref) => ListTile(
-              enabled: pref.enabled,
-              title: Text(pref.title),
-              subtitle: Text(pref.value.toString()),
-              onTap: () => _pushViews(context, pref),
-            ));
+      initData: getIt
+          .get<SharedPreferencesService>()
+          .loadPreferenceFromString(_defaultPref),
+      listTileBuilder: (context, pref) => ListTile(
+        enabled: pref.enabled,
+        title: Text(pref.title),
+        subtitle: Text(pref.value.toString()),
+        onTap: () => _pushToNavigation(context, pref, pref.value),
+      ),
+    );
   }
 }

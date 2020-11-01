@@ -6,7 +6,6 @@ import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart
 import 'package:yaga/model/route_args/focus_view_arguments.dart';
 import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
-import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/image_search.dart';
@@ -19,99 +18,68 @@ import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 enum BrowseViewMenu { settings, focus }
 
 //todo: rename this since it is also used for browse view... maybe clean up a little
-class DirectoryNavigationScreen extends StatelessWidget {
+class DirectoryTraversalPage extends Page {
   static const String route = "/directoryNavigationScreen";
 
   final ViewConfiguration viewConfig;
   final FileListLocalManager _fileListLocalManager;
   final String title;
   final Widget Function(BuildContext, Uri) bottomBarBuilder;
+  // final Function(Uri) navigate;
   final String navigationRoute;
   final NavigatableScreenArguments Function(DirectoryNavigationScreenArguments)
       getNavigationArgs;
+  final bool leading;
 
   final List<Preference> _defaultViewPreferences = [];
   final bool fixedOrigin;
 
-  DirectoryNavigationScreen(
+  DirectoryTraversalPage(
       {@required uri,
       @required this.viewConfig,
+      // @required this.navigate,
       this.title,
       this.bottomBarBuilder,
       this.navigationRoute,
       this.getNavigationArgs,
+      this.leading,
       this.fixedOrigin = false})
-      : _fileListLocalManager =
-            FileListLocalManager(uri, viewConfig.recursive) {
+      : _fileListLocalManager = FileListLocalManager(uri, viewConfig.recursive),
+        super(key: ValueKey(uri.toString())) {
     this._fileListLocalManager.initState();
     this._defaultViewPreferences.add(this.viewConfig.section);
     this._defaultViewPreferences.add(this.viewConfig.view);
   }
 
-  NavigatableScreenArguments _getSelfArgs(Uri path) {
-    var args = DirectoryNavigationScreenArguments(
-      uri: path,
-      viewConfig: this.viewConfig.clone(),
-      title: this.title,
-      bottomBarBuilder: this.bottomBarBuilder,
-    );
-
-    return this.getNavigationArgs?.call(args) ?? args;
-  }
-
-  String _getRoute() => this.navigationRoute ?? DirectoryNavigationScreen.route;
-
-  void _navigateToSelf(BuildContext context, Uri path) {
-    Navigator.pushNamed(context, _getRoute(), arguments: _getSelfArgs(path));
-  }
-
-  void _popUntilSelf(BuildContext context, Uri path) {
-    Navigator.popUntil(context, (route) {
-      if (route.settings.arguments is NavigatableScreenArguments) {
-        NavigatableScreenArguments args =
-            route.settings.arguments as NavigatableScreenArguments;
-        return _popCheck(args.uri, path);
-      }
-
-      return false;
-    });
-
-    if (this._fileListLocalManager.uri.scheme != path.scheme) {
-      Navigator.pushReplacementNamed(context, _getRoute(),
-          arguments: _getSelfArgs(path));
-    }
-  }
-
-  bool _popCheck(Uri uri, Uri path) {
-    if (uri.toString() == path.toString()) {
-      return true;
-    }
-    //when the root has to be changed
-    if (uri.scheme != path.scheme &&
-        UriUtils.getRootFromUri(uri).toString() == uri.toString()) {
-      return true;
-    }
-
-    return false;
-  }
-
   @override
-  Widget build(BuildContext context) {
-    this.viewConfig.onFolderTap =
-        (NcFile folder) => this._navigateToSelf(context, folder.uri);
+  Route createRoute(BuildContext context) {
+    return MaterialPageRoute(
+      settings: this,
+      builder: (BuildContext context) => _build(context),
+    );
+  }
 
+  Widget _build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
             this.title ?? this._fileListLocalManager.uri.pathSegments.last),
+        leading: this.leading
+            ? IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop())
+            : null,
         actions: <Widget>[
           //todo: image search button goes here
           IconButton(
             icon: Icon(Icons.search),
-            onPressed: () => showSearch(
-              context: context,
-              delegate: ImageSearch(_fileListLocalManager, this.viewConfig),
-            ),
+            onPressed: () async {
+              NcFile file = await showSearch<NcFile>(
+                context: context,
+                delegate: ImageSearch(_fileListLocalManager, this.viewConfig),
+              );
+              this.viewConfig.onFolderTap(file);
+            },
           ),
           YagaPopupMenuButton<BrowseViewMenu>(
             this._buildPopupMenu,
@@ -125,7 +93,8 @@ class DirectoryNavigationScreen extends StatelessWidget {
                 alignment: Alignment.topLeft,
                 child: PathWidget(
                   this._fileListLocalManager.uri,
-                  (Uri subPath) => this._popUntilSelf(context, subPath),
+                  (Uri subPath) => Navigator.of(context).pop(subPath),
+                  // (Uri subPath) => this.navigate(subPath),
                   fixedOrigin: this.fixedOrigin,
                 ),
               ),

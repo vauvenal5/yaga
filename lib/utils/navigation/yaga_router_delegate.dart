@@ -69,7 +69,8 @@ class YagaRouterDelegate extends RouterDelegate<Uri>
   Page getInitialPage() {
     String intentAction = intentService.getCachedIntentAction();
 
-    if (intentAction == "android.intent.action.GET_CONTENT") {
+    if (intentAction == "android.intent.action.GET_CONTENT" ||
+        intentAction == "android.intent.action.PICK") {
       return MaterialPage(
         key: ValueKey(ImageSelectorScreen.route),
         child: ImageSelectorScreen(),

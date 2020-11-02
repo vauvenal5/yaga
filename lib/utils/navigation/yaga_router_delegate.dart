@@ -6,7 +6,6 @@ import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/navigation/yaga_router.dart';
 import 'package:yaga/views/screens/directory_traversal_screen.dart';
-import 'package:yaga/views/screens/image_selector_screen.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
 
 class YagaRouterDelegate extends RouterDelegate<Uri>
@@ -59,24 +58,13 @@ class YagaRouterDelegate extends RouterDelegate<Uri>
 
     return [
       MaterialPage(
-        key: ValueKey("test"),
+        key: ValueKey(args.uri.toString()),
         child: DirectoryTraversalScreen(args),
-        // child: DirectoryNavigation(args),
       )
     ];
   }
 
   Page getInitialPage() {
-    String intentAction = intentService.getCachedIntentAction();
-
-    if (intentAction == "android.intent.action.GET_CONTENT" ||
-        intentAction == "android.intent.action.PICK") {
-      return MaterialPage(
-        key: ValueKey(ImageSelectorScreen.route),
-        child: ImageSelectorScreen(),
-      );
-    }
-
     return MaterialPage(
       key: ValueKey(YagaHomeScreen.route),
       child: YagaHomeScreen(),

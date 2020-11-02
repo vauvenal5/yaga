@@ -1,0 +1,4 @@
+- implement GET_CONTENT handler
+- introduce navigator 2.0 to directory traversal
+- add ACTION_PICK filter
+- open default screen for image select

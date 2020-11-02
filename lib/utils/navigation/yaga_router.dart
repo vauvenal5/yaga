@@ -8,7 +8,6 @@ import 'package:yaga/utils/logger.dart';
 import 'package:yaga/views/screens/choice_selector_screen.dart';
 import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/image_screen.dart';
-import 'package:yaga/views/screens/image_selector_screen.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/nc_login_screen.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
@@ -66,13 +65,13 @@ class YagaRouter {
       case ImageScreen.route:
         ImageScreenArguments args = settings.arguments as ImageScreenArguments;
         return MaterialPageRoute(
-            settings: settings,
-            builder: (context) => ImageScreen(
-                  args.images,
-                  args.index,
-                  title: args.title,
-                  mainActionBuilder: args.mainActionBuilder,
-                ));
+          settings: settings,
+          builder: (context) => ImageScreen(
+            args.images,
+            args.index,
+            title: args.title,
+          ),
+        );
       case ChoiceSelectorScreen.route:
         ChoiceSelectorScreenArguments args =
             settings.arguments as ChoiceSelectorScreenArguments;
@@ -84,11 +83,6 @@ class YagaRouter {
         FocusViewArguments args = settings.arguments as FocusViewArguments;
         return MaterialPageRoute(
             settings: settings, builder: (context) => FocusView(args.path));
-      case ImageSelectorScreen.route:
-        return MaterialPageRoute(
-          settings: settings,
-          builder: (context) => ImageSelectorScreen(),
-        );
       default:
         return MaterialPageRoute(
           settings: settings,

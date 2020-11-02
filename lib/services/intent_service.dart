@@ -27,4 +27,8 @@ class IntentService extends Service<IntentService> {
       "mime": mime,
     });
   }
+
+  bool get isOpenForSelect =>
+      _intentAction == "android.intent.action.GET_CONTENT" ||
+      _intentAction == "android.intent.action.PICK";
 }

@@ -6,6 +6,7 @@ import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
+import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/image_screen.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
@@ -24,7 +25,7 @@ class BrowseView extends StatelessWidget {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text("Nextcloud Yaga"),
+        title: Text(_getTitle() ?? "Nextcloud Yaga"),
       ),
       drawer: YagaDrawer(),
       body: StreamBuilder(
@@ -68,6 +69,15 @@ class BrowseView extends StatelessWidget {
     );
   }
 
+  //todo: unify this
+  String _getTitle() {
+    if (getIt.get<IntentService>().isOpenForSelect) {
+      return "Selecte image...";
+    }
+
+    return null;
+  }
+
   DirectoryNavigationScreenArguments _getArgs(BuildContext context, Uri uri) {
     ViewConfiguration viewConfig = ViewConfiguration.browse(
       route: _pref,
@@ -83,7 +93,7 @@ class BrowseView extends StatelessWidget {
 
     return DirectoryNavigationScreenArguments(
       uri: uri,
-      title: "Browse",
+      title: _getTitle() ?? "Browse",
       viewConfig: viewConfig,
       //todo: this can now be probably be removed and YagaBottomNavBar can be created directly in DirectoryNavigationScreen
       bottomBarBuilder: (context, uri) => YagaBottomNavBar(YagaHomeTab.folder),

@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mime/mime.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/utils/download_file_image.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:wc_flutter_share/wc_flutter_share.dart';
@@ -16,10 +18,12 @@ class ImageScreen extends StatefulWidget {
   final List<NcFile> _images;
   final PageController pageController;
   final String title;
-  final IconButton Function(BuildContext, NcFile) mainActionBuilder;
 
-  ImageScreen(this._images, int index, {this.title, this.mainActionBuilder})
-      : pageController = PageController(initialPage: index);
+  ImageScreen(
+    this._images,
+    int index, {
+    this.title,
+  }) : pageController = PageController(initialPage: index);
 
   @override
   State<StatefulWidget> createState() => ImageScreenState();
@@ -45,26 +49,10 @@ class ImageScreenState extends State<ImageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //todo: move to builder property of calling screen
-    IconButton defaultShare = IconButton(
-      icon: Icon(Icons.share),
-      onPressed: () async => await WcFlutterShare.share(
-          //todo: dp we need to move this to a service or controller?
-          sharePopupTitle: 'share',
-          fileName: widget._images[_currentIndex].name,
-          mimeType: 'image/jpeg', //todo: get real mime type
-          bytesOfFile:
-              widget._images[_currentIndex].localFile.readAsBytesSync()),
-    );
-
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title ?? _title),
-          actions: <Widget>[
-            widget.mainActionBuilder
-                    ?.call(context, widget._images[_currentIndex]) ??
-                defaultShare
-          ],
+          actions: <Widget>[_buildMainAction()],
         ),
         body: Stack(children: [
           PhotoViewGallery.builder(
@@ -111,5 +99,31 @@ class ImageScreenState extends State<ImageScreen> {
             },
           ),
         ]));
+  }
+
+  IconButton _buildMainAction() {
+    if (getIt.get<IntentService>().isOpenForSelect) {
+      return IconButton(
+        icon: Icon(Icons.check),
+        onPressed: () async {
+          await getIt
+              .get<IntentService>()
+              .setSelectedFile(widget._images[_currentIndex]);
+        },
+      );
+    }
+
+    return IconButton(
+      icon: Icon(Icons.share),
+      onPressed: () async => await WcFlutterShare.share(
+          //todo: dp we need to move this to a service or controller?
+          sharePopupTitle: 'share',
+          fileName: widget._images[_currentIndex].name,
+          mimeType: lookupMimeType(
+            widget._images[_currentIndex].localFile.path,
+          ), //todo: move mime type to NcFile
+          bytesOfFile:
+              widget._images[_currentIndex].localFile.readAsBytesSync()),
+    );
   }
 }

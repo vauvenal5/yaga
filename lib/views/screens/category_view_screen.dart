@@ -95,8 +95,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
             event.key == widget._categoryViewConfig.generalViewConfig.path.key)
         .map((event) => event as UriPreference)
         .listen((event) {
-      this._fileListLocalManager.uri = event.value;
-      this._fileListLocalManager.refetch();
+      this._fileListLocalManager.refetch(uri: event.value);
     });
 
     this._fileListLocalManager.initState();

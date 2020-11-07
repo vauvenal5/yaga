@@ -3,7 +3,7 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/utils/navigation/yaga_router.dart';
-import 'package:yaga/views/screens/directory_traversal_page.dart';
+import 'package:yaga/views/screens/directory_screen.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 
 class DirectoryTraversalScreen extends StatefulWidget {
@@ -102,13 +102,16 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
   }
 
   Page _buildPage(Uri uri, ViewConfiguration viewConfig) {
-    return DirectoryTraversalPage(
-      uri: uri,
-      bottomBarBuilder: widget.args.bottomBarBuilder,
-      viewConfig: viewConfig,
-      title: widget.args.title,
-      fixedOrigin: false,
-      leading: widget.args.leadingBackArrow,
+    return MaterialPage(
+      key: ValueKey(uri.toString()),
+      child: DirectoryScreen(
+        uri: uri,
+        bottomBarBuilder: widget.args.bottomBarBuilder,
+        viewConfig: viewConfig,
+        title: widget.args.title,
+        fixedOrigin: false,
+        leading: widget.args.leadingBackArrow,
+      ),
     );
   }
 }

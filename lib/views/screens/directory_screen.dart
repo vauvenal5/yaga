@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/focus_view_arguments.dart';
@@ -18,11 +19,11 @@ import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 enum BrowseViewMenu { settings, focus }
 
 //todo: rename this since it is also used for browse view... maybe clean up a little
-class DirectoryTraversalPage extends Page {
+class DirectoryScreen extends StatefulWidget {
   static const String route = "/directoryNavigationScreen";
 
   final ViewConfiguration viewConfig;
-  final FileListLocalManager _fileListLocalManager;
+  final Uri uri;
   final String title;
   final Widget Function(BuildContext, Uri) bottomBarBuilder;
   // final Function(Uri) navigate;
@@ -31,11 +32,10 @@ class DirectoryTraversalPage extends Page {
       getNavigationArgs;
   final bool leading;
 
-  final List<Preference> _defaultViewPreferences = [];
   final bool fixedOrigin;
 
-  DirectoryTraversalPage(
-      {@required uri,
+  DirectoryScreen(
+      {@required this.uri,
       @required this.viewConfig,
       // @required this.navigate,
       this.title,
@@ -44,43 +44,57 @@ class DirectoryTraversalPage extends Page {
       this.getNavigationArgs,
       this.leading,
       this.fixedOrigin = false})
-      : _fileListLocalManager = FileListLocalManager(uri, viewConfig.recursive),
-        super(key: ValueKey(uri.toString())) {
-    this._defaultViewPreferences.add(this.viewConfig.section);
-    this._defaultViewPreferences.add(this.viewConfig.view);
+      : super(key: ValueKey(uri.toString()));
+
+  @override
+  _DirectoryScreenState createState() =>
+      _DirectoryScreenState(this.uri, this.viewConfig.recursive);
+}
+
+class _DirectoryScreenState extends State<DirectoryScreen> {
+  final FileListLocalManager _fileListLocalManager;
+  List<Preference> _defaultViewPreferences = [];
+
+  _DirectoryScreenState(Uri uri, BoolPreference recursive)
+      : _fileListLocalManager = FileListLocalManager(uri, recursive);
+
+  @override
+  void initState() {
+    this._defaultViewPreferences.add(widget.viewConfig.section);
+    this._defaultViewPreferences.add(widget.viewConfig.view);
+
+    this._fileListLocalManager.initState();
+    super.initState();
   }
 
   @override
-  Route createRoute(BuildContext context) {
-    //todo: i am not sure this is the right place to init this state or if we have to move it into a statfull widget
-    this._fileListLocalManager.initState();
-    return MaterialPageRoute(
-      settings: this,
-      builder: (BuildContext context) => _build(context),
-    );
+  void dispose() {
+    this._fileListLocalManager.dispose();
+    super.dispose();
   }
 
-  Widget _build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       key: ValueKey(this._fileListLocalManager.uri.toString()),
       appBar: AppBar(
-        title: Text(
-            this.title ?? this._fileListLocalManager.uri.pathSegments.last),
-        leading: this.leading
+        title: Text(this.widget.title ??
+            this._fileListLocalManager.uri.pathSegments.last),
+        leading: this.widget.leading
             ? IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.of(context).pop())
             : null,
         actions: <Widget>[
-          //todo: image search button goes here
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () async {
               NcFile file = await showSearch<NcFile>(
                 context: context,
-                delegate: ImageSearch(_fileListLocalManager, this.viewConfig),
+                delegate:
+                    ImageSearch(_fileListLocalManager, this.widget.viewConfig),
               );
-              this.viewConfig.onFolderTap(file);
+              this.widget.viewConfig.onFolderTap(file);
             },
           ),
           YagaPopupMenuButton<BrowseViewMenu>(
@@ -97,7 +111,7 @@ class DirectoryTraversalPage extends Page {
                   this._fileListLocalManager.uri,
                   (Uri subPath) => Navigator.of(context).pop(subPath),
                   // (Uri subPath) => this.navigate(subPath),
-                  fixedOrigin: this.fixedOrigin,
+                  fixedOrigin: this.widget.fixedOrigin,
                 ),
               ),
             ),
@@ -105,11 +119,12 @@ class DirectoryTraversalPage extends Page {
       ),
       //todo: is it possible to directly pass the folder.uri?
       body: ImageViewContainer(
-          fileListLocalManager: _fileListLocalManager,
-          viewConfig: this.viewConfig),
-      bottomNavigationBar: bottomBarBuilder == null
+        fileListLocalManager: _fileListLocalManager,
+        viewConfig: this.widget.viewConfig,
+      ),
+      bottomNavigationBar: widget.bottomBarBuilder == null
           ? null
-          : bottomBarBuilder(context, this._fileListLocalManager.uri),
+          : widget.bottomBarBuilder(context, this._fileListLocalManager.uri),
     );
   }
 

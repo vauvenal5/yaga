@@ -62,13 +62,15 @@ class ImageScreenState extends State<ImageScreen> {
             builder: (BuildContext context, int index) {
               NcFile image = widget._images[index];
 
-              Future<File> localFileAvailable = Future.value(image.localFile);
+              //todo: we need to introduce checks where we cast file
+              Future<File> localFileAvailable =
+                  Future.value(image.localFile as File);
               if (!image.localFile.existsSync()) {
                 localFileAvailable = getIt
                     .get<FileManager>()
                     .updateImageCommand
                     .where((event) => event.uri.path == image.uri.path)
-                    .map((event) => event.localFile)
+                    .map((event) => event.localFile as File)
                     .first;
                 getIt.get<FileManager>().downloadImageCommand(image);
               }
@@ -76,8 +78,8 @@ class ImageScreenState extends State<ImageScreen> {
               return PhotoViewGalleryPageOptions(
                 key: ValueKey(image.uri.path),
                 minScale: PhotoViewComputedScale.contained,
-                imageProvider:
-                    DownloadFileImage(image.localFile, localFileAvailable),
+                imageProvider: DownloadFileImage(
+                    image.localFile as File, localFileAvailable),
               );
             },
             loadingBuilder: (context, event) {
@@ -122,8 +124,8 @@ class ImageScreenState extends State<ImageScreen> {
           mimeType: lookupMimeType(
             widget._images[_currentIndex].localFile.path,
           ), //todo: move mime type to NcFile
-          bytesOfFile:
-              widget._images[_currentIndex].localFile.readAsBytesSync()),
+          bytesOfFile: (widget._images[_currentIndex].localFile as File)
+              .readAsBytesSync()),
     );
   }
 }

@@ -71,13 +71,14 @@ class FileListLocalManager {
         .listen((event) {
       if (event is FileListResponse) {
         bool changed = false;
-        //todo-sv: dart magic matches the files properly however it will be better to add a custom equals --> how does dart runtime hashcode work? Oo
-        event.files.forEach((file) {
-          if (!files.contains(file)) {
-            files.add(file);
-            changed = true;
-          }
-        });
+
+        if (_addNewFiles(event.files)) {
+          changed = true;
+        }
+
+        if (_removeDeletedFiles(event.files)) {
+          changed = true;
+        }
 
         if (changed) {
           // List<NcFile> clone = List.from(files);
@@ -91,6 +92,32 @@ class FileListLocalManager {
     });
 
     this._worker.sendRequest(FileListRequest(key, uri, recursive.value));
+  }
+
+  /// Returns true if any files where added
+  bool _addNewFiles(List<NcFile> filesFromEvent) {
+    return _executeSizeChangingFunction(
+      filesFromEvent,
+      (files, filesFromEvent) => filesFromEvent
+          .where((file) => !files.contains(file))
+          .forEach((file) => files.add(file)),
+    );
+  }
+
+  /// Returns true if any files where removed
+  bool _removeDeletedFiles(List<NcFile> filesFromEvent) {
+    return _executeSizeChangingFunction(
+      filesFromEvent,
+      (files, filesFromEvent) =>
+          files.removeWhere((file) => !filesFromEvent.contains(file)),
+    );
+  }
+
+  bool _executeSizeChangingFunction(List<NcFile> filesFromEvent,
+      Function(List<NcFile> files, List<NcFile> filesFromEvent) manipulate) {
+    int size = files.length;
+    manipulate(files, filesFromEvent);
+    return size != files.length;
   }
 
   void refetch() {

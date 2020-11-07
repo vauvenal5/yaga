@@ -46,13 +46,14 @@ class DirectoryTraversalPage extends Page {
       this.fixedOrigin = false})
       : _fileListLocalManager = FileListLocalManager(uri, viewConfig.recursive),
         super(key: ValueKey(uri.toString())) {
-    this._fileListLocalManager.initState();
     this._defaultViewPreferences.add(this.viewConfig.section);
     this._defaultViewPreferences.add(this.viewConfig.view);
   }
 
   @override
   Route createRoute(BuildContext context) {
+    //todo: i am not sure this is the right place to init this state or if we have to move it into a statfull widget
+    this._fileListLocalManager.initState();
     return MaterialPageRoute(
       settings: this,
       builder: (BuildContext context) => _build(context),
@@ -61,6 +62,7 @@ class DirectoryTraversalPage extends Page {
 
   Widget _build(BuildContext context) {
     return Scaffold(
+      key: ValueKey(this._fileListLocalManager.uri.toString()),
       appBar: AppBar(
         title: Text(
             this.title ?? this._fileListLocalManager.uri.pathSegments.last),

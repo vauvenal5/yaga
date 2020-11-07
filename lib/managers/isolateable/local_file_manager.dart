@@ -31,8 +31,9 @@ class LocalFileManager
         .list(Directory.fromUri(
             this._systemPathService.absoluteUriFromInternal(uri)))
         .map((event) {
-      NcFile file = NcFile();
-      file.uri = this._systemPathService.internalUriFromAbsolute(event.uri);
+      NcFile file =
+          NcFile(this._systemPathService.internalUriFromAbsolute(event.uri));
+      file.localFile = event;
 
       if (event is Directory) {
         file.isDirectory = true;
@@ -42,8 +43,6 @@ class LocalFileManager
       } else {
         file.isDirectory = false;
         file.name = file.uri.pathSegments.last;
-        //todo: also set for directories? or at least don't set anything (see file_manager: list)
-        file.localFile = event;
         file.lastModified = (event as File).lastModifiedSync();
       }
 

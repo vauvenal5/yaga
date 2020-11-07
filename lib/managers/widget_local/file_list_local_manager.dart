@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:uuid/uuid.dart';
-import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -11,8 +10,10 @@ import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
+import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
+import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
@@ -31,7 +32,7 @@ class FileListLocalManager {
 
   StreamSubscription<MappingPreference>
       _updatedMappingPreferenceCommandSubscription;
-  StreamSubscription<NcFile> _updateFileListSubscripton;
+  StreamSubscription<FileUpdateMsg> _updateFileListSubscripton;
   StreamSubscription<BoolPreference> _updateRecursiveSubscription;
 
   ForegroundWorker _worker;
@@ -40,6 +41,7 @@ class FileListLocalManager {
   Uuid uuid = Uuid();
 
   Uri uri;
+  String managerKey;
 
   FileListLocalManager(this.uri, this.recursive) {
     _worker = getIt.get<ForegroundWorker>();
@@ -47,6 +49,7 @@ class FileListLocalManager {
         RxCommand.createSync((param) => param, initialLastResult: false);
     filesChangedCommand =
         RxCommand.createSync((param) => param, initialLastResult: []);
+    managerKey = uuid.v1();
   }
 
   void dispose() {
@@ -59,24 +62,37 @@ class FileListLocalManager {
 
   void updateFilesAndFolders() {
     //generating key per refresh to ensure that if the user refreshes twice the first will not cancel the 2nd
+    //todo: key maybe not necessary anymore
     String key = uuid.v1();
-
-    this.loadingChangedCommand(true);
+    // String key = uri.toString();
 
     //cancel old subscription
     this._foregroundMessageCommandSubscription?.cancel();
+    this._updateFileListSubscripton?.cancel();
 
+    this.loadingChangedCommand(true);
+
+    //todo: here we have still an update issue...
+    //...the home view might be interested in the updates coming from the browseview
+    //...I am not sure how we can make this work together with the keys
+    //...the key thingy is only a visual issue for the done event!
     _foregroundMessageCommandSubscription = _worker.isolateResponseCommand
-        .where((event) => event.key == key)
+        // .where((event) => event.key == key)
+        .where((event) => event is FileListMessage)
+        .map((event) => event as FileListMessage)
+        .where((event) =>
+            event.uri == uri ||
+            (recursive.value &&
+                event.uri.toString().startsWith(uri.toString())))
         .listen((event) {
       if (event is FileListResponse) {
         bool changed = false;
 
-        if (_addNewFiles(event.files)) {
-          changed = true;
-        }
+        _logger.w("$managerKey (add - manager)");
+        _logger.w("$key (add - key)");
+        _logger.w("${event.key} (add - event key)");
 
-        if (_removeDeletedFiles(event.files)) {
+        if (_addNewFiles(event.files, event.key)) {
           changed = true;
         }
 
@@ -86,22 +102,66 @@ class FileListLocalManager {
         }
       }
       if (event is FileListDone) {
-        _foregroundMessageCommandSubscription.cancel();
+        //todo: i am not sure if we still need this however in any case something is wrong
+        // if (!event.key.endsWith(key)) {
+        //   return;
+        // }
+        // _foregroundMessageCommandSubscription.cancel();
         this.loadingChangedCommand(false);
       }
     });
 
-    this._worker.sendRequest(FileListRequest(key, uri, recursive.value));
+    //todo: strictly speaking this is wrong and has been wrong for ever -> remove is only valid if we are in the correct list!
+    //for example when we are in the browse tab and a file has been moved from a inner folder to a outter folder the file will be removed from both views
+    //
+    this._updateFileListSubscripton = _worker.isolateResponseCommand
+        .where((event) => event is FileUpdateMsg)
+        .map((event) => event as FileUpdateMsg)
+        .listen((event) {
+      _logger.w("$managerKey (delete)");
+      if (files.contains(event.file)) {
+        if (event.file.isDirectory) {
+          files.removeWhere(
+              (file) => file.uri.path.startsWith(event.file.uri.path));
+        }
+
+        files.remove(event.file);
+        this.filesChangedCommand(files);
+      }
+    });
+
+    //todo: key should probably be a complex object
+    this._worker.sendRequest(FileListRequest(
+          "$managerKey:$key",
+          uri,
+          recursive.value,
+        ));
   }
 
   /// Returns true if any files where added
-  bool _addNewFiles(List<NcFile> filesFromEvent) {
+  bool _addNewFiles(List<NcFile> filesFromEvent, String eventKey) {
     return _executeSizeChangingFunction(
       filesFromEvent,
-      (files, filesFromEvent) => filesFromEvent
-          .where((file) => !files.contains(file))
-          .forEach((file) => files.add(file)),
+      (files, filesFromEvent) =>
+          filesFromEvent.where((file) => !files.contains(file)).forEach((file) {
+        // add file to list
+        files.add(file);
+        // check if it is necessary to update list with recursice childs of file
+        if (this.recursive.value &&
+            file.isDirectory &&
+            !_fileIsFromThisManager(eventKey)) {
+          this._worker.sendRequest(FileListRequest(
+                "$managerKey",
+                file.uri,
+                recursive.value,
+              ));
+        }
+      }),
     );
+  }
+
+  bool _fileIsFromThisManager(String eventKey) {
+    return eventKey.startsWith(this.managerKey);
   }
 
   /// Returns true if any files where removed
@@ -132,16 +192,6 @@ class FileListLocalManager {
         .get<MappingManager>()
         .mappingUpdatedCommand
         .listen((value) => this.refetch());
-
-    //todo: strictly speaking this is wrong and has been wrong for ever -> remove is only valid if we are in the correct list!
-    //for example when we are in the browse tab and a file has been moved from a inner folder to a outter folder the file will be removed from both views
-    this._updateFileListSubscripton =
-        getIt.get<FileManager>().updateFileList.listen((file) {
-      if (files.contains(file)) {
-        files.remove(file);
-        this.filesChangedCommand(files);
-      }
-    });
 
     this._updateRecursiveSubscription = getIt
         .get<SettingsManager>()

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/logger.dart';
 
 abstract class FileManagerBase {
@@ -31,20 +32,21 @@ abstract class FileManagerBase {
             : Stream.value(file));
   }
 
-  Stream<List<NcFile>> listFileLists(Uri uri, {bool recursive = false}) {
+  Stream<FileListResponse> listFileLists(String requestKey, Uri uri,
+      {bool recursive = false}) {
     return this._fileSubManagers[uri.scheme].listFileList(uri).flatMap((list) {
       if (!recursive) {
-        return Stream.value(list);
+        return Stream.value(FileListResponse(requestKey, uri, list));
       }
 
       return Rx.merge([
-        Stream.value(list),
+        Stream.value(FileListResponse(requestKey, uri, list)),
         Stream.fromIterable(list)
             .where((file) => file.isDirectory)
             .doOnData((file) =>
                 _logger.d("Emiting from recursive. (${file.uri.path})"))
-            .flatMap(
-                (file) => this.listFileLists(file.uri, recursive: recursive))
+            .flatMap((file) =>
+                this.listFileLists(requestKey, file.uri, recursive: recursive))
       ]);
     });
   }

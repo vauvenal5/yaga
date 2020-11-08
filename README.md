@@ -60,6 +60,21 @@ The following things are on my roadmap and will be developed during the next mon
 
 It is highly recommended to configure the image preview generator plugin on your Nextcloud server. This will significantly improve fetching times of previews.
 
+## APK Signature
+
+If you decide to download the APK file attached to a Github release, you can verify the APK signature in the following way:
+```
+apksigner verify --print-certs app-play-release.apk
+```
+
+The output should look like this:
+```
+Signer #1 certificate DN: CN=vauvenal5, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown
+Signer #1 certificate SHA-256 digest: dd1652817e4ed5cbd341336add61a10851fd93b2b79c93124ec9d584fdc54b06
+Signer #1 certificate SHA-1 digest: 1c54e02710c9ef669c0e75950e25825a5a11a349
+Signer #1 certificate MD5 digest: 7f8367b3ebbc8618b1dc0dff81e225b9
+```
+
 ## iOS Support
 
 I am physically unable to support iOS. I simply do not own the hardware and I also do not intend buying it. If Apple changes its policies about development SDKs I will gladly add iOS support.

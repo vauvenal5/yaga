@@ -78,12 +78,6 @@ android {
             signingConfig null
         }
     }
-
-    android.applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            output.outputFileName = "app-"+variant.flavorName+"-release.apk"
-        }
-    }
 }
 
 flutter {

@@ -3,10 +3,10 @@ import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
+import 'package:yaga/utils/navigation/yaga_router_delegate.dart';
 import 'package:yaga/utils/service_locator.dart';
-import 'package:yaga/utils/yaga_router.dart';
+import 'package:yaga/utils/navigation/yaga_route_information_parser.dart';
 import 'package:yaga/views/screens/splash_screen.dart';
-import 'package:yaga/views/screens/yaga_home_screen.dart';
 
 void main() {
   setupServiceLocator();
@@ -53,20 +53,20 @@ class MyApp extends StatelessWidget {
               .map((event) => event as ChoicePreference),
           builder: (context, snapshot) {
             if (snapshot.data.value == "system") {
-              return MaterialApp(
+              return MaterialApp.router(
                 title: title,
                 theme: light,
                 darkTheme: dark,
-                initialRoute: YagaHomeScreen.route,
-                onGenerateRoute: YagaRouter.generateRoute,
+                routeInformationParser: YagaRouteInformationParser(),
+                routerDelegate: YagaRouterDelegate(),
               );
             }
 
-            return MaterialApp(
+            return MaterialApp.router(
               title: title,
               theme: snapshot.data.value == "light" ? light : dark,
-              initialRoute: YagaHomeScreen.route,
-              onGenerateRoute: YagaRouter.generateRoute,
+              routeInformationParser: YagaRouteInformationParser(),
+              routerDelegate: YagaRouterDelegate(),
             );
           },
         );

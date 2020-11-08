@@ -4,7 +4,7 @@ import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 
-class ImageSearch extends SearchDelegate {
+class ImageSearch extends SearchDelegate<NcFile> {
   final FileListLocalManager _fileListLocalManager;
   final ViewConfiguration _viewConfig;
 
@@ -47,7 +47,10 @@ class ImageSearch extends SearchDelegate {
   Widget buildResults(BuildContext context) {
     return ImageViewContainer(
         fileListLocalManager: this._fileListLocalManager,
-        viewConfig: _viewConfig,
+        viewConfig: ViewConfiguration.fromViewConfig(
+          viewConfig: _viewConfig,
+          onFolderTap: (NcFile file) => this.close(context, file),
+        ),
         filter: (List<NcFile> files) => files
             .where((file) =>
                 file.name.toLowerCase().contains(this.query.toLowerCase()) ||

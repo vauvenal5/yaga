@@ -4,6 +4,7 @@ import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 
 class DirectoryNavigationScreenArguments extends NavigatableScreenArguments {
   final ViewConfiguration viewConfig;
+  final bool leadingBackArrow;
   final String title;
   final Widget Function(BuildContext, Uri) bottomBarBuilder;
 
@@ -12,5 +13,6 @@ class DirectoryNavigationScreenArguments extends NavigatableScreenArguments {
     this.title,
     this.viewConfig,
     this.bottomBarBuilder,
+    this.leadingBackArrow = true,
   }) : super(uri: uri);
 }

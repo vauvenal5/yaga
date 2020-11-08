@@ -9,7 +9,8 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/file_provider_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 
-class LocalImageProviderService extends FileProviderService<LocalImageProviderService> {
+class LocalImageProviderService
+    extends FileProviderService<LocalImageProviderService> {
   final String schemeLocal = "local";
   final String schemeTmp = "tmp";
   final String _android = "Android";
@@ -61,43 +62,49 @@ class LocalImageProviderService extends FileProviderService<LocalImageProviderSe
   @override
   Stream<NcFile> list(Uri directory) {
     //todo: bug: for local files we are missing file type filtering
-    return Permission.storage.request().asStream()
-      .where((event) => event.isGranted)
-      .map((event) => new Directory(this.systemPathService.absoluteUriFromInternal(directory).path))
-      // .map((event) => new Directory(_internalUriToSystemPath(directory)))
-      //.map((event) => new Directory(directory.toSystemPath()))
-      .flatMap((dir) => dir.list(recursive: false, followLinks: false)
-      .where((event) => event is Directory || _checkMimeType(event.path))
-      .map((event) {
-        NcFile file = NcFile();
-        // file.uri = _systemEntityToInternalUri(event);
-        file.uri = this.systemPathService.internalUriFromAbsolute(event.uri);
-        file.name = file.uri.pathSegments.last;
-        file.isDirectory = false;
+    return Permission.storage
+        .request()
+        .asStream()
+        .where((event) => event.isGranted)
+        .map((event) => new Directory(
+            this.systemPathService.absoluteUriFromInternal(directory).path))
+        // .map((event) => new Directory(_internalUriToSystemPath(directory)))
+        //.map((event) => new Directory(directory.toSystemPath()))
+        .flatMap((dir) => dir
+                    .list(recursive: false, followLinks: false)
+                    .where((event) =>
+                        event is Directory || _checkMimeType(event.path))
+                    .map((event) {
+                  NcFile file = NcFile(this
+                      .systemPathService
+                      .internalUriFromAbsolute(event.uri));
+                  // file.uri = _systemEntityToInternalUri(event);
+                  file.name = file.uri.pathSegments.last;
+                  file.isDirectory = false;
 
-        if(event is Directory) {
-          file.isDirectory = true;
-        } else {
-          //todo: also set for directories? or at least don't set anything (see file_manager: list)
-          if(file.uri.userInfo == "") {
-            file.previewFile = event;
-          } else {
-            file.localFile = event;
-          }
-          file.lastModified =  (event as File).lastModifiedSync();
-        }
+                  if (event is Directory) {
+                    file.isDirectory = true;
+                  } else {
+                    //todo: also set for directories? or at least don't set anything (see file_manager: list)
+                    if (file.uri.userInfo == "") {
+                      file.previewFile = event;
+                    } else {
+                      file.localFile = event;
+                    }
+                    file.lastModified = (event as File).lastModifiedSync();
+                  }
 
-        return file;
-      })
-        //.where((entity) => entity is File)
-        //.map((entity) => entity as File)
-        //.where((file) => file.path.endsWith(".bmp") || file.path.endsWith(".jpg"))
-      );
+                  return file;
+                })
+            //.where((entity) => entity is File)
+            //.map((entity) => entity as File)
+            //.where((file) => file.path.endsWith(".bmp") || file.path.endsWith(".jpg"))
+            );
   }
 
   String _normalizePath(String path) {
     path = Uri.decodeComponent(path);
-    return path.startsWith("/")?path.replaceFirst("/", ""):path;
+    return path.startsWith("/") ? path.replaceFirst("/", "") : path;
   }
 
   // Uri get externalAppDirUri => _systemEntityToInternalUri(_externalAppDir);
@@ -115,9 +122,12 @@ class LocalImageProviderService extends FileProviderService<LocalImageProviderSe
   File getLocalFile(String path, {Uri internalPathPrefix}) {
     // String localPath = "${(await _checkSetExcternalAppDir()).path}/${_normalizePath(path)}";
     String prefix = _externalAppDir.path;
-    if(internalPathPrefix != null) {
+    if (internalPathPrefix != null) {
       // prefix = _internalUriToSystemPath(internalPathPrefix);
-      prefix = this.systemPathService.absoluteUriFromInternal(internalPathPrefix).path;
+      prefix = this
+          .systemPathService
+          .absoluteUriFromInternal(internalPathPrefix)
+          .path;
     }
     String localPath = "$prefix/${_normalizePath(path)}";
     return File(localPath);
@@ -138,16 +148,19 @@ class LocalImageProviderService extends FileProviderService<LocalImageProviderSe
     //todo: subtask1: local files in cache and default app dir should be in a user@cloud.bla folder
     //todo: subtask2: check if file is null before delete --> done
     //todo: subtask3: webview should not cache data
-    if(file != null && file.existsSync()) {
+    if (file != null && file.existsSync()) {
       file.deleteSync();
     }
   }
 
-  Future<File> createFile({@required File file, @required List<int> bytes, DateTime lastModified}) async {
+  Future<File> createFile(
+      {@required File file,
+      @required List<int> bytes,
+      DateTime lastModified}) async {
     logger.d("Creating file ${file.path}");
     await file.create(recursive: true);
     File res = await file.writeAsBytes(bytes, flush: true);
-    if(lastModified != null) {
+    if (lastModified != null) {
       await res.setLastModified(lastModified);
     }
     return res;

@@ -60,16 +60,17 @@ class NextCloudService
         .where(
             (event) => event.isDirectory || event.mimeType.startsWith("image"))
         .map((webDavFile) {
-      NcFile file = NcFile();
-      file.isDirectory = webDavFile.isDirectory;
-      file.lastModified = webDavFile.lastModified;
-      file.name = webDavFile.name;
       var path = webDavFile.path.replaceFirst("/$basePath", "");
-      file.uri = Uri(
+      Uri uri = Uri(
           scheme: this.scheme,
           userInfo: _client.username,
           host: _host.host,
           path: path);
+
+      NcFile file = NcFile(uri);
+      file.isDirectory = webDavFile.isDirectory;
+      file.lastModified = webDavFile.lastModified;
+      file.name = webDavFile.name;
       return file;
     }); //.toList --> should this return a Future<List> since the data is actually allready downloaded?
   }
@@ -84,7 +85,7 @@ class NextCloudService
     String path = Uri.decodeComponent(file.path);
     _logger.d("Fetching preview $path");
     //todo: think about image sizes vs in code scaling
-    return this._client.preview.getPreview(path, 128, 128);
+    return this._client.preview.getPreviewByPath(path, 128, 128);
     //todo: implement proper error handling
     // .catchError((err) {
     //   print("Could not load preview for $path");

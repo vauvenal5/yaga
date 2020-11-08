@@ -7,7 +7,12 @@ class FileManagerBridge {
   final ForegroundWorker _worker;
 
   FileManagerBridge(this._fileManager, this._worker) {
-    this._worker.isolateResponseCommand.where((event) => event is FileUpdateMsg)
-    .listen((event) => _fileManager.updateFileList((event as FileUpdateMsg).file));
+    //todo: this does not work since we can not tell which list should receive the event
+    this
+        ._worker
+        .isolateResponseCommand
+        .where((event) => event is FileUpdateMsg)
+        .listen((event) =>
+            _fileManager.updateFileList((event as FileUpdateMsg).file));
   }
 }

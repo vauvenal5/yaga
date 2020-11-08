@@ -16,8 +16,8 @@ class ViewConfiguration {
   final BoolPreference showFolders;
 
   //todo: not sure if moving the onTap handler to this objects is a good idea
-  Function(NcFile) onFolderTap;
-  Function(List<NcFile>, int) onFileTap;
+  final Function(NcFile) onFolderTap;
+  final Function(List<NcFile>, int) onFileTap;
 
   ViewConfiguration._internal(this.section, this.view, this.recursive,
       this.showFolders, this.onFileTap, this.onFolderTap);
@@ -85,5 +85,17 @@ class ViewConfiguration {
 
     return ViewConfiguration._internal(
         section, view, recursive, showFolders, onFileTap, onFolderTap);
+  }
+
+  factory ViewConfiguration.fromViewConfig(
+      {@required ViewConfiguration viewConfig, Function(NcFile) onFolderTap}) {
+    return ViewConfiguration._internal(
+      viewConfig.section,
+      viewConfig.view,
+      viewConfig.recursive,
+      viewConfig.showFolders,
+      viewConfig.onFileTap,
+      onFolderTap ?? viewConfig.onFolderTap,
+    );
   }
 }

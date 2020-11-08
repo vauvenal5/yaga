@@ -4,14 +4,12 @@ import 'dart:isolate';
 import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
-import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
-import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
+import 'package:yaga/utils/forground_worker/handlers/file_list_request_handler.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
-import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/login_state_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/preference_msg.dart';
@@ -84,12 +82,7 @@ class ForegroundWorker {
 
     mainToIsolate.listen((message) {
       if (message is FileListRequest) {
-        getIt
-            .get<IsolatedFileManager>()
-            .listFileLists(message.uri, recursive: message.recursive)
-            .listen((event) =>
-                isolateToMain.send(FileListResponse(message.key, event)))
-            .onDone(() => isolateToMain.send(FileListDone(message.key)));
+        FileListRequestHandler.handle(message, isolateToMain);
         return;
       }
 

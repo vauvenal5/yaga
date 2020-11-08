@@ -28,14 +28,10 @@ platform :android do
   end
 
   lane :alpha do
-    pubspec = File.read('../pubspec.yaml')
-    regex = /version:\s.+\+(\d+)/
-    code = pubspec[regex, 1]
-    
     upload_to_play_store(
       track: 'internal', 
       track_promote_to: 'alpha', 
-      version_code: code.to_i,
+      version_code: get_code(),
       skip_upload_aab: 'true', 
       skip_upload_apk: 'true',
       skip_upload_metadata: 'true',
@@ -45,19 +41,48 @@ platform :android do
   end
 
   lane :beta do
-    pubspec = File.read('../pubspec.yaml')
-    regex = /version:\s.+\+(\d+)/
-    code = pubspec[regex, 1]
-    
     upload_to_play_store(
       track: 'alpha', 
       track_promote_to: 'beta', 
-      version_code: code.to_i,
+      version_code: get_code(),
       skip_upload_aab: 'true', 
       skip_upload_apk: 'true',
       skip_upload_metadata: 'true',
       skip_upload_images: 'true',
       skip_upload_screenshots: 'true',
     )
+  end
+
+  lane :github do 
+    Dir.chdir("..") do
+      sh("flutter build apk --flavor play")
+    end
+
+    version = get_version()
+    code = get_code()
+
+    set_github_release(
+      repository_name: "vauvenal5/yaga",
+      api_token: ENV["GITHUB_TOKEN"],
+      name: version,
+      tag_name: version,
+      description: (File.read("metadata/android/en-US/changelogs/"+code.to_s+".txt") rescue "No changelog provided."),
+      commitish: "master",
+      upload_assets: ["build/app/outputs/flutter-apk/app-play-release.apk"]
+    )
+  end
+
+  def get_version_or_code(capture)
+    pubspec = File.read('../pubspec.yaml')
+    regex = /version:\s(\d+\.\d+\.\d+)\+(\d+)/
+    return pubspec[regex, capture]
+  end
+
+  def get_version()
+    return "v"+get_version_or_code(1)
+  end
+
+  def get_code()
+    return get_version_or_code(2).to_i
   end
 end

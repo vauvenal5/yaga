@@ -41,13 +41,10 @@ This app is in an open beta stage. It is tested and fairly stable on an Android 
     - Previews are always mapped to cache.
 
 ### Next Steps
-The following things are on my roadmap and will be developed during the next months, however, not necessarily in this order. See also [issues](https://github.com/vauvenal5/yaga/issues) for a up to date state of current issues.
-- [ ] Improve autmated test coverage.
-- [ ] Clean up code base.
-- [ ] Add favourite places to browse view.
-- [ ] **Publish on F-Droid. - waiting for merge**
-- [ ] Allow for moving/deleting images.
-- [ ] Multiselect.
+
+My current plan is to release a stable `v1.0.0` version around christmas this year. For this release I am aming to complete all features that are required for the app to feel like a complete gallery app with respect to the provided functionality.
+
+You can track planned features, current issues as well as what is sceduled for `v1.0.0` in the [issues](https://github.com/vauvenal5/yaga/issues) section.
 
 ## Building from Sources
 

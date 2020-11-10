@@ -1,0 +1,9 @@
+This release is identical to v0.15.6. There were build changes for FDroid support.
+- implement GET_CONTENT handler
+- introduce navigator 2.0 to directory traversal
+- add ACTION_PICK filter
+- open default screen for image select
+- fix removal of upstream removed folders
+- fix recursive update issue from browse to home view
+- fix memory leak
+- fix browse view recursive issue when entering focus view

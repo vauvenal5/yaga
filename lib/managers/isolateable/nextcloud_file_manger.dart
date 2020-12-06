@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:logger/logger.dart';
+import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
@@ -23,6 +24,13 @@ class NextcloudFileManager
   final SyncManager _syncManager;
   final LocalFileService _localFileService;
 
+  RxCommand<NcFile, NcFile> _getPreviewCommand =
+      RxCommand.createSync((param) => param);
+  RxCommand<NcFile, NcFile> downloadPreviewCommand =
+      RxCommand.createSync((param) => param);
+  RxCommand<NcFile, NcFile> updatePreviewCommand =
+      RxCommand.createSync((param) => param);
+
   NextcloudFileManager(
     this._fileManager,
     this._nextCloudService,
@@ -31,6 +39,32 @@ class NextcloudFileManager
     this._syncManager,
   ) {
     this._fileManager.registerFileManager(this);
+
+    //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
+    //todo: bug: this also tries to fetch previews for local files; no check if the file is local or remote
+    _getPreviewCommand
+        .asyncMap((ncFile) =>
+            this._nextCloudService.getPreview(ncFile.uri).then((value) async {
+              ncFile.previewFile = await _localFileService.createFile(
+                  file: ncFile.previewFile,
+                  bytes: value,
+                  lastModified: ncFile.lastModified);
+              return ncFile;
+            }, onError: (err) {
+              return null;
+            }))
+        .where((event) => event != null)
+        .listen((value) => updatePreviewCommand(value));
+
+    downloadPreviewCommand
+        // .delay(Duration(seconds: 1))
+        .listen((ncFile) {
+      if (ncFile.previewFile != null && ncFile.previewFile.existsSync()) {
+        updatePreviewCommand(ncFile);
+        return;
+      }
+      this._getPreviewCommand(ncFile);
+    });
   }
 
   @override

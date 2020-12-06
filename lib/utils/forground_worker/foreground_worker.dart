@@ -8,7 +8,9 @@ import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
+import 'package:yaga/utils/forground_worker/handlers/download_preview_handler.dart';
 import 'package:yaga/utils/forground_worker/handlers/file_list_request_handler.dart';
+import 'package:yaga/utils/forground_worker/messages/download_preview_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/login_state_msg.dart';
@@ -101,6 +103,11 @@ class ForegroundWorker {
         }
 
         ncService.login(message.loginData);
+        return;
+      }
+
+      if (message is DownloadPreviewRequest) {
+        DownloadPreviewHandler.handle(message, isolateToMain);
         return;
       }
     });

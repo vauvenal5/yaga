@@ -22,7 +22,11 @@ Please have a look on the [quickstart guide]({{site.baseurl}}/quickstart/) for f
 
 # State of the app
 
-Nextcloud Yaga is currently in early beta. A lot of features are still missing. Have a look on the following feature lists for more details or into the [Github issues](https://github.com/vauvenal5/yaga/issues).
+My current plan is to release a stable `v1.0.0` version around christmas this year. For this release I am aming to complete all features that are required for the app to feel like a complete gallery app with respect to the provided functionality.
+
+You can track planned features, current issues as well as what is sceduled for `v1.0.0` in the [issues](https://github.com/vauvenal5/yaga/issues) section.
+
+The following lists provide only a brief overview.
 
 ## Features
 Allready included in Nextcloud Yaga:
@@ -35,10 +39,10 @@ Allready included in Nextcloud Yaga:
 * Light/Dark themes
 * Local search/filter
 * Change View Types
+* Intent support for "Select Image" and "Open with"
 
 ## Coming soon
 Features that are allready on my mind (not necessarily in that order):
-* Intent support for "Select Image" and "Open with"
 * Upload/Move/Delete
 * Multiselect for Sharing/Move/Delete
 * Video Support

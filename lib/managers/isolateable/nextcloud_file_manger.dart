@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:logger/logger.dart';
+import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
@@ -11,6 +12,7 @@ import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/logger.dart';
+import 'package:yaga/utils/ncfile_stream_extensions.dart';
 
 class NextcloudFileManager
     with Isolateable<NextcloudFileManager>
@@ -23,6 +25,13 @@ class NextcloudFileManager
   final SyncManager _syncManager;
   final LocalFileService _localFileService;
 
+  RxCommand<NcFile, NcFile> _getPreviewCommand =
+      RxCommand.createSync((param) => param);
+  RxCommand<NcFile, NcFile> downloadPreviewCommand =
+      RxCommand.createSync((param) => param);
+  RxCommand<NcFile, NcFile> updatePreviewCommand =
+      RxCommand.createSync((param) => param);
+
   NextcloudFileManager(
     this._fileManager,
     this._nextCloudService,
@@ -31,34 +40,71 @@ class NextcloudFileManager
     this._syncManager,
   ) {
     this._fileManager.registerFileManager(this);
+
+    //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
+    //todo: bug: this also tries to fetch previews for local files; no check if the file is local or remote
+    _getPreviewCommand
+        .asyncMap((ncFile) =>
+            this._nextCloudService.getPreview(ncFile.uri).then((value) async {
+              ncFile.previewFile = await _localFileService.createFile(
+                  file: ncFile.previewFile,
+                  bytes: value,
+                  lastModified: ncFile.lastModified);
+              return ncFile;
+            }, onError: (err) {
+              return null;
+            }))
+        .where((event) => event != null)
+        .listen((value) => updatePreviewCommand(value));
+
+    downloadPreviewCommand.listen((ncFile) {
+      if (ncFile.previewFile != null && ncFile.previewFile.existsSync()) {
+        updatePreviewCommand(ncFile);
+        return;
+      }
+      this._getPreviewCommand(ncFile);
+    });
   }
 
   @override
   String get scheme => _nextCloudService.scheme;
 
   @override
-  Stream<NcFile> listFiles(Uri uri) {
+  Stream<NcFile> listFiles(
+    Uri uri, {
+    bool recursive = false,
+  }) {
     //todo: add uri check
     return _syncManager.addUri(uri).asStream().flatMap((value) => Rx.merge([
-          this._listTmpFiles(uri),
-          this._listLocalFiles(uri),
-          this
-              ._listNextcloudFiles(uri)
-              .doOnData((file) => _syncManager.addRemoteFile(uri, file))
-              .doOnError((err, stack) {
-            _syncManager.removeUri(uri);
-          })
-        ]).doOnData((file) => _syncManager.addFile(uri, file)).doOnDone(() =>
-            _syncManager.syncUri(uri).then((value) => value.forEach((element) {
-                  _logger.w("Removing local file! (${element.uri.path})");
-                  this._fileManager.updateFileList(element);
-                  //todo: syncManager does not guarantee that files are set
-                  this._localFileService.deleteFile(element.localFile);
-                  this._localFileService.deleteFile(element.previewFile);
-                }))));
+          this._listLocalFileList(uri),
+          this._listNextcloudFiles(uri, recursive),
+        ]).doOnDone(() => this._finishSync(uri)));
   }
 
-  Stream<NcFile> _listNextcloudFiles(Uri uri) {
+  @override
+  Stream<List<NcFile>> listFileList(
+    Uri uri, {
+    bool recursive = false,
+  }) {
+    //todo: add uri check
+    _logger.d("Listing... $uri");
+    return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
+          this._listLocalFileList(uri),
+          this._listNextcloudFiles(uri, recursive).collectToList(),
+        ]).doOnData((event) {
+          _logger.w("Emiting list! (${uri})");
+        }).doOnDone(() => this._finishSync(uri)));
+  }
+
+  Stream<NcFile> _listNextcloudFiles(Uri uri, bool recursive) {
+    return this
+        ._listNextcloudFilesUpstream(uri)
+        .recursively(recursive, this._listNextcloudFilesUpstream)
+        .doOnData((file) => _syncManager.addRemoteFile(uri, file))
+        .doOnError((err, stack) => _syncManager.removeUri(uri));
+  }
+
+  Stream<NcFile> _listNextcloudFilesUpstream(Uri uri) {
     return _nextCloudService.list(uri).asyncMap((file) async {
       if (!file.isDirectory) {
         file.localFile =
@@ -68,6 +114,14 @@ class NextcloudFileManager
       }
       return file;
     });
+  }
+
+  Stream<List<NcFile>> _listLocalFileList(Uri uri) {
+    return Rx.merge([this._listTmpFiles(uri), this._listLocalFiles(uri)])
+        .doOnData((file) => _syncManager.addFile(uri, file))
+        .distinctUnique()
+        .toList()
+        .asStream();
   }
 
   Stream<NcFile> _listLocalFiles(Uri uri) {
@@ -107,38 +161,13 @@ class NextcloudFileManager
     });
   }
 
-  @override
-  Stream<List<NcFile>> listFileList(Uri uri) {
-    //todo: add uri check
-    _logger.d("Listing... $uri");
-    return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
-          this._listLocalFileList(uri),
-          this
-              ._listNextcloudFiles(uri)
-              .doOnData((file) => _syncManager.addRemoteFile(uri, file))
-              .doOnError((err, stack) {
-                _syncManager.removeUri(uri);
-              })
-              .toList()
-              .asStream()
-              .onErrorReturn([])
-        ]).doOnData((event) {
-          _logger.w("Emiting list! (${uri})");
-        }).doOnDone(() =>
-            _syncManager.syncUri(uri).then((value) => value.forEach((element) {
-                  _logger.w("Removing local file! (${element.uri.path})");
-                  this._fileManager.updateFileList(element);
-                  //todo: syncManager does not guarantee that files are set
-                  this._localFileService.deleteFile(element.localFile);
-                  this._localFileService.deleteFile(element.previewFile);
-                }))));
-  }
-
-  Stream<List<NcFile>> _listLocalFileList(Uri uri) {
-    return Rx.merge([this._listTmpFiles(uri), this._listLocalFiles(uri)])
-        .doOnData((file) => _syncManager.addFile(uri, file))
-        .distinctUnique()
-        .toList()
-        .asStream();
+  _finishSync(Uri uri) {
+    _syncManager.syncUri(uri).then((value) => value.forEach((element) {
+          _logger.w("Removing local file! (${element.uri.path})");
+          this._fileManager.updateFileList(element);
+          //todo: syncManager does not guarantee that files are set
+          this._localFileService.deleteFile(element.localFile);
+          this._localFileService.deleteFile(element.previewFile);
+        }));
   }
 }

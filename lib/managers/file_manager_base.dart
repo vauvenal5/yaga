@@ -34,20 +34,9 @@ abstract class FileManagerBase {
 
   Stream<FileListResponse> listFileLists(String requestKey, Uri uri,
       {bool recursive = false}) {
-    return this._fileSubManagers[uri.scheme].listFileList(uri).flatMap((list) {
-      if (!recursive) {
-        return Stream.value(FileListResponse(requestKey, uri, list));
-      }
-
-      return Rx.merge([
-        Stream.value(FileListResponse(requestKey, uri, list)),
-        Stream.fromIterable(list)
-            .where((file) => file.isDirectory)
-            .doOnData((file) =>
-                _logger.d("Emiting from recursive. (${file.uri.path})"))
-            .flatMap((file) =>
-                this.listFileLists(requestKey, file.uri, recursive: recursive))
-      ]);
-    });
+    return this
+        ._fileSubManagers[uri.scheme]
+        .listFileList(uri, recursive: recursive)
+        .map((event) => FileListResponse(requestKey, uri, recursive, event));
   }
 }

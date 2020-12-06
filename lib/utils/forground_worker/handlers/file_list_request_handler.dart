@@ -19,7 +19,8 @@ class FileListRequestHandler {
         .listFileLists(message.key, message.uri, recursive: message.recursive)
         .listen((event) => isolateToMain.send(event))
         .onDone(() {
-      isolateToMain.send(FileListDone(message.key, message.uri));
+      isolateToMain
+          .send(FileListDone(message.key, message.uri, message.recursive));
       updateSub.cancel();
     });
   }

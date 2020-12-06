@@ -1,0 +1,2 @@
+- fix memory leak when downloading a lot of previews
+- fix UI freeze when loading a lot of directories recursively

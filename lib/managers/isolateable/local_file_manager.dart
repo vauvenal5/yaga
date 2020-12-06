@@ -6,6 +6,7 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
+import 'package:yaga/utils/ncfile_stream_extensions.dart';
 
 class LocalFileManager
     with Isolateable<LocalFileManager>
@@ -25,7 +26,25 @@ class LocalFileManager
   @override
   //todo: should add a wrapper around uri to distinguish between internal and absolute uri
   // --> for example this serivce requires a internal uri but the call from within the nextcloudFileManager passes an absolute uri!
-  Stream<NcFile> listFiles(Uri uri) {
+  Stream<NcFile> listFiles(
+    Uri uri, {
+    bool recursive = false,
+  }) {
+    //todo: add uri check? or simply handle exception?
+    return this
+        ._listLocalFiles(uri)
+        .recursively(recursive, this._listLocalFiles);
+  }
+
+  @override
+  Stream<List<NcFile>> listFileList(
+    Uri uri, {
+    bool recursive = false,
+  }) {
+    return this.listFiles(uri, recursive: recursive).collectToList();
+  }
+
+  Stream<NcFile> _listLocalFiles(Uri uri) {
     //todo: add uri check? or simply handle exception?
     return _localFileService
         .list(Directory.fromUri(
@@ -48,10 +67,5 @@ class LocalFileManager
 
       return file;
     });
-  }
-
-  @override
-  Stream<List<NcFile>> listFileList(Uri uri) {
-    return this.listFiles(uri).toList().asStream();
   }
 }

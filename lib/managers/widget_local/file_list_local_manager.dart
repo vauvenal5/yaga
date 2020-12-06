@@ -71,7 +71,7 @@ class FileListLocalManager {
         .where((event) => event is FileListMessage)
         .map((event) => event as FileListMessage)
         .where((event) =>
-            event.uri == uri ||
+            (event.uri == uri && event.recursive == this.recursive.value) ||
             (this.recursive.value &&
                 event.uri.toString().startsWith(uri.toString())))
         .listen((event) {

@@ -5,5 +5,6 @@ import 'package:yaga/utils/forground_worker/messages/message.dart';
 class FileListResponse extends FileListMessage {
   final List<NcFile> files;
 
-  FileListResponse(String key, Uri uri, this.files) : super(key, uri);
+  FileListResponse(String key, Uri uri, bool recursive, this.files)
+      : super(key, uri, recursive);
 }

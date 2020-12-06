@@ -37,6 +37,6 @@ abstract class FileManagerBase {
     return this
         ._fileSubManagers[uri.scheme]
         .listFileList(uri, recursive: recursive)
-        .map((event) => FileListResponse(requestKey, uri, event));
+        .map((event) => FileListResponse(requestKey, uri, recursive, event));
   }
 }

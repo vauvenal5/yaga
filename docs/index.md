@@ -19,6 +19,10 @@ Please have a look on the [quickstart guide]({{site.baseurl}}/quickstart/) for f
     alt="Get it on Google Play"
     height="80"
     width="250">](https://play.google.com/store/apps/details?id=com.github.vauvenal5.yaga){: .text-decoration: none;}
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+    alt="Get it on F-Droid"
+    height="80"
+    width="250">](https://f-droid.org/packages/com.github.vauvenal5.yaga){: .text-decoration: none;}
 
 # State of the app
 

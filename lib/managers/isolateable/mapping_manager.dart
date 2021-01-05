@@ -33,6 +33,8 @@ class MappingManager with Isolateable<MappingManager> {
         .listen((event) => handleMappingUpdate(event));
   }
 
+  //todo: use a bridge and commands to handle incoming msgs in forgraound worker
+  // @visibleForTesting
   void handleMappingUpdate(MappingPreference event) {
     if (event == null) {
       return;
@@ -58,7 +60,7 @@ class MappingManager with Isolateable<MappingManager> {
 
   void _addMappingPreferenceToTree(
       MappingPreference pref, int pathIndex, MappingNode currentNode) {
-    if (pathIndex == pref.remote.value.pathSegments.length) {
+    if (pathIndex >= pref.remote.value.pathSegments.length - 1) {
       currentNode.mapping = pref;
       return;
     }

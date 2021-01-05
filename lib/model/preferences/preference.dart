@@ -11,7 +11,8 @@ abstract class Preference {
   String get title;
   bool get enabled;
 
-  static String prefixKey(String prefix, String key) => "$prefix:$key";
+  static String prefixKey(String prefix, String key) =>
+      key.startsWith(prefix) ? key : "$prefix:$key";
 
   @protected
   static T initBuilder<T extends PreferenceBuilder>(PreferenceBuilder b) =>

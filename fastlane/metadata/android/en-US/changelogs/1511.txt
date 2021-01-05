@@ -1,0 +1,2 @@
+- fix mapping manager when mapping non root folder
+- fix url validation

@@ -72,7 +72,13 @@ class NextCloudService
       file.lastModified = webDavFile.lastModified;
       file.name = webDavFile.name;
       return file;
-    }); //.toList --> should this return a Future<List> since the data is actually allready downloaded?
+    }).doOnError(
+      (error, stacktrace) => _logger.e(
+        "Unexpected error while loading list",
+        error,
+        stacktrace,
+      ),
+    ); //.toList --> should this return a Future<List> since the data is actually allready downloaded?
   }
 
   Future<Uint8List> getAvatar() => this

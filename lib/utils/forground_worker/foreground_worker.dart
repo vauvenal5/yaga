@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
@@ -16,9 +17,12 @@ import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/login_state_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/preference_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
+import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
 
 class ForegroundWorker {
+  final Logger _logger = getLogger(ForegroundWorker);
+
   Isolate _isolate;
   SendPort _mainToIsolate;
   Completer<ForegroundWorker> _isolateReady;
@@ -42,6 +46,11 @@ class ForegroundWorker {
         return;
       }
 
+      if (message is List) {
+        _logger.e("Error in forground worker", message[0],
+            StackTrace.fromString(message[1]));
+      }
+
       if (message is Message) {
         isolateResponseCommand(message);
       }
@@ -56,6 +65,8 @@ class ForegroundWorker {
         _nextCloudManager.updateLoginStateCommand.lastResult,
         _globalSettingsManager.updateRootMappingPreference.lastResult,
       ),
+      errorsAreFatal: false,
+      onError: isolateToMain.sendPort,
     );
 
     return _isolateReady.future;

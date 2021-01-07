@@ -51,7 +51,12 @@ class NextcloudFileManager
                   bytes: value,
                   lastModified: ncFile.lastModified);
               return ncFile;
-            }, onError: (err) {
+            }, onError: (err, stacktrace) {
+              _logger.e(
+                "Unexpected error while loading preview",
+                err,
+                stacktrace,
+              );
               return null;
             }))
         .where((event) => event != null)
@@ -87,7 +92,7 @@ class NextcloudFileManager
     bool recursive = false,
   }) {
     //todo: add uri check
-    _logger.d("Listing... $uri");
+    _logger.w("Listing... ($uri)");
     return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
           this._listLocalFileList(uri),
           this._listNextcloudFiles(uri, recursive).collectToList(),

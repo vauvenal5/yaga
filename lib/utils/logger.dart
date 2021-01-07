@@ -1,7 +1,14 @@
 import 'package:logger/logger.dart';
 
 Logger getLogger(Type className, {level: Level.debug}) {
-  return Logger(printer: SimpleLogPrinter(className.toString()), level: level);
+  ProductionFilter filter = ProductionFilter();
+  filter.level = Level.warning;
+
+  return Logger(
+    printer: SimpleLogPrinter(className.toString()),
+    level: level,
+    filter: filter,
+  );
 }
 
 class SimpleLogPrinter extends LogPrinter {
@@ -16,11 +23,19 @@ class SimpleLogPrinter extends LogPrinter {
     Level.error: '[E]',
     Level.wtf: '[WTF]',
   };
-  
+
   @override
   List<String> log(LogEvent event) {
     var color = PrettyPrinter.levelColors[event.level];
     var prefix = levelPrefixes[event.level];
+
+    if (event.level == Level.error) {
+      return [
+        color('$prefix $className - ${event.message}: ${event.error}'),
+        event.stackTrace.toString()
+      ];
+    }
+
     return [color('$prefix $className - ${event.message}')];
   }
 }

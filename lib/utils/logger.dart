@@ -1,13 +1,10 @@
 import 'package:logger/logger.dart';
 
-Logger getLogger(Type className, {level: Level.debug}) {
-  ProductionFilter filter = ProductionFilter();
-  filter.level = Level.warning;
-
+Logger getLogger(Type className, {level: Level.warning}) {
   return Logger(
     printer: SimpleLogPrinter(className.toString()),
     level: level,
-    filter: filter,
+    filter: ProductionFilter(),
   );
 }
 

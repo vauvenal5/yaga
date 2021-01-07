@@ -1,0 +1,2 @@
+- enable production logging for warn and err
+- correctly set log level

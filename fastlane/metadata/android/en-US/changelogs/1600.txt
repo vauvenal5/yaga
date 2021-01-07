@@ -1,0 +1,1 @@
+- add switch to disable URL validation in login mask

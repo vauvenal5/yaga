@@ -77,7 +77,9 @@ class RemoteImageWidget extends StatelessWidget {
             return _createIconOverlay(
                 imageWidget, _getLocalIcon(file, localExists, context));
           } else {
-            getIt.get<NextcloudManagerBridge>().downloadPreviewCommand(_file);
+            if (getIt.get<NextCloudService>().isUriOfService(_file.uri)) {
+              getIt.get<NextcloudManagerBridge>().downloadPreviewCommand(_file);
+            }
           }
 
           if (file.localFile != null && localExists) {

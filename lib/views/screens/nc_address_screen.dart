@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/views/screens/nc_login_screen.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
-import 'package:string_validator/string_validator.dart';
+import 'package:yaga/views/widgets/address_form_advanced.dart';
+import 'package:yaga/views/widgets/address_form_simple.dart';
 
 class NextCloudAddressScreen extends StatefulWidget {
   static const route = "/nc/address";
@@ -13,46 +14,32 @@ class NextCloudAddressScreen extends StatefulWidget {
 }
 
 class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
-  final _formKey = GlobalKey<FormState>();
-
-  String _addHttps(String value) {
-    if (value.startsWith("https://")) {
-      return value;
-    }
-
-    return "https://" + value;
-  }
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool validation = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: Text("Server Address"),
+          actions: [
+            IconButton(
+              icon: validation ? Icon(Icons.report) : Icon(Icons.report_off),
+              onPressed: () => setState(() {
+                validation = !validation;
+                _formKey = GlobalKey<FormState>();
+              }),
+            ),
+          ],
         ),
         body: Center(
-            child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                        labelText: "Nextcloud Server address https://...",
-                        icon: Icon(Icons.cloud_queue)),
-                    onSaved: (value) => Navigator.pushNamed(
-                        context, NextCloudLoginScreen.route,
-                        arguments: Uri.parse('https://${rtrim(value, "/")}')),
-                    validator: (value) {
-                      if (value.startsWith("https://") ||
-                          value.startsWith("http://")) {
-                        return "Https will be added automaically.";
-                      }
-                      return isURL("https://$value")
-                          ? null
-                          : "Please enter a valid URL.";
-                    },
-                  ),
-                ))),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: validation
+                ? AddressFormSimple(_formKey, _onSave)
+                : AddressFormAdvanced(_formKey, _onSave),
+          ),
+        ),
         resizeToAvoidBottomInset: true,
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: 1,
@@ -66,7 +53,9 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
             }
 
             Navigator.popUntil(
-                context, ModalRoute.withName(YagaHomeScreen.route));
+              context,
+              ModalRoute.withName(YagaHomeScreen.route),
+            );
           },
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -79,5 +68,21 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
             ),
           ],
         ));
+  }
+
+  String _addHttps(String value) {
+    if (value.startsWith("https://")) {
+      return value;
+    }
+
+    return "https://" + value;
+  }
+
+  void _onSave(Uri uri) {
+    Navigator.pushNamed(
+      context,
+      NextCloudLoginScreen.route,
+      arguments: uri,
+    );
   }
 }

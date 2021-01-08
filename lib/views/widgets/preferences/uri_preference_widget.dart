@@ -52,7 +52,7 @@ class UriPreferenceWidget extends StatelessWidget {
       listTileBuilder: (context, pref) => ListTile(
         enabled: pref.enabled,
         title: Text(pref.title),
-        subtitle: Text(pref.value.toString()),
+        subtitle: Text(Uri.decodeComponent(pref.value.toString())),
         onTap: () => _pushToNavigation(context, pref, pref.value),
       ),
     );

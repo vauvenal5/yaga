@@ -12,6 +12,7 @@ import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/nextcloud_client_factory.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class NextCloudService
     with Service<NextCloudService>, Isolateable<NextCloudService>
@@ -50,7 +51,7 @@ class NextCloudService
 
   @override
   Stream<NcFile> list(Uri dir) {
-    String basePath = "files/${_client.username}";
+    String basePath = "files/${this.username}";
     return this
         ._client
         .webDav
@@ -61,11 +62,7 @@ class NextCloudService
             (event) => event.isDirectory || event.mimeType.startsWith("image"))
         .map((webDavFile) {
       var path = webDavFile.path.replaceFirst("/$basePath", "");
-      Uri uri = Uri(
-          scheme: this.scheme,
-          userInfo: _client.username,
-          host: _host.host,
-          path: path);
+      Uri uri = UriUtils.fromUri(uri: getOrigin(), path: path);
 
       NcFile file = NcFile(uri);
       file.isDirectory = webDavFile.isDirectory;
@@ -84,7 +81,7 @@ class NextCloudService
   Future<Uint8List> getAvatar() => this
       ._client
       .avatar
-      .getAvatar(_client.username, 100)
+      .getAvatar(this.username, 100)
       .then((value) => base64.decode(value));
 
   Future<Uint8List> getPreview(Uri file) {
@@ -101,14 +98,14 @@ class NextCloudService
 
   Future<Uint8List> downloadImage(Uri file) {
     String basePath =
-        "files/${_client.username}"; //todo: add proper logging and check if download gets called on real device multiple times
+        "files/${this.username}"; //todo: add proper logging and check if download gets called on real device multiple times
     return this._client.webDav.download(basePath + file.path);
   }
 
   Uri getOrigin() {
     return Uri(
         scheme: this.scheme,
-        userInfo: _client.username,
+        userInfo: Uri.encodeComponent(this.username),
         host: _host.host,
         path: "/");
   }

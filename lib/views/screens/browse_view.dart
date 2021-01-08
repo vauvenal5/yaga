@@ -50,11 +50,12 @@ class BrowseView extends StatelessWidget {
             if (getIt.get<NextCloudService>().isLoggedIn()) {
               Uri origin = getIt.get<NextCloudService>().getOrigin();
               children.add(ListTile(
-                isThreeLine: false,
+                isThreeLine: true,
                 leading: AvatarWidget.command(
                   getIt.get<NextCloudManager>().updateAvatarCommand,
                 ),
-                title: Text(origin.authority),
+                title: Text(getIt.get<NextCloudService>().username),
+                subtitle: Text(origin.host),
                 onTap: () => getIt
                     .get<NavigationManager>()
                     .showDirectoryNavigation(_getArgs(context, origin)),

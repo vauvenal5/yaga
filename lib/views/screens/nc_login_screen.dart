@@ -44,7 +44,7 @@ class NextCloudLoginScreen extends StatelessWidget {
 
               getIt.get<NextCloudManager>().loginCommand(NextCloudLoginData(
                   Uri.parse(ncParas[NextCloudLoginDataKeys.server]),
-                  ncParas[NextCloudLoginDataKeys.user],
+                  Uri.decodeComponent(ncParas[NextCloudLoginDataKeys.user]),
                   ncParas[NextCloudLoginDataKeys.password]));
 
               Navigator.popUntil(

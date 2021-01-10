@@ -1,0 +1,2 @@
+- introducing multi-select
+- allow sharing of multiple images

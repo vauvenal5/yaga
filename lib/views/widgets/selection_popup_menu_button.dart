@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:mime/mime.dart';
-import 'package:wc_flutter_share/wc_flutter_share.dart';
+import 'package:share/share.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
-import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 
@@ -35,26 +31,21 @@ class SelectionPopupMenuButton extends StatelessWidget {
 
   void _popupMenuHandler(BuildContext context, SelectionViewMenu result) {
     if (result == SelectionViewMenu.share) {
-      if (fileListLocalManager.selected.length == 1 &&
-          fileListLocalManager.selected[0].localFile.existsSync()) {
-        NcFile selected = fileListLocalManager.selected[0];
-
-        WcFlutterShare.share(
-          //todo: dp we need to move this to a service or controller?
-          sharePopupTitle: 'share',
-          fileName: selected.name,
-          mimeType: lookupMimeType(
-            selected.localFile.path,
-          ), //todo: move mime type to NcFile
-          bytesOfFile: (selected.localFile as File).readAsBytesSync(),
-        ).then((value) => fileListLocalManager.deselectAll());
-      } else {
+      if (fileListLocalManager.selected
+              .where((element) => !element.localFile.existsSync())
+              .toList()
+              .length >
+          0) {
         Scaffold.of(context).showSnackBar(SnackBar(
-          content: Text(
-              "Currently sharing supports only one already downloaded file."),
+          content:
+              Text("Currently sharing supports only already downloaded files."),
           behavior: SnackBarBehavior.floating,
         ));
+        return;
       }
+
+      Share.shareFiles(
+          fileListLocalManager.selected.map((e) => e.localFile.path).toList());
     }
   }
 }

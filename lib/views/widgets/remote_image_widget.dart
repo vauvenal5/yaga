@@ -8,6 +8,7 @@ import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/bridges/nextcloud_manager_bridge.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
+import 'package:yaga/views/widgets/circle_avatar_icon.dart';
 
 class RemoteImageWidget extends StatelessWidget {
   final Logger _logger = getLogger(RemoteImageWidget, level: Level.warning);
@@ -18,22 +19,32 @@ class RemoteImageWidget extends StatelessWidget {
   RemoteImageWidget(this._file, {Key key, this.cacheWidth, this.cacheHeight})
       : super(key: key);
 
-  Widget _createIconOverlay(Widget imageWidget, Widget iconWidget) =>
-      Stack(fit: StackFit.expand, children: <Widget>[
-        imageWidget,
-        Align(
-            alignment: Alignment.bottomRight,
-            child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                CircleAvatar(
-                  radius: 13,
-                  backgroundColor: Colors.white,
-                ),
-                iconWidget,
-              ],
-            ))
-      ]);
+  Widget _createIconOverlay(Widget imageWidget, Widget iconWidget) {
+    List<Widget> children = <Widget>[
+      imageWidget,
+      Align(
+        alignment: Alignment.bottomRight,
+        child: CircleAvatarIcon(icon: iconWidget),
+      ),
+    ];
+
+    if (_file.selected) {
+      children.add(Align(
+        alignment: Alignment.topLeft,
+        child: CircleAvatarIcon(
+          icon: Icon(
+            Icons.check,
+            color: Colors.blue,
+          ),
+        ),
+      ));
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: children,
+    );
+  }
 
   Widget _getLocalIcon(NcFile file, bool localExists, BuildContext context) {
     if (getIt.get<NextCloudService>().isUriOfService(file.uri)) {
@@ -67,6 +78,12 @@ class RemoteImageWidget extends StatelessWidget {
           bool localExists = file.localFile.existsSync();
 
           if (file.previewFile != null && file.previewFile.existsSync()) {
+            //todo: find best solution for missing long press animation
+            // Ink image = Ink.image(
+            //   image: FileImage(snapshot.data.previewFile),
+            //   fit: BoxFit.cover,
+            // );
+
             Image imageWidget = Image.file(
               snapshot.data.previewFile,
               cacheWidth: this.cacheWidth,

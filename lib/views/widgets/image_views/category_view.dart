@@ -48,6 +48,8 @@ class CategoryView extends StatelessWidget {
   Widget _buildImage(String key, int itemIndex, BuildContext context) {
     return InkWell(
       onTap: () => this.viewConfig.onFileTap(this.sortedFiles[key], itemIndex),
+      onLongPress: () =>
+          this.viewConfig.onSelect(this.sortedFiles[key][itemIndex]),
       child: RemoteImageWidget(
         this.sortedFiles[key][itemIndex],
         key: ValueKey(this.sortedFiles[key][itemIndex].uri.path),

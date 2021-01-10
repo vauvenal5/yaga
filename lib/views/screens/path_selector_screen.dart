@@ -33,10 +33,12 @@ class PathSelectorScreen extends StatelessWidget {
     }
 
     ViewConfiguration viewConfig = ViewConfiguration.browse(
-        route: route,
-        defaultView: NcListView.viewKey,
-        onFolderTap: null,
-        onFileTap: this.onFileTap);
+      route: route,
+      defaultView: NcListView.viewKey,
+      onFolderTap: null,
+      onFileTap: this.onFileTap,
+      onSelect: null,
+    );
 
     return DirectoryNavigationScreenArguments(
         uri: this._uri,

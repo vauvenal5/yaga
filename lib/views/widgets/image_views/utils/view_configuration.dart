@@ -18,20 +18,23 @@ class ViewConfiguration {
   //todo: not sure if moving the onTap handler to this objects is a good idea
   final Function(NcFile) onFolderTap;
   final Function(List<NcFile>, int) onFileTap;
+  final Function(NcFile) onSelect;
 
   ViewConfiguration._internal(this.section, this.view, this.recursive,
-      this.showFolders, this.onFileTap, this.onFolderTap);
+      this.showFolders, this.onFileTap, this.onFolderTap, this.onSelect);
 
   ViewConfiguration clone() {
-    return ViewConfiguration._internal(
-        section, view, recursive, showFolders, onFileTap, onFolderTap);
+    return ViewConfiguration._internal(section, view, recursive, showFolders,
+        onFileTap, onFolderTap, onSelect);
   }
 
-  factory ViewConfiguration(
-      {@required String route,
-      @required String defaultView,
-      @required Function(NcFile) onFolderTap,
-      @required Function(List<NcFile>, int) onFileTap}) {
+  factory ViewConfiguration({
+    @required String route,
+    @required String defaultView,
+    @required Function(NcFile) onFolderTap,
+    @required Function(List<NcFile>, int) onFileTap,
+    @required final Function(NcFile) onSelect,
+  }) {
     SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
       ..title = "View");
@@ -55,14 +58,23 @@ class ViewConfiguration {
       ..value = false);
 
     return ViewConfiguration._internal(
-        section, view, recursive, showFolders, onFileTap, onFolderTap);
+      section,
+      view,
+      recursive,
+      showFolders,
+      onFileTap,
+      onFolderTap,
+      onSelect,
+    );
   }
 
-  factory ViewConfiguration.browse(
-      {@required String route,
-      @required String defaultView,
-      @required Function(NcFile) onFolderTap,
-      @required Function(List<NcFile>, int) onFileTap}) {
+  factory ViewConfiguration.browse({
+    @required String route,
+    @required String defaultView,
+    @required Function(NcFile) onFolderTap,
+    @required Function(List<NcFile>, int) onFileTap,
+    @required Function(NcFile) onSelect,
+  }) {
     SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
       ..title = "View");
@@ -84,18 +96,30 @@ class ViewConfiguration {
       ..value = true);
 
     return ViewConfiguration._internal(
-        section, view, recursive, showFolders, onFileTap, onFolderTap);
+      section,
+      view,
+      recursive,
+      showFolders,
+      onFileTap,
+      onFolderTap,
+      onSelect,
+    );
   }
 
-  factory ViewConfiguration.fromViewConfig(
-      {@required ViewConfiguration viewConfig, Function(NcFile) onFolderTap}) {
+  factory ViewConfiguration.fromViewConfig({
+    @required ViewConfiguration viewConfig,
+    Function(NcFile) onFolderTap,
+    Function(List<NcFile>, int) onFileTap,
+    Function(NcFile) onSelect,
+  }) {
     return ViewConfiguration._internal(
       viewConfig.section,
       viewConfig.view,
       viewConfig.recursive,
       viewConfig.showFolders,
-      viewConfig.onFileTap,
+      onFileTap ?? viewConfig.onFileTap,
       onFolderTap ?? viewConfig.onFolderTap,
+      onSelect ?? viewConfig.onSelect,
     );
   }
 }

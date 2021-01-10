@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
-import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/focus_view_arguments.dart';
@@ -9,11 +7,13 @@ import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
-import 'package:yaga/views/widgets/image_search.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 import 'package:yaga/views/widgets/path_widget.dart';
+import 'package:yaga/views/widgets/selection_app_bar.dart';
+import 'package:yaga/views/widgets/selection_title.dart';
+import 'package:yaga/views/widgets/selection_will_pop_scope.dart';
 import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 
 enum BrowseViewMenu { settings, focus }
@@ -21,12 +21,12 @@ enum BrowseViewMenu { settings, focus }
 //todo: rename this since it is also used for browse view... maybe clean up a little
 class DirectoryScreen extends StatefulWidget {
   static const String route = "/directoryNavigationScreen";
+  static const double appBarBottomHeight = 40;
 
   final ViewConfiguration viewConfig;
   final Uri uri;
   final String title;
   final Widget Function(BuildContext, Uri) bottomBarBuilder;
-  // final Function(Uri) navigate;
   final String navigationRoute;
   final NavigatableScreenArguments Function(DirectoryNavigationScreenArguments)
       getNavigationArgs;
@@ -37,7 +37,6 @@ class DirectoryScreen extends StatefulWidget {
   DirectoryScreen(
       {@required this.uri,
       @required this.viewConfig,
-      // @required this.navigate,
       this.title,
       this.bottomBarBuilder,
       this.navigationRoute,
@@ -48,15 +47,43 @@ class DirectoryScreen extends StatefulWidget {
 
   @override
   _DirectoryScreenState createState() =>
-      _DirectoryScreenState(this.uri, this.viewConfig.recursive);
+      _DirectoryScreenState(this.uri, this.viewConfig);
 }
 
 class _DirectoryScreenState extends State<DirectoryScreen> {
   final FileListLocalManager _fileListLocalManager;
+  final ViewConfiguration _viewConfig;
   List<Preference> _defaultViewPreferences = [];
 
-  _DirectoryScreenState(Uri uri, BoolPreference recursive)
-      : _fileListLocalManager = FileListLocalManager(uri, recursive);
+  _DirectoryScreenState._internal(this._fileListLocalManager, this._viewConfig);
+
+  factory _DirectoryScreenState(Uri uri, ViewConfiguration viewConfig) {
+    final fileListLocalManager =
+        FileListLocalManager(uri, viewConfig.recursive);
+
+    return _DirectoryScreenState._internal(
+      fileListLocalManager,
+      ViewConfiguration.fromViewConfig(
+        viewConfig: viewConfig,
+        onFolderTap: (folder) {
+          if (fileListLocalManager.isInSelectionMode) {
+            return;
+          }
+          return viewConfig.onFolderTap(folder);
+        },
+        onSelect: (file) => fileListLocalManager.selectFileCommand(file),
+        onFileTap: (files, index) {
+          if (fileListLocalManager.isInSelectionMode) {
+            return fileListLocalManager.selectFileCommand(files[index]);
+          }
+
+          if (viewConfig.onFileTap != null) {
+            return viewConfig.onFileTap(files, index);
+          }
+        },
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -75,56 +102,69 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: ValueKey(this._fileListLocalManager.uri.toString()),
-      appBar: AppBar(
-        title: Text(this.widget.title ??
-            this._fileListLocalManager.uri.pathSegments.last),
-        leading: this.widget.leading
-            ? IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () => Navigator.of(context).pop())
-            : null,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () async {
-              NcFile file = await showSearch<NcFile>(
-                context: context,
-                delegate:
-                    ImageSearch(_fileListLocalManager, this.widget.viewConfig),
-              );
+    return SelectionWillPopScope(
+      fileListLocalManager: this._fileListLocalManager,
+      child: Scaffold(
+        key: ValueKey(this._fileListLocalManager.uri.toString()),
+        appBar: SelectionAppBar(
+          fileListLocalManager: _fileListLocalManager,
+          viewConfig: _viewConfig,
+          appBarBuilder: _buildAppBar,
+          bottomHeight: DirectoryScreen.appBarBottomHeight,
+          searchResultHandler: (file) {
+            if (file != null && file.isDirectory) {
               this.widget.viewConfig.onFolderTap(file);
-            },
-          ),
-          YagaPopupMenuButton<BrowseViewMenu>(
-            this._buildPopupMenu,
-            this._handleMenuSelection,
-          ),
-        ],
-        bottom: PreferredSize(
-            child: Container(
-              height: 40,
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: PathWidget(
-                  this._fileListLocalManager.uri,
-                  (Uri subPath) => Navigator.of(context).pop(subPath),
-                  // (Uri subPath) => this.navigate(subPath),
-                  fixedOrigin: this.widget.fixedOrigin,
-                ),
+            }
+          },
+        ),
+        //todo: is it possible to directly pass the folder.uri?
+        body: ImageViewContainer(
+          fileListLocalManager: _fileListLocalManager,
+          viewConfig: this._viewConfig,
+        ),
+        bottomNavigationBar: widget.bottomBarBuilder == null
+            ? null
+            : widget.bottomBarBuilder(context, this._fileListLocalManager.uri),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context, List<Widget> actions) {
+    if (!_fileListLocalManager.isInSelectionMode) {
+      actions.add(YagaPopupMenuButton<BrowseViewMenu>(
+        this._buildPopupMenu,
+        this._handleMenuSelection,
+      ));
+    }
+
+    return AppBar(
+      title: SelectionTitle(
+        this._fileListLocalManager,
+        defaultTitel: Text(this.widget.title ??
+            this._fileListLocalManager.uri.pathSegments.last),
+      ),
+      //todo: remove widget.leading argument it is always true
+      leading: this.widget.leading
+          ? IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () => _fileListLocalManager.isInSelectionMode
+                  ? _fileListLocalManager.deselectAll()
+                  : Navigator.of(context).pop())
+          : null,
+      actions: actions,
+      bottom: PreferredSize(
+          child: Container(
+            height: DirectoryScreen.appBarBottomHeight,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: PathWidget(
+                this._fileListLocalManager.uri,
+                (Uri subPath) => Navigator.of(context).pop(subPath),
+                fixedOrigin: this.widget.fixedOrigin,
               ),
             ),
-            preferredSize: Size.fromHeight(40)),
-      ),
-      //todo: is it possible to directly pass the folder.uri?
-      body: ImageViewContainer(
-        fileListLocalManager: _fileListLocalManager,
-        viewConfig: this.widget.viewConfig,
-      ),
-      bottomNavigationBar: widget.bottomBarBuilder == null
-          ? null
-          : widget.bottomBarBuilder(context, this._fileListLocalManager.uri),
+          ),
+          preferredSize: Size.fromHeight(DirectoryScreen.appBarBottomHeight)),
     );
   }
 

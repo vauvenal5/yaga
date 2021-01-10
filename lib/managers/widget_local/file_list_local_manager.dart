@@ -25,9 +25,14 @@ class FileListLocalManager {
   Logger _logger = getLogger(FileListLocalManager);
   List<NcFile> files = List();
   BoolPreference recursive;
+  List<NcFile> selected = List();
 
   RxCommand<bool, bool> loadingChangedCommand;
   RxCommand<List<NcFile>, List<NcFile>> filesChangedCommand;
+  RxCommand<NcFile, NcFile> selectFileCommand =
+      RxCommand.createSync((param) => param);
+  RxCommand<bool, bool> selectionModeChanged =
+      RxCommand.createSync((param) => param, initialLastResult: false);
 
   StreamSubscription<MappingPreference>
       _updatedMappingPreferenceCommandSubscription;
@@ -41,6 +46,8 @@ class FileListLocalManager {
 
   Uri _uri;
   String managerKey;
+
+  bool get isInSelectionMode => this.selected.length > 0;
 
   FileListLocalManager(this._uri, this.recursive) {
     _worker = getIt.get<ForegroundWorker>();
@@ -167,5 +174,29 @@ class FileListLocalManager {
       this.recursive = event;
       this.refetch();
     });
+
+    this.selectFileCommand.listen((file) {
+      bool selectionMode = this.isInSelectionMode;
+      file.selected = !file.selected;
+      file.selected ? selected.add(file) : selected.remove(file);
+      this.filesChangedCommand(this.files);
+      if (selectionMode != this.isInSelectionMode) {
+        this.selectionModeChanged(this.isInSelectionMode);
+      }
+    });
+  }
+
+  void deselectAll() async {
+    this.selected.forEach((element) => element.selected = false);
+    this.selected = List();
+    this.filesChangedCommand(this.files);
+    this.selectionModeChanged(this.isInSelectionMode);
+  }
+
+  void selectAll() async {
+    this.files.forEach((element) => element.selected = true);
+    this.selected = List();
+    this.selected.addAll(this.files);
+    this.filesChangedCommand(this.files);
   }
 }

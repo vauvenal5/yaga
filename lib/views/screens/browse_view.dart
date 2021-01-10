@@ -84,6 +84,7 @@ class BrowseView extends StatelessWidget {
       route: _pref,
       defaultView: NcListView.viewKey,
       onFolderTap: null,
+      onSelect: null,
       //todo: implicit navigation
       onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
         context,

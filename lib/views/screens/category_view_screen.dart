@@ -9,6 +9,7 @@ import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
+import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/service_locator.dart';
@@ -49,20 +50,25 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
 
   @override
   void initState() {
+    final onFileTap = (List<NcFile> files, int index) =>
+        this._fileListLocalManager.isInSelectionMode
+            ? this._fileListLocalManager.selectFileCommand(files[index])
+            //todo: replace navigation by navigation manager
+            : Navigator.pushNamed(
+                context,
+                ImageScreen.route,
+                arguments: ImageScreenArguments(files, index),
+              );
+
     this._viewConfig = ViewConfiguration(
       route: widget._categoryViewConfig.pref,
       defaultView: CategoryViewExp.viewKey,
       onFolderTap: null,
-      onFileTap: (List<NcFile> files, int index) =>
-          this._fileListLocalManager.isInSelectionMode
-              ? this._fileListLocalManager.selectFileCommand(files[index])
-              //todo: replace navigation by navigation manager
-              : Navigator.pushNamed(
-                  context,
-                  ImageScreen.route,
-                  arguments: ImageScreenArguments(files, index),
-                ),
-      onSelect: (file) => this._fileListLocalManager.selectFileCommand(file),
+      onFileTap: onFileTap,
+      onSelect: getIt.get<IntentService>().isOpenForSelect
+          ? onFileTap
+          : (files, index) =>
+              this._fileListLocalManager.selectFileCommand(files[index]),
     );
 
     this

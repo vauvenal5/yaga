@@ -31,7 +31,7 @@ class CategoryViewExp extends StatelessWidget {
     return InkWell(
       onTap: () => this.viewConfig.onFileTap(this.sortedFiles[key], itemIndex),
       onLongPress: () =>
-          this.viewConfig.onSelect(this.sortedFiles[key][itemIndex]),
+          this.viewConfig.onSelect(this.sortedFiles[key], itemIndex),
       child: RemoteImageWidget(
         this.sortedFiles[key][itemIndex],
         key: ValueKey(this.sortedFiles[key][itemIndex].uri.path),

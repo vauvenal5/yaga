@@ -16,7 +16,7 @@ class NcGridView extends StatelessWidget {
   Widget _buildImage(int key, BuildContext context) {
     return InkWell(
       onTap: () => this.viewConfig.onFileTap(this._files, key),
-      onLongPress: () => this.viewConfig.onSelect(this._files[key]),
+      onLongPress: () => this.viewConfig.onSelect(this._files, key),
       child: RemoteImageWidget(
         this._files[key],
         key: ValueKey(this._files[key].uri.path),

@@ -18,7 +18,7 @@ class ViewConfiguration {
   //todo: not sure if moving the onTap handler to this objects is a good idea
   final Function(NcFile) onFolderTap;
   final Function(List<NcFile>, int) onFileTap;
-  final Function(NcFile) onSelect;
+  final Function(List<NcFile>, int) onSelect;
 
   ViewConfiguration._internal(this.section, this.view, this.recursive,
       this.showFolders, this.onFileTap, this.onFolderTap, this.onSelect);
@@ -33,7 +33,7 @@ class ViewConfiguration {
     @required String defaultView,
     @required Function(NcFile) onFolderTap,
     @required Function(List<NcFile>, int) onFileTap,
-    @required final Function(NcFile) onSelect,
+    @required final Function(List<NcFile>, int) onSelect,
   }) {
     SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
@@ -73,7 +73,7 @@ class ViewConfiguration {
     @required String defaultView,
     @required Function(NcFile) onFolderTap,
     @required Function(List<NcFile>, int) onFileTap,
-    @required Function(NcFile) onSelect,
+    @required Function(List<NcFile>, int) onSelect,
   }) {
     SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
@@ -110,7 +110,7 @@ class ViewConfiguration {
     @required ViewConfiguration viewConfig,
     Function(NcFile) onFolderTap,
     Function(List<NcFile>, int) onFileTap,
-    Function(NcFile) onSelect,
+    Function(List<NcFile>, int) onSelect,
   }) {
     return ViewConfiguration._internal(
       viewConfig.section,

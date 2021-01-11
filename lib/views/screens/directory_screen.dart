@@ -5,6 +5,8 @@ import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart
 import 'package:yaga/model/route_args/focus_view_arguments.dart';
 import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
+import 'package:yaga/services/intent_service.dart';
+import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
@@ -61,6 +63,16 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
     final fileListLocalManager =
         FileListLocalManager(uri, viewConfig.recursive);
 
+    final onFileTap = (files, index) {
+      if (fileListLocalManager.isInSelectionMode) {
+        return fileListLocalManager.selectFileCommand(files[index]);
+      }
+
+      if (viewConfig.onFileTap != null) {
+        return viewConfig.onFileTap(files, index);
+      }
+    };
+
     return _DirectoryScreenState._internal(
       fileListLocalManager,
       ViewConfiguration.fromViewConfig(
@@ -71,16 +83,11 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
           }
           return viewConfig.onFolderTap(folder);
         },
-        onSelect: (file) => fileListLocalManager.selectFileCommand(file),
-        onFileTap: (files, index) {
-          if (fileListLocalManager.isInSelectionMode) {
-            return fileListLocalManager.selectFileCommand(files[index]);
-          }
-
-          if (viewConfig.onFileTap != null) {
-            return viewConfig.onFileTap(files, index);
-          }
-        },
+        onSelect: getIt.get<IntentService>().isOpenForSelect
+            ? onFileTap
+            : (files, index) =>
+                fileListLocalManager.selectFileCommand(files[index]),
+        onFileTap: onFileTap,
       ),
     );
   }

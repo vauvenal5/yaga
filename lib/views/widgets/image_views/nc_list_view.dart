@@ -77,7 +77,7 @@ class NcListView extends StatelessWidget {
               ? () => this.viewConfig.onFileTap(_files, index)
               : null,
           onLongPress: this.viewConfig.onSelect != null
-              ? () => this.viewConfig.onSelect(_files[index])
+              ? () => this.viewConfig.onSelect(_files, index)
               : null,
         ),
         childCount: _files.length,

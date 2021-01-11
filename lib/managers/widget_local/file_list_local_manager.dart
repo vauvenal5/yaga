@@ -194,9 +194,14 @@ class FileListLocalManager {
   }
 
   void selectAll() async {
-    this.files.forEach((element) => element.selected = true);
+    this
+        .files
+        .where((element) => !element.isDirectory)
+        .forEach((element) => element.selected = true);
     this.selected = List();
-    this.selected.addAll(this.files);
+    this
+        .selected
+        .addAll(this.files.where((element) => element.selected).toList());
     this.filesChangedCommand(this.files);
   }
 }

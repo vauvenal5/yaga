@@ -11,7 +11,11 @@ class SelectionSelectAll extends StatelessWidget {
     return IconButton(
       icon: Icon(Icons.select_all),
       onPressed: () => this._fileListLocalManager.selected.length <
-              this._fileListLocalManager.files.length
+              this
+                  ._fileListLocalManager
+                  .files
+                  .where((element) => !element.isDirectory)
+                  .length
           ? this._fileListLocalManager.selectAll()
           : this._fileListLocalManager.deselectAll(),
     );

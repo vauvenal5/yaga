@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +21,16 @@ class RemoteImageWidget extends StatelessWidget {
   RemoteImageWidget(this._file, {Key key, this.cacheWidth, this.cacheHeight})
       : super(key: key);
 
-  Widget _createIconOverlay(Widget imageWidget, Widget iconWidget) {
+  Widget _createIconOverlay(FileSystemEntity file, Widget iconWidget) {
     List<Widget> children = <Widget>[
-      imageWidget,
+      Ink.image(
+        image: ResizeImage.resizeIfNeeded(
+          cacheWidth,
+          cacheHeight,
+          FileImage(file),
+        ),
+        fit: BoxFit.cover,
+      ),
       Align(
         alignment: Alignment.bottomRight,
         child: CircleAvatarIcon(icon: iconWidget),
@@ -78,21 +87,10 @@ class RemoteImageWidget extends StatelessWidget {
           bool localExists = file.localFile.existsSync();
 
           if (file.previewFile != null && file.previewFile.existsSync()) {
-            //todo: find best solution for missing long press animation
-            // Ink image = Ink.image(
-            //   image: FileImage(snapshot.data.previewFile),
-            //   fit: BoxFit.cover,
-            // );
-
-            Image imageWidget = Image.file(
-              snapshot.data.previewFile,
-              cacheWidth: this.cacheWidth,
-              cacheHeight: this.cacheHeight,
-              fit: BoxFit.cover,
-            );
-
             return _createIconOverlay(
-                imageWidget, _getLocalIcon(file, localExists, context));
+              snapshot.data.previewFile,
+              _getLocalIcon(file, localExists, context),
+            );
           } else {
             if (getIt.get<NextCloudService>().isUriOfService(_file.uri)) {
               getIt.get<NextcloudManagerBridge>().downloadPreviewCommand(_file);
@@ -100,15 +98,10 @@ class RemoteImageWidget extends StatelessWidget {
           }
 
           if (file.localFile != null && localExists) {
-            Image imageWidget = Image.file(
-              snapshot.data.localFile,
-              cacheWidth: this.cacheWidth,
-              cacheHeight: this.cacheHeight,
-              fit: BoxFit.cover,
-            );
-
             return _createIconOverlay(
-                imageWidget, _getLocalIcon(file, localExists, context));
+              snapshot.data.localFile,
+              _getLocalIcon(file, localExists, context),
+            );
           }
 
           return Container(

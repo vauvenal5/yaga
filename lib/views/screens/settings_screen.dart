@@ -5,12 +5,12 @@ import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
-import 'package:yaga/views/widgets/ok_cancel_button_bar.dart';
 import 'package:yaga/views/widgets/preferences/bool_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/choice_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/mapping_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/section_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/uri_preference_widget.dart';
+import 'package:yaga/views/widgets/select_cancel_bottom_navigation.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const String route = "/settings";
@@ -65,7 +65,10 @@ class SettingsScreen extends StatelessWidget {
       ),
       bottomNavigationBar: onCommit == null
           ? null
-          : OkCancelButtonBar(onCommit: this.onCommit, onCancel: this.onCancel),
+          : SelectCancelBottomNavigation(
+              onCommit: this.onCommit,
+              onCancel: this.onCancel,
+            ),
     );
   }
 }

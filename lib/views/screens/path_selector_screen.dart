@@ -4,7 +4,7 @@ import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart
 import 'package:yaga/views/screens/directory_traversal_screen.dart';
 import 'package:yaga/views/widgets/image_views/nc_list_view.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
-import 'package:yaga/views/widgets/ok_cancel_button_bar.dart';
+import 'package:yaga/views/widgets/select_cancel_bottom_navigation.dart';
 
 class PathSelectorScreen extends StatelessWidget {
   static const String route = "/pathSelector";
@@ -28,8 +28,11 @@ class PathSelectorScreen extends StatelessWidget {
     Widget Function(BuildContext, Uri) bottomBarBuilder;
 
     if (_onSelect != null || _onCancel != null) {
-      bottomBarBuilder = (BuildContext context, Uri uri) => OkCancelButtonBar(
-          onCommit: () => _onSelect(uri), onCancel: () => _onCancel());
+      bottomBarBuilder =
+          (BuildContext context, Uri uri) => SelectCancelBottomNavigation(
+                onCommit: () => _onSelect(uri),
+                onCancel: () => _onCancel(),
+              );
     }
 
     ViewConfiguration viewConfig = ViewConfiguration.browse(

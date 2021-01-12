@@ -44,6 +44,7 @@ class PathSelectorScreen extends StatelessWidget {
         uri: this._uri,
         title: this.title ?? "Select path...",
         viewConfig: viewConfig,
+        fixedOrigin: this.fixedOrigin,
         bottomBarBuilder: bottomBarBuilder);
   }
 }

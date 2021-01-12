@@ -109,7 +109,7 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
         bottomBarBuilder: widget.args.bottomBarBuilder,
         viewConfig: viewConfig,
         title: widget.args.title,
-        fixedOrigin: false,
+        fixedOrigin: widget.args.fixedOrigin,
         leading: widget.args.leadingBackArrow,
       ),
     );

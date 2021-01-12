@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
-import 'package:yaga/views/widgets/ok_cancel_button_bar.dart';
+import 'package:yaga/views/widgets/select_cancel_bottom_navigation.dart';
 
 class ChoiceSelectorScreen extends StatefulWidget {
   static const String route = "/choiceSelectorScreen";
@@ -39,7 +39,7 @@ class _ChoiceSelectorScreenState extends State<ChoiceSelectorScreen> {
               onChanged: (String value) => setState(() => _choice = value)),
           separatorBuilder: (context, index) => const Divider(),
           itemCount: widget._choicePreference.choices.length),
-      bottomNavigationBar: OkCancelButtonBar(
+      bottomNavigationBar: SelectCancelBottomNavigation(
           onCommit: () {
             this.widget._onSelect(_choice);
           },

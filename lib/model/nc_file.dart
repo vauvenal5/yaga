@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'dart:typed_data';
-
 class NcFile {
   bool isDirectory;
   String name;
@@ -9,6 +7,7 @@ class NcFile {
   FileSystemEntity localFile;
   FileSystemEntity previewFile;
   DateTime lastModified;
+  bool selected = false;
 
   NcFile(this.uri);
 

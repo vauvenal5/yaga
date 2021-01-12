@@ -72,12 +72,12 @@ class NcListView extends StatelessWidget {
               cacheWidth: 128,
             ),
           ),
-          // _files[index].localFile==null ?
-          //   Image.memory(_files[index].inMemoryPreview, cacheWidth: 32,) :
-          //   Image.file(_files[index].localFile, cacheWidth: 32,),
           title: Text(_files[index].name),
           onTap: this.viewConfig.onFileTap != null
               ? () => this.viewConfig.onFileTap(_files, index)
+              : null,
+          onLongPress: this.viewConfig.onSelect != null
+              ? () => this.viewConfig.onSelect(_files, index)
               : null,
         ),
         childCount: _files.length,

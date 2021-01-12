@@ -108,10 +108,11 @@ class GlobalSettingsManager {
     if (this._nextCloudService.isLoggedIn()) {
       MappingPreference mapping = this.getDefaultMappingPreference(
         local: UriUtils.fromUri(
-            uri: _systemLocationService.externalAppDirUri,
-            path:
-                "${_systemLocationService.externalAppDirUri.path}/${_nextCloudService.getUserDomain()}"),
-        remote: _nextCloudService.getOrigin(),
+          uri: _systemLocationService.externalAppDirUri,
+          path:
+              "${_systemLocationService.externalAppDirUri.path}/${_nextCloudService.origin.userDomain}",
+        ),
+        remote: _nextCloudService.origin.userEncodedDomainRoot,
       );
 
       this.registerGlobalSettingCommand(ncSection);

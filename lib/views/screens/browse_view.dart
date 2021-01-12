@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/navigation_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/model/nc_origin.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/image_screen_arguments.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
@@ -48,17 +49,18 @@ class BrowseView extends StatelessWidget {
             );
 
             if (getIt.get<NextCloudService>().isLoggedIn()) {
-              Uri origin = getIt.get<NextCloudService>().getOrigin();
+              NcOrigin origin = getIt.get<NextCloudService>().origin;
               children.add(ListTile(
                 isThreeLine: true,
                 leading: AvatarWidget.command(
                   getIt.get<NextCloudManager>().updateAvatarCommand,
                 ),
-                title: Text(getIt.get<NextCloudService>().username),
-                subtitle: Text(origin.host),
-                onTap: () => getIt
-                    .get<NavigationManager>()
-                    .showDirectoryNavigation(_getArgs(context, origin)),
+                title: Text(origin.username),
+                subtitle: Text(origin.domain),
+                onTap: () =>
+                    getIt.get<NavigationManager>().showDirectoryNavigation(
+                          _getArgs(context, origin.userEncodedDomainRoot),
+                        ),
               ));
             }
 
@@ -84,6 +86,7 @@ class BrowseView extends StatelessWidget {
       route: _pref,
       defaultView: NcListView.viewKey,
       onFolderTap: null,
+      onSelect: null,
       //todo: implicit navigation
       onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
         context,

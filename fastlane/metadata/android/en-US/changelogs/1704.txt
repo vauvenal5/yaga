@@ -1,0 +1,6 @@
+- introducing multi-select
+- allow sharing of multiple images
+- fix ripple effect on image tiles
+- fix NC behinde subpath issue
+- fix fixedOrigin propagation for root mapping
+- replace button bar with bottom nav to align style and fix reder issue

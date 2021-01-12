@@ -4,6 +4,7 @@ import 'package:mockito/mockito.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/settings_manager_base.dart';
+import 'package:yaga/model/nc_origin.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
@@ -21,10 +22,13 @@ void main() {
   SystemLocationServiceMock systemLocationServiceMock =
       SystemLocationServiceMock();
 
-  final ncRoot = Uri(host: "nc", pathSegments: []);
   final userInfo = "yaga";
   final host = "cloud.test.com";
   final userDomain = "$userInfo@$host";
+
+  final ncRoot = Uri(host: host, pathSegments: []);
+  final ncOrigin = NcOrigin(ncRoot, userInfo);
+
   final command = MockCommand<Preference, Preference>();
   final externalAppDirUri = Uri(host: "local", path: "/external/app/dir");
   final tmpAppDirUri = Uri(host: "local", path: "/internal/app/dir");
@@ -36,8 +40,7 @@ void main() {
     when(settingsManagerBaseMock.updateSettingCommand)
         .thenAnswer((_) => command);
 
-    when(nextCloudServiceMock.getOrigin()).thenReturn(ncRoot);
-    when(nextCloudServiceMock.getUserDomain()).thenReturn(userDomain);
+    when(nextCloudServiceMock.origin).thenReturn(ncOrigin);
 
     when(systemLocationServiceMock.externalAppDirUri)
         .thenReturn(externalAppDirUri);

@@ -1,0 +1,4 @@
+- introducing multi-select
+- allow sharing of multiple images
+- fix ripple effect on image tiles
+- fix NC behinde subpath issue

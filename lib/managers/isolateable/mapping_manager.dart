@@ -86,7 +86,10 @@ class MappingManager with Isolateable<MappingManager> {
   }
 
   String _appendLocalMappingFolder(String path) {
-    return UriUtils.chainPathSegments(path, _nextCloudService.getUserDomain());
+    return UriUtils.chainPathSegments(
+      path,
+      _nextCloudService.origin.userDomain,
+    );
   }
 
   Future<Uri> mapToLocalUri(Uri remoteUri) async {
@@ -124,7 +127,7 @@ class MappingManager with Isolateable<MappingManager> {
       (builder) => builder
         ..key = "default"
         ..title = "default"
-        ..remote.value = this._nextCloudService.getOrigin()
+        ..remote.value = this._nextCloudService.origin.userEncodedDomainRoot
         ..local.value = UriUtils.fromUri(
           uri: root,
           path: _appendLocalMappingFolder(root.path),

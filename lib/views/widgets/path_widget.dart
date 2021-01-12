@@ -37,8 +37,15 @@ class PathWidget extends StatelessWidget {
                 getIt.get<SystemLocationService>().getOrigin().toString()));
 
             if (getIt.get<NextCloudService>().isLoggedIn()) {
-              items.add(_getMenuItem(
-                  getIt.get<NextCloudService>().getOrigin().toString()));
+              items.add(
+                _getMenuItem(
+                  getIt
+                      .get<NextCloudService>()
+                      .origin
+                      .userEncodedDomainRoot
+                      .toString(),
+                ),
+              );
             }
 
             return DropdownButtonHideUnderline(

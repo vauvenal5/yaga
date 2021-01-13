@@ -124,4 +124,12 @@ class NextCloudService
 
   //todo: should we consider adding an [isLocal] property to NcOrigin?
   bool isUriOfService(Uri uri) => uri.scheme == this.scheme;
+
+  Future<NcFile> deleteFile(NcFile file) {
+    return this
+        ._client
+        .webDav
+        .delete("files/${origin.username}" + file.uri.path)
+        .then((_) => file);
+  }
 }

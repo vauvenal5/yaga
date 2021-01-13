@@ -12,9 +12,6 @@ class FileManager extends FileManagerBase {
   RxCommand<NcFile, NcFile> downloadImageCommand;
   RxCommand<NcFile, NcFile> updateImageCommand;
 
-  RxCommand<NcFile, NcFile> removeLocal;
-  RxCommand<NcFile, NcFile> removeTmp;
-
   NextCloudService _nextCloudService;
   LocalFileService _localFileService;
 
@@ -47,17 +44,5 @@ class FileManager extends FileManagerBase {
     });
 
     updateImageCommand = RxCommand.createSync((param) => param);
-
-    removeLocal = RxCommand.createSync((param) => param);
-    removeLocal.listen((value) {
-      _logger.d("Removing local file ${value.localFile.path}");
-      _localFileService.deleteFile(value.localFile);
-    });
-
-    removeTmp = RxCommand.createSync((param) => param);
-    removeTmp.listen((value) {
-      _logger.d("Removing preview file ${value.previewFile.path}");
-      _localFileService.deleteFile(value.previewFile);
-    });
   }
 }

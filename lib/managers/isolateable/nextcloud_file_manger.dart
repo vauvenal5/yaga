@@ -166,13 +166,22 @@ class NextcloudFileManager
     });
   }
 
-  _finishSync(Uri uri) {
-    _syncManager.syncUri(uri).then((value) => value.forEach((element) {
-          _logger.w("Removing local file! (${element.uri.path})");
-          this._fileManager.updateFileList(element);
-          //todo: syncManager does not guarantee that files are set
-          this._localFileService.deleteFile(element.localFile);
-          this._localFileService.deleteFile(element.previewFile);
-        }));
+  Future _finishSync(Uri uri) {
+    return _syncManager.syncUri(uri).then((files) => files.forEach(
+          (file) => _deleteLocalFile(file),
+        ));
+  }
+
+  void _deleteLocalFile(NcFile file) {
+    _logger.w("Removing local file! (${file.uri.path})");
+    this._localFileService.deleteFile(file.localFile);
+    this._localFileService.deleteFile(file.previewFile);
+    this._fileManager.updateFileList(file);
+  }
+
+  Future<void> deleteFiles(List<NcFile> files) {
+    return Stream.fromIterable(files)
+        .asyncMap((file) => this._nextCloudService.deleteFile(file))
+        .forEach((file) => _deleteLocalFile(file));
   }
 }

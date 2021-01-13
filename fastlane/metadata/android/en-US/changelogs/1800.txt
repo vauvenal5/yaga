@@ -1,0 +1,2 @@
+- delete file locally and remotely
+TODO: cancel logic

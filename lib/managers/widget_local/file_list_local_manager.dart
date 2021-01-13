@@ -3,12 +3,16 @@ import 'dart:async';
 import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
+import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
+import 'package:yaga/utils/forground_worker/messages/delete_files_done.dart';
+import 'package:yaga/utils/forground_worker/messages/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
@@ -179,7 +183,10 @@ class FileListLocalManager {
       bool selectionMode = this.isInSelectionMode;
       file.selected = !file.selected;
       file.selected ? selected.add(file) : selected.remove(file);
-      this.filesChangedCommand(this.files);
+      //using updateImageCommand is more effective then filesChangedCommand since it is not updating the whole list
+      //however, keep in mind that this will update all widgets displaying this file not only the one in the current view
+      //it might be a good idea to create a view local version of this command that relays global updates
+      getIt.get<FileManager>().updateImageCommand(file);
       if (selectionMode != this.isInSelectionMode) {
         this.selectionModeChanged(this.isInSelectionMode);
       }
@@ -187,9 +194,12 @@ class FileListLocalManager {
   }
 
   void deselectAll() async {
-    this.selected.forEach((element) => element.selected = false);
+    final fileManager = getIt.get<FileManager>();
+    this.selected.forEach((file) {
+      file.selected = false;
+      fileManager.updateImageCommand(file);
+    });
     this.selected = List();
-    this.filesChangedCommand(this.files);
     this.selectionModeChanged(this.isInSelectionMode);
   }
 
@@ -203,5 +213,40 @@ class FileListLocalManager {
         .selected
         .addAll(this.files.where((element) => element.selected).toList());
     this.filesChangedCommand(this.files);
+  }
+
+  Future<bool> deleteSelected(local) async =>
+      (local ? deleteSelectedLocal() : deleteSelectedRemote())
+          .whenComplete(() => this.deselectAll());
+
+  Future<bool> deleteSelectedLocal() async {
+    this.selected.forEach(
+      (file) {
+        getIt.get<LocalFileService>().deleteFile(file.localFile);
+        getIt.get<FileManager>().updateImageCommand(file);
+      },
+    );
+
+    return true;
+  }
+
+  Future<bool> deleteSelectedRemote() async {
+    Completer<bool> jobDone = Completer();
+
+    this
+        ._worker
+        .sendRequest(DeleteFilesRequest(this.managerKey, this.selected));
+
+    StreamSubscription deleteSub = this
+        ._worker
+        .isolateResponseCommand
+        .where((event) => event.key == this.managerKey)
+        .where((event) => event is DeleteFilesDone)
+        .map((event) => event as DeleteFilesDone)
+        .listen((event) {
+      jobDone.complete(true);
+    });
+
+    return jobDone.future.whenComplete(() => deleteSub.cancel());
   }
 }

@@ -111,12 +111,9 @@ class SelectionPopupMenuButton extends StatelessWidget {
           ),
         ),
         actions: [
-          //todo: implement cancel logic
           TextButton(
             child: Text('Cancel'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => this.fileListLocalManager.cancelDelete(),
           ),
         ],
       ),

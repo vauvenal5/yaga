@@ -37,6 +37,8 @@ class FileListLocalManager {
       RxCommand.createSync((param) => param);
   RxCommand<bool, bool> selectionModeChanged =
       RxCommand.createSync((param) => param, initialLastResult: false);
+  RxCommand<List<NcFile>, List<NcFile>> selectionChangedCommand =
+      RxCommand.createSync((param) => param);
 
   StreamSubscription<MappingPreference>
       _updatedMappingPreferenceCommandSubscription;
@@ -189,6 +191,8 @@ class FileListLocalManager {
       getIt.get<FileManager>().updateImageCommand(file);
       if (selectionMode != this.isInSelectionMode) {
         this.selectionModeChanged(this.isInSelectionMode);
+      } else {
+        this.selectionChangedCommand(this.selected);
       }
     });
   }
@@ -204,15 +208,14 @@ class FileListLocalManager {
   }
 
   void selectAll() async {
-    this
-        .files
-        .where((element) => !element.isDirectory)
-        .forEach((element) => element.selected = true);
+    final fileManager = getIt.get<FileManager>();
     this.selected = List();
-    this
-        .selected
-        .addAll(this.files.where((element) => element.selected).toList());
-    this.filesChangedCommand(this.files);
+    this.files.where((element) => !element.isDirectory).forEach((file) {
+      file.selected = true;
+      this.selected.add(file);
+      fileManager.updateImageCommand(file);
+    });
+    this.selectionChangedCommand(this.files);
   }
 
   Future<bool> deleteSelected(local) async =>
@@ -248,5 +251,9 @@ class FileListLocalManager {
     });
 
     return jobDone.future.whenComplete(() => deleteSub.cancel());
+  }
+
+  void cancelDelete() {
+    this._worker.sendRequest(DeleteFilesDone(this.managerKey));
   }
 }

@@ -5,6 +5,7 @@ import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
+import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
@@ -12,9 +13,11 @@ import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/handlers/delete_files_handler.dart';
 import 'package:yaga/utils/forground_worker/handlers/download_preview_handler.dart';
 import 'package:yaga/utils/forground_worker/handlers/file_list_request_handler.dart';
+import 'package:yaga/utils/forground_worker/messages/delete_files_done.dart';
 import 'package:yaga/utils/forground_worker/messages/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
+import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/login_state_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/preference_msg.dart';
@@ -91,6 +94,12 @@ class ForegroundWorker {
       setupIsolatedServiceLocator(message);
       getIt.allReady().then((value) {
         getIt.get<MappingManager>().handleMappingUpdate(message.mapping);
+
+        //todo: setupIsolatedServiceLocator should receive the sendPort and do this kind of setup in initIsolated
+        getIt.get<IsolatedFileManager>().updateFileList.listen((value) {
+          isolateToMain.send(FileUpdateMsg("", value));
+        });
+
         isolateToMain.send(mainToIsolate.sendPort);
       });
     }
@@ -126,6 +135,11 @@ class ForegroundWorker {
 
       if (message is DeleteFilesRequest) {
         DeleteFilesHandler.handle(message, isolateToMain);
+        return;
+      }
+
+      if (message is DeleteFilesDone) {
+        DeleteFilesHandler.handleCancel(message, isolateToMain);
         return;
       }
     });

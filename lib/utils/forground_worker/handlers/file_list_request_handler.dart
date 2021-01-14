@@ -9,11 +9,6 @@ import 'package:yaga/utils/service_locator.dart';
 
 class FileListRequestHandler {
   static void handle(FileListRequest message, SendPort isolateToMain) {
-    StreamSubscription updateSub =
-        getIt.get<IsolatedFileManager>().updateFileList.listen((value) {
-      isolateToMain.send(FileUpdateMsg(message.key, value));
-    });
-
     getIt
         .get<IsolatedFileManager>()
         .listFileLists(message.key, message.uri, recursive: message.recursive)
@@ -21,7 +16,6 @@ class FileListRequestHandler {
         .onDone(() {
       isolateToMain
           .send(FileListDone(message.key, message.uri, message.recursive));
-      updateSub.cancel();
     });
   }
 }

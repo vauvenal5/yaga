@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:mime/mime.dart';
 import 'package:rxdart/rxdart.dart';
@@ -19,7 +20,10 @@ class LocalFileService extends Service<LocalFileService>
   }
 
   @override
-  Future<LocalFileService> initIsolated(InitMsg init) async {
+  Future<LocalFileService> initIsolated(
+    InitMsg init,
+    SendPort isolateToMain,
+  ) async {
     _permissionState = PermissionStatus.granted;
     return this;
   }

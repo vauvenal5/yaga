@@ -5,22 +5,9 @@ import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
-import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
-import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
-import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
-import 'package:yaga/services/isolateable/nextcloud_service.dart';
-import 'package:yaga/utils/forground_worker/handlers/delete_files_handler.dart';
-import 'package:yaga/utils/forground_worker/handlers/download_preview_handler.dart';
-import 'package:yaga/utils/forground_worker/handlers/file_list_request_handler.dart';
-import 'package:yaga/utils/forground_worker/messages/delete_files_done.dart';
-import 'package:yaga/utils/forground_worker/messages/delete_files_request.dart';
-import 'package:yaga/utils/forground_worker/messages/download_preview_request.dart';
-import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
-import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
+import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
-import 'package:yaga/utils/forground_worker/messages/login_state_msg.dart';
-import 'package:yaga/utils/forground_worker/messages/preference_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
@@ -88,60 +75,18 @@ class ForegroundWorker {
   static void _workerMain(dynamic message) {
     SendPort isolateToMain;
     final mainToIsolate = ReceivePort();
+    final handlerRegistry = IsolateHandlerRegistry();
 
     if (message is InitMsg) {
       isolateToMain = message.sendPort;
-      setupIsolatedServiceLocator(message);
+      setupIsolatedServiceLocator(message, isolateToMain, handlerRegistry);
       getIt.allReady().then((value) {
-        getIt.get<MappingManager>().handleMappingUpdate(message.mapping);
-
-        //todo: setupIsolatedServiceLocator should receive the sendPort and do this kind of setup in initIsolated
-        getIt.get<IsolatedFileManager>().updateFileList.listen((value) {
-          isolateToMain.send(FileUpdateMsg("", value));
-        });
-
         isolateToMain.send(mainToIsolate.sendPort);
       });
     }
 
     mainToIsolate.listen((message) {
-      if (message is FileListRequest) {
-        FileListRequestHandler.handle(message, isolateToMain);
-        return;
-      }
-
-      if (message is PreferenceMsg) {
-        getIt
-            .get<IsolatedSettingsManager>()
-            .updateSettingCommand(message.preference);
-        return;
-      }
-
-      if (message is LoginStateMsg) {
-        NextCloudService ncService = getIt.get<NextCloudService>();
-
-        if (message.loginData.server == null) {
-          return ncService.logout();
-        }
-
-        ncService.login(message.loginData);
-        return;
-      }
-
-      if (message is DownloadPreviewRequest) {
-        DownloadPreviewHandler.handle(message, isolateToMain);
-        return;
-      }
-
-      if (message is DeleteFilesRequest) {
-        DeleteFilesHandler.handle(message, isolateToMain);
-        return;
-      }
-
-      if (message is DeleteFilesDone) {
-        DeleteFilesHandler.handleCancel(message, isolateToMain);
-        return;
-      }
+      handlerRegistry.handleMessage(message);
     });
   }
 }

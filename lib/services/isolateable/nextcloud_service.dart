@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:logger/logger.dart';
@@ -29,7 +30,10 @@ class NextCloudService
 
   NextCloudService(this.nextCloudClientFactory);
 
-  Future<NextCloudService> initIsolated(InitMsg init) async {
+  Future<NextCloudService> initIsolated(
+    InitMsg init,
+    SendPort isolateToMain,
+  ) async {
     if (init.lastLoginData.server != null) {
       this.login(init.lastLoginData);
     }

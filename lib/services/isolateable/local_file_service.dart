@@ -1,10 +1,10 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:mime/mime.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:yaga/managers/isolateable/local_file_manager.dart';
 import 'package:yaga/services/service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
@@ -20,7 +20,10 @@ class LocalFileService extends Service<LocalFileService>
   }
 
   @override
-  Future<LocalFileService> initIsolated(InitMsg init) async {
+  Future<LocalFileService> initIsolated(
+    InitMsg init,
+    SendPort isolateToMain,
+  ) async {
     _permissionState = PermissionStatus.granted;
     return this;
   }
@@ -42,7 +45,6 @@ class LocalFileService extends Service<LocalFileService>
   void deleteFile(FileSystemEntity file) {
     //todo: null exception comes from webview cache files
     //todo: subtask1: local files in cache and default app dir should be in a user@cloud.bla folder
-    //todo: subtask2: check if file is null before delete --> done
     //todo: subtask3: webview should not cache data
     if (file != null && file.existsSync()) {
       file.deleteSync(recursive: true);

@@ -63,7 +63,10 @@ class NextCloudManager {
 
     if (server != "" && user != "" && password != "") {
       Completer<NextCloudManager> login = Completer();
-      this.updateLoginStateCommand.listen((value) => login.complete(this));
+      this
+          .updateLoginStateCommand
+          .where((event) => !login.isCompleted)
+          .listen((value) => login.complete(this));
       this._internalLoginCommand(
           NextCloudLoginData(Uri.parse(server), user, password));
       return login.future;

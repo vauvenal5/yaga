@@ -10,7 +10,7 @@ class SelectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: this._fileListLocalManager.filesChangedCommand,
+      stream: this._fileListLocalManager.selectionChangedCommand,
       builder: (context, snapshot) {
         if (this.defaultTitel != null &&
             !this._fileListLocalManager.isInSelectionMode) {

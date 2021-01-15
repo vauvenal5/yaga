@@ -68,4 +68,11 @@ class LocalFileManager
       return file;
     });
   }
+
+  @override
+  Future<NcFile> deleteFile(NcFile file, bool local) async {
+    this._localFileService.deleteFile(file.localFile);
+    this._fileManager.updateFileList(file);
+    return file;
+  }
 }

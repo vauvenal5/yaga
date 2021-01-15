@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager_base.dart';
@@ -6,6 +8,7 @@ import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
+import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
@@ -31,6 +34,14 @@ class MappingManager with Isolateable<MappingManager> {
         .updateSettingCommand
         .where((event) => event is MappingPreference)
         .listen((event) => handleMappingUpdate(event));
+  }
+
+  Future<MappingManager> initIsolated(
+    InitMsg init,
+    SendPort isolateToMain,
+  ) async {
+    this.handleMappingUpdate(init.mapping);
+    return this;
   }
 
   //todo: use a bridge and commands to handle incoming msgs in forgraound worker

@@ -3,12 +3,16 @@ import 'dart:async';
 import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
+import 'package:yaga/utils/forground_worker/messages/delete_files_done.dart';
+import 'package:yaga/utils/forground_worker/messages/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
@@ -33,6 +37,8 @@ class FileListLocalManager {
       RxCommand.createSync((param) => param);
   RxCommand<bool, bool> selectionModeChanged =
       RxCommand.createSync((param) => param, initialLastResult: false);
+  RxCommand<List<NcFile>, List<NcFile>> selectionChangedCommand =
+      RxCommand.createSync((param) => param);
 
   StreamSubscription<MappingPreference>
       _updatedMappingPreferenceCommandSubscription;
@@ -103,18 +109,7 @@ class FileListLocalManager {
     this._updateFileListSubscripton = _worker.isolateResponseCommand
         .where((event) => event is FileUpdateMsg)
         .map((event) => event as FileUpdateMsg)
-        .listen((event) {
-      _logger.w("$managerKey (delete)");
-      if (files.contains(event.file)) {
-        if (event.file.isDirectory) {
-          files.removeWhere(
-              (file) => file.uri.path.startsWith(event.file.uri.path));
-        }
-
-        files.remove(event.file);
-        this.filesChangedCommand(files);
-      }
-    });
+        .listen((event) => this._removeFileFromList(event.file));
 
     _logger.w("$managerKey (start)");
 
@@ -124,6 +119,18 @@ class FileListLocalManager {
           uri,
           recursive.value,
         ));
+  }
+
+  void _removeFileFromList(NcFile file) {
+    _logger.w("$managerKey (delete)");
+    if (files.contains(file)) {
+      if (file.isDirectory) {
+        files.removeWhere((file) => file.uri.path.startsWith(file.uri.path));
+      }
+
+      files.remove(file);
+      this.filesChangedCommand(files);
+    }
   }
 
   /// Returns true if any files where added
@@ -179,29 +186,65 @@ class FileListLocalManager {
       bool selectionMode = this.isInSelectionMode;
       file.selected = !file.selected;
       file.selected ? selected.add(file) : selected.remove(file);
-      this.filesChangedCommand(this.files);
+      //using updateImageCommand is more effective then filesChangedCommand since it is not updating the whole list
+      //however, keep in mind that this will update all widgets displaying this file not only the one in the current view
+      //it might be a good idea to create a view local version of this command that relays global updates
+      getIt.get<FileManager>().updateImageCommand(file);
       if (selectionMode != this.isInSelectionMode) {
         this.selectionModeChanged(this.isInSelectionMode);
+      } else {
+        this.selectionChangedCommand(this.selected);
       }
     });
   }
 
   void deselectAll() async {
-    this.selected.forEach((element) => element.selected = false);
+    final fileManager = getIt.get<FileManager>();
+    this.selected.forEach((file) {
+      file.selected = false;
+      fileManager.updateImageCommand(file);
+    });
     this.selected = List();
-    this.filesChangedCommand(this.files);
     this.selectionModeChanged(this.isInSelectionMode);
   }
 
   void selectAll() async {
-    this
-        .files
-        .where((element) => !element.isDirectory)
-        .forEach((element) => element.selected = true);
+    final fileManager = getIt.get<FileManager>();
     this.selected = List();
-    this
-        .selected
-        .addAll(this.files.where((element) => element.selected).toList());
-    this.filesChangedCommand(this.files);
+    this.files.where((element) => !element.isDirectory).forEach((file) {
+      file.selected = true;
+      this.selected.add(file);
+      fileManager.updateImageCommand(file);
+    });
+    this.selectionChangedCommand(this.files);
   }
+
+  Future<bool> deleteSelected(bool local) async {
+    Completer<bool> jobDone = Completer();
+
+    this
+        ._worker
+        .sendRequest(DeleteFilesRequest(this.managerKey, this.selected, local));
+
+    StreamSubscription deleteSub = this
+        ._worker
+        .isolateResponseCommand
+        .where((event) => event.key == this.managerKey)
+        .where((event) => event is DeleteFilesDone)
+        .map((event) => event as DeleteFilesDone)
+        .listen((event) {
+      jobDone.complete(true);
+    });
+
+    return jobDone.future
+        .whenComplete(() => deleteSub.cancel())
+        .whenComplete(() => this.deselectAll());
+  }
+
+  void cancelDelete() {
+    this._worker.sendRequest(DeleteFilesDone(this.managerKey));
+  }
+
+  bool get isRemoteUri =>
+      getIt.get<NextCloudService>().isUriOfService(this.uri);
 }

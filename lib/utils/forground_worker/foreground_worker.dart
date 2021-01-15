@@ -22,13 +22,13 @@ class ForegroundWorker {
   final NextCloudManager _nextCloudManager;
   final GlobalSettingsManager _globalSettingsManager;
 
-  RxCommand<Message, Message> isolateResponseCommand;
+  RxCommand<Message, Message> isolateResponseCommand =
+      RxCommand.createSync((param) => param);
 
   ForegroundWorker(this._nextCloudManager, this._globalSettingsManager);
 
   Future<ForegroundWorker> init() async {
     _isolateReady = Completer<ForegroundWorker>();
-    isolateResponseCommand = RxCommand.createSync((param) => param);
     final isolateToMain = ReceivePort();
 
     isolateToMain.listen((message) {

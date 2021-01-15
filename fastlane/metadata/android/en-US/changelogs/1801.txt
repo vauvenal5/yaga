@@ -1,0 +1,3 @@
+- delete file locally and remotely
+- fix recursive remove on server detection
+- fix broken communication after background

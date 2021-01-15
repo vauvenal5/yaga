@@ -135,6 +135,7 @@ class NextcloudFileManager
   Stream<NcFile> _listLocalFiles(Uri uri, bool recursive) =>
       _listFromLocalFileManager(
         uri,
+        recursive,
         this._mappingManager.mapToLocalUri,
         (file) async {
           file.uri = await _mappingManager.mapToRemoteUri(file.uri, uri);
@@ -151,6 +152,7 @@ class NextcloudFileManager
   Stream<NcFile> _listTmpFiles(Uri uri, bool recursive) =>
       _listFromLocalFileManager(
         uri,
+        recursive,
         this._mappingManager.mapToTmpUri,
         (file) async {
           file.uri = await _mappingManager.mapTmpToRemoteUri(file.uri, uri);
@@ -167,11 +169,13 @@ class NextcloudFileManager
 
   Stream<NcFile> _listFromLocalFileManager(
       Uri uri,
+      bool recursive,
       Future<Uri> Function(Uri) mappingCall,
       Future<NcFile> Function(NcFile) resultMapping) {
     return mappingCall(uri)
         .asStream()
-        .flatMap((value) => this._fileManager.listFiles(value))
+        .flatMap(
+            (value) => this._fileManager.listFiles(value, recursive: recursive))
         .asyncMap(resultMapping);
   }
 

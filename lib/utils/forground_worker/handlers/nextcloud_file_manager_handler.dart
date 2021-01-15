@@ -1,5 +1,6 @@
 import 'dart:isolate';
 
+import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
@@ -29,13 +30,13 @@ class NextcloudFileManagerHandler
 
   void handleDelete(DeleteFilesRequest message, SendPort isolateToMain) {
     getIt
-        .get<NextcloudFileManager>()
-        .deleteFiles(message.files)
+        .get<IsolatedFileManager>()
+        .deleteFiles(message.files, message.local)
         .then((_) => isolateToMain.send(DeleteFilesDone(message.key)));
   }
 
   void handleCancelDelete(DeleteFilesDone message) {
-    getIt.get<NextcloudFileManager>().cancelDeleteCommand(true);
+    getIt.get<IsolatedFileManager>().cancelDeleteCommand(true);
   }
 
   void handleDownloadPreview(

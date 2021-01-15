@@ -57,44 +57,82 @@ class SelectionPopupMenuButton extends StatelessWidget {
       showDialog(
         context: context,
         useRootNavigator: false,
-        builder: (contextDialog) => AlertDialog(
-          title: const Text("Delete location"),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                    "If you delete your images locally, they will be deleted from your phone only."),
-                Text(
-                    "If you delete them remotely they will be deleted from your phone and server."),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text('Keep'),
-              onPressed: () {
-                Navigator.pop(contextDialog);
-              },
-            ),
-            TextButton(
-              child: Text('Delete locally'),
-              onPressed: () {
-                Navigator.pop(contextDialog);
-                this._openDeletingDialog(context);
-              },
-            ),
-            TextButton(
-              child: Text('Delete remotely'),
-              style: TextButton.styleFrom(primary: Colors.red),
-              onPressed: () {
-                Navigator.pop(context);
-                this._openDeletingDialog(context, local: false);
-              },
-            ),
-          ],
-        ),
+        builder: (contextDialog) => this.fileListLocalManager.isRemoteUri
+            ? _buildRemoteDialog(contextDialog, context)
+            : _buildLocalDialog(contextDialog, context),
       );
     }
+  }
+
+  AlertDialog _buildRemoteDialog(
+      BuildContext contextDialog, BuildContext parentContex) {
+    return AlertDialog(
+      title: const Text("Delete location"),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text(
+                "If you delete your images locally, they will be deleted from your phone only."),
+            Text(
+                "If you delete them remotely they will be deleted from your phone and server."),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          child: Text('Keep'),
+          onPressed: () {
+            Navigator.pop(contextDialog);
+          },
+        ),
+        TextButton(
+          child: Text('Delete locally'),
+          onPressed: () {
+            Navigator.pop(contextDialog);
+            this._openDeletingDialog(parentContex);
+          },
+        ),
+        TextButton(
+          child: Text('Delete remotely'),
+          style: TextButton.styleFrom(primary: Colors.red),
+          onPressed: () {
+            Navigator.pop(parentContex);
+            this._openDeletingDialog(parentContex, local: false);
+          },
+        ),
+      ],
+    );
+  }
+
+  AlertDialog _buildLocalDialog(
+      BuildContext contextDialog, BuildContext parentContex) {
+    return AlertDialog(
+      title: const Text("Deleting"),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text(
+                "This images seem to be local to your phone. Do you really want to delete them?"),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          child: Text('Keep'),
+          onPressed: () {
+            Navigator.pop(contextDialog);
+          },
+        ),
+        TextButton(
+          child: Text('Delete'),
+          style: TextButton.styleFrom(primary: Colors.red),
+          onPressed: () {
+            Navigator.pop(contextDialog);
+            this._openDeletingDialog(parentContex);
+          },
+        ),
+      ],
+    );
   }
 
   void _openDeletingDialog(BuildContext context, {bool local = true}) {

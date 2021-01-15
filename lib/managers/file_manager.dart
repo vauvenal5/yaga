@@ -10,7 +10,6 @@ class FileManager extends FileManagerBase {
   RxCommand<NcFile, NcFile> _getImageCommand;
 
   RxCommand<NcFile, NcFile> downloadImageCommand;
-  RxCommand<NcFile, NcFile> updateImageCommand;
 
   NextCloudService _nextCloudService;
   LocalFileService _localFileService;
@@ -42,7 +41,5 @@ class FileManager extends FileManagerBase {
       }
       this._getImageCommand(ncFile);
     });
-
-    updateImageCommand = RxCommand.createSync((param) => param);
   }
 }

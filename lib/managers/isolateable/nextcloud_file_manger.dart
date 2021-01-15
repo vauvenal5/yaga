@@ -31,8 +31,6 @@ class NextcloudFileManager
       RxCommand.createSync((param) => param);
   RxCommand<NcFile, NcFile> updatePreviewCommand =
       RxCommand.createSync((param) => param);
-  RxCommand<void, bool> cancelDeleteCommand =
-      RxCommand.createSyncNoParam(() => true);
 
   NextcloudFileManager(
     this._fileManager,
@@ -174,21 +172,25 @@ class NextcloudFileManager
         ));
   }
 
-  void _deleteLocalFile(NcFile file) {
+  Future<NcFile> _deleteLocalFile(NcFile file) async {
     _logger.w("Removing local file! (${file.uri.path})");
     this._localFileService.deleteFile(file.localFile);
     this._localFileService.deleteFile(file.previewFile);
     this._fileManager.updateFileList(file);
+    return file;
   }
 
-  Future<void> deleteFiles(List<NcFile> files) {
-    return Stream.fromIterable(files)
-        .asyncMap((file) => this
-            ._nextCloudService
-            .deleteFile(file)
-            .then((value) => _deleteLocalFile(file)))
-        .takeUntil(
-            this.cancelDeleteCommand.doOnData((event) => _logger.v("cancel!")))
-        .last;
+  @override
+  Future<NcFile> deleteFile(NcFile file, bool local) async {
+    if (local) {
+      this._localFileService.deleteFile(file.localFile);
+      this._fileManager.updateImageCommand(file);
+      return file;
+    }
+
+    return this
+        ._nextCloudService
+        .deleteFile(file)
+        .then((value) => _deleteLocalFile(file));
   }
 }

@@ -9,7 +9,7 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
-import 'package:yaga/services/isolateable/local_file_service.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/forground_worker/messages/delete_files_done.dart';
 import 'package:yaga/utils/forground_worker/messages/delete_files_request.dart';
@@ -109,18 +109,7 @@ class FileListLocalManager {
     this._updateFileListSubscripton = _worker.isolateResponseCommand
         .where((event) => event is FileUpdateMsg)
         .map((event) => event as FileUpdateMsg)
-        .listen((event) {
-      _logger.w("$managerKey (delete)");
-      if (files.contains(event.file)) {
-        if (event.file.isDirectory) {
-          files.removeWhere(
-              (file) => file.uri.path.startsWith(event.file.uri.path));
-        }
-
-        files.remove(event.file);
-        this.filesChangedCommand(files);
-      }
-    });
+        .listen((event) => this._removeFileFromList(event.file));
 
     _logger.w("$managerKey (start)");
 
@@ -130,6 +119,18 @@ class FileListLocalManager {
           uri,
           recursive.value,
         ));
+  }
+
+  void _removeFileFromList(NcFile file) {
+    _logger.w("$managerKey (delete)");
+    if (files.contains(file)) {
+      if (file.isDirectory) {
+        files.removeWhere((file) => file.uri.path.startsWith(file.uri.path));
+      }
+
+      files.remove(file);
+      this.filesChangedCommand(files);
+    }
   }
 
   /// Returns true if any files where added
@@ -218,27 +219,12 @@ class FileListLocalManager {
     this.selectionChangedCommand(this.files);
   }
 
-  Future<bool> deleteSelected(local) async =>
-      (local ? deleteSelectedLocal() : deleteSelectedRemote())
-          .whenComplete(() => this.deselectAll());
-
-  Future<bool> deleteSelectedLocal() async {
-    this.selected.forEach(
-      (file) {
-        getIt.get<LocalFileService>().deleteFile(file.localFile);
-        getIt.get<FileManager>().updateImageCommand(file);
-      },
-    );
-
-    return true;
-  }
-
-  Future<bool> deleteSelectedRemote() async {
+  Future<bool> deleteSelected(bool local) async {
     Completer<bool> jobDone = Completer();
 
     this
         ._worker
-        .sendRequest(DeleteFilesRequest(this.managerKey, this.selected));
+        .sendRequest(DeleteFilesRequest(this.managerKey, this.selected, local));
 
     StreamSubscription deleteSub = this
         ._worker
@@ -250,10 +236,15 @@ class FileListLocalManager {
       jobDone.complete(true);
     });
 
-    return jobDone.future.whenComplete(() => deleteSub.cancel());
+    return jobDone.future
+        .whenComplete(() => deleteSub.cancel())
+        .whenComplete(() => this.deselectAll());
   }
 
   void cancelDelete() {
     this._worker.sendRequest(DeleteFilesDone(this.managerKey));
   }
+
+  bool get isRemoteUri =>
+      getIt.get<NextCloudService>().isUriOfService(this.uri);
 }

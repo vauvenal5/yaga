@@ -81,7 +81,7 @@ class NextcloudFileManager
   }) {
     //todo: add uri check
     return _syncManager.addUri(uri).asStream().flatMap((value) => Rx.merge([
-          this._listLocalFileList(uri),
+          this._listLocalFileList(uri, recursive),
           this._listNextcloudFiles(uri, recursive),
         ]).doOnDone(() => this._finishSync(uri)));
   }
@@ -94,7 +94,7 @@ class NextcloudFileManager
     //todo: add uri check
     _logger.w("Listing... ($uri)");
     return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
-          this._listLocalFileList(uri),
+          this._listLocalFileList(uri, recursive),
           this._listNextcloudFiles(uri, recursive).collectToList(),
         ]).doOnData((event) {
           _logger.w("Emiting list! (${uri})");
@@ -121,49 +121,58 @@ class NextcloudFileManager
     });
   }
 
-  Stream<List<NcFile>> _listLocalFileList(Uri uri) {
-    return Rx.merge([this._listTmpFiles(uri), this._listLocalFiles(uri)])
+  Stream<List<NcFile>> _listLocalFileList(Uri uri, bool recursive) {
+    return Rx.merge([
+      this._listTmpFiles(uri, recursive),
+      this._listLocalFiles(uri, recursive),
+    ])
         .doOnData((file) => _syncManager.addFile(uri, file))
         .distinctUnique()
         .toList()
         .asStream();
   }
 
-  Stream<NcFile> _listLocalFiles(Uri uri) {
-    return this
-        ._mappingManager
-        .mapToLocalUri(uri)
+  Stream<NcFile> _listLocalFiles(Uri uri, bool recursive) =>
+      _listFromLocalFileManager(
+        uri,
+        this._mappingManager.mapToLocalUri,
+        (file) async {
+          file.uri = await _mappingManager.mapToRemoteUri(file.uri, uri);
+          //todo: should this be a FileSystemEntity?
+          // file.localFile = await _mappingManager.mapToLocalFile(file.uri);
+          if (!file.isDirectory) {
+            file.previewFile =
+                File.fromUri(await _mappingManager.mapToTmpUri(file.uri));
+          }
+          return file;
+        },
+      );
+
+  Stream<NcFile> _listTmpFiles(Uri uri, bool recursive) =>
+      _listFromLocalFileManager(
+        uri,
+        this._mappingManager.mapToTmpUri,
+        (file) async {
+          file.uri = await _mappingManager.mapTmpToRemoteUri(file.uri, uri);
+          //todo: should this be a FileSystemEntity?
+          if (!file.isDirectory) {
+            file.previewFile = file.localFile;
+            file.localFile =
+                File.fromUri(await _mappingManager.mapToLocalUri(file.uri));
+          }
+          // file.previewFile = _localFileService.getTmpFile(file.uri.path);
+          return file;
+        },
+      );
+
+  Stream<NcFile> _listFromLocalFileManager(
+      Uri uri,
+      Future<Uri> Function(Uri) mappingCall,
+      Future<NcFile> Function(NcFile) resultMapping) {
+    return mappingCall(uri)
         .asStream()
         .flatMap((value) => this._fileManager.listFiles(value))
-        .asyncMap((file) async {
-      file.uri = await _mappingManager.mapToRemoteUri(file.uri, uri);
-      //todo: should this be a FileSystemEntity?
-      // file.localFile = await _mappingManager.mapToLocalFile(file.uri);
-      if (!file.isDirectory) {
-        file.previewFile =
-            File.fromUri(await _mappingManager.mapToTmpUri(file.uri));
-      }
-      return file;
-    });
-  }
-
-  Stream<NcFile> _listTmpFiles(Uri uri) {
-    return this
-        ._mappingManager
-        .mapToTmpUri(uri)
-        .asStream()
-        .flatMap((previewUri) => this._fileManager.listFiles(previewUri))
-        .asyncMap((file) async {
-      file.uri = await _mappingManager.mapTmpToRemoteUri(file.uri, uri);
-      //todo: should this be a FileSystemEntity?
-      if (!file.isDirectory) {
-        file.previewFile = file.localFile;
-        file.localFile =
-            File.fromUri(await _mappingManager.mapToLocalUri(file.uri));
-      }
-      // file.previewFile = _localFileService.getTmpFile(file.uri.path);
-      return file;
-    });
+        .asyncMap(resultMapping);
   }
 
   Future _finishSync(Uri uri) {

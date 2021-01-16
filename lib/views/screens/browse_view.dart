@@ -55,7 +55,7 @@ class BrowseView extends StatelessWidget {
                 leading: AvatarWidget.command(
                   getIt.get<NextCloudManager>().updateAvatarCommand,
                 ),
-                title: Text(origin.username),
+                title: Text(origin.displayName),
                 subtitle: Text(origin.domain),
                 onTap: () =>
                     getIt.get<NavigationManager>().showDirectoryNavigation(

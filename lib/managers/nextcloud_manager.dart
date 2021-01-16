@@ -25,19 +25,28 @@ class NextCloudManager {
     this.loginCommand.listen((value) => this._internalLoginCommand(value));
 
     this._internalLoginCommand = RxCommand.createSync((param) => param);
-    this
-        ._internalLoginCommand
-        .doOnData((event) => _nextCloudService.login(event))
-        .listen((event) {
+    this._internalLoginCommand.listen((event) async {
+      final origin = await _nextCloudService.login(event);
+
+      if (event.id == "" || event.displayName == "") {
+        await _secureStorageService.savePreference(
+            NextCloudLoginDataKeys.id, origin.username);
+        await _secureStorageService.savePreference(
+            NextCloudLoginDataKeys.displayName, origin.displayName);
+      }
+
       updateLoginStateCommand(event);
       updateAvatarCommand();
     });
 
-    this.updateLoginStateCommand = RxCommand.createSync((param) => param,
-        initialLastResult: NextCloudLoginData(null, "", ""));
+    this.updateLoginStateCommand = RxCommand.createSync(
+      (param) => param,
+      initialLastResult: NextCloudLoginData.empty(),
+    );
 
-    this.logoutCommand = RxCommand.createFromStream((_) =>
-        this._createLoginDataPersisStream(NextCloudLoginData(null, "", "")));
+    this.logoutCommand = RxCommand.createFromStream(
+      (_) => this._createLoginDataPersisStream(NextCloudLoginData.empty()),
+    );
     this
         .logoutCommand
         .doOnData((event) => _nextCloudService.logout())
@@ -60,6 +69,10 @@ class NextCloudManager {
         await _secureStorageService.loadPreference(NextCloudLoginDataKeys.user);
     String password = await _secureStorageService
         .loadPreference(NextCloudLoginDataKeys.password);
+    String userId =
+        await _secureStorageService.loadPreference(NextCloudLoginDataKeys.id);
+    String displayName = await _secureStorageService
+        .loadPreference(NextCloudLoginDataKeys.displayName);
 
     if (server != "" && user != "" && password != "") {
       Completer<NextCloudManager> login = Completer();
@@ -67,8 +80,13 @@ class NextCloudManager {
           .updateLoginStateCommand
           .where((event) => !login.isCompleted)
           .listen((value) => login.complete(this));
-      this._internalLoginCommand(
-          NextCloudLoginData(Uri.parse(server), user, password));
+      this._internalLoginCommand(NextCloudLoginData(
+        Uri.parse(server),
+        user,
+        password,
+        id: userId,
+        displayName: displayName,
+      ));
       return login.future;
     }
 
@@ -86,6 +104,12 @@ class NextCloudManager {
           .asStream(),
       _secureStorageService
           .savePreference(NextCloudLoginDataKeys.password, data.password)
+          .asStream(),
+      _secureStorageService
+          .savePreference(NextCloudLoginDataKeys.id, data.id)
+          .asStream(),
+      _secureStorageService
+          .savePreference(NextCloudLoginDataKeys.displayName, data.displayName)
           .asStream(),
     ]).map((_) => data);
   }

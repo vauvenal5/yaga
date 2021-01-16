@@ -1,0 +1,1 @@
+- fix bug when login name and user name are not the same

@@ -35,18 +35,32 @@ class NextCloudService
     SendPort isolateToMain,
   ) async {
     if (init.lastLoginData.server != null) {
-      this.login(init.lastLoginData);
+      await this.login(init.lastLoginData);
     }
     return this;
   }
 
-  void login(NextCloudLoginData loginData) {
+  Future<NcOrigin> login(NextCloudLoginData loginData) async {
+    this._client = this.nextCloudClientFactory.createNextCloudClient(
+          loginData.server.toString(),
+          loginData.user,
+          loginData.password,
+        );
+
+    UserData userData;
+
+    if (loginData.id == "" || loginData.displayName == "") {
+      userData = await this._client.user.getUser();
+    }
+
     this._origin = NcOrigin(
       UriUtils.fromUri(uri: loginData.server, scheme: this.scheme),
+      userData?.id ?? loginData.id,
+      userData?.displayName ?? loginData.displayName,
       loginData.user,
     );
-    this._client = this.nextCloudClientFactory.createNextCloudClient(
-        loginData.server.toString(), loginData.user, loginData.password);
+
+    return this._origin;
   }
 
   void logout() {

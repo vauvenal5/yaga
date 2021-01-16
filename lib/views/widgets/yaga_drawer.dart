@@ -37,7 +37,9 @@ class YagaDrawer extends StatelessWidget {
                       radius: 25,
                     ),
                     title: Text(
-                      ncService.isLoggedIn() ? ncService.origin.username : "",
+                      ncService.isLoggedIn()
+                          ? ncService.origin.displayName
+                          : "",
                       style: TextStyle(color: Colors.white),
                     ),
                     subtitle: Text(

@@ -17,7 +17,7 @@ class ForegroundWorker {
 
   Isolate _isolate;
   SendPort _mainToIsolate;
-  Completer<ForegroundWorker> _isolateReady;
+  Completer<ForegroundWorker> _isolateReady = Completer<ForegroundWorker>();
 
   final NextCloudManager _nextCloudManager;
   final GlobalSettingsManager _globalSettingsManager;
@@ -27,8 +27,9 @@ class ForegroundWorker {
 
   ForegroundWorker(this._nextCloudManager, this._globalSettingsManager);
 
+  Future<ForegroundWorker> get isolateReadyFuture => _isolateReady.future;
+
   Future<ForegroundWorker> init() async {
-    _isolateReady = Completer<ForegroundWorker>();
     final isolateToMain = ReceivePort();
 
     isolateToMain.listen((message) {
@@ -61,15 +62,16 @@ class ForegroundWorker {
       onError: isolateToMain.sendPort,
     );
 
-    return _isolateReady.future;
+    return isolateReadyFuture;
   }
 
   void dispose() {
+    _isolateReady = Completer<ForegroundWorker>();
     _isolate.kill();
   }
 
   void sendRequest(Message request) {
-    this._mainToIsolate.send(request);
+    isolateReadyFuture.then((value) => this._mainToIsolate.send(request));
   }
 
   static void _workerMain(dynamic message) {

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:nextcloud/nextcloud.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:yaga/managers/nextcloud_manager.dart';
+import 'package:yaga/model/nc_login_data.dart';
+import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/nc_login_screen.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:yaga/views/widgets/address_form_advanced.dart';
@@ -17,6 +22,7 @@ class NextCloudAddressScreen extends StatefulWidget {
 class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool validation = true;
+  bool _inBrowser = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,23 +49,74 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       ),
       resizeToAvoidBottomInset: true,
       bottomNavigationBar: SelectCancelBottomNavigation(
-        onCommit: () {
-          if (!_formKey.currentState.validate()) {
-            return;
-          }
-          _formKey.currentState.save();
-        },
+        onCommit: () => this._validateAndSaveForm(),
         onCancel: () => Navigator.popUntil(
           context,
           ModalRoute.withName(YagaHomeScreen.route),
         ),
         labelSelect: "Continue",
         iconSelect: Icons.chevron_right,
+        betweenItems: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.open_in_browser),
+            label: "Open in browser",
+          ),
+        ],
+        betweenItemsCallback: [
+          () {
+            _inBrowser = true;
+            this._validateAndSaveForm();
+          }
+        ],
       ),
     );
   }
 
-  void _onSave(Uri uri) {
+  void _validateAndSaveForm() {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    _formKey.currentState.save();
+  }
+
+  void _onSave(Uri uri) async {
+    if (this._inBrowser) {
+      //todo: should we move this into the manager/service?
+      //todo: is canLaunch/launch a UI component?
+      final client = NextCloudClient.withoutLogin(uri);
+      LoginFlowInit init = await client.login.initLoginFlow();
+
+      if (await canLaunch(init.login)) {
+        await launch(init.login);
+        LoginFlowResult res;
+        while (res == null) {
+          try {
+            res = await client.login.pollLogin(init);
+          } on RequestException catch (e) {
+            if (e.statusCode != 404) {
+              throw e;
+            }
+          }
+        }
+
+        getIt.get<NextCloudManager>().loginCommand(
+              NextCloudLoginData(
+                Uri.parse(res.server),
+                res.loginName,
+                res.appPassword,
+              ),
+            );
+
+        Navigator.popUntil(
+          context,
+          ModalRoute.withName(YagaHomeScreen.route),
+        );
+      } else {
+        throw 'Could not launch $uri';
+      }
+      return;
+    }
+
     Navigator.pushNamed(
       context,
       NextCloudLoginScreen.route,

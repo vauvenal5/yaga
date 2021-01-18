@@ -41,8 +41,9 @@ class NextCloudService
   }
 
   Future<NcOrigin> login(NextCloudLoginData loginData) async {
+    //todo: can we get rid of the client factory?
     this._client = this.nextCloudClientFactory.createNextCloudClient(
-          loginData.server.toString(),
+          loginData.server,
           loginData.user,
           loginData.password,
         );

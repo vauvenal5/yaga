@@ -1,5 +1,11 @@
 import 'package:nextcloud/nextcloud.dart';
 
 class NextCloudClientFactory {
-  NextCloudClient createNextCloudClient(String host, String username, String password) => NextCloudClient(host, username, password);
+  NextCloudClient createNextCloudClient(
+          Uri host, String username, String password) =>
+      NextCloudClient.withCredentials(
+        host,
+        username,
+        password,
+      );
 }

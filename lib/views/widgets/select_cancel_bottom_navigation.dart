@@ -6,6 +6,8 @@ class SelectCancelBottomNavigation extends StatelessWidget {
   final String labelSelect;
   final String labelCancel;
   final IconData iconSelect;
+  final List<BottomNavigationBarItem> betweenItems;
+  final List<Function> betweenItemsCallback;
 
   SelectCancelBottomNavigation({
     @required this.onCommit,
@@ -13,30 +15,41 @@ class SelectCancelBottomNavigation extends StatelessWidget {
     this.labelSelect = "Select",
     this.labelCancel = "Cancel",
     this.iconSelect = Icons.check,
+    this.betweenItems = const [],
+    this.betweenItemsCallback = const [],
   });
 
   @override
   Widget build(BuildContext context) {
+    List<BottomNavigationBarItem> items = [];
+    items.add(BottomNavigationBarItem(
+      icon: Icon(Icons.close),
+      label: this.labelCancel,
+    ));
+    items.addAll(this.betweenItems);
+    items.add(BottomNavigationBarItem(
+      icon: Icon(this.iconSelect),
+      label: this.labelSelect,
+    ));
+
     return BottomNavigationBar(
-      currentIndex: 1,
+      currentIndex: items.length - 1,
       onTap: (index) {
-        if (index == 1) {
+        if (index == items.length - 1) {
           this.onCommit();
           return;
         }
 
+        if (this.betweenItemsCallback.length >= (index - 1)) {
+          if (this.betweenItemsCallback[index - 1] != null) {
+            this.betweenItemsCallback[index - 1]();
+            return;
+          }
+        }
+
         this.onCancel();
       },
-      items: <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.close),
-          label: this.labelCancel,
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(this.iconSelect),
-          label: this.labelSelect,
-        ),
-      ],
+      items: items,
     );
   }
 }

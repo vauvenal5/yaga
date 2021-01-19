@@ -49,7 +49,11 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       ),
       resizeToAvoidBottomInset: true,
       bottomNavigationBar: SelectCancelBottomNavigation(
-        onCommit: () => this._validateAndSaveForm(),
+        onCommit: () {
+          _inBrowser = false;
+          this._validateAndSaveForm();
+        },
+        //todo: why does this cause a refetch?!
         onCancel: () => Navigator.popUntil(
           context,
           ModalRoute.withName(YagaHomeScreen.route),
@@ -62,7 +66,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
             label: "Open in browser",
           ),
         ],
-        betweenItemsCallback: [
+        betweenItemsCallbacks: [
           () {
             _inBrowser = true;
             this._validateAndSaveForm();

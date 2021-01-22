@@ -30,7 +30,7 @@ dependencies:
   image: ^2.1.18
   logger: ^0.9.4
   mime: ^0.9.7
-  nextcloud: ^2.0.0
+  nextcloud: ^2.1.2
   package_info: ^0.4.3
   path_provider: ^1.6.21
   permission_handler: ^5.0.1+1

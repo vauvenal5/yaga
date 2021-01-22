@@ -72,17 +72,17 @@ class NextCloudService
 
   @override
   Stream<NcFile> list(Uri dir) {
-    String basePath = "files/${origin.username}";
     return this
         ._client
         .webDav
-        .ls(basePath + dir.path)
+        .ls(dir.path)
         .asStream()
         .flatMap((value) => Stream.fromIterable(value))
         .where(
-            (event) => event.isDirectory || event.mimeType.startsWith("image"))
+          (event) => event.isDirectory || event.mimeType.startsWith("image"),
+        )
         .map((webDavFile) {
-      //todo: removing _host.path is just a quick fix for a much bigger problem:
+      //todo: here we are hiding the origin path, if any, because we are not interested in it, the much bigger problem is:
       // we cannot assume that the origin is depictable by url.host
       // furthermore for identifing the upstream of a file we actually need an origin-url + username
       // since, when adding multi user support in future, in theory you can have multiple users on the same cloud
@@ -95,11 +95,10 @@ class NextCloudService
       // --> however, we can not simply substitute the [NcFile.uri] field as long as the [MppingManager] has not been reworked
       // --> the [MappingManager] needs now to be able to map [NcLocations(NcOrigin+Path)] to each other and not simply Urls
       // --> this however requires a rather big refactoring of the [MappingManager] including persistance
-      var path = webDavFile.path.replaceFirst(
-        "${_origin.uri.path}/$basePath",
-        "",
+      Uri uri = UriUtils.fromUri(
+        uri: origin.userEncodedDomainRoot,
+        path: webDavFile.path,
       );
-      Uri uri = UriUtils.fromUri(uri: origin.userEncodedDomainRoot, path: path);
 
       NcFile file = NcFile(uri);
       file.isDirectory = webDavFile.isDirectory;
@@ -112,7 +111,7 @@ class NextCloudService
         error,
         stacktrace,
       ),
-    ); //.toList --> should this return a Future<List> since the data is actually allready downloaded?
+    ); //.toList --> todo: should this return a Future<List> since the data is actually allready downloaded?
   }
 
   Future<Uint8List> getAvatar() => this
@@ -133,22 +132,14 @@ class NextCloudService
     // });
   }
 
-  Future<Uint8List> downloadImage(Uri file) {
-    String basePath =
-        "files/${origin.username}"; //todo: add proper logging and check if download gets called on real device multiple times
-    return this._client.webDav.download(basePath + file.path);
-  }
+  Future<Uint8List> downloadImage(Uri file) =>
+      this._client.webDav.download(file.path);
 
   NcOrigin get origin => _origin;
 
   //todo: should we consider adding an [isLocal] property to NcOrigin?
   bool isUriOfService(Uri uri) => uri.scheme == this.scheme;
 
-  Future<NcFile> deleteFile(NcFile file) {
-    return this
-        ._client
-        .webDav
-        .delete("files/${origin.username}" + file.uri.path)
-        .then((_) => file);
-  }
+  Future<NcFile> deleteFile(NcFile file) =>
+      this._client.webDav.delete(file.uri.path).then((_) => file);
 }

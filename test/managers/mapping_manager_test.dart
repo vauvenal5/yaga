@@ -27,7 +27,7 @@ void main() {
   final userDomain = "$userInfo@$host";
 
   final ncRoot = Uri(host: host, pathSegments: []);
-  final ncOrigin = NcOrigin(ncRoot, userInfo);
+  final ncOrigin = NcOrigin(ncRoot, userInfo, userInfo, userInfo);
 
   final command = MockCommand<Preference, Preference>();
   final externalAppDirUri = Uri(host: "local", path: "/external/app/dir");

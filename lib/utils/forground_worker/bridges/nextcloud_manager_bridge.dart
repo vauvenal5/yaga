@@ -6,16 +6,20 @@ import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_complete.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_request.dart';
 import 'package:yaga/utils/forground_worker/messages/login_state_msg.dart';
-import 'package:yaga/utils/service_locator.dart';
 
 class NextcloudManagerBridge {
   final NextCloudManager _nextCloudManager;
   final ForegroundWorker _worker;
+  final NextcloudFileManager _nextcloudFileManager;
 
   RxCommand<NcFile, NcFile> downloadPreviewCommand =
       RxCommand.createSync((param) => param);
 
-  NextcloudManagerBridge(this._nextCloudManager, this._worker) {
+  NextcloudManagerBridge(
+    this._nextCloudManager,
+    this._worker,
+    this._nextcloudFileManager,
+  ) {
     //todo: update loginStateCommand has no logout values... see todo in ncManager
     this._nextCloudManager.updateLoginStateCommand.listen((value) {
       this._worker.sendRequest(LoginStateMsg("", value));
@@ -26,8 +30,11 @@ class NextcloudManagerBridge {
         .isolateResponseCommand
         .where((event) => event is DownloadPreviewComplete)
         .map((event) => event as DownloadPreviewComplete)
-        .listen((value) =>
-            getIt.get<NextcloudFileManager>().updatePreviewCommand(value.file));
+        .listen(
+          (value) => value.success
+              ? _nextcloudFileManager.updatePreviewCommand(value.file)
+              : _nextcloudFileManager.downloadPreviewFaildCommand(value.file),
+        );
 
     this.downloadPreviewCommand.listen((ncFile) {
       this._worker.sendRequest(DownloadPreviewRequest("", ncFile));

@@ -6,7 +6,6 @@ import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
-import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart';

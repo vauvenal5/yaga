@@ -70,6 +70,7 @@ class NcListView extends StatelessWidget {
               _files[index],
               key: ValueKey(_files[index].uri.path),
               cacheWidth: 128,
+              showFileEnding: false,
             ),
           ),
           title: Text(_files[index].name),

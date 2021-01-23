@@ -3,6 +3,7 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
+import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart';
@@ -23,8 +24,9 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
 
   @override
   void initState() {
-    this._remote = widget.pref.remote;
-    this._local = widget.pref.local;
+    final prefService = getIt.get<SharedPreferencesService>();
+    this._remote = prefService.loadPreferenceFromString(widget.pref.remote);
+    this._local = prefService.loadPreferenceFromString(widget.pref.local);
 
     getIt
         .get<SettingsManager>()

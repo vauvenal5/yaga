@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
+import 'package:yaga/utils/nextcloud_client_factory.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
 
@@ -21,7 +22,7 @@ class NextCloudLoginScreen extends StatelessWidget {
       ),
       body: WebView(
         key: UniqueKey(),
-        userAgent: "Nextcloud Yaga",
+        userAgent: getIt.get<NextCloudClientFactory>().userAgent,
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (WebViewController webViewController) {
           webViewController.loadUrl(

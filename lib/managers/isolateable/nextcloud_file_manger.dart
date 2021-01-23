@@ -31,6 +31,8 @@ class NextcloudFileManager
       RxCommand.createSync((param) => param);
   RxCommand<NcFile, NcFile> updatePreviewCommand =
       RxCommand.createSync((param) => param);
+  RxCommand<NcFile, NcFile> downloadPreviewFaildCommand =
+      RxCommand.createSync((param) => param);
 
   NextcloudFileManager(
     this._fileManager,
@@ -57,6 +59,7 @@ class NextcloudFileManager
                 err,
                 stacktrace,
               );
+              downloadPreviewFaildCommand(ncFile);
               return null;
             }))
         .where((event) => event != null)

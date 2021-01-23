@@ -47,6 +47,12 @@ class NextcloudFileManagerHandler
       isolateToMain.send(DownloadPreviewComplete("", file));
     });
 
+    getIt.get<NextcloudFileManager>().downloadPreviewFaildCommand.listen(
+          (file) => isolateToMain.send(
+            DownloadPreviewComplete("", file, success: false),
+          ),
+        );
+
     getIt.get<NextcloudFileManager>().downloadPreviewCommand(msg.file);
   }
 }

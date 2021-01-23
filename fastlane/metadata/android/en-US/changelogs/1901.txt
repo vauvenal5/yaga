@@ -1,0 +1,4 @@
+- fix broken cancel button on login screen
+- fix endless loading indicator when preview download fails
+- fix show user agent in browser login flow
+- fix persisting unchanged mapping issue

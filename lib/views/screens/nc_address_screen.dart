@@ -3,6 +3,7 @@ import 'package:nextcloud/nextcloud.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
+import 'package:yaga/utils/nextcloud_client_factory.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/nc_login_screen.dart';
 import 'package:yaga/views/screens/yaga_home_screen.dart';
@@ -49,7 +50,11 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       ),
       resizeToAvoidBottomInset: true,
       bottomNavigationBar: SelectCancelBottomNavigation(
-        onCommit: () => this._validateAndSaveForm(),
+        onCommit: () {
+          _inBrowser = false;
+          this._validateAndSaveForm();
+        },
+        //todo: why does this cause a refetch?!
         onCancel: () => Navigator.popUntil(
           context,
           ModalRoute.withName(YagaHomeScreen.route),
@@ -62,7 +67,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
             label: "Open in browser",
           ),
         ],
-        betweenItemsCallback: [
+        betweenItemsCallbacks: [
           () {
             _inBrowser = true;
             this._validateAndSaveForm();
@@ -83,7 +88,8 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
     if (this._inBrowser) {
       //todo: should we move this into the manager/service?
       //todo: is canLaunch/launch a UI component?
-      final client = NextCloudClient.withoutLogin(uri);
+      final client =
+          getIt.get<NextCloudClientFactory>().createUnauthenticatedClient(uri);
       LoginFlowInit init = await client.login.initLoginFlow();
 
       if (await canLaunch(init.login)) {

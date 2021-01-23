@@ -100,10 +100,11 @@ class NextCloudService
         path: webDavFile.path,
       );
 
-      NcFile file = NcFile(uri);
-      file.isDirectory = webDavFile.isDirectory;
+      NcFile file = webDavFile.isDirectory
+          ? NcFile.directory(uri, webDavFile.name)
+          : NcFile.file(uri, webDavFile.name, webDavFile.mimeType);
       file.lastModified = webDavFile.lastModified;
-      file.name = webDavFile.name;
+
       return file;
     }).doOnError(
       (error, stacktrace) => _logger.e(

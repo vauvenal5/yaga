@@ -95,9 +95,12 @@ void setupServiceLocator() {
           await getIt.getAsync<NextCloudManager>(),
           await getIt.getAsync<GlobalSettingsManager>())
       .init());
-  getIt.registerSingletonAsync<NextcloudManagerBridge>(() async =>
-      NextcloudManagerBridge(await getIt.getAsync<NextCloudManager>(),
-          await getIt.getAsync<ForegroundWorker>()));
+  getIt.registerSingletonAsync<NextcloudManagerBridge>(
+      () async => NextcloudManagerBridge(
+            await getIt.getAsync<NextCloudManager>(),
+            await getIt.getAsync<ForegroundWorker>(),
+            await getIt.getAsync<NextcloudFileManager>(),
+          ));
   getIt.registerSingletonAsync<SettingsManagerBridge>(() async =>
       SettingsManagerBridge(await getIt.getAsync<SettingsManager>(),
               await getIt.getAsync<ForegroundWorker>())

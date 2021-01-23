@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:mime/mime.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -50,23 +51,32 @@ class LocalFileManager
         .list(Directory.fromUri(
             this._systemPathService.absoluteUriFromInternal(uri)))
         .map((event) {
-      NcFile file =
-          NcFile(this._systemPathService.internalUriFromAbsolute(event.uri));
+      Uri uri = this._systemPathService.internalUriFromAbsolute(event.uri);
+
+      NcFile file = _createFile(uri, event);
       file.localFile = event;
-
-      if (event is Directory) {
-        file.isDirectory = true;
-        file.name = file.uri.pathSegments[file.uri.pathSegments.length - 2];
-        //todo: think about this!
-        file.lastModified = DateTime.now();
-      } else {
-        file.isDirectory = false;
-        file.name = file.uri.pathSegments.last;
-        file.lastModified = (event as File).lastModifiedSync();
-      }
-
       return file;
     });
+  }
+
+  NcFile _createFile(Uri uri, FileSystemEntity event) {
+    if (event is Directory) {
+      NcFile file = NcFile.directory(
+        uri,
+        uri.pathSegments[uri.pathSegments.length - 2],
+      );
+      //todo: think about this!
+      file.lastModified = DateTime.now();
+      return file;
+    }
+
+    NcFile file = NcFile.file(
+      uri,
+      uri.pathSegments.last,
+      lookupMimeType(event.path),
+    );
+    file.lastModified = (event as File).lastModifiedSync();
+    return file;
   }
 
   @override

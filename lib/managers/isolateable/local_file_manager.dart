@@ -85,4 +85,13 @@ class LocalFileManager
     this._fileManager.updateFileList(file);
     return file;
   }
+
+  @override
+  Future<NcFile> copyFile(NcFile file, Uri destination) async {
+    this._localFileService.copyFile(
+          file,
+          this._systemPathService.absoluteUriFromInternal(destination),
+        );
+    return file;
+  }
 }

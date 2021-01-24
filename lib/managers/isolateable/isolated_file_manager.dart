@@ -14,7 +14,7 @@ class IsolatedFileManager extends FileManagerBase
     with Isolateable<IsolatedFileManager> {
   final _logger = getLogger(IsolatedFileManager);
 
-  RxCommand<void, bool> cancelDeleteCommand =
+  RxCommand<void, bool> cancelActionCommand =
       RxCommand.createSyncNoParam(() => true);
 
   Future<IsolatedFileManager> initIsolated(
@@ -31,19 +31,39 @@ class IsolatedFileManager extends FileManagerBase
           (file) => isolateToMain.send(ImageUpdateMsg("", file)),
         );
 
+    //todo: need the same aproach for updating lists!
+
     return this;
   }
 
-  Future<void> deleteFiles(List<NcFile> files, bool local) async {
+  Future<void> deleteFiles(List<NcFile> files, bool local) async =>
+      this._cancelableAction(
+        files,
+        (file) => this.fileSubManagers[file.uri.scheme].deleteFile(
+              file,
+              local,
+            ),
+      );
+
+  Future<void> copyFiles(List<NcFile> files, Uri destination) async =>
+      this._cancelableAction(
+        files,
+        (file) => this.fileSubManagers[file.uri.scheme].copyFile(
+              file,
+              destination,
+            ),
+      );
+
+  Future<void> _cancelableAction(
+      List<NcFile> files, Future<NcFile> Function(NcFile) action) {
     return Stream.fromIterable(files)
         .asyncMap(
-          (file) =>
-              this.fileSubManagers[file.uri.scheme].deleteFile(file, local),
+          (file) => action(file),
         )
         .takeUntil(
           this
-              .cancelDeleteCommand
-              .doOnData((event) => _logger.v("Canceling delete!")),
+              .cancelActionCommand
+              .doOnData((event) => _logger.v("Canceling action!")),
         )
         .last;
   }

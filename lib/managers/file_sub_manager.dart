@@ -6,4 +6,5 @@ abstract class FileSubManager {
   Stream<NcFile> listFiles(Uri uri, {bool recursive = false});
   Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false});
   Future<NcFile> deleteFile(NcFile file, bool local);
+  Future<NcFile> copyFile(NcFile file, Uri destination);
 }

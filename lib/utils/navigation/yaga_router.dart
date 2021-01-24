@@ -38,7 +38,6 @@ class YagaRouter {
             settings: settings,
             builder: (context) => PathSelectorScreen(
                   pathSelectorScreenArguments.uri,
-                  pathSelectorScreenArguments.onCancel,
                   pathSelectorScreenArguments.onSelect,
                   onFileTap: pathSelectorScreenArguments.onFileTap,
                   title: pathSelectorScreenArguments.title,

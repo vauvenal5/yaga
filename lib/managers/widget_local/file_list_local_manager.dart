@@ -11,8 +11,9 @@ import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
-import 'package:yaga/utils/forground_worker/messages/delete_files_done.dart';
-import 'package:yaga/utils/forground_worker/messages/delete_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/copy_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
@@ -219,30 +220,42 @@ class FileListLocalManager {
     this.selectionChangedCommand(this.files);
   }
 
-  Future<bool> deleteSelected(bool local) async {
+  Future<bool> deleteSelected(bool local) =>
+      this._executeActionForSelection(DeleteFilesRequest(
+        this.managerKey,
+        this.selected,
+        local,
+      ));
+
+  Future<bool> copySelected(Uri destination) =>
+      this._executeActionForSelection(CopyFilesRequest(
+        this.managerKey,
+        this.selected,
+        destination,
+      ));
+
+  Future<bool> _executeActionForSelection(Message action) async {
     Completer<bool> jobDone = Completer();
 
-    this
-        ._worker
-        .sendRequest(DeleteFilesRequest(this.managerKey, this.selected, local));
+    this._worker.sendRequest(action);
 
-    StreamSubscription deleteSub = this
+    StreamSubscription actionSub = this
         ._worker
         .isolateResponseCommand
         .where((event) => event.key == this.managerKey)
-        .where((event) => event is DeleteFilesDone)
-        .map((event) => event as DeleteFilesDone)
+        .where((event) => event is FilesActionDone)
+        .map((event) => event as FilesActionDone)
         .listen((event) {
       jobDone.complete(true);
     });
 
     return jobDone.future
-        .whenComplete(() => deleteSub.cancel())
+        .whenComplete(() => actionSub.cancel())
         .whenComplete(() => this.deselectAll());
   }
 
-  void cancelDelete() {
-    this._worker.sendRequest(DeleteFilesDone(this.managerKey));
+  void cancelSelectionAction() {
+    this._worker.sendRequest(FilesActionDone(this.managerKey));
   }
 
   bool get isRemoteUri =>

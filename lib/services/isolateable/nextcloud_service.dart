@@ -143,4 +143,10 @@ class NextCloudService
 
   Future<NcFile> deleteFile(NcFile file) =>
       this._client.webDav.delete(file.uri.path).then((_) => file);
+
+  Future<NcFile> copyFile(NcFile file, Uri destination) => this
+      ._client
+      .webDav
+      .copy(file.uri.path, "${destination.path}${file.name}")
+      .then((_) => file);
 }

@@ -4,8 +4,9 @@ import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
-import 'package:yaga/utils/forground_worker/messages/delete_files_done.dart';
-import 'package:yaga/utils/forground_worker/messages/delete_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/copy_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_complete.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_request.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
@@ -21,8 +22,9 @@ class NextcloudFileManagerHandler
   ) async {
     registry.registerHandler<DeleteFilesRequest>(
         (msg) => this.handleDelete(msg, isolateToMain));
-    registry.registerHandler<DeleteFilesDone>(
-        (msg) => this.handleCancelDelete(msg));
+    registry.registerHandler<CopyFilesRequest>(
+        (msg) => this.handleCopy(msg, isolateToMain));
+    registry.registerHandler<FilesActionDone>((msg) => this.handleCancel(msg));
     registry.registerHandler<DownloadPreviewRequest>(
         (msg) => this.handleDownloadPreview(msg, isolateToMain));
     return this;
@@ -32,11 +34,16 @@ class NextcloudFileManagerHandler
     getIt
         .get<IsolatedFileManager>()
         .deleteFiles(message.files, message.local)
-        .then((_) => isolateToMain.send(DeleteFilesDone(message.key)));
+        .then((_) => isolateToMain.send(FilesActionDone(message.key)));
   }
 
-  void handleCancelDelete(DeleteFilesDone message) {
-    getIt.get<IsolatedFileManager>().cancelDeleteCommand(true);
+  void handleCopy(CopyFilesRequest message, SendPort isolateToMain) => getIt
+      .get<IsolatedFileManager>()
+      .copyFiles(message.files, message.destination)
+      .then((_) => isolateToMain.send(FilesActionDone(message.key)));
+
+  void handleCancel(FilesActionDone message) {
+    getIt.get<IsolatedFileManager>().cancelActionCommand(true);
   }
 
   void handleDownloadPreview(

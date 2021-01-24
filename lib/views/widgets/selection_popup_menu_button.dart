@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
+import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
+import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 
-enum SelectionViewMenu { share, delete }
+enum SelectionViewMenu { share, delete, copy }
 
 class SelectionPopupMenuButton extends StatelessWidget {
   final FileListLocalManager fileListLocalManager;
@@ -29,6 +31,10 @@ class SelectionPopupMenuButton extends StatelessWidget {
       PopupMenuItem(
         child: ListMenuEntry(Icons.delete, "Delete"),
         value: SelectionViewMenu.delete,
+      ),
+      PopupMenuItem(
+        child: ListMenuEntry(Icons.copy, "Copy"),
+        value: SelectionViewMenu.copy,
       ),
     ];
   }
@@ -60,6 +66,22 @@ class SelectionPopupMenuButton extends StatelessWidget {
         builder: (contextDialog) => this.fileListLocalManager.isRemoteUri
             ? _buildRemoteDialog(contextDialog, context)
             : _buildLocalDialog(contextDialog, context),
+      );
+    }
+
+    if (result == SelectionViewMenu.copy) {
+      Navigator.pushNamed(
+        context,
+        PathSelectorScreen.route,
+        arguments: PathSelectorScreenArguments(
+          uri: this.fileListLocalManager.uri,
+          fixedOrigin: true,
+          onSelect: (uri) => _openCancelableDialog(
+            context,
+            "Copying...",
+            () => this.fileListLocalManager.copySelected(uri),
+          ),
+        ),
       );
     }
   }
@@ -135,14 +157,25 @@ class SelectionPopupMenuButton extends StatelessWidget {
     );
   }
 
-  void _openDeletingDialog(BuildContext context, {bool local = true}) {
+  void _openDeletingDialog(BuildContext context, {bool local = true}) =>
+      _openCancelableDialog(
+        context,
+        "Deleting...",
+        () => this.fileListLocalManager.deleteSelected(local),
+      );
+
+  void _openCancelableDialog(
+    BuildContext context,
+    String text,
+    Future<bool> Function() actionCallback,
+  ) {
     bool dialogOpen = true;
 
     showDialog(
       context: context,
       useRootNavigator: false,
       builder: (context) => AlertDialog(
-        title: const Text("Deleting..."),
+        title: Text(text),
         content: SingleChildScrollView(
           child: Center(
             child: CircularProgressIndicator(),
@@ -151,13 +184,13 @@ class SelectionPopupMenuButton extends StatelessWidget {
         actions: [
           TextButton(
             child: Text('Cancel'),
-            onPressed: () => this.fileListLocalManager.cancelDelete(),
+            onPressed: () => this.fileListLocalManager.cancelSelectionAction(),
           ),
         ],
       ),
     ).whenComplete(() => dialogOpen = false);
 
-    this.fileListLocalManager.deleteSelected(local).whenComplete(() {
+    actionCallback().whenComplete(() {
       if (dialogOpen) {
         Navigator.pop(context);
       }

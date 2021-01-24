@@ -209,4 +209,8 @@ class NextcloudFileManager
         .deleteFile(file)
         .then((value) => _deleteLocalFile(file));
   }
+
+  @override
+  Future<NcFile> copyFile(NcFile file, Uri destination) =>
+      this._nextCloudService.copyFile(file, destination);
 }

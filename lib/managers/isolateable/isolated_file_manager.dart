@@ -31,7 +31,7 @@ class IsolatedFileManager extends FileManagerBase
           (file) => isolateToMain.send(ImageUpdateMsg("", file)),
         );
 
-    //todo: need the same aproach for updating lists!
+    this.updateFilesCommand.listen((event) => isolateToMain.send(event));
 
     return this;
   }
@@ -55,7 +55,9 @@ class IsolatedFileManager extends FileManagerBase
       );
 
   Future<void> _cancelableAction(
-      List<NcFile> files, Future<NcFile> Function(NcFile) action) {
+    List<NcFile> files,
+    Future<NcFile> Function(NcFile) action,
+  ) {
     return Stream.fromIterable(files)
         .asyncMap(
           (file) => action(file),

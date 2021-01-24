@@ -26,9 +26,8 @@ class FileListRequestHandler
     getIt
         .get<IsolatedFileManager>()
         .listFileLists(message.key, message.uri, recursive: message.recursive)
-        .listen((event) => isolateToMain.send(event))
-        .onDone(
-          () => isolateToMain.send(
+        .then(
+          (_) => isolateToMain.send(
             FileListDone(
               message.key,
               message.uri,

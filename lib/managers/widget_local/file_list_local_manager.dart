@@ -81,10 +81,13 @@ class FileListLocalManager {
 
     this.loadingChangedCommand(true);
 
+    //todo: in future communication with the background worker should be done by bridges & handlers, and not directly
     _foregroundMessageCommandSubscription = _worker.isolateResponseCommand
         .where((event) => event is FileListMessage)
         .map((event) => event as FileListMessage)
         .where((event) =>
+            //file list may contain recursively loaded files; this is done so we minimize the UI thread merging of lists
+            //todo: maybe there is a better approach to this
             (event.uri == uri && event.recursive == this.recursive.value) ||
             (this.recursive.value &&
                 event.uri.toString().startsWith(uri.toString())))
@@ -140,16 +143,6 @@ class FileListLocalManager {
     filesFromEvent.where((file) => !files.contains(file)).forEach((file) {
       // add file to list
       files.add(file);
-      // check if it is necessary to update list with recursice childs of file
-      if (this.recursive.value &&
-          file.isDirectory &&
-          !_fileIsFromThisManager(eventKey)) {
-        this._worker.sendRequest(FileListRequest(
-              "$managerKey",
-              file.uri,
-              recursive.value,
-            ));
-      }
     });
     return size != files.length;
   }

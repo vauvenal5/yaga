@@ -13,6 +13,8 @@ abstract class FileManagerBase {
   RxCommand<NcFile, NcFile> updateFileList;
   RxCommand<NcFile, NcFile> updateImageCommand =
       RxCommand.createSync((param) => param);
+  RxCommand<FileListResponse, FileListResponse> updateFilesCommand =
+      RxCommand.createSync((param) => param);
 
   @protected
   Map<String, FileSubManager> fileSubManagers = Map();
@@ -34,11 +36,17 @@ abstract class FileManagerBase {
             : Stream.value(file));
   }
 
-  Stream<FileListResponse> listFileLists(String requestKey, Uri uri,
-      {bool recursive = false}) {
+  //todo: the whole list file-lists logic is quite complicated, try simplifying it
+  Future<void> listFileLists(
+    String requestKey,
+    Uri uri, {
+    bool recursive = false,
+  }) {
     return this
         .fileSubManagers[uri.scheme]
         .listFileList(uri, recursive: recursive)
-        .map((event) => FileListResponse(requestKey, uri, recursive, event));
+        .map((event) => FileListResponse(requestKey, uri, recursive, event))
+        .doOnData((event) => this.updateFilesCommand(event))
+        .last;
   }
 }

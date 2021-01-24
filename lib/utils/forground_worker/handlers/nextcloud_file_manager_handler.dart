@@ -37,10 +37,16 @@ class NextcloudFileManagerHandler
         .then((_) => isolateToMain.send(FilesActionDone(message.key)));
   }
 
-  void handleCopy(CopyFilesRequest message, SendPort isolateToMain) => getIt
-      .get<IsolatedFileManager>()
-      .copyFiles(message.files, message.destination)
-      .then((_) => isolateToMain.send(FilesActionDone(message.key)));
+  void handleCopy(CopyFilesRequest message, SendPort isolateToMain) {
+    final fileManager = getIt.get<IsolatedFileManager>();
+
+    fileManager
+        .copyFiles(message.files, message.destination)
+        .then((_) => isolateToMain.send(FilesActionDone(message.key)))
+        .whenComplete(
+          () => fileManager.listFileLists(message.key, message.destination),
+        );
+  }
 
   void handleCancel(FilesActionDone message) {
     getIt.get<IsolatedFileManager>().cancelActionCommand(true);

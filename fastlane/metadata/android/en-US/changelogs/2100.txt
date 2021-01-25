@@ -1,0 +1,2 @@
+- implement avatar caching
+- disable multi-select in path selector view

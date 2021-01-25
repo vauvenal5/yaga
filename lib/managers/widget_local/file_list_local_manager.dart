@@ -31,6 +31,7 @@ class FileListLocalManager {
   List<NcFile> files = List();
   BoolPreference recursive;
   List<NcFile> selected = List();
+  final bool allowSelecting;
 
   RxCommand<bool, bool> loadingChangedCommand;
   RxCommand<List<NcFile>, List<NcFile>> filesChangedCommand;
@@ -56,7 +57,11 @@ class FileListLocalManager {
 
   bool get isInSelectionMode => this.selected.length > 0;
 
-  FileListLocalManager(this._uri, this.recursive) {
+  FileListLocalManager(
+    this._uri,
+    this.recursive, {
+    this.allowSelecting = true,
+  }) {
     _worker = getIt.get<ForegroundWorker>();
     loadingChangedCommand =
         RxCommand.createSync((param) => param, initialLastResult: false);
@@ -176,7 +181,7 @@ class FileListLocalManager {
       this.refetch();
     });
 
-    this.selectFileCommand.listen((file) {
+    this.selectFileCommand.where((_) => allowSelecting).listen((file) {
       bool selectionMode = this.isInSelectionMode;
       file.selected = !file.selected;
       file.selected ? selected.add(file) : selected.remove(file);

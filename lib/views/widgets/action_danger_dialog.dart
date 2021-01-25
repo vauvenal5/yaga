@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SelectionActionDangerDialog extends StatelessWidget {
+class ActionDangerDialog extends StatelessWidget {
   final String title;
   final String cancelButton;
   final String normalAction;
@@ -8,7 +8,7 @@ class SelectionActionDangerDialog extends StatelessWidget {
   final Function(bool) action;
   final List<Widget> Function(BuildContext) bodyBuilder;
 
-  SelectionActionDangerDialog({
+  ActionDangerDialog({
     @required this.title,
     @required this.cancelButton,
     this.normalAction,

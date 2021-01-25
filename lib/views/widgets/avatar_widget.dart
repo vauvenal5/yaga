@@ -1,34 +1,34 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:rx_command/rx_command.dart';
 
 class AvatarWidget extends StatelessWidget {
-  final Uint8List _avatarBytes;
-  final RxCommand<void, Uint8List> _command;
+  final File _avatar;
+  final RxCommand<void, File> _command;
   final IconData _iconData;
   final double _radius;
   final bool border;
 
-  AvatarWidget(this._avatarBytes, {double radius = 14, this.border = true})
+  AvatarWidget(this._avatar, {double radius = 14, this.border = true})
       : this._command = null,
         this._iconData = null,
         this._radius = radius;
   AvatarWidget.command(this._command, {double radius = 14, this.border = true})
-      : _avatarBytes = null,
+      : _avatar = null,
         this._iconData = null,
         this._radius = radius;
   AvatarWidget.icon(this._iconData, {double radius = 14, this.border = true})
-      : _avatarBytes = null,
+      : _avatar = null,
         this._command = null,
         this._radius = radius;
   AvatarWidget.phone({double radius = 14, this.border = true})
-      : _avatarBytes = null,
+      : _avatar = null,
         this._iconData = Icons.phone_android,
         this._command = null,
         this._radius = radius;
 
-  Widget _buildAvatar(BuildContext context, Uint8List data) {
+  Widget _buildAvatar(BuildContext context, File data) {
     if (border) {
       return CircleAvatar(
         radius: this._radius + 1,
@@ -40,11 +40,11 @@ class AvatarWidget extends StatelessWidget {
     return _getInnerAvatar(context, data);
   }
 
-  Widget _getInnerAvatar(BuildContext context, Uint8List data) {
-    if (data != null) {
+  Widget _getInnerAvatar(BuildContext context, File data) {
+    if (data != null && data.existsSync()) {
       return CircleAvatar(
         radius: this._radius,
-        backgroundImage: MemoryImage(data),
+        backgroundImage: FileImage(data),
       );
     }
 
@@ -68,7 +68,7 @@ class AvatarWidget extends StatelessWidget {
   }
 
   Widget _buildAvatarFromStream(BuildContext context) {
-    return StreamBuilder<Uint8List>(
+    return StreamBuilder<File>(
       stream: _command,
       initialData: _command.lastResult,
       builder: (context, snapshot) => _buildAvatar(context, snapshot.data),
@@ -78,7 +78,7 @@ class AvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _command == null
-        ? _buildAvatar(context, _avatarBytes)
+        ? _buildAvatar(context, _avatar)
         : _buildAvatarFromStream(context);
   }
 }

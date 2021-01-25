@@ -1,11 +1,14 @@
 import 'dart:async';
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
+import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class NextCloudManager {
   RxCommand<NextCloudLoginData, NextCloudLoginData> loginCommand;
@@ -14,12 +17,19 @@ class NextCloudManager {
   RxCommand<NextCloudLoginData, NextCloudLoginData> updateLoginStateCommand;
   RxCommand<void, NextCloudLoginData> logoutCommand;
 
-  RxCommand<void, Uint8List> updateAvatarCommand;
+  RxCommand<void, File> updateAvatarCommand;
 
-  SecureStorageService _secureStorageService;
-  NextCloudService _nextCloudService;
+  final SecureStorageService _secureStorageService;
+  final NextCloudService _nextCloudService;
+  final LocalFileService _localFileService;
+  final SystemLocationService _systemLocationService;
 
-  NextCloudManager(this._nextCloudService, this._secureStorageService) {
+  NextCloudManager(
+    this._nextCloudService,
+    this._secureStorageService,
+    this._localFileService,
+    this._systemLocationService,
+  ) {
     this.loginCommand = RxCommand.createFromStream(
         (param) => this._createLoginDataPersisStream(param));
     this.loginCommand.listen((value) => this._internalLoginCommand(value));
@@ -56,11 +66,36 @@ class NextCloudManager {
     });
 
     this.updateAvatarCommand = RxCommand.createAsync(
-        (_) => this._nextCloudService.isLoggedIn()
-            ? this._nextCloudService.getAvatar()
-            : null,
-        initialLastResult: null);
+        (_) => _handleAvatarUpdate(),
+        initialLastResult: _avatarFile);
   }
+
+  Future<File> _handleAvatarUpdate() async {
+    File avatar = _avatarFile;
+    if (this._nextCloudService.isLoggedIn()) {
+      return this
+          ._nextCloudService
+          .getAvatar()
+          .then(
+            (value) => _localFileService.createFile(
+              file: avatar,
+              bytes: value,
+            ),
+          )
+          .catchError((_) => avatar);
+    }
+    _localFileService.deleteFile(avatar);
+    return avatar;
+  }
+
+  File get _avatarFile => File(
+        UriUtils.chainPathSegments(
+          _systemLocationService
+              .absoluteUriFromInternal(_systemLocationService.tmpAppDirUri)
+              .path,
+          "${_nextCloudService.origin?.userDomain}.avatar",
+        ),
+      );
 
   Future<NextCloudManager> init() async {
     String server = await _secureStorageService

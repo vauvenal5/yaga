@@ -94,4 +94,13 @@ class LocalFileManager
         );
     return file;
   }
+
+  @override
+  Future<NcFile> moveFile(NcFile file, Uri destination) async {
+    this._localFileService.moveFile(
+          file,
+          this._systemPathService.absoluteUriFromInternal(destination),
+        );
+    return file;
+  }
 }

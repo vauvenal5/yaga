@@ -22,8 +22,8 @@ class NextcloudFileManagerHandler
   ) async {
     registry.registerHandler<DeleteFilesRequest>(
         (msg) => this.handleDelete(msg, isolateToMain));
-    registry.registerHandler<CopyFilesRequest>(
-        (msg) => this.handleCopy(msg, isolateToMain));
+    registry.registerHandler<DestinationActionFilesRequest>(
+        (msg) => this.handleDestinationAction(msg, isolateToMain));
     registry.registerHandler<FilesActionDone>((msg) => this.handleCancel(msg));
     registry.registerHandler<DownloadPreviewRequest>(
         (msg) => this.handleDownloadPreview(msg, isolateToMain));
@@ -37,11 +37,17 @@ class NextcloudFileManagerHandler
         .then((_) => isolateToMain.send(FilesActionDone(message.key)));
   }
 
-  void handleCopy(CopyFilesRequest message, SendPort isolateToMain) {
+  void handleDestinationAction(
+    DestinationActionFilesRequest message,
+    SendPort isolateToMain,
+  ) {
     final fileManager = getIt.get<IsolatedFileManager>();
 
-    fileManager
-        .copyFiles(message.files, message.destination)
+    final action = message.action == DestinationAction.copy
+        ? fileManager.copyFiles(message.files, message.destination)
+        : fileManager.moveFiles(message.files, message.destination);
+
+    action
         .then((_) => isolateToMain.send(FilesActionDone(message.key)))
         .whenComplete(
           () => fileManager.listFileLists(message.key, message.destination),

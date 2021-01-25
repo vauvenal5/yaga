@@ -1,9 +1,17 @@
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
 
-class CopyFilesRequest extends Message {
+enum DestinationAction { copy, move }
+
+class DestinationActionFilesRequest extends Message {
   final List<NcFile> files;
   final Uri destination;
+  final DestinationAction action;
 
-  CopyFilesRequest(String key, this.files, this.destination) : super(key);
+  DestinationActionFilesRequest(
+    String key,
+    this.files,
+    this.destination, {
+    this.action = DestinationAction.copy,
+  }) : super(key);
 }

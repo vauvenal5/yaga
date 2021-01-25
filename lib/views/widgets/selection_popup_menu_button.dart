@@ -6,7 +6,7 @@ import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 
-enum SelectionViewMenu { share, delete, copy }
+enum SelectionViewMenu { share, delete, copy, move }
 
 class SelectionPopupMenuButton extends StatelessWidget {
   final FileListLocalManager fileListLocalManager;
@@ -35,6 +35,10 @@ class SelectionPopupMenuButton extends StatelessWidget {
       PopupMenuItem(
         child: ListMenuEntry(Icons.copy, "Copy"),
         value: SelectionViewMenu.copy,
+      ),
+      PopupMenuItem(
+        child: ListMenuEntry(Icons.forward, "Move"),
+        value: SelectionViewMenu.move,
       ),
     ];
   }
@@ -69,7 +73,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
       );
     }
 
-    if (result == SelectionViewMenu.copy) {
+    if (result == SelectionViewMenu.copy || result == SelectionViewMenu.move) {
       Navigator.pushNamed(
         context,
         PathSelectorScreen.route,
@@ -78,8 +82,10 @@ class SelectionPopupMenuButton extends StatelessWidget {
           fixedOrigin: true,
           onSelect: (uri) => _openCancelableDialog(
             context,
-            "Copying...",
-            () => this.fileListLocalManager.copySelected(uri),
+            result == SelectionViewMenu.copy ? "Copying..." : "Moving...",
+            result == SelectionViewMenu.copy
+                ? () => this.fileListLocalManager.copySelected(uri)
+                : () => this.fileListLocalManager.moveSelected(uri),
           ),
         ),
       );

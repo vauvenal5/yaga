@@ -70,4 +70,8 @@ class LocalFileService extends Service<LocalFileService>
   void copyFile(NcFile file, Uri destination) {
     (file.localFile as File).copySync("${destination.path}${file.name}");
   }
+
+  void moveFile(NcFile file, Uri destination) {
+    (file.localFile as File).renameSync("${destination.path}${file.name}");
+  }
 }

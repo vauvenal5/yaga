@@ -149,4 +149,10 @@ class NextCloudService
       .webDav
       .copy(file.uri.path, "${destination.path}${file.name}")
       .then((_) => file);
+
+  Future<NcFile> moveFile(NcFile file, Uri destination) => this
+      ._client
+      .webDav
+      .move(file.uri.path, "${destination.path}${file.name}")
+      .then((_) => file);
 }

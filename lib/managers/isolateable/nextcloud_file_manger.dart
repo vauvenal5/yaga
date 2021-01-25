@@ -213,4 +213,8 @@ class NextcloudFileManager
   @override
   Future<NcFile> copyFile(NcFile file, Uri destination) =>
       this._nextCloudService.copyFile(file, destination);
+
+  @override
+  Future<NcFile> moveFile(NcFile file, Uri destination) =>
+      this._nextCloudService.moveFile(file, destination);
 }

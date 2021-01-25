@@ -54,9 +54,17 @@ class IsolatedFileManager extends FileManagerBase
             ),
       );
 
+  Future<void> moveFiles(List<NcFile> files, Uri destination) async =>
+      this._cancelableAction(
+        files,
+        (file) => fileSubManagers[file.uri.scheme]
+            .moveFile(file, destination)
+            .then((value) => this.updateFileList(file)),
+      );
+
   Future<void> _cancelableAction(
     List<NcFile> files,
-    Future<NcFile> Function(NcFile) action,
+    Future<dynamic> Function(NcFile) action,
   ) {
     return Stream.fromIterable(files)
         .asyncMap(

@@ -5,9 +5,11 @@ import 'package:mime/mime.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class LocalFileService extends Service<LocalFileService>
     implements Isolateable<LocalFileService> {
@@ -64,5 +66,25 @@ class LocalFileService extends Service<LocalFileService>
   bool _checkMimeType(String path) {
     String type = lookupMimeType(path);
     return type != null && type.startsWith("image");
+  }
+
+  void copyFile(NcFile file, Uri destination, bool overwrite) {
+    (file.localFile as File).copySync(
+      _checkExists(destination, file.name, overwrite),
+    );
+  }
+
+  void moveFile(NcFile file, Uri destination, bool overwrite) {
+    (file.localFile as File).renameSync(
+      _checkExists(destination, file.name, overwrite),
+    );
+  }
+
+  String _checkExists(Uri destination, String name, bool overwrite) {
+    String path = UriUtils.chainPathSegments(destination.path, name);
+    if (!overwrite && File(path).existsSync()) {
+      throw FileSystemException("File exists!", path);
+    }
+    return path;
   }
 }

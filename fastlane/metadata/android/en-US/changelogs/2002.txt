@@ -1,0 +1,4 @@
+- implement support for copying files
+- implement support for moving files
+- ignore same destination actions
+- !!! please note: if file exists in destination it will be overwritten !!!

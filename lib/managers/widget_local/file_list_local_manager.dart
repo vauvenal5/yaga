@@ -11,8 +11,9 @@ import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
-import 'package:yaga/utils/forground_worker/messages/delete_files_done.dart';
-import 'package:yaga/utils/forground_worker/messages/delete_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/copy_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
@@ -80,10 +81,13 @@ class FileListLocalManager {
 
     this.loadingChangedCommand(true);
 
+    //todo: in future communication with the background worker should be done by bridges & handlers, and not directly
     _foregroundMessageCommandSubscription = _worker.isolateResponseCommand
         .where((event) => event is FileListMessage)
         .map((event) => event as FileListMessage)
         .where((event) =>
+            //file list may contain recursively loaded files; this is done so we minimize the UI thread merging of lists
+            //todo: maybe there is a better approach to this
             (event.uri == uri && event.recursive == this.recursive.value) ||
             (this.recursive.value &&
                 event.uri.toString().startsWith(uri.toString())))
@@ -139,16 +143,6 @@ class FileListLocalManager {
     filesFromEvent.where((file) => !files.contains(file)).forEach((file) {
       // add file to list
       files.add(file);
-      // check if it is necessary to update list with recursice childs of file
-      if (this.recursive.value &&
-          file.isDirectory &&
-          !_fileIsFromThisManager(eventKey)) {
-        this._worker.sendRequest(FileListRequest(
-              "$managerKey",
-              file.uri,
-              recursive.value,
-            ));
-      }
     });
     return size != files.length;
   }
@@ -219,30 +213,52 @@ class FileListLocalManager {
     this.selectionChangedCommand(this.files);
   }
 
-  Future<bool> deleteSelected(bool local) async {
+  Future<bool> deleteSelected(bool local) =>
+      this._executeActionForSelection(DeleteFilesRequest(
+        this.managerKey,
+        this.selected,
+        local,
+      ));
+
+  Future<bool> copySelected(Uri destination, {bool overwrite = false}) =>
+      this._executeActionForSelection(DestinationActionFilesRequest(
+        this.managerKey,
+        this.selected,
+        destination,
+        overwrite: overwrite,
+      ));
+
+  Future<bool> moveSelected(Uri destination, {bool overwrite = false}) =>
+      this._executeActionForSelection(DestinationActionFilesRequest(
+        this.managerKey,
+        this.selected,
+        destination,
+        action: DestinationAction.move,
+        overwrite: overwrite,
+      ));
+
+  Future<bool> _executeActionForSelection(Message action) async {
     Completer<bool> jobDone = Completer();
 
-    this
-        ._worker
-        .sendRequest(DeleteFilesRequest(this.managerKey, this.selected, local));
+    this._worker.sendRequest(action);
 
-    StreamSubscription deleteSub = this
+    StreamSubscription actionSub = this
         ._worker
         .isolateResponseCommand
         .where((event) => event.key == this.managerKey)
-        .where((event) => event is DeleteFilesDone)
-        .map((event) => event as DeleteFilesDone)
+        .where((event) => event is FilesActionDone)
+        .map((event) => event as FilesActionDone)
         .listen((event) {
       jobDone.complete(true);
     });
 
     return jobDone.future
-        .whenComplete(() => deleteSub.cancel())
+        .whenComplete(() => actionSub.cancel())
         .whenComplete(() => this.deselectAll());
   }
 
-  void cancelDelete() {
-    this._worker.sendRequest(DeleteFilesDone(this.managerKey));
+  void cancelSelectionAction() {
+    this._worker.sendRequest(FilesActionDone(this.managerKey));
   }
 
   bool get isRemoteUri =>

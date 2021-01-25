@@ -6,18 +6,23 @@ import 'package:yaga/views/widgets/image_views/nc_list_view.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/select_cancel_bottom_navigation.dart';
 
+//todo: is it a good idea to merge PathSelectorScreen and DirectoryTraversalScreen?
 class PathSelectorScreen extends StatelessWidget {
   static const String route = "/pathSelector";
 
   final Uri _uri;
-  final void Function() _onCancel;
   final void Function(Uri) _onSelect;
   final void Function(List<NcFile>, int) onFileTap;
   final String title;
   final bool fixedOrigin;
 
-  PathSelectorScreen(this._uri, this._onCancel, this._onSelect,
-      {this.onFileTap, this.title, this.fixedOrigin = false});
+  PathSelectorScreen(
+    this._uri,
+    this._onSelect, {
+    this.onFileTap,
+    this.title,
+    this.fixedOrigin = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +32,17 @@ class PathSelectorScreen extends StatelessWidget {
   DirectoryNavigationScreenArguments _getArgs(BuildContext context) {
     Widget Function(BuildContext, Uri) bottomBarBuilder;
 
-    if (_onSelect != null || _onCancel != null) {
+    //todo: can't we simply build the bottomBar every time in this screen?
+    if (_onSelect != null) {
       bottomBarBuilder =
           (BuildContext context, Uri uri) => SelectCancelBottomNavigation(
-                onCommit: () => _onSelect(uri),
-                onCancel: () => _onCancel(),
+                onCommit: () {
+                  Navigator.of(context)
+                      .pop(DirectoryTraversalScreenNavActions.cancel);
+                  _onSelect(uri);
+                },
+                onCancel: () => Navigator.of(context)
+                    .pop(DirectoryTraversalScreenNavActions.cancel),
               );
     }
 

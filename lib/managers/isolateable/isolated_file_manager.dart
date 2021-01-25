@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:isolate';
 
+import 'package:nextcloud/nextcloud.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -9,12 +11,13 @@ import 'package:yaga/utils/forground_worker/messages/image_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/utils/logger.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class IsolatedFileManager extends FileManagerBase
     with Isolateable<IsolatedFileManager> {
   final _logger = getLogger(IsolatedFileManager);
 
-  RxCommand<void, bool> cancelDeleteCommand =
+  RxCommand<void, bool> cancelActionCommand =
       RxCommand.createSyncNoParam(() => true);
 
   Future<IsolatedFileManager> initIsolated(
@@ -31,19 +34,61 @@ class IsolatedFileManager extends FileManagerBase
           (file) => isolateToMain.send(ImageUpdateMsg("", file)),
         );
 
+    this.updateFilesCommand.listen((event) => isolateToMain.send(event));
+
     return this;
   }
 
-  Future<void> deleteFiles(List<NcFile> files, bool local) async {
+  Future<void> deleteFiles(List<NcFile> files, bool local) async =>
+      this._cancelableAction(
+        files,
+        (file) => this.fileSubManagers[file.uri.scheme].deleteFile(
+              file,
+              local,
+            ),
+      );
+
+  Future<void> copyFiles(
+          List<NcFile> files, Uri destination, bool overwrite) async =>
+      this._cancelableAction(
+        files,
+        (file) => fileSubManagers[file.uri.scheme]
+            .copyFile(file, destination, overwrite),
+        filter: (file) => _destinationFilter(file, destination),
+      );
+
+  Future<void> moveFiles(
+          List<NcFile> files, Uri destination, bool overwrite) async =>
+      this._cancelableAction(
+        files,
+        (file) => fileSubManagers[file.uri.scheme]
+            .moveFile(file, destination, overwrite)
+            .then((value) => this.updateFileList(file)),
+        filter: (file) => _destinationFilter(file, destination),
+      );
+
+  bool _destinationFilter(NcFile file, Uri destination) =>
+      file.uri.path != UriUtils.chainPathSegments(destination.path, file.name);
+
+  Future<void> _cancelableAction(
+    List<NcFile> files,
+    Future<dynamic> Function(NcFile) action, {
+    bool Function(NcFile file) filter,
+  }) {
     return Stream.fromIterable(files)
+        .where((event) => filter == null || filter(event))
         .asyncMap(
-          (file) =>
-              this.fileSubManagers[file.uri.scheme].deleteFile(file, local),
+          (file) => action(file).catchError(
+            (err) => null,
+            test: (err) =>
+                err is RequestException || err is FileSystemException,
+          ),
         )
+        .where((event) => event != null)
         .takeUntil(
           this
-              .cancelDeleteCommand
-              .doOnData((event) => _logger.v("Canceling delete!")),
+              .cancelActionCommand
+              .doOnData((event) => _logger.v("Canceling action!")),
         )
         .last;
   }

@@ -6,6 +6,8 @@ import 'package:yaga/utils/navigation/yaga_router.dart';
 import 'package:yaga/views/screens/directory_screen.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 
+enum DirectoryTraversalScreenNavActions { cancel }
+
 class DirectoryTraversalScreen extends StatefulWidget {
   final DirectoryNavigationScreenArguments args;
 
@@ -32,6 +34,8 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
   }
 
   void _navigate(Uri target) {
+    //this is so we can find out which use case sets null
+    assert(target != null, "Target is null!");
     setState(() {
       uri = target == null ? null : UriUtils.fromUri(uri: target);
     });
@@ -65,7 +69,9 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
     }
 
     //in case we are poping the root element we need to inform the parent navigatort
-    if (uri == null || uri == UriUtils.getRootFromUri(uri)) {
+    if (result == DirectoryTraversalScreenNavActions.cancel ||
+        uri == null || //todo: in which case is the uri == null?!
+        uri == UriUtils.getRootFromUri(uri)) {
       Navigator.of(context).pop();
       return true;
     }

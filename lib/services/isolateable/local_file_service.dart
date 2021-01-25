@@ -9,6 +9,7 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class LocalFileService extends Service<LocalFileService>
     implements Isolateable<LocalFileService> {
@@ -68,10 +69,14 @@ class LocalFileService extends Service<LocalFileService>
   }
 
   void copyFile(NcFile file, Uri destination) {
-    (file.localFile as File).copySync("${destination.path}${file.name}");
+    (file.localFile as File).copySync(
+      UriUtils.chainPathSegments(destination.path, file.name),
+    );
   }
 
   void moveFile(NcFile file, Uri destination) {
-    (file.localFile as File).renameSync("${destination.path}${file.name}");
+    (file.localFile as File).renameSync(
+      UriUtils.chainPathSegments(destination.path, file.name),
+    );
   }
 }

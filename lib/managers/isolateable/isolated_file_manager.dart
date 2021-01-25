@@ -9,6 +9,7 @@ import 'package:yaga/utils/forground_worker/messages/image_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/utils/logger.dart';
+import 'package:yaga/utils/uri_utils.dart';
 
 class IsolatedFileManager extends FileManagerBase
     with Isolateable<IsolatedFileManager> {
@@ -52,6 +53,7 @@ class IsolatedFileManager extends FileManagerBase
               file,
               destination,
             ),
+        filter: (file) => _destinationFilter(file, destination),
       );
 
   Future<void> moveFiles(List<NcFile> files, Uri destination) async =>
@@ -60,13 +62,19 @@ class IsolatedFileManager extends FileManagerBase
         (file) => fileSubManagers[file.uri.scheme]
             .moveFile(file, destination)
             .then((value) => this.updateFileList(file)),
+        filter: (file) => _destinationFilter(file, destination),
       );
+
+  bool _destinationFilter(NcFile file, Uri destination) =>
+      file.uri.path != UriUtils.chainPathSegments(destination.path, file.name);
 
   Future<void> _cancelableAction(
     List<NcFile> files,
-    Future<dynamic> Function(NcFile) action,
-  ) {
+    Future<dynamic> Function(NcFile) action, {
+    bool Function(NcFile file) filter,
+  }) {
     return Stream.fromIterable(files)
+        .where((event) => filter == null || filter(event))
         .asyncMap(
           (file) => action(file),
         )

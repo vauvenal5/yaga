@@ -1,0 +1,3 @@
+- implement avatar caching
+- disable multi-select in path selector view
+- add warning dialog for root mapping

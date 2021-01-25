@@ -4,7 +4,7 @@ import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/widgets/selection_action_cancel_dialog.dart';
-import 'package:yaga/views/widgets/selection_action_danger_dialog.dart';
+import 'package:yaga/views/widgets/action_danger_dialog.dart';
 import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 
@@ -70,7 +70,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
         context: context,
         useRootNavigator: false,
         builder: (contextDialog) => this.fileListLocalManager.isRemoteUri
-            ? SelectionActionDangerDialog(
+            ? ActionDangerDialog(
                 title: "Delete location",
                 cancelButton: 'Keep',
                 normalAction: 'Delete locally',
@@ -85,7 +85,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
                   ),
                 ],
               )
-            : SelectionActionDangerDialog(
+            : ActionDangerDialog(
                 title: "Delete",
                 cancelButton: 'Keep',
                 aggressiveAction: 'Delete',
@@ -109,7 +109,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
           onSelect: (uri) => showDialog(
             context: context,
             useRootNavigator: false,
-            builder: (contextDialog) => SelectionActionDangerDialog(
+            builder: (contextDialog) => ActionDangerDialog(
               title: "Overwrite Existing",
               cancelButton: 'Cancel',
               normalAction: 'Skip existing',

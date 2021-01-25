@@ -34,7 +34,7 @@ class NextcloudFileManagerHandler
     getIt
         .get<IsolatedFileManager>()
         .deleteFiles(message.files, message.local)
-        .then((_) => isolateToMain.send(FilesActionDone(message.key)));
+        .whenComplete(() => isolateToMain.send(FilesActionDone(message.key)));
   }
 
   void handleDestinationAction(
@@ -48,7 +48,9 @@ class NextcloudFileManagerHandler
         : fileManager.moveFiles(message.files, message.destination);
 
     action
-        .then((_) => isolateToMain.send(FilesActionDone(message.key)))
+        .whenComplete(
+          () => isolateToMain.send(FilesActionDone(message.key)),
+        )
         .whenComplete(
           () => fileManager.listFileLists(message.key, message.destination),
         );

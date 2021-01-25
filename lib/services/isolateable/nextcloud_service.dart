@@ -147,12 +147,21 @@ class NextCloudService
   Future<NcFile> copyFile(NcFile file, Uri destination) => this
       ._client
       .webDav
-      .copy(file.uri.path, "${destination.path}${file.name}")
+      .copy(file.uri.path, "${destination.path}${file.name}", overwrite: true)
+      .catchError(_logAndRethrow)
       .then((_) => file);
 
   Future<NcFile> moveFile(NcFile file, Uri destination) => this
       ._client
       .webDav
-      .move(file.uri.path, "${destination.path}${file.name}")
+      .move(file.uri.path, "${destination.path}${file.name}", overwrite: true)
+      .catchError(_logAndRethrow)
       .then((_) => file);
+
+  void _logAndRethrow(dynamic err) {
+    if (err is RequestException) {
+      _logger.e(err.body);
+    }
+    throw err;
+  }
 }

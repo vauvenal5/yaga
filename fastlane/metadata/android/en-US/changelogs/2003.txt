@@ -1,0 +1,4 @@
+- implement support for copying files
+- implement support for moving files
+- ignore same destination actions
+- ask for overwrite mode

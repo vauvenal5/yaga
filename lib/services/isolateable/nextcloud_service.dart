@@ -144,24 +144,24 @@ class NextCloudService
   Future<NcFile> deleteFile(NcFile file) =>
       this._client.webDav.delete(file.uri.path).then((_) => file);
 
-  Future<NcFile> copyFile(NcFile file, Uri destination) => this
+  Future<NcFile> copyFile(NcFile file, Uri destination, bool overwrite) => this
       ._client
       .webDav
       .copy(
         file.uri.path,
         UriUtils.chainPathSegments(destination.path, file.name),
-        overwrite: true,
+        overwrite: overwrite,
       )
       .catchError(_logAndRethrow)
       .then((_) => file);
 
-  Future<NcFile> moveFile(NcFile file, Uri destination) => this
+  Future<NcFile> moveFile(NcFile file, Uri destination, bool overwrite) => this
       ._client
       .webDav
       .move(
         file.uri.path,
         UriUtils.chainPathSegments(destination.path, file.name),
-        overwrite: true,
+        overwrite: overwrite,
       )
       .catchError(_logAndRethrow)
       .then((_) => file);

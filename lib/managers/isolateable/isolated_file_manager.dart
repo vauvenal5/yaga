@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:isolate';
 
+import 'package:nextcloud/nextcloud.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -46,21 +48,21 @@ class IsolatedFileManager extends FileManagerBase
             ),
       );
 
-  Future<void> copyFiles(List<NcFile> files, Uri destination) async =>
-      this._cancelableAction(
-        files,
-        (file) => this.fileSubManagers[file.uri.scheme].copyFile(
-              file,
-              destination,
-            ),
-        filter: (file) => _destinationFilter(file, destination),
-      );
-
-  Future<void> moveFiles(List<NcFile> files, Uri destination) async =>
+  Future<void> copyFiles(
+          List<NcFile> files, Uri destination, bool overwrite) async =>
       this._cancelableAction(
         files,
         (file) => fileSubManagers[file.uri.scheme]
-            .moveFile(file, destination)
+            .copyFile(file, destination, overwrite),
+        filter: (file) => _destinationFilter(file, destination),
+      );
+
+  Future<void> moveFiles(
+          List<NcFile> files, Uri destination, bool overwrite) async =>
+      this._cancelableAction(
+        files,
+        (file) => fileSubManagers[file.uri.scheme]
+            .moveFile(file, destination, overwrite)
             .then((value) => this.updateFileList(file)),
         filter: (file) => _destinationFilter(file, destination),
       );
@@ -76,8 +78,13 @@ class IsolatedFileManager extends FileManagerBase
     return Stream.fromIterable(files)
         .where((event) => filter == null || filter(event))
         .asyncMap(
-          (file) => action(file),
+          (file) => action(file).catchError(
+            (err) => null,
+            test: (err) =>
+                err is RequestException || err is FileSystemException,
+          ),
         )
+        .where((event) => event != null)
         .takeUntil(
           this
               .cancelActionCommand

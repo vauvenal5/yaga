@@ -44,8 +44,16 @@ class NextcloudFileManagerHandler
     final fileManager = getIt.get<IsolatedFileManager>();
 
     final action = message.action == DestinationAction.copy
-        ? fileManager.copyFiles(message.files, message.destination)
-        : fileManager.moveFiles(message.files, message.destination);
+        ? fileManager.copyFiles(
+            message.files,
+            message.destination,
+            message.overwrite,
+          )
+        : fileManager.moveFiles(
+            message.files,
+            message.destination,
+            message.overwrite,
+          );
 
     action
         .whenComplete(

@@ -220,19 +220,21 @@ class FileListLocalManager {
         local,
       ));
 
-  Future<bool> copySelected(Uri destination) =>
+  Future<bool> copySelected(Uri destination, {bool overwrite = false}) =>
       this._executeActionForSelection(DestinationActionFilesRequest(
         this.managerKey,
         this.selected,
         destination,
+        overwrite: overwrite,
       ));
 
-  Future<bool> moveSelected(Uri destination) =>
+  Future<bool> moveSelected(Uri destination, {bool overwrite = false}) =>
       this._executeActionForSelection(DestinationActionFilesRequest(
         this.managerKey,
         this.selected,
         destination,
         action: DestinationAction.move,
+        overwrite: overwrite,
       ));
 
   Future<bool> _executeActionForSelection(Message action) async {

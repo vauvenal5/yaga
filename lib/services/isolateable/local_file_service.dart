@@ -68,15 +68,23 @@ class LocalFileService extends Service<LocalFileService>
     return type != null && type.startsWith("image");
   }
 
-  void copyFile(NcFile file, Uri destination) {
+  void copyFile(NcFile file, Uri destination, bool overwrite) {
     (file.localFile as File).copySync(
-      UriUtils.chainPathSegments(destination.path, file.name),
+      _checkExists(destination, file.name, overwrite),
     );
   }
 
-  void moveFile(NcFile file, Uri destination) {
+  void moveFile(NcFile file, Uri destination, bool overwrite) {
     (file.localFile as File).renameSync(
-      UriUtils.chainPathSegments(destination.path, file.name),
+      _checkExists(destination, file.name, overwrite),
     );
+  }
+
+  String _checkExists(Uri destination, String name, bool overwrite) {
+    String path = UriUtils.chainPathSegments(destination.path, name);
+    if (!overwrite && File(path).existsSync()) {
+      throw FileSystemException("File exists!", path);
+    }
+    return path;
   }
 }

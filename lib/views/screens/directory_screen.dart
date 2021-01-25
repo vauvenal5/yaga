@@ -60,8 +60,11 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
   _DirectoryScreenState._internal(this._fileListLocalManager, this._viewConfig);
 
   factory _DirectoryScreenState(Uri uri, ViewConfiguration viewConfig) {
-    final fileListLocalManager =
-        FileListLocalManager(uri, viewConfig.recursive);
+    final fileListLocalManager = FileListLocalManager(
+      uri,
+      viewConfig.recursive,
+      allowSelecting: viewConfig.onFileTap != null,
+    );
 
     final onFileTap = (files, index) {
       if (fileListLocalManager.isInSelectionMode) {

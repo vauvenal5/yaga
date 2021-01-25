@@ -3,6 +3,8 @@ import 'package:share/share.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
+import 'package:yaga/views/widgets/selection_action_cancel_dialog.dart';
+import 'package:yaga/views/widgets/selection_action_danger_dialog.dart';
 import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 
@@ -68,22 +70,32 @@ class SelectionPopupMenuButton extends StatelessWidget {
         context: context,
         useRootNavigator: false,
         builder: (contextDialog) => this.fileListLocalManager.isRemoteUri
-            ? _buildRemoteDialog(
-                contextDialog,
-                context,
-                const Text("Delete location"),
-                const Text('Keep'),
-                const Text('Delete locally'),
-                const Text('Delete remotely'),
-                _openDeletingDialog,
-                <Widget>[
+            ? SelectionActionDangerDialog(
+                title: "Delete location",
+                cancelButton: 'Keep',
+                normalAction: 'Delete locally',
+                aggressiveAction: 'Delete remotely',
+                action: (agg) => _openDeletingDialog(context, agg),
+                bodyBuilder: (builderContext) => <Widget>[
                   Text(
-                      "If you delete your images locally, they will be deleted from your phone only."),
+                    "If you delete your images locally, they will be deleted from your phone only.",
+                  ),
                   Text(
-                      "If you delete them remotely they will be deleted from your phone and server."),
+                    "If you delete them remotely they will be deleted from your phone and server.",
+                  ),
                 ],
               )
-            : _buildLocalDialog(contextDialog, context),
+            : SelectionActionDangerDialog(
+                title: "Delete",
+                cancelButton: 'Keep',
+                aggressiveAction: 'Delete',
+                action: (agg) => _openDeletingDialog(context, false),
+                bodyBuilder: (builderContext) => <Widget>[
+                  Text(
+                    "This images seem to be local to your phone. Do you really want to delete them?",
+                  ),
+                ],
+              ),
       );
     }
 
@@ -97,25 +109,23 @@ class SelectionPopupMenuButton extends StatelessWidget {
           onSelect: (uri) => showDialog(
             context: context,
             useRootNavigator: false,
-            builder: (contextDialog) => _buildRemoteDialog(
-              contextDialog,
-              context,
-              const Text("Overwrite Existing"),
-              const Text('Cancel'),
-              const Text('Skip existing'),
-              const Text('Overwrite existing'),
-              (context, aggressive) => _openCancelableDialog(
+            builder: (contextDialog) => SelectionActionDangerDialog(
+              title: "Overwrite Existing",
+              cancelButton: 'Cancel',
+              normalAction: 'Skip existing',
+              aggressiveAction: 'Overwrite existing',
+              action: (agg) => _openCancelableDialog(
                 context,
                 result == SelectionViewMenu.copy ? "Copying..." : "Moving...",
                 result == SelectionViewMenu.copy
                     ? () => this
                         .fileListLocalManager
-                        .copySelected(uri, overwrite: aggressive)
+                        .copySelected(uri, overwrite: agg)
                     : () => this
                         .fileListLocalManager
-                        .moveSelected(uri, overwrite: aggressive),
+                        .moveSelected(uri, overwrite: agg),
               ),
-              <Widget>[
+              bodyBuilder: (builderContext) => <Widget>[
                 Text(
                   "Do you want to overwrite existing files, if any?",
                 ),
@@ -125,80 +135,6 @@ class SelectionPopupMenuButton extends StatelessWidget {
         ),
       );
     }
-  }
-
-  AlertDialog _buildRemoteDialog(
-    BuildContext contextDialog,
-    BuildContext parentContex,
-    Text title,
-    Text cancelButton,
-    Text normalAction,
-    Text aggressiveAction,
-    Function(BuildContext, bool) openDialog,
-    List<Widget> children,
-  ) {
-    return AlertDialog(
-      title: title,
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: children,
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: cancelButton,
-          onPressed: () {
-            Navigator.pop(contextDialog);
-          },
-        ),
-        TextButton(
-          child: normalAction,
-          onPressed: () {
-            Navigator.pop(contextDialog);
-            openDialog(parentContex, false);
-          },
-        ),
-        TextButton(
-          child: aggressiveAction,
-          style: TextButton.styleFrom(primary: Colors.red),
-          onPressed: () {
-            Navigator.pop(parentContex);
-            openDialog(parentContex, true);
-          },
-        ),
-      ],
-    );
-  }
-
-  AlertDialog _buildLocalDialog(
-      BuildContext contextDialog, BuildContext parentContex) {
-    return AlertDialog(
-      title: const Text("Deleting"),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: <Widget>[
-            Text(
-                "This images seem to be local to your phone. Do you really want to delete them?"),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: Text('Keep'),
-          onPressed: () {
-            Navigator.pop(contextDialog);
-          },
-        ),
-        TextButton(
-          child: Text('Delete'),
-          style: TextButton.styleFrom(primary: Colors.red),
-          onPressed: () {
-            Navigator.pop(contextDialog);
-            this._openDeletingDialog(parentContex, false);
-          },
-        ),
-      ],
-    );
   }
 
   void _openDeletingDialog(BuildContext context, bool aggressive) =>
@@ -218,19 +154,9 @@ class SelectionPopupMenuButton extends StatelessWidget {
     showDialog(
       context: context,
       useRootNavigator: false,
-      builder: (context) => AlertDialog(
-        title: Text(text),
-        content: SingleChildScrollView(
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => this.fileListLocalManager.cancelSelectionAction(),
-          ),
-        ],
+      builder: (context) => SelectionActionCancelDialog(
+        text,
+        this.fileListLocalManager.cancelSelectionAction,
       ),
     ).whenComplete(() => dialogOpen = false);
 

@@ -41,6 +41,7 @@ class SettingsManager extends SettingsManagerBase {
       await _sharedPreferencesService.savePreferenceToBool(value);
       await _sharedPreferencesService.savePreferenceToString(value.remote);
       await _sharedPreferencesService.savePreferenceToString(value.local);
+      await _sharedPreferencesService.savePreferenceToBool(value.syncDeletes);
       // _sharedPreferencesService.saveComplexPreference(value).then((res) =>
       _sharedPreferencesService.savePreferenceToBool(value).then((res) =>
           _checkPersistResult(
@@ -51,6 +52,7 @@ class SettingsManager extends SettingsManagerBase {
     removeMappingPreferenceCommand.listen((value) async {
       await _sharedPreferencesService.removePreference(value.local);
       await _sharedPreferencesService.removePreference(value.remote);
+      await _sharedPreferencesService.removePreference(value.syncDeletes);
       await _sharedPreferencesService.removePreference(value);
     });
 
@@ -60,10 +62,15 @@ class SettingsManager extends SettingsManagerBase {
           _sharedPreferencesService.loadPreferenceFromString(value.remote);
       UriPreference local =
           _sharedPreferencesService.loadPreferenceFromString(value.local);
+      BoolPreference syncDeletes =
+          _sharedPreferencesService.loadPreferenceFromBool(value.syncDeletes);
       updateSettingCommand(_sharedPreferencesService.loadPreferenceFromBool(
-        value.rebuild((b) => b
-          ..remote = remote.toBuilder()
-          ..local = local.toBuilder()),
+        value.rebuild(
+          (b) => b
+            ..remote = remote.toBuilder()
+            ..local = local.toBuilder()
+            ..syncDeletes = syncDeletes.toBuilder(),
+        ),
       ));
     });
   }

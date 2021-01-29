@@ -7,6 +7,7 @@ import 'package:yaga/model/preferences/value_preference.dart';
 
 part 'complex_preference.g.dart';
 
+//todo: is the bool value ever used?
 @BuiltValue(instantiable: false)
 abstract class ComplexPreference
     implements SerializablePreference<bool, bool, ComplexPreference> {

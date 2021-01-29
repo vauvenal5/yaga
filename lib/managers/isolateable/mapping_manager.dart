@@ -96,6 +96,13 @@ class MappingManager with Isolateable<MappingManager> {
         pathIndex + 1, currentNode.nodes[uri.pathSegments[pathIndex]]);
   }
 
+  MappingPreference _getRootMappingPreference(Uri remoteUri) =>
+      _getMappingPrefernce(
+          remoteUri,
+          _getDefaultMapping(this._systemLocationService.externalAppDirUri),
+          0,
+          root);
+
   String _appendLocalMappingFolder(String path) {
     return UriUtils.chainPathSegments(
       path,
@@ -103,15 +110,14 @@ class MappingManager with Isolateable<MappingManager> {
     );
   }
 
-  Future<Uri> mapToLocalUri(Uri remoteUri) async {
-    MappingPreference mapping = _getMappingPrefernce(
+  Future<bool> isSyncDelete(Uri remoteUri) async => _getRootMappingPreference(
         remoteUri,
-        _getDefaultMapping(this._systemLocationService.externalAppDirUri),
-        0,
-        root);
+      ).syncDeletes.value;
 
-    return _mapUri(remoteUri, mapping);
-  }
+  Future<Uri> mapToLocalUri(Uri remoteUri) async => _mapUri(
+        remoteUri,
+        _getRootMappingPreference(remoteUri),
+      );
 
   Future<Uri> mapToTmpUri(Uri remoteUri) async {
     return _mapUri(remoteUri,
@@ -147,11 +153,13 @@ class MappingManager with Isolateable<MappingManager> {
   }
 
   Future<Uri> mapToRemoteUri(Uri local, Uri remote) async {
-    Uri defaultInternal = this._systemLocationService.externalAppDirUri;
-    MappingPreference mapping = _getMappingPrefernce(
-        remote, _getDefaultMapping(defaultInternal), 0, root);
+    MappingPreference mapping = _getRootMappingPreference(remote);
     String relativePath = local.path.replaceFirst(
-        mapping == null ? defaultInternal.path : mapping.local.value.path, "");
+      mapping == null
+          ? this._systemLocationService.externalAppDirUri.path
+          : mapping.local.value.path,
+      "",
+    );
     return UriUtils.fromPathSegments(
         uri: remote, pathSegments: [mapping.remote.value.path, relativePath]);
   }

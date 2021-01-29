@@ -183,9 +183,17 @@ class NextcloudFileManager
   }
 
   Future _finishSync(Uri uri) {
-    return _syncManager.syncUri(uri).then((files) => files.forEach(
-          (file) => _deleteLocalFile(file),
-        ));
+    return _syncManager.syncUri(uri).then(
+          (files) => files.forEach(
+            (file) async {
+              if (await this._mappingManager.isSyncDelete(file.uri)) {
+                _deleteLocalFile(file);
+              } else {
+                this._fileManager.updateFileList(file);
+              }
+            },
+          ),
+        );
   }
 
   Future<NcFile> _deleteLocalFile(NcFile file) async {

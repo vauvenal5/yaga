@@ -165,10 +165,17 @@ class FileListLocalManager {
   void initState() {
     this.updateFilesAndFolders();
 
-    this._updatedMappingPreferenceCommandSubscription = getIt
-        .get<MappingManager>()
-        .mappingUpdatedCommand
-        .listen((value) => this.refetch());
+    this._updatedMappingPreferenceCommandSubscription =
+        getIt.get<MappingManager>().mappingUpdatedCommand.listen(
+      (value) {
+        // currently local file is not checked when comparing two NcFiles
+        // thats why we have to clear the entire list and repopulate it
+        // otherwise availability icons will not be refreshed
+        // because NcFiles in list will not be refreshed and will still point to old local files
+        this.removeAll();
+        this.refetch();
+      },
+    );
 
     this._updateRecursiveSubscription = getIt
         .get<SettingsManager>()
@@ -195,6 +202,11 @@ class FileListLocalManager {
         this.selectionChangedCommand(this.selected);
       }
     });
+  }
+
+  void removeAll() async {
+    this.files = [];
+    this.filesChangedCommand(this.files);
   }
 
   void deselectAll() async {

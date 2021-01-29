@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/settings_manager.dart';
+import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
@@ -26,27 +27,41 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
   SystemLocationService _systemLocationService;
   UriPreference _remote;
   UriPreference _local;
+  BoolPreference _syncDeletes;
 
   @override
   void initState() {
     _systemLocationService = getIt.get<SystemLocationService>();
+    final _settingsManager = getIt.get<SettingsManager>();
 
     final prefService = getIt.get<SharedPreferencesService>();
     this._remote = prefService.loadPreferenceFromString(widget.pref.remote);
     this._local = prefService.loadPreferenceFromString(widget.pref.local);
+    this._syncDeletes = prefService.loadPreferenceFromBool(
+      widget.pref.syncDeletes,
+    );
 
-    getIt
-        .get<SettingsManager>()
-        .updateSettingCommand
-        .where((event) =>
-            event.key == widget.pref.remote.key ||
-            event.key == widget.pref.local.key)
-        .map((event) => event as UriPreference)
+    _settingsManager.updateSettingCommand
+        .where(
+      (event) =>
+          event.key == widget.pref.remote.key ||
+          event.key == widget.pref.local.key ||
+          event.key == widget.pref.syncDeletes.key,
+    )
         .listen((pref) {
-      if (pref.key.endsWith("remote")) {
+      if (pref.key == _remote.key) {
         _remote = pref;
-      } else {
+      }
+
+      if (pref.key == _local.key) {
         _local = pref;
+        _settingsManager.updateSettingCommand(
+          _syncDeletes.rebuild((b) => b..value = false),
+        );
+      }
+
+      if (pref.key == _syncDeletes.key) {
+        _syncDeletes = pref;
       }
     });
 
@@ -65,7 +80,7 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
           arguments: SettingsScreenArguments(
             onSettingChangedCommand:
                 getIt.get<SettingsManager>().updateSettingCommand,
-            preferences: [pref.remote, pref.local],
+            preferences: [pref.remote, pref.local, pref.syncDeletes],
             onCancel: () => Navigator.pop(context),
             //todo: onCommit should return a list of all preferences then we do not need to listen here to the UriPref changes
             onCommit: () => _checkDirectory(context, pref),
@@ -76,12 +91,12 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
   }
 
   void _checkDirectory(BuildContext context, MappingPreference pref) {
-    if (Directory(_systemLocationService
+    if (_syncDeletes.value &&
+        Directory(_systemLocationService
                 .absoluteUriFromInternal(_local.value)
                 .path)
             .listSync()
-            .length >
-        0) {
+            .isNotEmpty) {
       showDialog(
         context: context,
         builder: (context) => ActionDangerDialog(
@@ -96,7 +111,7 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
           },
           bodyBuilder: (context) => <Widget>[
             Text(
-              'The choosen local directory is not empty. Any files which do not exist on the Nextcloud side of the mapping will be erased!',
+              'The choosen local directory is not empty. Any files which do not exist on the Nextcloud side of the mapping will be erased from your phone!',
             ),
           ],
         ),
@@ -112,7 +127,8 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
           pref.rebuild(
             (b) => b
               ..local = _local.toBuilder()
-              ..remote = _remote.toBuilder(),
+              ..remote = _remote.toBuilder()
+              ..syncDeletes = _syncDeletes.toBuilder(),
           ),
         );
   }

@@ -66,7 +66,11 @@ class FileListRequestHandler
     }
 
     if (getIt.get<SortManager>().mergeSort(message.main, addition)) {
-      isolateToMain.send(MergeSortDone(message.key, message.main));
+      isolateToMain.send(MergeSortDone(
+        message.key,
+        message.main,
+        updateLoading: message.updateLoading,
+      ));
     }
   }
 }

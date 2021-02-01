@@ -6,6 +6,7 @@ class MergeSortRequest extends Message {
   final SortedFileList addition;
   final Uri uri;
   final bool recursive;
+  final bool updateLoading;
 
   MergeSortRequest(
     String key,
@@ -13,5 +14,6 @@ class MergeSortRequest extends Message {
     this.addition, {
     this.uri,
     this.recursive = false,
+    this.updateLoading = false,
   }) : super(key);
 }

@@ -187,12 +187,13 @@ class FileListLocalManager {
 
     if (changed) {
       //todo: loading changed has to be improved... currently if we are fetching a list and changing the config simulatniously the first to be done will stop the loading indicator
-      // this.loadingChangedCommand(true);
+      this.loadingChangedCommand(true);
       this._sendMergeSortRequest(
         MergeSortRequest(
           this.managerKey,
           this.emptyFileList,
           this.filesChangedCommand.lastResult,
+          updateLoading: true,
         ),
       );
     }
@@ -265,7 +266,9 @@ class FileListLocalManager {
         .map((event) => event as MergeSortDone)
         .listen((event) {
       this._showNewFiles(event.sorted);
-      // this.loadingChangedCommand(false);
+      if (event.updateLoading) {
+        this.loadingChangedCommand(false);
+      }
     });
   }
 

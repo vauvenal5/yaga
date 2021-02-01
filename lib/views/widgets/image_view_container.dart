@@ -94,7 +94,12 @@ class ImageViewContainer extends StatelessWidget {
       initialData: sortChanged
           ? this.fileListLocalManager.emptyFileList
           : this.fileListLocalManager.filesChangedCommand.lastResult,
-      stream: this.fileListLocalManager.filesChangedCommand,
+      stream: this.fileListLocalManager.filesChangedCommand.where(
+            // this filter makes sure that if viewType is changed while loading we do not run into trouble
+            (event) =>
+                event.config.sortType ==
+                fileListLocalManager.sortConfig.sortType,
+          ),
       builder: (context, files) => RefreshIndicator(
         child: _buildImageView(choice, files.data),
         onRefresh: () async =>

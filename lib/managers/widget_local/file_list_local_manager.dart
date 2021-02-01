@@ -118,20 +118,20 @@ class FileListLocalManager {
       if (event is FileListResponse) {
         // if uri is not equal then it could be a sub dir loaded by the copy command for example
         if (event.key == this.managerKey && event.uri == uri) {
-          this.filesChangedCommand(event.files);
+          _showNewFiles(event.files);
         } else {
           // in this case we are interested in the data but can not tell if the data is not missing crutial parts
           // todo: can we build a bridge for this?
-          this._worker.sendRequest(
-                MergeSortRequest(
-                  this.managerKey,
-                  //primarely to counter hot reloads
-                  this.filesChangedCommand.lastResult ?? this.emptyFileList,
-                  event.files,
-                  uri: this.uri,
-                  recursive: this.recursive.value,
-                ),
-              );
+          this._sendMergeSortRequest(
+            MergeSortRequest(
+              this.managerKey,
+              //primarely to counter hot reloads
+              this.filesChangedCommand.lastResult ?? this.emptyFileList,
+              event.files,
+              uri: this.uri,
+              recursive: this.recursive.value,
+            ),
+          );
         }
       }
 
@@ -158,20 +158,43 @@ class FileListLocalManager {
         ));
   }
 
+  void _showNewFiles(SortedFileList files) {
+    if (files.config == this._sortConfig) {
+      this.filesChangedCommand(files);
+    } else {
+      this._sendMergeSortRequest(
+        MergeSortRequest(
+          this.managerKey,
+          this.emptyFileList,
+          files,
+        ),
+      );
+    }
+  }
+
+  void _sendMergeSortRequest(MergeSortRequest request) =>
+      this._worker.sendRequest(request);
+
+  //todo: changing the view type while fetching the list will not fetch all files
   bool setSortConfig(SortConfig sortConfig) {
-    //todo: move this into sortConfig equals
-    final changed = _sortConfig?.sortType != sortConfig.sortType ||
-        _sortConfig?.fileSortProperty != sortConfig.fileSortProperty ||
-        _sortConfig?.folderSortProperty != sortConfig.folderSortProperty;
+    final changed = sortConfig != _sortConfig;
+
     this._sortConfig = sortConfig;
+
+    if (this.loadingChangedCommand.lastResult) {
+      return changed;
+    }
+
     if (changed) {
-      this._worker.sendRequest(
-            MergeSortRequest(
-              this.managerKey,
-              this.emptyFileList,
-              this.filesChangedCommand.lastResult,
-            ),
-          );
+      //todo: loading changed has to be improved... currently if we are fetching a list and changing the config simulatniously the first to be done will stop the loading indicator
+      // this.loadingChangedCommand(true);
+      this._sendMergeSortRequest(
+        MergeSortRequest(
+          this.managerKey,
+          this.emptyFileList,
+          this.filesChangedCommand.lastResult,
+        ),
+      );
     }
     return changed;
   }
@@ -179,7 +202,9 @@ class FileListLocalManager {
   void _removeFileFromList(NcFile file) {
     _logger.w("$managerKey (delete)");
     SortedFileList files = this.filesChangedCommand.lastResult;
+    //todo: delete and re-sort are interfearing with each other
     if (files.remove(file)) {
+      //todo: what happens is that the deletes might be triggered on states before the resort is done
       this.filesChangedCommand(files);
     }
   }
@@ -238,7 +263,10 @@ class FileListLocalManager {
         .where((event) => event.key == this.managerKey)
         .where((event) => event is MergeSortDone)
         .map((event) => event as MergeSortDone)
-        .listen((event) => this.filesChangedCommand(event.sorted));
+        .listen((event) {
+      this._showNewFiles(event.sorted);
+      // this.loadingChangedCommand(false);
+    });
   }
 
   void removeAll() async {

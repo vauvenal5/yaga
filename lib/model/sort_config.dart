@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 enum SortProperty {
   name,
   dateModified,
@@ -8,10 +10,13 @@ enum SortType {
   category,
 }
 
-class SortConfig {
+class SortConfig extends Equatable {
   final SortType sortType;
   final SortProperty folderSortProperty;
   final SortProperty fileSortProperty;
 
   SortConfig(this.sortType, this.fileSortProperty, this.folderSortProperty);
+
+  @override
+  List<Object> get props => [sortType, folderSortProperty, fileSortProperty];
 }

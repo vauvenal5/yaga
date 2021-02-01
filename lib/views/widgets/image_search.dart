@@ -46,16 +46,15 @@ class ImageSearch extends SearchDelegate<NcFile> {
   @override
   Widget buildResults(BuildContext context) {
     return ImageViewContainer(
-        fileListLocalManager: this._fileListLocalManager,
-        viewConfig: ViewConfiguration.fromViewConfig(
-          viewConfig: _viewConfig,
-          onFolderTap: (NcFile file) => this.close(context, file),
-        ),
-        filter: (List<NcFile> files) => files
-            .where((file) =>
-                file.name.toLowerCase().contains(this.query.toLowerCase()) ||
-                file.lastModified.toString().contains(this.query))
-            .toList());
+      fileListLocalManager: this._fileListLocalManager,
+      viewConfig: ViewConfiguration.fromViewConfig(
+        viewConfig: _viewConfig,
+        onFolderTap: (NcFile file) => this.close(context, file),
+      ),
+      filter: (NcFile file) =>
+          file.name.toLowerCase().contains(this.query.toLowerCase()) ||
+          file.lastModified.toString().contains(this.query),
+    );
   }
 
   @override

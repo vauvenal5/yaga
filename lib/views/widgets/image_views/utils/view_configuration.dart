@@ -4,6 +4,7 @@ import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/section_preference.dart';
+import 'package:yaga/model/sort_config.dart';
 import 'package:yaga/views/widgets/image_views/category_view.dart';
 import 'package:yaga/views/widgets/image_views/category_view_exp.dart';
 import 'package:yaga/views/widgets/image_views/nc_grid_view.dart';
@@ -120,6 +121,31 @@ class ViewConfiguration {
       onFileTap ?? viewConfig.onFileTap,
       onFolderTap ?? viewConfig.onFolderTap,
       onSelect ?? viewConfig.onSelect,
+    );
+  }
+
+  static SortConfig getSortConfigFromViewChoice(ChoicePreference pref) {
+    if (pref.value == CategoryView.viewKey ||
+        pref.value == CategoryViewExp.viewKey) {
+      return SortConfig(
+        SortType.category,
+        SortProperty.dateModified,
+        SortProperty.name,
+      );
+    }
+
+    if (pref.value == NcGridView.viewKey) {
+      return SortConfig(
+        SortType.list,
+        SortProperty.dateModified,
+        SortProperty.name,
+      );
+    }
+
+    return SortConfig(
+      SortType.list,
+      SortProperty.name,
+      SortProperty.name,
     );
   }
 }

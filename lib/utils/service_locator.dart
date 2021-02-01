@@ -9,6 +9,7 @@ import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
 import 'package:yaga/managers/isolateable/local_file_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
+import 'package:yaga/managers/isolateable/sort_manager.dart';
 import 'package:yaga/managers/navigation_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
@@ -52,6 +53,7 @@ void setupServiceLocator() {
   getIt.registerSingletonAsync<IntentService>(
       () async => IntentService().init());
 
+  //todo: re-check if we still need everything in the main thread (bridge strategy)
   // Managers
   getIt.registerSingletonAsync<TabManager>(() async => TabManager());
   getIt.registerSingletonAsync<SettingsManager>(() async => SettingsManager(
@@ -160,7 +162,13 @@ void setupIsolatedServiceLocator(
 
   // Managers
   getIt.registerSingletonAsync(
-      () async => IsolatedFileManager().initIsolated(init, isolateToMain));
+    () async => SortManager().initIsolated(init, isolateToMain),
+  );
+  getIt.registerSingletonAsync(
+    () async => IsolatedFileManager(
+      await getIt.getAsync<SortManager>(),
+    ).initIsolated(init, isolateToMain),
+  );
   getIt.registerSingletonAsync(
       () async => IsolatedSettingsManager().initIsolated(init, isolateToMain));
   getIt.registerSingletonAsync(

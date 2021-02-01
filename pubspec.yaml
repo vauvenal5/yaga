@@ -11,7 +11,7 @@ description: A Nextcloud gallary app.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.21.2+2102
+version: 0.21.5+2105
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -44,6 +44,7 @@ dependencies:
   webview_flutter: ^1.0.3
   share: ^0.6.5+4
   url_launcher: ^5.7.10
+  equatable: ^1.2.5
 
 dev_dependencies:
   flutter_test:

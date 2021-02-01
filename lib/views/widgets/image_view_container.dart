@@ -5,6 +5,7 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
+import 'package:yaga/model/sorted_file_list.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
@@ -18,18 +19,19 @@ class ImageViewContainer extends StatelessWidget {
   final Logger _logger = getLogger(ImageViewContainer);
   final FileListLocalManager fileListLocalManager;
   final ViewConfiguration viewConfig;
-  final List<NcFile> Function(List<NcFile>) _filter;
+  final bool Function(NcFile) _filter;
 
-  ImageViewContainer(
-      {@required this.fileListLocalManager,
-      @required this.viewConfig,
-      filter = _defaultFilter})
-      : this._filter = filter;
+  ImageViewContainer({
+    @required this.fileListLocalManager,
+    @required this.viewConfig,
+    bool Function(NcFile) filter,
+  }) : this._filter = filter;
 
-  static List<NcFile> _defaultFilter(List<NcFile> files) => files;
-
-  Widget _buildImageView(ChoicePreference choice, List<NcFile> files) {
-    List<NcFile> filteredFiles = this._filter(files);
+  Widget _buildImageView(ChoicePreference choice, SortedFileList files) {
+    SortedFileList filteredFiles = files;
+    if (_filter != null) {
+      filteredFiles = files.applyFilter(_filter);
+    }
 
     if (choice.value == NcGridView.viewKey) {
       return NcGridView(filteredFiles, viewConfig);
@@ -41,7 +43,7 @@ class ImageViewContainer extends StatelessWidget {
 
     if (choice.value == NcListView.viewKey) {
       return NcListView(
-        files: filteredFiles,
+        sorted: filteredFiles,
         viewConfig: this.viewConfig,
       );
     }
@@ -63,15 +65,13 @@ class ImageViewContainer extends StatelessWidget {
             .where((event) => event.key == this.viewConfig.view.key)
             .map((event) => event as ChoicePreference),
         builder: (context, choice) {
-          return StreamBuilder<List<NcFile>>(
-            initialData:
-                this.fileListLocalManager.filesChangedCommand.lastResult,
-            stream: this.fileListLocalManager.filesChangedCommand,
-            builder: (context, files) => RefreshIndicator(
-              child: _buildImageView(choice.data, files.data),
-              onRefresh: () async =>
-                  this.fileListLocalManager.updateFilesAndFolders(),
-            ),
+          bool sortChanged = this.fileListLocalManager.setSortConfig(
+                ViewConfiguration.getSortConfigFromViewChoice(choice.data),
+              );
+          return _buildImageContainterStreamBuilder(
+            context,
+            choice.data,
+            sortChanged,
           );
         },
       ),
@@ -82,5 +82,29 @@ class ImageViewContainer extends StatelessWidget {
             snapshot.data ? LinearProgressIndicator() : Container(),
       )
     ]);
+  }
+
+  Widget _buildImageContainterStreamBuilder(
+    BuildContext context,
+    ChoicePreference choice,
+    bool sortChanged,
+  ) {
+    return StreamBuilder<SortedFileList>(
+      key: ValueKey(fileListLocalManager.sortConfig.sortType),
+      initialData: sortChanged
+          ? this.fileListLocalManager.emptyFileList
+          : this.fileListLocalManager.filesChangedCommand.lastResult,
+      stream: this.fileListLocalManager.filesChangedCommand.where(
+            // this filter makes sure that if viewType is changed while loading we do not run into trouble
+            (event) =>
+                event.config.sortType ==
+                fileListLocalManager.sortConfig.sortType,
+          ),
+      builder: (context, files) => RefreshIndicator(
+        child: _buildImageView(choice, files.data),
+        onRefresh: () async =>
+            this.fileListLocalManager.updateFilesAndFolders(),
+      ),
+    );
   }
 }

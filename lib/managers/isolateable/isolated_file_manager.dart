@@ -4,8 +4,11 @@ import 'dart:isolate';
 import 'package:nextcloud/nextcloud.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_manager_base.dart';
+import 'package:yaga/managers/isolateable/sort_manager.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/model/sort_config.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
+import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/image_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
@@ -17,8 +20,12 @@ class IsolatedFileManager extends FileManagerBase
     with Isolateable<IsolatedFileManager> {
   final _logger = getLogger(IsolatedFileManager);
 
+  final SortManager _sortManager;
+
   RxCommand<void, bool> cancelActionCommand =
       RxCommand.createSyncNoParam(() => true);
+
+  IsolatedFileManager(this._sortManager);
 
   Future<IsolatedFileManager> initIsolated(
     InitMsg init,
@@ -37,6 +44,37 @@ class IsolatedFileManager extends FileManagerBase
     this.updateFilesCommand.listen((event) => isolateToMain.send(event));
 
     return this;
+  }
+
+  Future<void> listFileLists(
+    String requestKey,
+    Uri uri,
+    SortConfig sortConfig, {
+    bool recursive = false,
+  }) {
+    return this
+        .fileSubManagers[uri.scheme]
+        .listFileList(uri, recursive: recursive)
+        .map((event) => _sortManager.sortList(event, sortConfig))
+        .fold(
+      null,
+      (previous, element) {
+        if (previous == null) {
+          this.updateFilesCommand(
+            FileListResponse(requestKey, uri, recursive, element),
+          );
+          return element;
+        }
+
+        if (_sortManager.mergeSort(previous, element)) {
+          this.updateFilesCommand(
+            FileListResponse(requestKey, uri, recursive, previous),
+          );
+        }
+
+        return previous;
+      },
+    ).then((value) => value);
   }
 
   Future<void> deleteFiles(List<NcFile> files, bool local) async =>

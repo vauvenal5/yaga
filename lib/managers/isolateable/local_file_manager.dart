@@ -75,7 +75,7 @@ class LocalFileManager
       uri.pathSegments.last,
       lookupMimeType(event.path),
     );
-    file.lastModified = (event as File).lastModifiedSync();
+    file.lastModified = (event as File).lastModifiedSync().toUtc();
     return file;
   }
 

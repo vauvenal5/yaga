@@ -4,7 +4,7 @@ import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/copy_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_complete.dart';
@@ -60,7 +60,11 @@ class NextcloudFileManagerHandler
           () => isolateToMain.send(FilesActionDone(message.key)),
         )
         .whenComplete(
-          () => fileManager.listFileLists(message.key, message.destination),
+          () => fileManager.listFileLists(
+            message.key,
+            message.destination,
+            message.config,
+          ),
         );
   }
 

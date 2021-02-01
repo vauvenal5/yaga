@@ -9,9 +9,13 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
+import 'package:yaga/model/sort_config.dart';
+import 'package:yaga/model/sorted_category_list.dart';
+import 'package:yaga/model/sorted_file_folder_list.dart';
+import 'package:yaga/model/sorted_file_list.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/copy_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
@@ -19,6 +23,8 @@ import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
+import 'package:yaga/utils/forground_worker/messages/merge_sort_done.dart';
+import 'package:yaga/utils/forground_worker/messages/merge_sort_request.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
@@ -28,13 +34,14 @@ import 'package:yaga/utils/service_locator.dart';
 // treat it like local state
 class FileListLocalManager {
   Logger _logger = getLogger(FileListLocalManager);
-  List<NcFile> files = List();
+
   BoolPreference recursive;
   List<NcFile> selected = List();
   final bool allowSelecting;
+  SortConfig _sortConfig;
 
   RxCommand<bool, bool> loadingChangedCommand;
-  RxCommand<List<NcFile>, List<NcFile>> filesChangedCommand;
+  RxCommand<SortedFileList, SortedFileList> filesChangedCommand;
   RxCommand<NcFile, NcFile> selectFileCommand =
       RxCommand.createSync((param) => param);
   RxCommand<bool, bool> selectionModeChanged =
@@ -49,6 +56,7 @@ class FileListLocalManager {
 
   ForegroundWorker _worker;
   StreamSubscription<Message> _foregroundMessageCommandSubscription;
+  StreamSubscription<Message> _foregroundMergeSortSubscription;
 
   Uuid uuid = Uuid();
 
@@ -59,24 +67,33 @@ class FileListLocalManager {
 
   FileListLocalManager(
     this._uri,
-    this.recursive, {
+    this.recursive,
+    this._sortConfig, {
     this.allowSelecting = true,
   }) {
     _worker = getIt.get<ForegroundWorker>();
     loadingChangedCommand =
         RxCommand.createSync((param) => param, initialLastResult: false);
-    filesChangedCommand =
-        RxCommand.createSync((param) => param, initialLastResult: []);
+    filesChangedCommand = RxCommand.createSync(
+      (param) => param,
+      initialLastResult: this.emptyFileList,
+    );
     managerKey = uuid.v1();
   }
 
+  SortedFileList get sorted => this.filesChangedCommand.lastResult;
   Uri get uri => this._uri;
+  SortConfig get sortConfig => _sortConfig;
+  SortedFileList get emptyFileList => _sortConfig.sortType == SortType.list
+      ? SortedFileFolderList.empty(_sortConfig)
+      : SortedCategoryList.empty(_sortConfig);
 
   void dispose() {
     this._foregroundMessageCommandSubscription?.cancel();
     this._updatedMappingPreferenceCommandSubscription?.cancel();
     this._updateFileListSubscripton?.cancel();
     this._updateRecursiveSubscription?.cancel();
+    this._foregroundMergeSortSubscription?.cancel();
   }
 
   void updateFilesAndFolders() {
@@ -86,6 +103,7 @@ class FileListLocalManager {
 
     this.loadingChangedCommand(true);
 
+    //todo: why are we still rebuilding this subScriptions on refetch?
     //todo: in future communication with the background worker should be done by bridges & handlers, and not directly
     _foregroundMessageCommandSubscription = _worker.isolateResponseCommand
         .where((event) => event is FileListMessage)
@@ -93,22 +111,31 @@ class FileListLocalManager {
         .where((event) =>
             //file list may contain recursively loaded files; this is done so we minimize the UI thread merging of lists
             //todo: maybe there is a better approach to this
-            (event.uri == uri && event.recursive == this.recursive.value) ||
+            (event.uri == uri) ||
             (this.recursive.value &&
                 event.uri.toString().startsWith(uri.toString())))
         .listen((event) {
       if (event is FileListResponse) {
-        bool changed = false;
-
-        if (_addNewFiles(event.files, event.key)) {
-          changed = true;
-        }
-
-        if (changed) {
-          this.filesChangedCommand(files);
+        // if uri is not equal then it could be a sub dir loaded by the copy command for example
+        if (event.key == this.managerKey && event.uri == uri) {
+          _showNewFiles(event.files);
+        } else {
+          // in this case we are interested in the data but can not tell if the data is not missing crutial parts
+          // todo: can we build a bridge for this?
+          this._sendMergeSortRequest(
+            MergeSortRequest(
+              this.managerKey,
+              //primarely to counter hot reloads
+              this.filesChangedCommand.lastResult ?? this.emptyFileList,
+              event.files,
+              uri: this.uri,
+              recursive: this.recursive.value,
+            ),
+          );
         }
       }
-      if (event is FileListDone) {
+
+      if (event is FileListDone && event.key == this.managerKey) {
         _logger.w("$managerKey (done - manager key)");
         _logger.w("${event.key} (done - event key)");
         this.loadingChangedCommand(false);
@@ -127,29 +154,60 @@ class FileListLocalManager {
           managerKey,
           uri,
           recursive.value,
+          this._sortConfig,
         ));
+  }
+
+  void _showNewFiles(SortedFileList files) {
+    if (files.config == this._sortConfig) {
+      this.filesChangedCommand(files);
+    } else {
+      this._sendMergeSortRequest(
+        MergeSortRequest(
+          this.managerKey,
+          this.emptyFileList,
+          files,
+        ),
+      );
+    }
+  }
+
+  void _sendMergeSortRequest(MergeSortRequest request) =>
+      this._worker.sendRequest(request);
+
+  //todo: changing the view type while fetching the list will not fetch all files
+  bool setSortConfig(SortConfig sortConfig) {
+    final changed = sortConfig != _sortConfig;
+
+    this._sortConfig = sortConfig;
+
+    if (this.loadingChangedCommand.lastResult) {
+      return changed;
+    }
+
+    if (changed) {
+      //todo: loading changed has to be improved... currently if we are fetching a list and changing the config simulatniously the first to be done will stop the loading indicator
+      this.loadingChangedCommand(true);
+      this._sendMergeSortRequest(
+        MergeSortRequest(
+          this.managerKey,
+          this.emptyFileList,
+          this.filesChangedCommand.lastResult,
+          updateLoading: true,
+        ),
+      );
+    }
+    return changed;
   }
 
   void _removeFileFromList(NcFile file) {
     _logger.w("$managerKey (delete)");
-    if (files.contains(file)) {
-      if (file.isDirectory) {
-        files.removeWhere((file) => file.uri.path.startsWith(file.uri.path));
-      }
-
-      files.remove(file);
+    SortedFileList files = this.filesChangedCommand.lastResult;
+    //todo: delete and re-sort are interfearing with each other
+    if (files.remove(file)) {
+      //todo: what happens is that the deletes might be triggered on states before the resort is done
       this.filesChangedCommand(files);
     }
-  }
-
-  /// Returns true if any files where added
-  bool _addNewFiles(List<NcFile> filesFromEvent, String eventKey) {
-    int size = files.length;
-    filesFromEvent.where((file) => !files.contains(file)).forEach((file) {
-      // add file to list
-      files.add(file);
-    });
-    return size != files.length;
   }
 
   bool _fileIsFromThisManager(String eventKey) {
@@ -158,7 +216,6 @@ class FileListLocalManager {
 
   void refetch({Uri uri}) {
     this._uri = uri ?? this.uri;
-    this.files = [];
     this.updateFilesAndFolders();
   }
 
@@ -202,11 +259,21 @@ class FileListLocalManager {
         this.selectionChangedCommand(this.selected);
       }
     });
+
+    this._foregroundMergeSortSubscription = _worker.isolateResponseCommand
+        .where((event) => event.key == this.managerKey)
+        .where((event) => event is MergeSortDone)
+        .map((event) => event as MergeSortDone)
+        .listen((event) {
+      this._showNewFiles(event.sorted);
+      if (event.updateLoading) {
+        this.loadingChangedCommand(false);
+      }
+    });
   }
 
   void removeAll() async {
-    this.files = [];
-    this.filesChangedCommand(this.files);
+    this.filesChangedCommand(this.filesChangedCommand.lastResult..removeAll());
   }
 
   void deselectAll() async {
@@ -222,12 +289,13 @@ class FileListLocalManager {
   void selectAll() async {
     final fileManager = getIt.get<FileManager>();
     this.selected = List();
-    this.files.where((element) => !element.isDirectory).forEach((file) {
+    final sorted = this.filesChangedCommand.lastResult;
+    sorted.files.forEach((file) {
       file.selected = true;
       this.selected.add(file);
       fileManager.updateImageCommand(file);
     });
-    this.selectionChangedCommand(this.files);
+    this.selectionChangedCommand(this.selected);
   }
 
   Future<bool> deleteSelected(bool local) =>
@@ -242,6 +310,7 @@ class FileListLocalManager {
         this.managerKey,
         this.selected,
         destination,
+        this._sortConfig,
         overwrite: overwrite,
       ));
 
@@ -250,6 +319,7 @@ class FileListLocalManager {
         this.managerKey,
         this.selected,
         destination,
+        this._sortConfig,
         action: DestinationAction.move,
         overwrite: overwrite,
       ));

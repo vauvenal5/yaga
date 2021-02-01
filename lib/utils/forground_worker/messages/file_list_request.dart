@@ -1,9 +1,15 @@
+import 'package:yaga/model/sort_config.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
 
 class FileListRequest extends Message {
   final Uri uri;
-  // final List<NcFile> oldFiles;
   final bool recursive;
+  final SortConfig config;
 
-  FileListRequest(String key, this.uri, this.recursive) : super(key);
+  FileListRequest(
+    String key,
+    this.uri,
+    this.recursive,
+    this.config,
+  ) : super(key);
 }

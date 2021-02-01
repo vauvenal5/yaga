@@ -91,14 +91,20 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
     //todo: is it still necessary for tab to be a stateful widget?
     //image state wrapper is a widget local manager
     this._fileListLocalManager = new FileListLocalManager(
+      getIt
+          .get<SharedPreferencesService>()
+          .loadPreferenceFromString(
+              widget._categoryViewConfig.generalViewConfig.path)
+          .value,
+      getIt
+          .get<SharedPreferencesService>()
+          .loadPreferenceFromBool(this._viewConfig.recursive),
+      ViewConfiguration.getSortConfigFromViewChoice(
         getIt
             .get<SharedPreferencesService>()
-            .loadPreferenceFromString(
-                widget._categoryViewConfig.generalViewConfig.path)
-            .value,
-        getIt
-            .get<SharedPreferencesService>()
-            .loadPreferenceFromBool(this._viewConfig.recursive));
+            .loadPreferenceFromString(this._viewConfig.view),
+      ),
+    );
 
     //todo: this could be moved into imageStateWrapper
     _updateUriSubscription = getIt

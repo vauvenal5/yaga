@@ -6,6 +6,7 @@ import 'package:yaga/model/route_args/focus_view_arguments.dart';
 import 'package:yaga/model/route_args/navigatable_screen_arguments.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/services/intent_service.dart';
+import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
@@ -63,6 +64,11 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
     final fileListLocalManager = FileListLocalManager(
       uri,
       viewConfig.recursive,
+      ViewConfiguration.getSortConfigFromViewChoice(
+        getIt
+            .get<SharedPreferencesService>()
+            .loadPreferenceFromString(viewConfig.view),
+      ),
       allowSelecting: viewConfig.onFileTap != null,
     );
 

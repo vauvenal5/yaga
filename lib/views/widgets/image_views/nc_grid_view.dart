@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/model/sorted_file_folder_list.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class NcGridView extends StatelessWidget {
   static const String viewKey = "grid";
-  final List<NcFile> _files;
-  final List<NcFile> _folders;
+  final SortedFileFolderList sorted;
   final ViewConfiguration viewConfig;
 
-  NcGridView(List<NcFile> files, this.viewConfig)
-      : _files = files.where((file) => !file.isDirectory).toList(),
-        _folders = files.where((file) => file.isDirectory).toList();
+  NcGridView(this.sorted, this.viewConfig);
 
   Widget _buildImage(int key, BuildContext context) {
     return InkWell(
-      onTap: () => this.viewConfig.onFileTap(this._files, key),
-      onLongPress: () => this.viewConfig.onSelect(this._files, key),
+      onTap: () => this.viewConfig.onFileTap(this.sorted.files, key),
+      onLongPress: () => this.viewConfig.onSelect(this.sorted.files, key),
       child: RemoteImageWidget(
-        this._files[key],
-        key: ValueKey(this._files[key].uri.path),
+        this.sorted.files[key],
+        key: ValueKey(this.sorted.files[key].uri.path),
         cacheWidth: 256,
         // cacheHeight: 256,
       ),
@@ -29,7 +26,7 @@ class NcGridView extends StatelessWidget {
   Widget _buildFolder(int key, BuildContext context) {
     return Container(
       child: ListTile(
-        onTap: () => this.viewConfig.onFolderTap(_folders[key]),
+        onTap: () => this.viewConfig.onFolderTap(sorted.folders[key]),
         leading: Icon(
           Icons.folder,
           size: 48,
@@ -37,7 +34,7 @@ class NcGridView extends StatelessWidget {
         isThreeLine: false,
         contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 5),
         title: Text(
-          _folders[key].name,
+          sorted.folders[key].name,
         ),
       ),
       decoration: BoxDecoration(
@@ -46,22 +43,12 @@ class NcGridView extends StatelessWidget {
     );
   }
 
-  void _sort() {
-    if (this.viewConfig.showFolders.value) {
-      _folders
-          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    }
-    _files.sort((a, b) => b.lastModified.compareTo(a.lastModified));
-  }
-
   @override
   Widget build(BuildContext context) {
-    _sort();
-
     SliverGrid folderGrid = SliverGrid(
       delegate: SliverChildBuilderDelegate(
         (context, index) => _buildFolder(index, context),
-        childCount: _folders.length,
+        childCount: sorted.folders.length,
       ),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -84,7 +71,7 @@ class NcGridView extends StatelessWidget {
       ),
       delegate: SliverChildBuilderDelegate(
         (context, index) => _buildImage(index, context),
-        childCount: _files.length,
+        childCount: sorted.files.length,
       ),
     );
 

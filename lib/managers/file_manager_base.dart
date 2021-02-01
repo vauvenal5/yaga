@@ -35,18 +35,4 @@ abstract class FileManagerBase {
             ? this.listFiles(file.uri, recursive: recursive)
             : Stream.value(file));
   }
-
-  //todo: the whole list file-lists logic is quite complicated, try simplifying it
-  Future<void> listFileLists(
-    String requestKey,
-    Uri uri, {
-    bool recursive = false,
-  }) {
-    return this
-        .fileSubManagers[uri.scheme]
-        .listFileList(uri, recursive: recursive)
-        .map((event) => FileListResponse(requestKey, uri, recursive, event))
-        .doOnData((event) => this.updateFilesCommand(event))
-        .last;
-  }
 }

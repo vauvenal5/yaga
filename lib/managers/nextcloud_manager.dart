@@ -8,6 +8,7 @@ import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
+import 'package:yaga/utils/self_signed_cert_handler.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class NextCloudManager {
@@ -23,12 +24,14 @@ class NextCloudManager {
   final NextCloudService _nextCloudService;
   final LocalFileService _localFileService;
   final SystemLocationService _systemLocationService;
+  final SelfSignedCertHandler _selfSignedCertHandler;
 
   NextCloudManager(
     this._nextCloudService,
     this._secureStorageService,
     this._localFileService,
     this._systemLocationService,
+    this._selfSignedCertHandler,
   ) {
     this.loginCommand = RxCommand.createFromStream(
         (param) => this._createLoginDataPersisStream(param));
@@ -39,6 +42,7 @@ class NextCloudManager {
       final origin = await _nextCloudService.login(event);
 
       if (event.id == "" || event.displayName == "") {
+        await _selfSignedCertHandler.persistCert();
         await _secureStorageService.savePreference(
             NextCloudLoginDataKeys.id, origin.username);
         await _secureStorageService.savePreference(
@@ -61,6 +65,7 @@ class NextCloudManager {
         .logoutCommand
         .doOnData((event) => _nextCloudService.logout())
         .listen((value) {
+      this._selfSignedCertHandler.revokeCert();
       this.updateLoginStateCommand(value);
       this.updateAvatarCommand();
     });

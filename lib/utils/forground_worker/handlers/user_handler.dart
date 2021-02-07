@@ -8,6 +8,7 @@ import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/login_state_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/preference_msg.dart';
+import 'package:yaga/utils/self_signed_cert_handler.dart';
 import 'package:yaga/utils/service_locator.dart';
 
 class UserHandler implements IsolateMsgHandler<UserHandler> {
@@ -28,6 +29,7 @@ class UserHandler implements IsolateMsgHandler<UserHandler> {
     NextCloudService ncService = getIt.get<NextCloudService>();
 
     if (message.loginData.server == null) {
+      getIt.get<SelfSignedCertHandler>().revokeCert();
       return ncService.logout();
     }
 

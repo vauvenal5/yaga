@@ -30,13 +30,27 @@ import 'package:yaga/utils/forground_worker/handlers/user_handler.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/nextcloud_client_factory.dart';
+import 'package:yaga/utils/self_signed_cert_handler.dart';
 
 GetIt getIt = GetIt.instance;
 
 void setupServiceLocator() {
+  //setup HTTP overrides
+  getIt.registerSingletonAsync<SecureStorageService>(
+    () => SecureStorageService().init(),
+  );
+  getIt.registerSingletonAsync<SelfSignedCertHandler>(
+    () async => SelfSignedCertHandler().init(
+      await getIt.getAsync<SecureStorageService>(),
+    ),
+  );
+
   // Factories
   getIt.registerSingletonAsync<NextCloudClientFactory>(
-      () async => NextCloudClientFactory());
+    () async => NextCloudClientFactory(
+      await getIt.getAsync<SelfSignedCertHandler>(),
+    ),
+  );
 
   // Services
   getIt.registerSingletonAsync<SystemLocationService>(
@@ -48,8 +62,7 @@ void setupServiceLocator() {
   getIt.registerSingletonAsync<NextCloudService>(() async => NextCloudService(
         await getIt.getAsync<NextCloudClientFactory>(),
       ).init());
-  getIt.registerSingletonAsync<SecureStorageService>(
-      () => SecureStorageService().init());
+
   getIt.registerSingletonAsync<IntentService>(
       () async => IntentService().init());
 
@@ -65,6 +78,7 @@ void setupServiceLocator() {
       await getIt.getAsync<SecureStorageService>(),
       await getIt.getAsync<LocalFileService>(),
       await getIt.getAsync<SystemLocationService>(),
+      await getIt.getAsync<SelfSignedCertHandler>(),
     ).init(),
   );
   getIt.registerSingletonAsync(() async => MappingManager(
@@ -96,9 +110,10 @@ void setupServiceLocator() {
           ).init());
 
   getIt.registerSingletonAsync<ForegroundWorker>(() async => ForegroundWorker(
-          await getIt.getAsync<NextCloudManager>(),
-          await getIt.getAsync<GlobalSettingsManager>())
-      .init());
+        await getIt.getAsync<NextCloudManager>(),
+        await getIt.getAsync<GlobalSettingsManager>(),
+        await getIt.getAsync<SelfSignedCertHandler>(),
+      ).init());
   getIt.registerSingletonAsync<NextcloudManagerBridge>(
       () async => NextcloudManagerBridge(
             await getIt.getAsync<NextCloudManager>(),
@@ -120,9 +135,16 @@ void setupIsolatedServiceLocator(
   SendPort isolateToMain,
   IsolateHandlerRegistry registry,
 ) {
+  getIt.registerSingletonAsync<SelfSignedCertHandler>(
+    () async => SelfSignedCertHandler().initIsolated(init, isolateToMain),
+  );
+
   // Factories
   getIt.registerSingletonAsync<NextCloudClientFactory>(
-      () async => NextCloudClientFactory());
+    () async => NextCloudClientFactory(
+      await getIt.getAsync<SelfSignedCertHandler>(),
+    ),
+  );
 
   // Handlers
   getIt.registerSingletonAsync<NextcloudFileManagerHandler>(

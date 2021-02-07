@@ -10,7 +10,14 @@ class InitMsg {
   final Directory tmpPath;
   final NextCloudLoginData lastLoginData;
   final MappingPreference mapping;
+  final String fingerprint;
 
-  InitMsg(this.sendPort, this.externalPath, this.tmpPath, this.lastLoginData,
-      this.mapping);
+  InitMsg(
+    this.sendPort,
+    this.externalPath,
+    this.tmpPath,
+    this.lastLoginData,
+    this.mapping,
+    this.fingerprint,
+  );
 }

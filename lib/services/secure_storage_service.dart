@@ -15,4 +15,8 @@ class SecureStorageService extends Service<SecureStorageService> {
   Future<String> loadPreference(String key) {
     return this._storage.read(key: key).then((value) => value ?? "");
   }
+
+  Future<void> deletePreference(String key) {
+    return this._storage.delete(key: key);
+  }
 }

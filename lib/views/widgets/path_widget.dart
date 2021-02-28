@@ -56,11 +56,11 @@ class PathWidget extends StatelessWidget {
               ),
             );
           }
+          Uri subUri = UriUtils.fromUriPathSegments(_uri, index - 1);
           return FlatButton(
             textColor: Colors.white,
-            onPressed: () =>
-                _onTap(UriUtils.fromUriPathSegments(_uri, index - 1)),
-            child: Text(_uri.pathSegments[index - 1]),
+            onPressed: () => _onTap(subUri),
+            child: Text(UriUtils.getNameFromUri(subUri)),
           );
         },
         separatorBuilder: (context, index) =>

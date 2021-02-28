@@ -24,6 +24,7 @@ class UriUtils {
     pathSegments.forEach((element) {
       path = UriUtils.chainPathSegments(path, element);
     });
+    // do not double encode here because paths are already double encoded
     return UriUtils.fromUri(uri: uri, path: path);
   }
 
@@ -46,7 +47,8 @@ class UriUtils {
     for (int i = 0; i <= index; i++) {
       path += uri.pathSegments[i] + "/";
     }
-    return UriUtils.fromUri(uri: uri, path: path);
+    // in cases where we have encoded chars in the folder name we have to re-encode to make sure we do not change the meaning, since pathSegments do auto-decoding
+    return UriUtils.fromUri(uri: uri, path: Uri.encodeFull(path));
   }
 
   static String getNameFromUri(Uri uri) {
@@ -54,10 +56,12 @@ class UriUtils {
       return uri.host;
     }
 
+    //resolving any encoded chars in the name of a file/folder to improve readability should be avoided
+    //this would not correspond anymore to the displayed name in nextcloud
+    //furthermore you get problems when trying to double decode DE chars
     if (uri.pathSegments.last.isNotEmpty) {
       return uri.pathSegments.last;
     }
-
     return uri.pathSegments[uri.pathSegments.length - 2];
   }
 }

@@ -8,6 +8,8 @@ import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/ncfile_stream_extensions.dart';
+import 'package:yaga/utils/uri_utils.dart';
+import 'package:rxdart/rxdart.dart';
 
 class LocalFileManager
     with Isolateable<LocalFileManager>
@@ -47,9 +49,10 @@ class LocalFileManager
 
   Stream<NcFile> _listLocalFiles(Uri uri) {
     //todo: add uri check? or simply handle exception?
-    return _localFileService
-        .list(Directory.fromUri(
-            this._systemPathService.absoluteUriFromInternal(uri)))
+    return Stream.value(uri)
+        .map(this._systemPathService.absoluteUriFromInternal)
+        .map((uri) => Directory.fromUri(uri))
+        .flatMap((dir) => _localFileService.list(dir))
         .map((event) {
       Uri uri = this._systemPathService.internalUriFromAbsolute(event.uri);
 
@@ -63,7 +66,7 @@ class LocalFileManager
     if (event is Directory) {
       NcFile file = NcFile.directory(
         uri,
-        uri.pathSegments[uri.pathSegments.length - 2],
+        UriUtils.getNameFromUri(uri),
       );
       //todo: think about this!
       file.lastModified = DateTime.now();
@@ -72,7 +75,7 @@ class LocalFileManager
 
     NcFile file = NcFile.file(
       uri,
-      uri.pathSegments.last,
+      UriUtils.getNameFromUri(uri),
       lookupMimeType(event.path),
     );
     file.lastModified = (event as File).lastModifiedSync().toUtc();

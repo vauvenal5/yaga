@@ -88,9 +88,16 @@ class SystemLocationService extends Service<SystemLocationService>
     if (internal.host == "") {
       return internal;
     }
-    return Uri(
-        scheme: internal.scheme,
-        path: _locations[internal.host].privatePath + internal.path);
+    //todo: add a test when a local folder contain uri encoded chars
+    //--> this happens when a server is behind a subpath cloud.com/nc
+    //--> then NC Files App will create a local folder like cloud.com%2Fnc
+    return UriUtils.fromPathSegments(
+      uri: _locations[internal.host].directory.uri,
+      pathSegments: [
+        _locations[internal.host].privatePath,
+        internal.path,
+      ],
+    );
   }
 
   //todo: can we make this const?

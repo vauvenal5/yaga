@@ -51,7 +51,7 @@ class NextCloudService
     UserData userData;
 
     if (loginData.id == "" || loginData.displayName == "") {
-      userData = await this._client.user.getUser();
+      userData = await this._client.user.getUser().catchError(_logAndRethrow);
     }
 
     this._origin = NcOrigin(
@@ -119,13 +119,18 @@ class NextCloudService
       ._client
       .avatar
       .getAvatar(origin.username, 100)
+      .catchError(_logAndRethrow)
       .then((value) => base64.decode(value));
 
   Future<Uint8List> getPreview(Uri file) {
     String path = Uri.decodeComponent(file.path);
     _logger.d("Fetching preview $path");
     //todo: think about image sizes vs in code scaling
-    return this._client.preview.getPreviewByPath(path, 128, 128);
+    return this
+        ._client
+        .preview
+        .getPreviewByPath(path, 128, 128)
+        .catchError(_logAndRethrow);
     //todo: implement proper error handling
     // .catchError((err) {
     //   print("Could not load preview for $path");
@@ -134,15 +139,19 @@ class NextCloudService
   }
 
   Future<Uint8List> downloadImage(Uri file) =>
-      this._client.webDav.download(file.path);
+      this._client.webDav.download(file.path).catchError(_logAndRethrow);
 
   NcOrigin get origin => _origin;
 
   //todo: should we consider adding an [isLocal] property to NcOrigin?
   bool isUriOfService(Uri uri) => uri.scheme == this.scheme;
 
-  Future<NcFile> deleteFile(NcFile file) =>
-      this._client.webDav.delete(file.uri.path).then((_) => file);
+  Future<NcFile> deleteFile(NcFile file) => this
+      ._client
+      .webDav
+      .delete(file.uri.path)
+      .catchError(_logAndRethrow)
+      .then((_) => file);
 
   Future<NcFile> copyFile(NcFile file, Uri destination, bool overwrite) => this
       ._client
@@ -168,7 +177,12 @@ class NextCloudService
 
   void _logAndRethrow(dynamic err) {
     if (err is RequestException) {
-      _logger.e(err.body);
+      _logger.e("Nextcloud url: ${err.url}");
+      _logger.e("Nextcloud method: ${err.method}");
+      _logger.e("Nextcloud code: ${err.statusCode}");
+      _logger.e("Nextcloud body: ${err.body}");
+    } else {
+      _logger.e(err);
     }
     throw err;
   }

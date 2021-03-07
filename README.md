@@ -11,7 +11,7 @@
 
 ## State of Yaga
 
-This app is in an open beta stage. It is tested and fairly stable on an Android One device with Android version 10. You can download it from Google Play. For more information on how to use the app [read the docs](https://vauvenal5.github.io/yaga/).
+This app is in an open beta stage. It is tested and fairly stable on an Android One device with Android version 10. You can download it from Google Play. For more information on how to use the app [read the docs](https://vauvenal5.github.io/yaga-docs/).
 
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
     alt="Get it on Google Play"

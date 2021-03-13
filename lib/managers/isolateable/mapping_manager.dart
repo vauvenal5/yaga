@@ -128,8 +128,7 @@ class MappingManager with Isolateable<MappingManager> {
     _logger.d("Mapping remoteUri: " + remoteUri.toString());
     _logger.d("Mapping local: " + mapping.local.value.toString());
     _logger.d("Mapping remote: " + mapping.remote.value.toString());
-    Uri mappedUri =
-        UriUtils.fromPathSegments(uri: mapping.local.value, pathSegments: [
+    Uri mappedUri = UriUtils.fromPathList(uri: mapping.local.value, paths: [
       mapping.local.value.path,
       remoteUri.path.replaceFirst(mapping.remote.value.path, "")
     ]);
@@ -160,8 +159,8 @@ class MappingManager with Isolateable<MappingManager> {
           : mapping.local.value.path,
       "",
     );
-    return UriUtils.fromPathSegments(
-        uri: remote, pathSegments: [mapping.remote.value.path, relativePath]);
+    return UriUtils.fromPathList(
+        uri: remote, paths: [mapping.remote.value.path, relativePath]);
   }
 
   Future<Uri> mapTmpToRemoteUri(Uri local, Uri remote) async {

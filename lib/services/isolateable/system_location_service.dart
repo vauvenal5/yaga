@@ -91,9 +91,9 @@ class SystemLocationService extends Service<SystemLocationService>
     //todo: add a test when a local folder contain uri encoded chars
     //--> this happens when a server is behind a subpath cloud.com/nc
     //--> then NC Files App will create a local folder like cloud.com%2Fnc
-    return UriUtils.fromPathSegments(
+    return UriUtils.fromPathList(
       uri: _locations[internal.host].directory.uri,
-      pathSegments: [
+      paths: [
         _locations[internal.host].privatePath,
         internal.path,
       ],

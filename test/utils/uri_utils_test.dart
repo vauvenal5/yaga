@@ -112,6 +112,12 @@ void main() {
       Uri uri = Uri(path: "${expectedPath}chars");
       expect(UriUtils.fromUriPathSegments(uri, 1).path, expectedPath);
     });
+
+    test("should not change meaning of double encoded chars", () {
+      String expectedPath = "/test/path%252Fwith%252Fspecial/t%C3%B6st/";
+      Uri uri = Uri(path: "${expectedPath}chars");
+      expect(UriUtils.fromUriPathSegments(uri, 2).path, expectedPath);
+    });
   });
 
   group("getNameFromUri", () {

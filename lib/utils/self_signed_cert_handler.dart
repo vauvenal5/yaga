@@ -4,9 +4,12 @@ import 'dart:isolate';
 import 'package:yaga/services/secure_storage_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
+import 'package:yaga/utils/logger.dart';
 
 class SelfSignedCertHandler extends HttpOverrides
     implements Isolateable<SelfSignedCertHandler> {
+  final _logger = getLogger(SelfSignedCertHandler);
+
   final String _fingerprintKey = "cert.fingerprint";
   String _fingerprint;
 
@@ -47,6 +50,12 @@ class SelfSignedCertHandler extends HttpOverrides
       if (_fingerprint == certFingerprint && cert.subject.endsWith(host)) {
         return true;
       }
+
+      _logger.w("Fingerprint Cert: $certFingerprint");
+      _logger.w("Saved Fingerprint: $_fingerprint");
+      _logger.w("Host: $host");
+      _logger.w("Cert-Subject: ${cert.subject}");
+
       badCertificateCallback
           ?.call(
         cert.subject,

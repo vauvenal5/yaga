@@ -18,10 +18,9 @@ class UriUtils {
         path: path ?? uri.path,
       );
 
-  static Uri fromPathSegments(
-      {@required Uri uri, @required List<String> pathSegments}) {
+  static Uri fromPathList({@required Uri uri, @required List<String> paths}) {
     String path = "";
-    pathSegments.forEach((element) {
+    paths.forEach((element) {
       path = UriUtils.chainPathSegments(path, element);
     });
     // do not double encode here because paths are already double encoded
@@ -45,10 +44,12 @@ class UriUtils {
   static Uri fromUriPathSegments(Uri uri, int index) {
     String path = "/";
     for (int i = 0; i <= index; i++) {
-      path += uri.pathSegments[i] + "/";
+      // in cases where we have encoded chars in the folder name we have to re-encode
+      // to make sure we do not change the meaning, since pathSegments does auto-decoding
+      path += Uri.encodeComponent(uri.pathSegments[i]) + "/";
     }
-    // in cases where we have encoded chars in the folder name we have to re-encode to make sure we do not change the meaning, since pathSegments do auto-decoding
-    return UriUtils.fromUri(uri: uri, path: Uri.encodeFull(path));
+
+    return UriUtils.fromUri(uri: uri, path: path);
   }
 
   static String getNameFromUri(Uri uri) {

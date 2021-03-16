@@ -1,0 +1,3 @@
+- fix color gradient
+- refactor icon
+- fix jumping splash screen

@@ -4,6 +4,7 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/navigation/yaga_router_delegate.dart';
+import 'package:yaga/utils/nextcloud_colors.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/navigation/yaga_route_information_parser.dart';
 import 'package:yaga/views/screens/splash_screen.dart';
@@ -18,13 +19,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeData dark = ThemeData(
       brightness: Brightness.dark,
-      accentColor: Colors.blue,
-      toggleableActiveColor: Colors.blue,
+      accentColor: NextcloudColors.lightBlue,
+      toggleableActiveColor: NextcloudColors.lightBlue,
     );
 
     ThemeData light = ThemeData(
       brightness: Brightness.light,
-      accentColor: Colors.blue,
+      accentColor: NextcloudColors.lightBlue,
     );
 
     const String title = "Nextcloud Yaga";

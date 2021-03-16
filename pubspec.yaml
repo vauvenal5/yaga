@@ -11,7 +11,7 @@ description: A Nextcloud gallary app.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.22.4+2204
+version: 0.22.5+2205
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -45,13 +45,13 @@ dependencies:
   share: ^0.6.5+4
   url_launcher: ^5.7.10
   equatable: ^1.2.5
+  flutter_svg: ^0.19.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^1.0.0
   built_value_generator: ^7.1.0
-  flutter_launcher_icons: "^0.8.1"
   mockito: ^4.1.2
 
 # dev_dependency_overrides:
@@ -69,8 +69,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/icon/ic_launcher_xxxhdpi.png
-    - assets/icon/ic_foreground.png
+    - assets/icon/icon.svg
+    - assets/icon/foreground.svg
   #  - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -95,10 +95,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-
-flutter_icons:
-  android: true
-  ios: false
-  image_path: assets/icon/ic_launcher_xxxhdpi.png
-  adaptive_icon_background: "#0082c9"
-  adaptive_icon_foreground: assets/icon/ic_foreground.png

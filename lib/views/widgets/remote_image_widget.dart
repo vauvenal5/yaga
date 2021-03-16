@@ -9,6 +9,7 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/bridges/nextcloud_manager_bridge.dart';
 import 'package:yaga/utils/logger.dart';
+import 'package:yaga/utils/nextcloud_colors.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/widgets/circle_avatar_icon.dart';
 
@@ -42,7 +43,7 @@ class RemoteImageWidget extends StatelessWidget {
         child: CircleAvatarIcon(
           icon: Icon(
             Icons.check,
-            color: Colors.blue,
+            color: NextcloudColors.lightBlue,
           ),
         ),
       ));

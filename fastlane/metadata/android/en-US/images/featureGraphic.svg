@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="svg901"
+   width="1024"
+   height="500"
+   viewBox="0 0 1024 500"
+   sodipodi:docname="featureGraphic.svg"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)">
+  <metadata
+     id="metadata907">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs905">
+    <rect
+       x="637.80971"
+       y="148.45049"
+       width="384.48932"
+       height="71.192233"
+       id="rect963" />
+    <rect
+       x="654.15922"
+       y="185.5534"
+       width="203.58058"
+       height="45.887379"
+       id="rect957" />
+    <rect
+       x="390.83495"
+       y="179.06796"
+       width="464.61359"
+       height="66.935922"
+       id="rect947" />
+    <linearGradient
+       id="a"
+       x1="18.23"
+       x2="150"
+       y1="150"
+       y2="-7.6294e-6"
+       gradientTransform="matrix(8.96,0,0,8.96,-7.8457e-5,1.9795e-4)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         stop-color="#0082c9"
+         offset="0"
+         id="stop924" />
+      <stop
+         stop-color="#1cafff"
+         offset="1"
+         id="stop926" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1530"
+     inkscape:window-height="991"
+     id="namedview903"
+     showgrid="false"
+     inkscape:zoom="0.71124999"
+     inkscape:cx="506.19316"
+     inkscape:cy="345.64384"
+     inkscape:window-x="26"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g909" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g909">
+    <g
+       style="clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.4142"
+       id="g943"
+       transform="matrix(0.76168191,0,0,0.37260523,0,-4.548392e-5)">
+      <rect
+         y="0.00012207"
+         width="1344"
+         height="1344"
+         fill="url(#a)"
+         fill-rule="evenodd"
+         id="rect931"
+         x="0"
+         style="fill:url(#a)" />
+    </g>
+    <text
+       xml:space="preserve"
+       id="text945"
+       style="fill:black;fill-opacity:1;line-height:1.25;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;white-space:pre;shape-inside:url(#rect947);" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:65.1257px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.62815"
+       x="452.87729"
+       y="221.89236"
+       id="text953"
+       transform="scale(0.98220577,1.0181166)"><tspan
+         sodipodi:role="line"
+         id="tspan951"
+         x="452.87729"
+         y="221.89236"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:65.1257px;font-family:Cantarell;-inkscape-font-specification:'Cantarell, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:1.62815">Nextcloud Yaga</tspan></text>
+    <text
+       xml:space="preserve"
+       id="text955"
+       style="fill:black;fill-opacity:1;line-height:1.25;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;white-space:pre;shape-inside:url(#rect957);" />
+    <text
+       xml:space="preserve"
+       id="text961"
+       style="fill:black;fill-opacity:1;line-height:1.25;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;white-space:pre;shape-inside:url(#rect963);" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:32.1839px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.804601"
+       x="453.34363"
+       y="283.927"
+       id="text969"
+       transform="scale(0.99723925,1.0027684)"><tspan
+         sodipodi:role="line"
+         id="tspan967"
+         x="453.34363"
+         y="283.927"
+         style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:32.1839px;font-family:Cantarell;-inkscape-font-specification:'Cantarell, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.804601"
+         rotate="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0">Yet Another Gallery App</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="Image 2">
+    <path
+       fill="#ffffff"
+       d="m 125.98534,139.06731 c -3.43823,0.66589 -6.04605,4.0632 -5.98426,7.61633 V 340.3559 c 0,4.00401 3.69065,7.62503 7.61632,7.62503 h 228.4897 c 3.9266,-9e-5 7.6162,-3.62903 7.6164,-7.61632 V 149.68664 c -0.01,-5.85891 -4.6046,-10.64458 -8.9742,-10.61063 z m 11.42362,17.40787 208.90494,9e-5 v 87.04371 l -17.4088,-17.40874 -52.2262,69.63498 -52.2262,-52.22624 -69.635,69.63497 h -17.40874 z m 43.52359,17.40875 c -14.42227,0 -26.11311,11.69083 -26.11311,26.11312 0,14.42226 11.69084,26.1131 26.11311,26.1131 14.42228,0 26.11315,-11.69084 26.11315,-26.1131 0,-14.42229 -11.69087,-26.11312 -26.11315,-26.11312 z"
+       id="path913"
+       style="fill:#ffffff;stroke-width:8.70437" />
+  </g>
+</svg>

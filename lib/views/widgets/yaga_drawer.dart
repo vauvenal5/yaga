@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:package_info/package_info.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
@@ -6,6 +7,7 @@ import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
+import 'package:yaga/utils/nextcloud_colors.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
@@ -19,7 +21,14 @@ class YagaDrawer extends StatelessWidget {
       children: <Widget>[
         DrawerHeader(
           decoration: BoxDecoration(
-            color: Theme.of(context).accentColor,
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                NextcloudColors.lightBlue,
+                NextcloudColors.darkBlue,
+              ],
+            ),
           ),
           child: StreamBuilder<NextCloudLoginData>(
             stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
@@ -91,8 +100,10 @@ class YagaDrawer extends StatelessWidget {
         AboutListTile(
           icon: Icon(Icons.info_outline),
           applicationVersion: "v" + getIt.get<PackageInfo>().version,
-          applicationIcon: Image.asset(
-            'assets/icon/ic_launcher_xxxhdpi.png',
+          applicationIcon: SvgPicture.asset(
+            "assets/icon/icon.svg",
+            semanticsLabel: 'Yaga Logo',
+            alignment: Alignment.center,
             width: 56,
           ),
         )

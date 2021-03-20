@@ -57,6 +57,15 @@ platform :android do
     )
   end
 
+  lane :meta do
+    upload_to_play_store(
+      track: 'beta', 
+      version_code: get_code(),
+      skip_upload_aab: 'true', 
+      skip_upload_apk: 'true',
+    )
+  end
+
   lane :github do 
     Dir.chdir("..") do
       sh("flutter build apk --flavor play")

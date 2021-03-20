@@ -107,7 +107,15 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       //todo: is canLaunch/launch a UI component?
       final client =
           getIt.get<NextCloudClientFactory>().createUnauthenticatedClient(uri);
-      LoginFlowInit init = await client.login.initLoginFlow();
+
+      LoginFlowInit init;
+      try {
+        init = await client.login.initLoginFlow();
+      } catch (e) {
+        _logger.e("Could not init login flow", e);
+        getIt.get<SelfSignedCertHandler>().revokeCert();
+        return;
+      }
 
       if (await canLaunch(init.login)) {
         await launch(init.login);
@@ -189,7 +197,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
             Text('Fingerprint: $fingerprint'),
             Text(''),
             Text(
-              'Please note that Nextcloud Yaga only performs fingerprint comparison and a subject check on self-signed certificates!',
+              'Please note that Nextcloud Yaga only performs fingerprint comparison on self-signed certificates!',
             ),
           ],
         ),

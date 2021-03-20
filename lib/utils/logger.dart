@@ -29,7 +29,7 @@ class SimpleLogPrinter extends LogPrinter {
     if (event.level == Level.error) {
       return [
         color('$prefix $className - ${event.message}: ${event.error}'),
-        event.stackTrace.toString()
+        color('Stacktrace: ${event?.stackTrace?.toString()}'),
       ];
     }
 

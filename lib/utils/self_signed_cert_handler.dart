@@ -47,7 +47,7 @@ class SelfSignedCertHandler extends HttpOverrides
     client.badCertificateCallback =
         (X509Certificate cert, String host, int port) {
       String certFingerprint = cert.sha1.toString();
-      if (_fingerprint == certFingerprint && cert.subject.endsWith(host)) {
+      if (_fingerprint == certFingerprint) {
         return true;
       }
 

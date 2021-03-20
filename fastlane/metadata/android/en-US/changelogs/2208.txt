@@ -1,0 +1,2 @@
+- remove host check from unsigned cert checks
+- fix bug in auto-revoking on exception

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:nextcloud/nextcloud.dart';
@@ -100,13 +101,25 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
   }
 
   void _onSave(Uri uri) async {
+    final client =
+        getIt.get<NextCloudClientFactory>().createUnauthenticatedClient(uri);
+
+    // check if we detect a self-signed cert, if yes, enforce browser flow
+    if (!this._inBrowser) {
+      try {
+        await client.user.getUser();
+      } on HandshakeException catch (e) {
+        this._inBrowser = true;
+      } on RequestException catch (e) {
+        _logger.i("Proper HTTPS detected.");
+      }
+    }
+
     if (this._inBrowser) {
       getIt.get<SelfSignedCertHandler>().badCertificateCallback =
           this._askForCertApprovalBuilder(uri);
       //todo: should we move this into the manager/service?
       //todo: is canLaunch/launch a UI component?
-      final client =
-          getIt.get<NextCloudClientFactory>().createUnauthenticatedClient(uri);
 
       LoginFlowInit init;
       try {
@@ -114,6 +127,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       } catch (e) {
         _logger.e("Could not init login flow", e);
         getIt.get<SelfSignedCertHandler>().revokeCert();
+        getIt.get<SelfSignedCertHandler>().badCertificateCallback = null;
         return;
       }
 

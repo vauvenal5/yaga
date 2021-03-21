@@ -50,6 +50,7 @@ class YagaLogger {
 
   static Future<void> init({bool isolate = false}) async {
     ansiColorDisabled = false;
+    Logger.root.level = Level.INFO;
     Logger.root.onRecord.listen((record) {
       List<String> logs = [
         '${record.time} ${record.level} ${record.loggerName} - ${record.message}',

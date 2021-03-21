@@ -94,12 +94,12 @@ class NextcloudFileManager
     bool recursive = false,
   }) {
     //todo: add uri check
-    _logger.warning("Listing... ($uri)");
+    _logger.finer("Listing... ($uri)");
     return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
           this._listLocalFileList(uri, recursive),
           this._listNextcloudFiles(uri, recursive).collectToList(),
         ]).doOnData((event) {
-          _logger.warning("Emiting list! (${uri})");
+          _logger.finer("Emiting list! (${uri})");
         }).doOnDone(() => this._finishSync(uri)));
   }
 

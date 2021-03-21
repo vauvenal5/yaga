@@ -7,6 +7,7 @@ import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
+import 'package:yaga/utils/forground_worker/messages/flush_logs_message.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
 import 'package:yaga/utils/logger.dart';
@@ -14,7 +15,7 @@ import 'package:yaga/utils/self_signed_cert_handler.dart';
 import 'package:yaga/utils/service_locator.dart';
 
 class ForegroundWorker {
-  final Logger _logger = getLogger(ForegroundWorker);
+  final Logger _logger = YagaLogger.getLogger(ForegroundWorker);
 
   Isolate _isolate;
   SendPort _mainToIsolate;
@@ -81,20 +82,27 @@ class ForegroundWorker {
     isolateReadyFuture.then((value) => this._mainToIsolate.send(request));
   }
 
-  static void _workerMain(dynamic message) {
+  static void _workerMain(dynamic message) async {
     SendPort isolateToMain;
     final mainToIsolate = ReceivePort();
     final handlerRegistry = IsolateHandlerRegistry();
 
     if (message is InitMsg) {
       isolateToMain = message.sendPort;
+      await YagaLogger.init(isolate: true);
       setupIsolatedServiceLocator(message, isolateToMain, handlerRegistry);
       getIt.allReady().then((value) {
         isolateToMain.send(mainToIsolate.sendPort);
       });
     }
 
-    mainToIsolate.listen((message) {
+    mainToIsolate.listen((message) async {
+      if (message is FlushLogsMessage) {
+        await YagaLogger.fileHandler.flushFile();
+        isolateToMain.send(FlushLogsMessage(flushed: true));
+        return;
+      }
+
       handlerRegistry.handleMessage(message);
     });
   }

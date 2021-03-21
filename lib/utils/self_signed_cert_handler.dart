@@ -8,7 +8,7 @@ import 'package:yaga/utils/logger.dart';
 
 class SelfSignedCertHandler extends HttpOverrides
     implements Isolateable<SelfSignedCertHandler> {
-  final _logger = getLogger(SelfSignedCertHandler);
+  final _logger = YagaLogger.getLogger(SelfSignedCertHandler);
 
   final String _fingerprintKey = "cert.fingerprint";
   String _fingerprint;

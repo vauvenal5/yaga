@@ -16,7 +16,7 @@ import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:logger/logger.dart';
 
 class YagaRouter {
-  static Logger _logger = getLogger(YagaRouter);
+  static Logger _logger = YagaLogger.getLogger(YagaRouter);
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {

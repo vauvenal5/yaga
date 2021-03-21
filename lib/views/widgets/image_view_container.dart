@@ -16,7 +16,7 @@ import 'package:yaga/views/widgets/image_views/nc_grid_view.dart';
 import 'package:yaga/views/widgets/image_views/nc_list_view.dart';
 
 class ImageViewContainer extends StatelessWidget {
-  final Logger _logger = getLogger(ImageViewContainer);
+  final Logger _logger = YagaLogger.getLogger(ImageViewContainer);
   final FileListLocalManager fileListLocalManager;
   final ViewConfiguration viewConfig;
   final bool Function(NcFile) _filter;

@@ -19,7 +19,7 @@ import 'package:yaga/utils/uri_utils.dart';
 class NextCloudService
     with Service<NextCloudService>, Isolateable<NextCloudService>
     implements FileProviderService<NextCloudService> {
-  final Logger _logger = getLogger(NextCloudService);
+  final Logger _logger = YagaLogger.getLogger(NextCloudService);
 
   //todo: it will probably be best to replace nc with https since it does not bring any actual advantage
   // --> however this is a breaking change

@@ -27,7 +27,7 @@ class NextCloudAddressScreen extends StatefulWidget {
 }
 
 class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
-  final _logger = getLogger(_NextCloudAddressScreenState);
+  final _logger = YagaLogger.getLogger(_NextCloudAddressScreenState);
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool validation = true;

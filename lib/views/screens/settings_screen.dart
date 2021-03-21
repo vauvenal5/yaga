@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:rx_command/rx_command.dart';
+import 'package:yaga/model/preferences/action_preference.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
+import 'package:yaga/views/widgets/preferences/action_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/bool_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/choice_preference_widget.dart';
 import 'package:yaga/views/widgets/preferences/mapping_preference_widget.dart';
@@ -56,6 +58,10 @@ class SettingsScreen extends StatelessWidget {
               defaultPref,
               this.onPreferenceChangedCommand,
             );
+          }
+
+          if (defaultPref is ActionPreference) {
+            return ActionPreferenceWidget(defaultPref);
           }
 
           return SectionPreferenceWidget(defaultPref);

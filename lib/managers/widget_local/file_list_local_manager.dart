@@ -33,7 +33,7 @@ import 'package:yaga/utils/service_locator.dart';
 // however this also means that the owning widget has to manage init and disposal
 // treat it like local state
 class FileListLocalManager {
-  Logger _logger = getLogger(FileListLocalManager);
+  Logger _logger = YagaLogger.getLogger(FileListLocalManager);
 
   BoolPreference recursive;
   List<NcFile> selected = List();

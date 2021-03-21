@@ -5,7 +5,7 @@ import 'package:yaga/services/service.dart';
 import 'package:yaga/utils/logger.dart';
 
 class SecureStorageService extends Service<SecureStorageService> {
-  final Logger _logger = getLogger(SecureStorageService);
+  final Logger _logger = YagaLogger.getLogger(SecureStorageService);
   FlutterSecureStorage _storage;
 
   SecureStorageService() {

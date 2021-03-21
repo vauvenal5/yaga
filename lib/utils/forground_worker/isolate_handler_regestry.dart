@@ -2,7 +2,7 @@ import 'package:yaga/utils/forground_worker/messages/message.dart';
 import 'package:yaga/utils/logger.dart';
 
 class IsolateHandlerRegistry {
-  final logger = getLogger(IsolateHandlerRegistry);
+  final logger = YagaLogger.getLogger(IsolateHandlerRegistry);
   final Map<Type, List<Function(Message)>> handlers = Map();
 
   void registerHandler<M extends Message>(Function(M) handler) {

@@ -7,7 +7,7 @@ import 'package:yaga/utils/forground_worker/messages/preference_msg.dart';
 import 'package:yaga/utils/logger.dart';
 
 class SettingsManagerBridge {
-  Logger _logger = getLogger(SettingsManagerBridge);
+  Logger _logger = YagaLogger.getLogger(SettingsManagerBridge);
   final SettingsManager _settingsManager;
   final ForegroundWorker _worker;
 

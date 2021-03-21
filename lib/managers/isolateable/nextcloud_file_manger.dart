@@ -17,7 +17,7 @@ import 'package:yaga/utils/ncfile_stream_extensions.dart';
 class NextcloudFileManager
     with Isolateable<NextcloudFileManager>
     implements FileSubManager {
-  Logger _logger = getLogger(NextcloudFileManager);
+  Logger _logger = YagaLogger.getLogger(NextcloudFileManager);
 
   final NextCloudService _nextCloudService;
   final FileManagerBase _fileManager;

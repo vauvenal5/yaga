@@ -4,7 +4,7 @@ import 'package:yaga/utils/logger.dart';
 
 abstract class Service<T extends Service<T>> {
   @protected
-  Logger logger = getLogger(T);
-  
+  Logger logger = YagaLogger.getLogger(T);
+
   Future<T> init() async => this;
 }

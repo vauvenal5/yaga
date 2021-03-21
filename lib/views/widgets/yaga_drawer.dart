@@ -92,8 +92,10 @@ class YagaDrawer extends StatelessWidget {
               return ListTile(
                 leading: Icon(Icons.add_to_home_screen),
                 title: Text("Login"),
-                onTap: () =>
-                    Navigator.pushNamed(context, NextCloudAddressScreen.route),
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  NextCloudAddressScreen.route,
+                ),
               );
             }),
         //todo: improve this (fill text and move to bottom)

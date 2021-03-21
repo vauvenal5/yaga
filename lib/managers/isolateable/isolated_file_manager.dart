@@ -18,7 +18,7 @@ import 'package:yaga/utils/uri_utils.dart';
 
 class IsolatedFileManager extends FileManagerBase
     with Isolateable<IsolatedFileManager> {
-  final _logger = getLogger(IsolatedFileManager);
+  final _logger = YagaLogger.getLogger(IsolatedFileManager);
 
   final SortManager _sortManager;
 

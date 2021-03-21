@@ -13,7 +13,7 @@ import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class MappingManager with Isolateable<MappingManager> {
-  final Logger _logger = getLogger(MappingManager);
+  final Logger _logger = YagaLogger.getLogger(MappingManager);
   final NextCloudService _nextCloudService;
   final SystemLocationService _systemLocationService;
   final SettingsManagerBase _settingsManager;

@@ -8,7 +8,7 @@ import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/logger.dart';
 
 abstract class FileManagerBase {
-  Logger _logger = getLogger(FileManagerBase);
+  Logger _logger = YagaLogger.getLogger(FileManagerBase);
 
   RxCommand<NcFile, NcFile> updateFileList;
   RxCommand<NcFile, NcFile> updateImageCommand =

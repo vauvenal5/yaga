@@ -14,7 +14,7 @@ description: A Nextcloud gallary app.
 version: 0.22.8+2208
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.7.0 <2.12.0"
 
 dependencies:
   flutter:
@@ -45,7 +45,9 @@ dependencies:
   share: ^0.6.5+4
   url_launcher: ^5.7.10
   equatable: ^1.2.5
-  flutter_svg: ^0.19.3
+  flutter_svg: ^0.19.1
+  catcher: ^0.4.2
+  device_info: ^1.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
@@ -9,14 +8,12 @@ import 'package:yaga/model/sorted_file_list.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
-import 'package:yaga/utils/logger.dart';
 import 'package:yaga/views/widgets/image_views/category_view.dart';
 import 'package:yaga/views/widgets/image_views/category_view_exp.dart';
 import 'package:yaga/views/widgets/image_views/nc_grid_view.dart';
 import 'package:yaga/views/widgets/image_views/nc_list_view.dart';
 
 class ImageViewContainer extends StatelessWidget {
-  final Logger _logger = getLogger(ImageViewContainer);
   final FileListLocalManager fileListLocalManager;
   final ViewConfiguration viewConfig;
   final bool Function(NcFile) _filter;

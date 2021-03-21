@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:nextcloud/nextcloud.dart';
@@ -26,7 +27,7 @@ class NextCloudAddressScreen extends StatefulWidget {
 }
 
 class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
-  final _logger = getLogger(_NextCloudAddressScreenState);
+  final _logger = YagaLogger.getLogger(_NextCloudAddressScreenState);
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool validation = true;
@@ -35,7 +36,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
 
   @override
   void dispose() {
-    _logger.d("Disposing");
+    _logger.fine("Disposing");
     _disposing = true;
     super.dispose();
   }
@@ -100,20 +101,33 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
   }
 
   void _onSave(Uri uri) async {
+    final client =
+        getIt.get<NextCloudClientFactory>().createUnauthenticatedClient(uri);
+
+    // check if we detect a self-signed cert, if yes, enforce browser flow
+    if (!this._inBrowser) {
+      try {
+        await client.user.getUser();
+      } on HandshakeException catch (e) {
+        this._inBrowser = true;
+      } on RequestException catch (e) {
+        _logger.info("Proper HTTPS detected.");
+      }
+    }
+
     if (this._inBrowser) {
       getIt.get<SelfSignedCertHandler>().badCertificateCallback =
           this._askForCertApprovalBuilder(uri);
       //todo: should we move this into the manager/service?
       //todo: is canLaunch/launch a UI component?
-      final client =
-          getIt.get<NextCloudClientFactory>().createUnauthenticatedClient(uri);
 
       LoginFlowInit init;
       try {
         init = await client.login.initLoginFlow();
       } catch (e) {
-        _logger.e("Could not init login flow", e);
+        _logger.severe("Could not init login flow", e);
         getIt.get<SelfSignedCertHandler>().revokeCert();
+        getIt.get<SelfSignedCertHandler>().badCertificateCallback = null;
         return;
       }
 
@@ -123,7 +137,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
 
         while (res == null && !_disposing) {
           try {
-            _logger.d("Requesting");
+            _logger.fine("Requesting");
             res = await client.login.pollLogin(init);
           } on RequestException catch (e) {
             if (e.statusCode != 404) {

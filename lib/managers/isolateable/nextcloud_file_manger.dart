@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_manager_base.dart';
@@ -17,7 +16,7 @@ import 'package:yaga/utils/ncfile_stream_extensions.dart';
 class NextcloudFileManager
     with Isolateable<NextcloudFileManager>
     implements FileSubManager {
-  Logger _logger = getLogger(NextcloudFileManager);
+  final _logger = YagaLogger.getLogger(NextcloudFileManager);
 
   final NextCloudService _nextCloudService;
   final FileManagerBase _fileManager;
@@ -54,7 +53,7 @@ class NextcloudFileManager
                   lastModified: ncFile.lastModified);
               return ncFile;
             }, onError: (err, stacktrace) {
-              _logger.e(
+              _logger.severe(
                 "Unexpected error while loading preview",
                 err,
                 stacktrace,
@@ -95,12 +94,12 @@ class NextcloudFileManager
     bool recursive = false,
   }) {
     //todo: add uri check
-    _logger.w("Listing... ($uri)");
+    _logger.finer("Listing... ($uri)");
     return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
           this._listLocalFileList(uri, recursive),
           this._listNextcloudFiles(uri, recursive).collectToList(),
         ]).doOnData((event) {
-          _logger.w("Emiting list! (${uri})");
+          _logger.finer("Emiting list! (${uri})");
         }).doOnDone(() => this._finishSync(uri)));
   }
 
@@ -197,7 +196,7 @@ class NextcloudFileManager
   }
 
   Future<NcFile> _deleteLocalFile(NcFile file) async {
-    _logger.w("Removing local file! (${file.uri.path})");
+    _logger.warning("Removing local file! (${file.uri.path})");
     this._localFileService.deleteFile(file.localFile);
     this._localFileService.deleteFile(file.previewFile);
     this._fileManager.updateFileList(file);

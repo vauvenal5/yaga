@@ -1,0 +1,3 @@
+- add ability to send logs from within app
+- improve logging
+- improve self-signed cert usability

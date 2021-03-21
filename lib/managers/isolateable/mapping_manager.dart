@@ -1,6 +1,5 @@
 import 'dart:isolate';
 
-import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager_base.dart';
 import 'package:yaga/model/mapping_node.dart';
@@ -13,7 +12,7 @@ import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class MappingManager with Isolateable<MappingManager> {
-  final Logger _logger = getLogger(MappingManager);
+  final _logger = YagaLogger.getLogger(MappingManager);
   final NextCloudService _nextCloudService;
   final SystemLocationService _systemLocationService;
   final SettingsManagerBase _settingsManager;
@@ -125,14 +124,14 @@ class MappingManager with Isolateable<MappingManager> {
   }
 
   Uri _mapUri(Uri remoteUri, MappingPreference mapping) {
-    _logger.d("Mapping remoteUri: " + remoteUri.toString());
-    _logger.d("Mapping local: " + mapping.local.value.toString());
-    _logger.d("Mapping remote: " + mapping.remote.value.toString());
+    _logger.fine("Mapping remoteUri: " + remoteUri.toString());
+    _logger.fine("Mapping local: " + mapping.local.value.toString());
+    _logger.fine("Mapping remote: " + mapping.remote.value.toString());
     Uri mappedUri = UriUtils.fromPathList(uri: mapping.local.value, paths: [
       mapping.local.value.path,
       remoteUri.path.replaceFirst(mapping.remote.value.path, "")
     ]);
-    _logger.d("Mapped uri: " + mappedUri.toString());
+    _logger.fine("Mapped uri: " + mappedUri.toString());
     //todo: is returning an absolute uri from mapping manager the best option?
     return this._systemLocationService.absoluteUriFromInternal(mappedUri);
   }

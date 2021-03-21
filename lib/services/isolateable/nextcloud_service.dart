@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -12,15 +11,12 @@ import 'package:yaga/services/file_provider_service.dart';
 import 'package:yaga/services/service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
-import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/nextcloud_client_factory.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class NextCloudService
     with Service<NextCloudService>, Isolateable<NextCloudService>
     implements FileProviderService<NextCloudService> {
-  final Logger _logger = getLogger(NextCloudService);
-
   //todo: it will probably be best to replace nc with https since it does not bring any actual advantage
   // --> however this is a breaking change
   final String scheme = "nc";
@@ -107,7 +103,7 @@ class NextCloudService
 
       return file;
     }).doOnError(
-      (error, stacktrace) => _logger.e(
+      (error, stacktrace) => logger.severe(
         "Unexpected error while loading list",
         error,
         stacktrace,
@@ -124,7 +120,7 @@ class NextCloudService
 
   Future<Uint8List> getPreview(Uri file) {
     String path = Uri.decodeComponent(file.path);
-    _logger.d("Fetching preview $path");
+    logger.fine("Fetching preview $path");
     //todo: think about image sizes vs in code scaling
     return this
         ._client
@@ -177,12 +173,12 @@ class NextCloudService
 
   void _logAndRethrow(dynamic err) {
     if (err is RequestException) {
-      _logger.e("Nextcloud url: ${err.url}");
-      _logger.e("Nextcloud method: ${err.method}");
-      _logger.e("Nextcloud code: ${err.statusCode}");
-      _logger.e("Nextcloud body: ${err.body}");
+      logger.severe("Nextcloud url: ${err.url}");
+      logger.severe("Nextcloud method: ${err.method}");
+      logger.severe("Nextcloud code: ${err.statusCode}");
+      logger.severe("Nextcloud body: ${err.body}");
     } else {
-      _logger.e(err);
+      logger.severe(err);
     }
     throw err;
   }

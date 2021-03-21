@@ -1,17 +1,31 @@
+import 'package:catcher/catcher.dart';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
+import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/navigation/yaga_router_delegate.dart';
 import 'package:yaga/utils/nextcloud_colors.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/navigation/yaga_route_information_parser.dart';
 import 'package:yaga/views/screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  await YagaLogger.init();
+
   setupServiceLocator();
-  runApp(MyApp());
+
+  CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [
+    YagaLogger.fileHandler,
+  ]);
+
+  Catcher(
+    rootWidget: MyApp(),
+    debugConfig: releaseOptions,
+    releaseConfig: releaseOptions,
+    enableLogger: false,
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -31,7 +45,9 @@ class MyApp extends StatelessWidget {
     const String title = "Nextcloud Yaga";
 
     return FutureBuilder(
-      future: getIt.allReady(),
+      future: YagaLogger.printBaseLog().then(
+        (_) => getIt.allReady(),
+      ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return MaterialApp(

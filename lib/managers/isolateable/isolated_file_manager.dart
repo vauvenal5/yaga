@@ -18,7 +18,7 @@ import 'package:yaga/utils/uri_utils.dart';
 
 class IsolatedFileManager extends FileManagerBase
     with Isolateable<IsolatedFileManager> {
-  final _logger = getLogger(IsolatedFileManager);
+  final _logger = YagaLogger.getLogger(IsolatedFileManager);
 
   final SortManager _sortManager;
 
@@ -126,7 +126,7 @@ class IsolatedFileManager extends FileManagerBase
         .takeUntil(
           this
               .cancelActionCommand
-              .doOnData((event) => _logger.v("Canceling action!")),
+              .doOnData((event) => _logger.finest("Canceling action!")),
         )
         .last;
   }

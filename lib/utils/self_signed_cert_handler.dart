@@ -51,10 +51,10 @@ class SelfSignedCertHandler extends HttpOverrides
         return true;
       }
 
-      _logger.w("Fingerprint Cert: $certFingerprint");
-      _logger.w("Saved Fingerprint: $_fingerprint");
-      _logger.w("Host: $host");
-      _logger.w("Cert-Subject: ${cert.subject}");
+      _logger.warning("Fingerprint Cert: $certFingerprint");
+      _logger.warning("Saved Fingerprint: $_fingerprint");
+      _logger.warning("Host: $host");
+      _logger.warning("Cert-Subject: ${cert.subject}");
 
       badCertificateCallback
           ?.call(

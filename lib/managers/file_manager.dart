@@ -1,4 +1,3 @@
-import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -6,7 +5,6 @@ import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 
 class FileManager extends FileManagerBase {
-  Logger _logger = Logger();
   RxCommand<NcFile, NcFile> _getImageCommand;
 
   RxCommand<NcFile, NcFile> downloadImageCommand;

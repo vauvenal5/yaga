@@ -34,7 +34,7 @@ class LocalFileService extends Service<LocalFileService>
       {@required File file,
       @required List<int> bytes,
       DateTime lastModified}) async {
-    logger.d("Creating file ${file.path}");
+    logger.fine("Creating file ${file.path}");
     await file.create(recursive: true);
     File res = await file.writeAsBytes(bytes, flush: true);
     if (lastModified != null) {

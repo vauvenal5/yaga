@@ -126,7 +126,7 @@ class IsolatedFileManager extends FileManagerBase
         .takeUntil(
           this
               .cancelActionCommand
-              .doOnData((event) => _logger.v("Canceling action!")),
+              .doOnData((event) => _logger.finest("Canceling action!")),
         )
         .last;
   }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
@@ -15,7 +14,7 @@ import 'package:yaga/utils/self_signed_cert_handler.dart';
 import 'package:yaga/utils/service_locator.dart';
 
 class ForegroundWorker {
-  final Logger _logger = YagaLogger.getLogger(ForegroundWorker);
+  final _logger = YagaLogger.getLogger(ForegroundWorker);
 
   Isolate _isolate;
   SendPort _mainToIsolate;
@@ -47,7 +46,7 @@ class ForegroundWorker {
       }
 
       if (message is List) {
-        _logger.e("Error in forground worker", message[0],
+        _logger.severe("Error in forground worker", message[0],
             StackTrace.fromString(message[1]));
       }
 

@@ -16,18 +16,15 @@ void main() async {
 
   setupServiceLocator();
 
-  CatcherOptions debugOptions = CatcherOptions(SilentReportMode(), [
-    ConsoleHandler(),
-    YagaLogger.fileHandler,
-  ]);
   CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [
     YagaLogger.fileHandler,
   ]);
 
   Catcher(
     rootWidget: MyApp(),
-    debugConfig: debugOptions,
+    debugConfig: releaseOptions,
     releaseConfig: releaseOptions,
+    enableLogger: false,
   );
 }
 

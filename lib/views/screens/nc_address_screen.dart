@@ -36,7 +36,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
 
   @override
   void dispose() {
-    _logger.d("Disposing");
+    _logger.fine("Disposing");
     _disposing = true;
     super.dispose();
   }
@@ -111,7 +111,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       } on HandshakeException catch (e) {
         this._inBrowser = true;
       } on RequestException catch (e) {
-        _logger.i("Proper HTTPS detected.");
+        _logger.info("Proper HTTPS detected.");
       }
     }
 
@@ -125,7 +125,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       try {
         init = await client.login.initLoginFlow();
       } catch (e) {
-        _logger.e("Could not init login flow", e);
+        _logger.severe("Could not init login flow", e);
         getIt.get<SelfSignedCertHandler>().revokeCert();
         getIt.get<SelfSignedCertHandler>().badCertificateCallback = null;
         return;
@@ -137,7 +137,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
 
         while (res == null && !_disposing) {
           try {
-            _logger.d("Requesting");
+            _logger.fine("Requesting");
             res = await client.login.pollLogin(init);
           } on RequestException catch (e) {
             if (e.statusCode != 404) {

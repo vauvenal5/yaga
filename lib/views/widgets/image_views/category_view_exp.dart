@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sticky_infinite_list/sticky_infinite_list.dart';
 import 'package:yaga/model/sorted_category_list.dart';
+import 'package:yaga/utils/logger.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class CategoryViewExp extends StatelessWidget {
+  final _logger = YagaLogger.getLogger(CategoryViewExp);
   static const String viewKey = "category_exp";
   final ViewConfiguration viewConfig;
   final SortedCategoryList sorted;
@@ -82,7 +84,7 @@ class CategoryViewExp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("drawing list");
+    _logger.finer("drawing list");
 
     return _buildExperimental();
   }

@@ -6,12 +6,11 @@ import 'package:catcher/model/platform_type.dart';
 import 'package:catcher/model/report.dart';
 import 'package:catcher/model/report_handler.dart';
 import 'package:flutter/foundation.dart';
-import 'package:logger/logger.dart';
 import 'package:package_info/package_info.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:device_info/device_info.dart';
 
-class LogErrorFileHandler extends ReportHandler implements LogOutput {
+class LogErrorFileHandler extends ReportHandler {
   final File file;
   final bool enableDeviceParameters;
   final bool enableApplicationParameters;
@@ -20,7 +19,7 @@ class LogErrorFileHandler extends ReportHandler implements LogOutput {
   final bool printLogs;
 
   //emergency logger for when errors occure in LogErrorFileHandler
-  final Logger _logger = YagaLogger.getEmergencyLogger(LogErrorFileHandler);
+  final _logger = YagaLogger.getEmergencyLogger(LogErrorFileHandler);
 
   IOSink _sink;
   bool _fileValidationResult = false;
@@ -49,7 +48,7 @@ class LogErrorFileHandler extends ReportHandler implements LogOutput {
       }
       return await _processReport(report);
     } catch (exc, stackTrace) {
-      _logger.e("Exception occured: $exc stack: $stackTrace");
+      _logger.severe("Exception occured: $exc stack: $stackTrace");
       return false;
     }
   }
@@ -75,7 +74,7 @@ class LogErrorFileHandler extends ReportHandler implements LogOutput {
       await sink.close();
       return true;
     } catch (exc, stackTrace) {
-      _logger.e("Exception occured: $exc stack: $stackTrace");
+      _logger.severe("Exception occured: $exc stack: $stackTrace");
       return false;
     }
   }
@@ -88,6 +87,10 @@ class LogErrorFileHandler extends ReportHandler implements LogOutput {
   }
 
   void _writeLineToFile(String text) {
+    _logger.shout(text);
+  }
+
+  void writeLineToFile(String text) {
     _sink.add(utf8.encode('$text\n'));
   }
 
@@ -214,7 +217,7 @@ class LogErrorFileHandler extends ReportHandler implements LogOutput {
 
   void _printLog(String log) {
     if (printLogs) {
-      this._logger.i(log);
+      this._logger.info(log);
     }
   }
 
@@ -222,12 +225,10 @@ class LogErrorFileHandler extends ReportHandler implements LogOutput {
   List<PlatformType> getSupportedPlatforms() =>
       [PlatformType.android, PlatformType.iOS];
 
-  @override
   void destroy() async {
     await _closeFile();
   }
 
-  @override
   Future<void> init() async {
     if (_sink != null) {
       return;
@@ -235,10 +236,5 @@ class LogErrorFileHandler extends ReportHandler implements LogOutput {
 
     this._fileValidationResult = await _checkFile();
     _openFile();
-  }
-
-  @override
-  void output(OutputEvent event) {
-    event.lines.forEach(_writeLineToFile);
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:logger/logger.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaga/managers/file_manager.dart';
@@ -33,7 +32,7 @@ import 'package:yaga/utils/service_locator.dart';
 // however this also means that the owning widget has to manage init and disposal
 // treat it like local state
 class FileListLocalManager {
-  Logger _logger = YagaLogger.getLogger(FileListLocalManager);
+  final _logger = YagaLogger.getLogger(FileListLocalManager);
 
   BoolPreference recursive;
   List<NcFile> selected = List();
@@ -136,8 +135,8 @@ class FileListLocalManager {
       }
 
       if (event is FileListDone && event.key == this.managerKey) {
-        _logger.w("$managerKey (done - manager key)");
-        _logger.w("${event.key} (done - event key)");
+        _logger.warning("$managerKey (done - manager key)");
+        _logger.warning("${event.key} (done - event key)");
         this.loadingChangedCommand(false);
       }
     });
@@ -147,7 +146,7 @@ class FileListLocalManager {
         .map((event) => event as FileUpdateMsg)
         .listen((event) => this._removeFileFromList(event.file));
 
-    _logger.w("$managerKey (start)");
+    _logger.warning("$managerKey (start)");
 
     //todo: we are here directly using the worker, we should be going over the file manager bridge
     this._worker.sendRequest(FileListRequest(
@@ -201,7 +200,7 @@ class FileListLocalManager {
   }
 
   void _removeFileFromList(NcFile file) {
-    _logger.w("$managerKey (delete)");
+    _logger.warning("$managerKey (delete)");
     SortedFileList files = this.filesChangedCommand.lastResult;
     //todo: delete and re-sort are interfearing with each other
     if (files.remove(file)) {

@@ -14,7 +14,7 @@ class IsolateHandlerRegistry {
     if (this.handlers.containsKey(msg.runtimeType)) {
       this.handlers[msg.runtimeType].forEach((handler) => handler(msg));
     } else {
-      logger.wtf("No handler registered for ${msg.runtimeType}");
+      logger.shout("No handler registered for ${msg.runtimeType}");
     }
   }
 }

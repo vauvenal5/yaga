@@ -1,11 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:logger/logger.dart';
 import 'package:yaga/services/service.dart';
-import 'package:yaga/utils/logger.dart';
 
 class SecureStorageService extends Service<SecureStorageService> {
-  final Logger _logger = YagaLogger.getLogger(SecureStorageService);
   FlutterSecureStorage _storage;
 
   SecureStorageService() {
@@ -33,12 +30,12 @@ class SecureStorageService extends Service<SecureStorageService> {
 
   void _logAndRethrow(dynamic err) {
     if (err is PlatformException) {
-      _logger.e("SecureStorage: ${err.code}");
-      _logger.e("SecureStorage: ${err.message}");
-      _logger.e("SecureStorage: ${err.details}");
-      _logger.e("SecureStorage: ${err.stacktrace}");
+      logger.severe("SecureStorage: ${err.code}");
+      logger.severe("SecureStorage: ${err.message}");
+      logger.severe("SecureStorage: ${err.details}");
+      logger.severe("SecureStorage: ${err.stacktrace}");
     } else {
-      _logger.e(err);
+      logger.severe(err);
     }
     throw err;
   }

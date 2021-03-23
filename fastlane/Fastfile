@@ -68,7 +68,7 @@ platform :android do
 
   lane :github do 
     Dir.chdir("..") do
-      sh("flutter build apk --flavor play")
+      sh(".fvm/flutter_sdk/bin/flutter build apk --flavor play")
     end
 
     version = get_version()

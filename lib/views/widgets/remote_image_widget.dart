@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/file_manager.dart';
@@ -99,53 +100,43 @@ class RemoteImageWidget extends StatelessWidget {
           );
         }
 
+        _requestPreviewDownload();
+
         if (file.localFile != null && localExists) {
-          _requestPreviewDownload();
           return _createIconOverlay(
             _inkFromImage(snapshot.data.localFile),
             _getLocalIcon(file, localExists, context),
           );
         }
 
-        return StreamBuilder<NcFile>(
-          stream: getIt
-              .get<NextcloudFileManager>()
-              .downloadPreviewFaildCommand
-              .where(
-                (event) => event == null || event.uri.path == _file.uri.path,
-              ),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final children = <Widget>[
-                Icon(Icons.photo),
-              ];
-
-              if (showFileEnding) {
-                children.add(Text(_file.fileExtension));
-              }
-
-              return _createIconOverlay(
-                Ink(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: children,
-                  ),
-                ),
-                _getLocalIcon(file, localExists, context),
-              );
-            }
-
-            //this way we make sure that the download failed builder is setup before the request can fail
-            _requestPreviewDownload();
-
-            return Container(
-              height: 32,
-              width: 32,
-              child: CircularProgressIndicator(),
-            );
-          },
-        );
+        return _createDefaultIconPreview(file, localExists, context);
       },
+    );
+  }
+
+  Widget _createDefaultIconPreview(
+      NcFile file, bool localExists, BuildContext context) {
+    final children = <Widget>[
+      SvgPicture.asset(
+        "assets/icon/foreground_no_border.svg",
+        semanticsLabel: 'Yaga Logo',
+        alignment: Alignment.center,
+        width: 48,
+      ),
+    ];
+
+    if (showFileEnding) {
+      children.add(Text(_file.fileExtension));
+    }
+
+    return _createIconOverlay(
+      Ink(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: children,
+        ),
+      ),
+      _getLocalIcon(file, localExists, context),
     );
   }
 

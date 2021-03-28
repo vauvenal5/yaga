@@ -11,6 +11,7 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/utils/download_file_image.dart';
 import 'package:yaga/utils/service_locator.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ImageScreen extends StatefulWidget {
   static const String route = "/image";
@@ -63,13 +64,14 @@ class ImageScreenState extends State<ImageScreen> {
 
               //todo: we need to introduce checks where we cast file
               Future<File> localFileAvailable =
-                  Future.value(image.localFile as File);
-              if (!image.localFile.existsSync()) {
+                  Future.value(image.localFile.file as File);
+              if (!image.localFile.exists) {
                 localFileAvailable = getIt
                     .get<FileManager>()
                     .updateImageCommand
                     .where((event) => event.uri.path == image.uri.path)
-                    .map((event) => event.localFile as File)
+                    .doOnData((event) => image.localFile.exists = true)
+                    .map((event) => event.localFile.file as File)
                     .first;
                 getIt.get<FileManager>().downloadImageCommand(image);
               }
@@ -78,18 +80,19 @@ class ImageScreenState extends State<ImageScreen> {
                 key: ValueKey(image.uri.path),
                 minScale: PhotoViewComputedScale.contained,
                 imageProvider: DownloadFileImage(
-                    image.localFile as File, localFileAvailable),
+                    image.localFile.file as File, localFileAvailable),
               );
             },
             loadingBuilder: (context, event) {
               bool previewExists =
                   widget._images[_currentIndex].previewFile != null &&
-                      widget._images[_currentIndex].previewFile.existsSync();
+                      widget._images[_currentIndex].previewFile.exists;
               return Stack(children: [
                 Container(
                   color: Colors.black,
                   child: previewExists
-                      ? Image.file(widget._images[_currentIndex].previewFile,
+                      ? Image.file(
+                          widget._images[_currentIndex].previewFile.file,
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.contain)
@@ -117,7 +120,7 @@ class ImageScreenState extends State<ImageScreen> {
     return IconButton(
       icon: Icon(Icons.share),
       onPressed: () =>
-          Share.shareFiles([widget._images[_currentIndex].localFile.path]),
+          Share.shareFiles([widget._images[_currentIndex].localFile.file.path]),
     );
   }
 }

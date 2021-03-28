@@ -12,13 +12,13 @@ import 'package:yaga/utils/nextcloud_colors.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/widgets/circle_avatar_icon.dart';
 
-class RemoteImageWidget extends StatelessWidget {
+class RemoteImageWidgetOther extends StatelessWidget {
   final NcFile _file;
   final int cacheWidth;
   final int cacheHeight;
   final bool showFileEnding;
 
-  RemoteImageWidget(
+  RemoteImageWidgetOther(
     this._file, {
     Key key,
     this.cacheWidth,
@@ -83,43 +83,67 @@ class RemoteImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Future.value(this._file.localFile != null)
+          .then((value) => value ? this._file.localFile.file.exists() : value),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return _createDefaultIconPreview(this._file, false, context);
+        }
+
+        return _buildPreview(snapshot.data);
+      },
+    );
+  }
+
+  Widget _buildPreview(bool localFileExists) {
+    return FutureBuilder(
+      future: Future.value(this._file.previewFile != null).then(
+          (value) => value ? this._file.previewFile.file.exists() : value),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return _createDefaultIconPreview(
+              this._file, localFileExists, context);
+        }
+
+        if (snapshot.data) {
+          return _createPreview(context, localFileExists, _file);
+        }
+
+        return _buildLocal(context, localFileExists);
+      },
+    );
+  }
+
+  Widget _createPreview(
+      BuildContext context, bool localFileExists, NcFile file) {
+    return _createIconOverlay(
+      _inkFromImage(file.previewFile.file),
+      _getLocalIcon(file, localFileExists, context),
+    );
+  }
+
+  Widget _buildLocal(BuildContext context, bool localFileExists) {
     return StreamBuilder<NcFile>(
       stream: Rx.merge([
         getIt.get<NextcloudFileManager>().updatePreviewCommand,
         getIt.get<FileManager>().updateImageCommand
-      ])
-          .where((event) => event.uri.path == _file.uri.path)
-          //here we are backpropagating the existing flag to the local file list
-          //this is okay since we do not need to do any imediate action upon this change just have the value in case of resorting
-          .doOnData(
-            (event) => _file.localFile.exists = event.localFile.exists,
-          )
-          .doOnData(
-            (event) => _file.previewFile.exists = event.previewFile.exists,
-          ),
-      initialData: this._file,
+      ]).where((event) => event.uri.path == _file.uri.path),
       builder: (context, snapshot) {
-        NcFile file = snapshot.data;
-        //todo: clean this up
-        bool localExists = file.localFile.exists;
-
-        if (file.previewFile != null && file.previewFile.exists) {
-          return _createIconOverlay(
-            _inkFromImage(snapshot.data.previewFile.file),
-            _getLocalIcon(file, localExists, context),
-          );
+        if (snapshot.hasData) {
+          return _createPreview(context, localFileExists, snapshot.data);
         }
 
         _requestPreviewDownload();
 
-        if (file.localFile != null && localExists) {
+        if (localFileExists) {
           return _createIconOverlay(
-            _inkFromImage(snapshot.data.localFile.file),
-            _getLocalIcon(file, localExists, context),
+            _inkFromImage(_file.localFile.file),
+            _getLocalIcon(_file, localFileExists, context),
           );
         }
 
-        return _createDefaultIconPreview(file, localExists, context);
+        return _createDefaultIconPreview(_file, localFileExists, context);
       },
     );
   }

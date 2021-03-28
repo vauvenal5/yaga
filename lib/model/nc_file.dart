@@ -1,15 +1,14 @@
-import 'dart:io';
-
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
+import 'package:yaga/model/local_file.dart';
 
 class NcFile {
   final bool isDirectory;
   final String name;
   final String fileExtension;
   Uri uri;
-  FileSystemEntity localFile;
-  FileSystemEntity previewFile;
+  LocalFile localFile;
+  LocalFile previewFile;
   DateTime lastModified;
   bool selected = false;
 

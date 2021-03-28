@@ -20,8 +20,8 @@ class FileManager extends FileManagerBase {
                 ._nextCloudService
                 .downloadImage(ncFile.uri)
                 .then((value) async {
-              ncFile.localFile = await _localFileService.createFile(
-                  file: ncFile.localFile,
+              ncFile.localFile.file = await _localFileService.createFile(
+                  file: ncFile.localFile.file,
                   bytes: value,
                   lastModified: ncFile.lastModified);
               return ncFile;
@@ -33,7 +33,7 @@ class FileManager extends FileManagerBase {
 
     downloadImageCommand = RxCommand.createSync((param) => param);
     downloadImageCommand.listen((ncFile) {
-      if (ncFile.localFile != null && ncFile.localFile.existsSync()) {
+      if (ncFile.localFile != null && ncFile.localFile.file.existsSync()) {
         updateImageCommand(ncFile);
         return;
       }

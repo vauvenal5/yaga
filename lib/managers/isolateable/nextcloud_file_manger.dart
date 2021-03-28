@@ -6,6 +6,7 @@ import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/isolateable/sync_manager.dart';
+import 'package:yaga/model/local_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
@@ -47,10 +48,12 @@ class NextcloudFileManager
     _getPreviewCommand
         .asyncMap((ncFile) =>
             this._nextCloudService.getPreview(ncFile.uri).then((value) async {
-              ncFile.previewFile = await _localFileService.createFile(
-                  file: ncFile.previewFile,
+              ncFile.previewFile.file = await _localFileService.createFile(
+                  file: ncFile.previewFile.file,
                   bytes: value,
                   lastModified: ncFile.lastModified);
+              ncFile.previewFile.exists = true;
+              _logger.fine("Preview fetched. (${ncFile.uri})");
               return ncFile;
             }, onError: (err, stacktrace) {
               _logger.severe(
@@ -65,7 +68,8 @@ class NextcloudFileManager
         .listen((value) => updatePreviewCommand(value));
 
     downloadPreviewCommand.listen((ncFile) {
-      if (ncFile.previewFile != null && ncFile.previewFile.existsSync()) {
+      if (ncFile.previewFile != null && ncFile.previewFile.file.existsSync()) {
+        ncFile.previewFile.exists = true;
         updatePreviewCommand(ncFile);
         return;
       }
@@ -114,10 +118,8 @@ class NextcloudFileManager
   Stream<NcFile> _listNextcloudFilesUpstream(Uri uri) {
     return _nextCloudService.list(uri).asyncMap((file) async {
       if (!file.isDirectory) {
-        file.localFile =
-            File.fromUri(await _mappingManager.mapToLocalUri(file.uri));
-        file.previewFile =
-            File.fromUri(await _mappingManager.mapToTmpUri(file.uri));
+        file.localFile = await _createLocalFile(file.uri);
+        file.previewFile = await _createTmpFile(file.uri);
       }
       return file;
     });
@@ -144,8 +146,7 @@ class NextcloudFileManager
           //todo: should this be a FileSystemEntity?
           // file.localFile = await _mappingManager.mapToLocalFile(file.uri);
           if (!file.isDirectory) {
-            file.previewFile =
-                File.fromUri(await _mappingManager.mapToTmpUri(file.uri));
+            file.previewFile = await _createTmpFile(file.uri);
           }
           return file;
         },
@@ -161,8 +162,7 @@ class NextcloudFileManager
           //todo: should this be a FileSystemEntity?
           if (!file.isDirectory) {
             file.previewFile = file.localFile;
-            file.localFile =
-                File.fromUri(await _mappingManager.mapToLocalUri(file.uri));
+            file.localFile = await _createLocalFile(file.uri);
           }
           // file.previewFile = _localFileService.getTmpFile(file.uri.path);
           return file;
@@ -197,8 +197,8 @@ class NextcloudFileManager
 
   Future<NcFile> _deleteLocalFile(NcFile file) async {
     _logger.warning("Removing local file! (${file.uri.path})");
-    this._localFileService.deleteFile(file.localFile);
-    this._localFileService.deleteFile(file.previewFile);
+    this._localFileService.deleteFile(file.localFile.file);
+    this._localFileService.deleteFile(file.previewFile.file);
     this._fileManager.updateFileList(file);
     return file;
   }
@@ -206,7 +206,8 @@ class NextcloudFileManager
   @override
   Future<NcFile> deleteFile(NcFile file, bool local) async {
     if (local) {
-      this._localFileService.deleteFile(file.localFile);
+      this._localFileService.deleteFile(file.localFile.file);
+      file.localFile.exists = false;
       this._fileManager.updateImageCommand(file);
       return file;
     }
@@ -224,4 +225,20 @@ class NextcloudFileManager
   @override
   Future<NcFile> moveFile(NcFile file, Uri destination, bool overwrite) =>
       this._nextCloudService.moveFile(file, destination, overwrite);
+
+  Future<LocalFile> _createLocalFile(Uri uri) async {
+    final file = LocalFile(
+      File.fromUri(await _mappingManager.mapToLocalUri(uri)),
+    );
+    file.exists = file.file.existsSync();
+    return file;
+  }
+
+  Future<LocalFile> _createTmpFile(Uri uri) async {
+    final file = LocalFile(
+      File.fromUri(await _mappingManager.mapToTmpUri(uri)),
+    );
+    file.exists = file.file.existsSync();
+    return file;
+  }
 }

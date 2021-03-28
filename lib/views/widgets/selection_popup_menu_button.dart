@@ -48,7 +48,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
   void _popupMenuHandler(BuildContext context, SelectionViewMenu result) {
     if (result == SelectionViewMenu.share) {
       if (fileListLocalManager.selected
-              .where((element) => !element.localFile.existsSync())
+              .where((element) => !element.localFile.exists)
               .toList()
               .length >
           0) {
@@ -60,8 +60,9 @@ class SelectionPopupMenuButton extends StatelessWidget {
         return;
       }
 
-      Share.shareFiles(
-          fileListLocalManager.selected.map((e) => e.localFile.path).toList());
+      Share.shareFiles(fileListLocalManager.selected
+          .map((e) => e.localFile.file.path)
+          .toList());
       return;
     }
 

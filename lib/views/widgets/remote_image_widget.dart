@@ -26,12 +26,12 @@ class RemoteImageWidget extends StatelessWidget {
     this.showFileEnding = true,
   }) : super(key: key);
 
-  Widget _createIconOverlay(Ink mainWidget, Widget iconWidget) {
+  Widget _createIconOverlay(BuildContext context, Ink mainWidget) {
     List<Widget> children = <Widget>[
       mainWidget,
       Align(
         alignment: Alignment.bottomRight,
-        child: CircleAvatarIcon(icon: iconWidget),
+        child: CircleAvatarIcon(icon: _getLocalIcon(context)),
       ),
     ];
 
@@ -62,9 +62,9 @@ class RemoteImageWidget extends StatelessWidget {
         fit: BoxFit.cover,
       );
 
-  Widget _getLocalIcon(NcFile file, bool localExists, BuildContext context) {
-    if (getIt.get<NextCloudService>().isUriOfService(file.uri)) {
-      if (localExists) {
+  Widget _getLocalIcon(BuildContext context) {
+    if (getIt.get<NextCloudService>().isUriOfService(_file.uri)) {
+      if (_file.localFile.exists) {
         return Icon(
           Icons.check_circle,
           color: Colors.green,
@@ -85,47 +85,49 @@ class RemoteImageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder<NcFile>(
       stream: Rx.merge([
-        getIt.get<NextcloudFileManager>().updatePreviewCommand,
-        getIt.get<FileManager>().updateImageCommand
-      ])
-          .where((event) => event.uri.path == _file.uri.path)
-          //here we are backpropagating the existing flag to the local file list
-          //this is okay since we do not need to do any imediate action upon this change just have the value in case of resorting
-          .doOnData(
-            (event) => _file.localFile.exists = event.localFile.exists,
-          )
-          .doOnData(
-            (event) => _file.previewFile.exists = event.previewFile.exists,
-          ),
+        getIt
+            .get<NextcloudFileManager>()
+            .updatePreviewCommand
+            .where((event) => event.uri.path == _file.uri.path)
+            //here we are backpropagating the existing flag to the local file list
+            //this is okay since we do not need to do any imediate action upon this change just have the value in case of resorting
+            .doOnData(
+              (event) => _file.previewFile = event.previewFile,
+            ),
+        getIt
+            .get<FileManager>()
+            .updateImageCommand
+            .where((event) => event.uri.path == _file.uri.path)
+            //here we are backpropagating the existing flag to the local file list
+            //this is okay since we do not need to do any imediate action upon this change just have the value in case of resorting
+            .doOnData(
+              (event) => _file.localFile = event.localFile,
+            )
+      ]),
       initialData: this._file,
       builder: (context, snapshot) {
-        NcFile file = snapshot.data;
-        //todo: clean this up
-        bool localExists = file.localFile.exists;
-
-        if (file.previewFile != null && file.previewFile.exists) {
+        if (_file.previewFile.exists) {
           return _createIconOverlay(
+            context,
             _inkFromImage(snapshot.data.previewFile.file),
-            _getLocalIcon(file, localExists, context),
           );
         }
 
         _requestPreviewDownload();
 
-        if (file.localFile != null && localExists) {
+        if (_file.localFile.exists) {
           return _createIconOverlay(
+            context,
             _inkFromImage(snapshot.data.localFile.file),
-            _getLocalIcon(file, localExists, context),
           );
         }
 
-        return _createDefaultIconPreview(file, localExists, context);
+        return _createDefaultIconPreview(context);
       },
     );
   }
 
-  Widget _createDefaultIconPreview(
-      NcFile file, bool localExists, BuildContext context) {
+  Widget _createDefaultIconPreview(BuildContext context) {
     final children = <Widget>[
       SvgPicture.asset(
         "assets/icon/foreground_no_border.svg",
@@ -140,13 +142,13 @@ class RemoteImageWidget extends StatelessWidget {
     }
 
     return _createIconOverlay(
+      context,
       Ink(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: children,
         ),
       ),
-      _getLocalIcon(file, localExists, context),
     );
   }
 

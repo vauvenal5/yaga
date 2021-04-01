@@ -18,7 +18,7 @@ default_platform(:android)
 platform :android do
   lane :internal do
     Dir.chdir("..") do
-      sh(".fvm/flutter_sdk/bin/flutter build appbundle --flavor play")
+      sh("flutter build appbundle --flavor play")
     end
 
     upload_to_play_store(
@@ -68,7 +68,7 @@ platform :android do
 
   lane :github do 
     Dir.chdir("..") do
-      sh(".fvm/flutter_sdk/bin/flutter build apk --flavor play")
+      sh("flutter build apk --flavor play")
     end
 
     version = get_version()

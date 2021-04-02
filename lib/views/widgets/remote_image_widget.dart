@@ -106,7 +106,7 @@ class RemoteImageWidget extends StatelessWidget {
       ]),
       initialData: this._file,
       builder: (context, snapshot) {
-        if (_file.previewFile.exists) {
+        if (_file.previewFile != null && _file.previewFile.exists) {
           return _createIconOverlay(
             context,
             _inkFromImage(snapshot.data.previewFile.file),
@@ -115,7 +115,7 @@ class RemoteImageWidget extends StatelessWidget {
 
         _requestPreviewDownload();
 
-        if (_file.localFile.exists) {
+        if (_file.localFile != null && _file.localFile.exists) {
           return _createIconOverlay(
             context,
             _inkFromImage(snapshot.data.localFile.file),

@@ -21,6 +21,7 @@ import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
+import 'package:yaga/utils/forground_worker/bridges/file_manager_bridge.dart';
 import 'package:yaga/utils/forground_worker/bridges/nextcloud_manager_bridge.dart';
 import 'package:yaga/utils/forground_worker/bridges/settings_manager_bridge.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
@@ -120,10 +121,18 @@ void setupServiceLocator() {
             await getIt.getAsync<ForegroundWorker>(),
             await getIt.getAsync<NextcloudFileManager>(),
           ));
-  getIt.registerSingletonAsync<SettingsManagerBridge>(() async =>
-      SettingsManagerBridge(await getIt.getAsync<SettingsManager>(),
-              await getIt.getAsync<ForegroundWorker>())
-          .init());
+  getIt.registerSingletonAsync<SettingsManagerBridge>(
+    () async => SettingsManagerBridge(
+      await getIt.getAsync<SettingsManager>(),
+      await getIt.getAsync<ForegroundWorker>(),
+    ).init(),
+  );
+  getIt.registerSingletonAsync<FileManagerBridge>(
+    () async => FileManagerBridge(
+      await getIt.getAsync<FileManager>(),
+      await getIt.getAsync<ForegroundWorker>(),
+    ),
+  );
 
   getIt.registerSingletonAsync(() async => await PackageInfo.fromPlatform());
 
@@ -143,29 +152,6 @@ void setupIsolatedServiceLocator(
   getIt.registerSingletonAsync<NextCloudClientFactory>(
     () async => NextCloudClientFactory(
       await getIt.getAsync<SelfSignedCertHandler>(),
-    ),
-  );
-
-  // Handlers
-  getIt.registerSingletonAsync<NextcloudFileManagerHandler>(
-    () async => NextcloudFileManagerHandler().initIsolated(
-      init,
-      isolateToMain,
-      registry,
-    ),
-  );
-  getIt.registerSingletonAsync<FileListRequestHandler>(
-    () async => FileListRequestHandler().initIsolated(
-      init,
-      isolateToMain,
-      registry,
-    ),
-  );
-  getIt.registerSingletonAsync<UserHandler>(
-    () async => UserHandler().initIsolated(
-      init,
-      isolateToMain,
-      registry,
     ),
   );
 
@@ -216,4 +202,32 @@ void setupIsolatedServiceLocator(
         await getIt.getAsync<LocalFileService>(),
         await getIt.getAsync<SystemLocationService>(),
       ).initIsolated(init, isolateToMain));
+
+  // Handlers
+  getIt.registerSingletonAsync<NextcloudFileManagerHandler>(
+    () async => NextcloudFileManagerHandler(
+      await getIt.getAsync<NextcloudFileManager>(),
+      isolateToMain,
+    ).initIsolated(
+      init,
+      isolateToMain,
+      registry,
+    ),
+  );
+
+  getIt.registerSingletonAsync<FileListRequestHandler>(
+    () async => FileListRequestHandler().initIsolated(
+      init,
+      isolateToMain,
+      registry,
+    ),
+  );
+
+  getIt.registerSingletonAsync<UserHandler>(
+    () async => UserHandler().initIsolated(
+      init,
+      isolateToMain,
+      registry,
+    ),
+  );
 }

@@ -1,5 +1,4 @@
 import 'dart:isolate';
-
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
@@ -28,6 +27,21 @@ class NextcloudFileManagerHandler
     registry.registerHandler<DownloadPreviewRequest>(
         (msg) => this.handleDownloadPreview(msg, isolateToMain));
     return this;
+  }
+
+  NextcloudFileManagerHandler(
+    NextcloudFileManager nextcloudFileManager,
+    SendPort isolateToMain,
+  ) {
+    nextcloudFileManager.updatePreviewCommand.listen((file) {
+      isolateToMain.send(DownloadPreviewComplete("", file));
+    });
+
+    nextcloudFileManager.downloadPreviewFaildCommand.listen(
+      (file) => isolateToMain.send(
+        DownloadPreviewComplete("", file, success: false),
+      ),
+    );
   }
 
   void handleDelete(DeleteFilesRequest message, SendPort isolateToMain) {
@@ -76,16 +90,6 @@ class NextcloudFileManagerHandler
     DownloadPreviewRequest msg,
     SendPort isolateToMain,
   ) {
-    getIt.get<NextcloudFileManager>().updatePreviewCommand.listen((file) {
-      isolateToMain.send(DownloadPreviewComplete("", file));
-    });
-
-    getIt.get<NextcloudFileManager>().downloadPreviewFaildCommand.listen(
-          (file) => isolateToMain.send(
-            DownloadPreviewComplete("", file, success: false),
-          ),
-        );
-
     getIt.get<NextcloudFileManager>().downloadPreviewCommand(msg.file);
   }
 }

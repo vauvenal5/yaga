@@ -20,10 +20,10 @@ class IntentService extends Service<IntentService> {
 
   Future<bool> setSelectedFile(NcFile file) async {
     //todo: maybe we should keep the mime tipe in the NcFile object
-    String mime = lookupMimeType(file.localFile.path);
+    String mime = lookupMimeType(file.localFile.file.path);
     return _intentChannel.invokeMethod("setSelectedFile", {
       "name": file.name,
-      "path": file.localFile.path,
+      "path": file.localFile.file.path,
       "mime": mime,
     });
   }

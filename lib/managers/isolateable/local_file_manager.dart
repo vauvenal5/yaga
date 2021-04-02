@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:mime/mime.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
+import 'package:yaga/model/local_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
@@ -57,7 +58,8 @@ class LocalFileManager
       Uri uri = this._systemPathService.internalUriFromAbsolute(event.uri);
 
       NcFile file = _createFile(uri, event);
-      file.localFile = event;
+      file.localFile = LocalFile(event);
+      file.localFile.exists = event.existsSync();
       return file;
     });
   }
@@ -78,13 +80,14 @@ class LocalFileManager
       UriUtils.getNameFromUri(uri),
       lookupMimeType(event.path),
     );
+    //todo: this value is not necessarily correct(!)
     file.lastModified = (event as File).lastModifiedSync().toUtc();
     return file;
   }
 
   @override
   Future<NcFile> deleteFile(NcFile file, bool local) async {
-    this._localFileService.deleteFile(file.localFile);
+    this._localFileService.deleteFile(file.localFile.file);
     this._fileManager.updateFileList(file);
     return file;
   }

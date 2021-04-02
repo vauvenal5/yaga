@@ -72,6 +72,12 @@ class NextCloudService
         ._client
         .webDav
         .ls(dir.path)
+        //todo: this will improve responsiveness in case of a bad connection but it can not be used as long
+        // as we are using the sync manager for deletes and not the activity log.
+        // .catchError((err) {
+        //   _logError(err);
+        //   return <WebDavFile>[];
+        // })
         .asStream()
         .flatMap((value) => Stream.fromIterable(value))
         .where(
@@ -102,13 +108,10 @@ class NextCloudService
       file.lastModified = webDavFile.lastModified;
 
       return file;
-    }).doOnError(
-      (error, stacktrace) => logger.severe(
-        "Unexpected error while loading list",
-        error,
-        stacktrace,
-      ),
-    ); //.toList --> todo: should this return a Future<List> since the data is actually allready downloaded?
+    }).doOnError((error, stacktrace) {
+      _logError(error);
+    });
+    //.toList --> todo: should this return a Future<List> since the data is actually allready downloaded?
   }
 
   Future<Uint8List> getAvatar() => this
@@ -172,6 +175,11 @@ class NextCloudService
       .then((_) => file);
 
   void _logAndRethrow(dynamic err) {
+    _logError(err);
+    throw err;
+  }
+
+  void _logError(dynamic err) {
     if (err is RequestException) {
       logger.severe("Nextcloud url: ${err.url}");
       logger.severe("Nextcloud method: ${err.method}");
@@ -180,6 +188,5 @@ class NextCloudService
     } else {
       logger.severe(err);
     }
-    throw err;
   }
 }

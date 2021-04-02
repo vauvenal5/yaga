@@ -1,0 +1,2 @@
+- improve logging in list error cases
+- replace loading indicator for previews with default image

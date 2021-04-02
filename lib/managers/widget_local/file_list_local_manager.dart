@@ -115,6 +115,9 @@ class FileListLocalManager {
                 event.uri.toString().startsWith(uri.toString())))
         .listen((event) {
       if (event is FileListResponse) {
+        _logger.warning(
+          "${event.key} (received list - #images: ${event.files.files.length})",
+        );
         // if uri is not equal then it could be a sub dir loaded by the copy command for example
         if (event.key == this.managerKey && event.uri == uri) {
           _showNewFiles(event.files);

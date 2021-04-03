@@ -16,14 +16,14 @@ import 'package:rxdart/rxdart.dart';
 class ImageScreen extends StatefulWidget {
   static const String route = "/image";
   final List<NcFile> _images;
-  final PageController pageController;
+  final int index;
   final String title;
 
   ImageScreen(
     this._images,
-    int index, {
+    this.index, {
     this.title,
-  }) : pageController = PageController(initialPage: index);
+  });
 
   @override
   State<StatefulWidget> createState() => ImageScreenState();
@@ -32,10 +32,12 @@ class ImageScreen extends StatefulWidget {
 class ImageScreenState extends State<ImageScreen> {
   String _title;
   int _currentIndex;
+  PageController pageController;
 
   @override
   void initState() {
-    this._currentIndex = widget.pageController.initialPage;
+    pageController = PageController(initialPage: widget.index);
+    this._currentIndex = pageController.initialPage;
     this._title = widget._images[_currentIndex].name;
     super.initState();
   }
@@ -56,7 +58,7 @@ class ImageScreenState extends State<ImageScreen> {
         ),
         body: Stack(children: [
           PhotoViewGallery.builder(
-            pageController: widget.pageController,
+            pageController: pageController,
             onPageChanged: _onPageChanged,
             itemCount: widget._images.length,
             builder: (BuildContext context, int index) {

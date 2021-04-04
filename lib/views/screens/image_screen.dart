@@ -11,6 +11,7 @@ import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/utils/download_file_image.dart';
+import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -31,6 +32,7 @@ class ImageScreen extends StatefulWidget {
 }
 
 class ImageScreenState extends State<ImageScreen> {
+  final _logger = YagaLogger.getLogger(ImageScreenState);
   String _title;
   int _currentIndex;
   PageController pageController;
@@ -63,6 +65,8 @@ class ImageScreenState extends State<ImageScreen> {
         itemCount: widget._images.length,
         builder: (BuildContext context, int index) {
           NcFile image = widget._images[index];
+
+          _logger.fine("Building view for index $index");
 
           Future<FetchedFile> localFileAvailable = getIt
               .get<FileManager>()

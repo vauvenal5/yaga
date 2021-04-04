@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_manager_base.dart';
+import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
@@ -24,17 +27,20 @@ class FileManager extends FileManagerBase {
                   file: ncFile.localFile.file,
                   bytes: value,
                   lastModified: ncFile.lastModified);
-              return ncFile;
+              return FetchedFile(ncFile, value);
             }, onError: (err) {
               return null;
             }))
         .where((event) => event != null)
-        .listen((value) => updateImageCommand(value));
+        .listen((value) => fetchedFileCommand(value));
 
     downloadImageCommand = RxCommand.createSync((param) => param);
-    downloadImageCommand.listen((ncFile) {
+    downloadImageCommand.listen((ncFile) async {
       if (ncFile.localFile != null && ncFile.localFile.file.existsSync()) {
-        updateImageCommand(ncFile);
+        fetchedFileCommand(FetchedFile(
+          ncFile,
+          await (ncFile.localFile.file as File).readAsBytes(),
+        ));
         return;
       }
       this._getImageCommand(ncFile);

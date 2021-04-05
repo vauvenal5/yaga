@@ -87,9 +87,7 @@ void setupServiceLocator() {
       await getIt.getAsync<NextCloudService>(),
       await getIt.getAsync<SystemLocationService>()));
   getIt.registerSingletonAsync(() async => SyncManager());
-  getIt.registerSingletonAsync(() async => FileManager(
-      await getIt.getAsync<NextCloudService>(),
-      await getIt.getAsync<LocalFileService>()));
+  getIt.registerSingletonAsync(() async => FileManager());
   getIt.registerSingletonAsync<NextcloudFileManager>(() async =>
       NextcloudFileManager(
           await getIt.getAsync<FileManager>(),

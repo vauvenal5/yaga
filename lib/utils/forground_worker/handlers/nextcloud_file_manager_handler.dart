@@ -1,8 +1,14 @@
+import 'dart:io';
 import 'dart:isolate';
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
+import 'package:yaga/model/fetched_file.dart';
+import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/services/isolateable/local_file_service.dart';
+import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
+import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
@@ -26,6 +32,8 @@ class NextcloudFileManagerHandler
     registry.registerHandler<FilesActionDone>((msg) => this.handleCancel(msg));
     registry.registerHandler<DownloadPreviewRequest>(
         (msg) => this.handleDownloadPreview(msg, isolateToMain));
+    registry.registerHandler<DownloadFileRequest>(
+        (msg) => this.handleDownload(msg, isolateToMain));
     return this;
   }
 
@@ -91,5 +99,29 @@ class NextcloudFileManagerHandler
     SendPort isolateToMain,
   ) {
     getIt.get<NextcloudFileManager>().downloadPreviewCommand(msg.file);
+  }
+
+  void handleDownload(
+    DownloadFileRequest request,
+    SendPort isolateToMain,
+  ) async {
+    NcFile ncFile = request.file;
+    if (ncFile.localFile != null && await ncFile.localFile.file.exists()) {
+      ncFile.localFile.exists = true;
+      isolateToMain.send(FetchedFile(
+        ncFile,
+        await (ncFile.localFile.file as File).readAsBytes(),
+      ));
+      return;
+    }
+
+    getIt.get<NextCloudService>().downloadImage(ncFile.uri).then((value) async {
+      ncFile.localFile.file = await getIt.get<LocalFileService>().createFile(
+          file: ncFile.localFile.file,
+          bytes: value,
+          lastModified: ncFile.lastModified);
+      ncFile.localFile.exists = true;
+      isolateToMain.send(FetchedFile(ncFile, value));
+    });
   }
 }

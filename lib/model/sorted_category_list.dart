@@ -76,15 +76,16 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
 
     final filtered = SortedCategoryList(config, folders: filteredFolders);
 
-    this.categorizedFiles.forEach((key, value) {
-      final filteredCat = value
+    this.categories.forEach((cat) {
+      final filteredCat = this
+          .categorizedFiles[cat]
           .where(
             (element) => filter(element),
           )
           .toList();
       if (filteredCat.isNotEmpty) {
-        filtered.categories.add(key);
-        filtered.categorizedFiles[key] = filteredCat;
+        filtered.categories.add(cat);
+        filtered.categorizedFiles[cat] = filteredCat;
       }
     });
 

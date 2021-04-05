@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui show Codec;
 
 import 'package:flutter/rendering.dart';
+import 'package:yaga/model/fetched_file.dart';
 
 class DownloadFileImage extends FileImage {
-  final Future<File> localFileAvailable;
+  final Future<FetchedFile> localFileAvailable;
 
   DownloadFileImage(File file, this.localFileAvailable) : super(file);
 
@@ -24,18 +24,16 @@ class DownloadFileImage extends FileImage {
   Future<ui.Codec> _loadAsync(FileImage key, DecoderCallback decode) async {
     assert(key == this);
 
-    File localFile = await localFileAvailable;
-    assert(localFile.path == this.file.path);
+    FetchedFile fetchedFile = await localFileAvailable;
+    assert(fetchedFile.file.localFile.file.path == this.file.path);
 
-    final Uint8List bytes = await file.readAsBytes();
-
-    if (bytes.lengthInBytes == 0) {
+    if (fetchedFile.data.lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError(
           '${file.uri.toString()} is empty and cannot be loaded as an image.');
     }
 
-    return await decode(bytes);
+    return await decode(fetchedFile.data);
   }
 }

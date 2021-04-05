@@ -1,0 +1,2 @@
+- move download to background
+- fix bug in category search

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
+import 'package:yaga/managers/isolateable/isolated_global_settings_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -116,11 +117,14 @@ class NextcloudFileManagerHandler
     }
 
     getIt.get<NextCloudService>().downloadImage(ncFile.uri).then((value) async {
-      ncFile.localFile.file = await getIt.get<LocalFileService>().createFile(
-          file: ncFile.localFile.file,
-          bytes: value,
-          lastModified: ncFile.lastModified);
-      ncFile.localFile.exists = true;
+      if (getIt.get<IsolatedGlobalSettingsManager>().autoPersist.value) {
+        ncFile.localFile.file = await getIt.get<LocalFileService>().createFile(
+            file: ncFile.localFile.file,
+            bytes: value,
+            lastModified: ncFile.lastModified);
+        ncFile.localFile.exists = true;
+      }
+
       isolateToMain.send(FetchedFile(ncFile, value));
     });
   }

@@ -4,6 +4,7 @@ import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preferences/action_preference.dart';
+import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
@@ -19,6 +20,10 @@ class GlobalSettingsManager {
   static SectionPreference ncSection = SectionPreference((b) => b
     ..key = "nc"
     ..title = "Nextcloud");
+  static BoolPreference autoPersist = BoolPreference((b) => b
+    ..key = ncSection.prepareKey("autoPersist")
+    ..title = "Persist on View Image"
+    ..value = true);
   static SectionPreference appSection = SectionPreference((b) => b
     ..key = "app"
     ..title = "General");
@@ -80,6 +85,7 @@ class GlobalSettingsManager {
 
       _settingsManager.removeMappingPreferenceCommand(mapping);
       this.removeGlobalSettingCommand(mapping);
+      this.removeGlobalSettingCommand(autoPersist);
       this.removeGlobalSettingCommand(ncSection);
     });
 
@@ -127,6 +133,7 @@ class GlobalSettingsManager {
 
       this.registerGlobalSettingCommand(ncSection);
       this.registerGlobalSettingCommand(mapping);
+      this.registerGlobalSettingCommand(autoPersist);
 
       _settingsManager.loadMappingPreferenceCommand(mapping);
     }

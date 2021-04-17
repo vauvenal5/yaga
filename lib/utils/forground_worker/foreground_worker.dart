@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
+import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/messages/flush_logs_message.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
@@ -23,6 +24,7 @@ class ForegroundWorker {
   final NextCloudManager _nextCloudManager;
   final GlobalSettingsManager _globalSettingsManager;
   final SelfSignedCertHandler _selfSignedCertHandler;
+  final SharedPreferencesService _sharedPreferencesService;
 
   RxCommand<Message, Message> isolateResponseCommand =
       RxCommand.createSync((param) => param);
@@ -31,6 +33,7 @@ class ForegroundWorker {
     this._nextCloudManager,
     this._globalSettingsManager,
     this._selfSignedCertHandler,
+    this._sharedPreferencesService,
   );
 
   Future<ForegroundWorker> get isolateReadyFuture => _isolateReady.future;
@@ -64,6 +67,9 @@ class ForegroundWorker {
         _nextCloudManager.updateLoginStateCommand.lastResult,
         _globalSettingsManager.updateRootMappingPreference.lastResult,
         _selfSignedCertHandler.fingerprint,
+        _sharedPreferencesService.loadPreferenceFromBool(
+          GlobalSettingsManager.autoPersist,
+        ),
       ),
       errorsAreFatal: false,
       onError: isolateToMain.sendPort,

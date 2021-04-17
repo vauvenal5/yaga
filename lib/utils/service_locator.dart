@@ -5,6 +5,7 @@ import 'package:package_info/package_info.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
+import 'package:yaga/managers/isolateable/isolated_global_settings_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
 import 'package:yaga/managers/isolateable/local_file_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
@@ -112,6 +113,7 @@ void setupServiceLocator() {
         await getIt.getAsync<NextCloudManager>(),
         await getIt.getAsync<GlobalSettingsManager>(),
         await getIt.getAsync<SelfSignedCertHandler>(),
+        await getIt.getAsync<SharedPreferencesService>(),
       ).init());
   getIt.registerSingletonAsync<NextcloudManagerBridge>(
       () async => NextcloudManagerBridge(
@@ -200,6 +202,12 @@ void setupIsolatedServiceLocator(
         await getIt.getAsync<LocalFileService>(),
         await getIt.getAsync<SystemLocationService>(),
       ).initIsolated(init, isolateToMain));
+
+  getIt.registerSingletonAsync<IsolatedGlobalSettingsManager>(
+    () async => IsolatedGlobalSettingsManager(
+      await getIt.getAsync<IsolatedSettingsManager>(),
+    ).initIsolated(init, isolateToMain),
+  );
 
   // Handlers
   getIt.registerSingletonAsync<NextcloudFileManagerHandler>(

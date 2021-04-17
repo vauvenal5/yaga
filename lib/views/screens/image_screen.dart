@@ -72,7 +72,6 @@ class ImageScreenState extends State<ImageScreen> {
               .get<FileManager>()
               .fetchedFileCommand
               .where((event) => event.file.uri.path == image.uri.path)
-              .doOnData((event) => image.localFile.exists = true)
               .first;
           getIt.get<FileManager>().downloadImageCommand(image);
 

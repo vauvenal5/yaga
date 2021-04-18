@@ -117,7 +117,8 @@ class NextcloudFileManagerHandler
     }
 
     getIt.get<NextCloudService>().downloadImage(ncFile.uri).then((value) async {
-      if (getIt.get<IsolatedGlobalSettingsManager>().autoPersist.value) {
+      if (request.overrideGlobalPersistFlag ||
+          getIt.get<IsolatedGlobalSettingsManager>().autoPersist.value) {
         ncFile.localFile.file = await getIt.get<LocalFileService>().createFile(
             file: ncFile.localFile.file,
             bytes: value,

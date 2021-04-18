@@ -20,7 +20,7 @@ class FileManagerBridge {
         .listen((event) => this._fileManager.fetchedFileCommand(event));
 
     _fileManager.downloadImageCommand.listen(
-      (value) => _worker.sendRequest(DownloadFileRequest(value)),
+      (value) => _worker.sendRequest(value),
     );
   }
 }

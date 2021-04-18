@@ -11,9 +11,9 @@ import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/intent_service.dart';
 import 'package:yaga/utils/download_file_image.dart';
+import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/service_locator.dart';
-import 'package:rxdart/rxdart.dart';
 
 class ImageScreen extends StatefulWidget {
   static const String route = "/image";
@@ -73,7 +73,9 @@ class ImageScreenState extends State<ImageScreen> {
               .fetchedFileCommand
               .where((event) => event.file.uri.path == image.uri.path)
               .first;
-          getIt.get<FileManager>().downloadImageCommand(image);
+          getIt.get<FileManager>().downloadImageCommand(
+                DownloadFileRequest(image),
+              );
 
           return PhotoViewGalleryPageOptions(
             key: ValueKey(image.uri.path),

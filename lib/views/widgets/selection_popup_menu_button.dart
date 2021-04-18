@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
+import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
+import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
+import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
 import 'package:yaga/views/widgets/selection_action_cancel_dialog.dart';
 import 'package:yaga/views/widgets/action_danger_dialog.dart';
 import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
 
-enum SelectionViewMenu { share, delete, copy, move }
+enum SelectionViewMenu { share, delete, copy, move, download }
 
 class SelectionPopupMenuButton extends StatelessWidget {
   final FileListLocalManager fileListLocalManager;
@@ -42,6 +45,10 @@ class SelectionPopupMenuButton extends StatelessWidget {
         child: ListMenuEntry(Icons.forward, "Move"),
         value: SelectionViewMenu.move,
       ),
+      PopupMenuItem(
+        child: ListMenuEntry(Icons.file_download, "Download"),
+        value: SelectionViewMenu.download,
+      ),
     ];
   }
 
@@ -52,7 +59,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
               .toList()
               .length >
           0) {
-        Scaffold.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content:
               Text("Currently sharing supports only already downloaded files."),
           behavior: SnackBarBehavior.floating,
@@ -135,6 +142,18 @@ class SelectionPopupMenuButton extends StatelessWidget {
           ),
         ),
       );
+    }
+
+    if (result == SelectionViewMenu.download) {
+      fileListLocalManager.selected.forEach(
+        (file) {
+          getIt.get<FileManager>().downloadImageCommand(
+                DownloadFileRequest(file, overrideGlobalPersistFlag: true),
+              );
+        },
+      );
+
+      fileListLocalManager.deselectAll();
     }
   }
 

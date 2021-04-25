@@ -1,0 +1,2 @@
+- fix url validation issue
+- improve logging

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:string_validator/string_validator.dart';
+import 'package:validators/sanitizers.dart';
+import 'package:validators/validators.dart';
 
 class AddressFormSimple extends StatelessWidget {
   final GlobalKey<FormState> _formKey;
@@ -16,8 +17,11 @@ class AddressFormSimple extends StatelessWidget {
         decoration: InputDecoration(
             labelText: "Nextcloud Server address https://...",
             icon: Icon(Icons.cloud_queue)),
-        onSaved: (value) => _onSave(Uri.parse('https://${rtrim(value, "/")}')),
+        onSaved: (value) => _onSave(
+          Uri.parse('https://${rtrim(value.trim(), "/")}'),
+        ),
         validator: (value) {
+          value = value.trim();
           if (value.startsWith("https://") || value.startsWith("http://")) {
             return "Https will be added automaically.";
           }

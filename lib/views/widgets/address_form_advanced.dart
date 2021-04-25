@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:string_validator/string_validator.dart';
+import 'package:validators/sanitizers.dart';
 
 class AddressFormAdvanced extends StatelessWidget {
   final GlobalKey<FormState> _formKey;
@@ -18,7 +18,9 @@ class AddressFormAdvanced extends StatelessWidget {
             icon: Icon(Icons.cloud_queue),
             helperStyle: TextStyle(color: Colors.orange),
             helperText: "Validation is disabled."),
-        onSaved: (value) => _onSave(Uri.parse(rtrim(value, "/"))),
+        onSaved: (value) => _onSave(
+          Uri.parse(rtrim(value.trim(), "/")),
+        ),
         initialValue: "https://",
       ),
     );

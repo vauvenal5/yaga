@@ -49,6 +49,13 @@ class YagaLogger {
   };
 
   static Future<void> init({bool isolate = false}) async {
+    YagaLogger._fileHandler = LogErrorFileHandler(
+      File.fromUri(isolate ? YagaLogger._isolateLogUri : YagaLogger._logUri),
+      printLogs: true,
+    );
+
+    await YagaLogger._fileHandler.init();
+
     ansiColorDisabled = false;
     Logger.root.level = Level.INFO;
     Logger.root.onRecord.listen((record) {
@@ -67,13 +74,6 @@ class YagaLogger {
         YagaLogger._fileHandler.writeLineToFile(log);
       });
     });
-
-    YagaLogger._fileHandler = LogErrorFileHandler(
-      File.fromUri(isolate ? YagaLogger._isolateLogUri : YagaLogger._logUri),
-      printLogs: true,
-    );
-
-    await YagaLogger._fileHandler.init();
   }
 
   static Future<void> printBaseLog() async {

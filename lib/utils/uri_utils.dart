@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:string_validator/string_validator.dart';
+import 'package:validators/sanitizers.dart';
 
 class UriUtils {
   static Uri fromUri({

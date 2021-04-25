@@ -57,6 +57,8 @@ class NextCloudService
       loginData.user,
     );
 
+    //todo: why is logging here not possible?
+
     return this._origin;
   }
 
@@ -68,6 +70,8 @@ class NextCloudService
 
   @override
   Stream<NcFile> list(Uri dir) {
+    logger.info("Listing ${dir.toString()}");
+    logger.info("NcOrigin: ${_origin.userEncodedDomainRoot}");
     return this
         ._client
         .webDav
@@ -84,6 +88,7 @@ class NextCloudService
           (event) => event.isDirectory || event.mimeType.startsWith("image"),
         )
         .map((webDavFile) {
+      logger.info("Mapping ${webDavFile.path}");
       //todo: here we are hiding the origin path, if any, because we are not interested in it, the much bigger problem is:
       // we cannot assume that the origin is depictable by url.host
       // furthermore for identifing the upstream of a file we actually need an origin-url + username
@@ -109,7 +114,7 @@ class NextCloudService
 
       return file;
     }).doOnError((error, stacktrace) {
-      _logError(error);
+      _logError(error, stacktrace: stacktrace);
     });
     //.toList --> todo: should this return a Future<List> since the data is actually allready downloaded?
   }
@@ -179,14 +184,15 @@ class NextCloudService
     throw err;
   }
 
-  void _logError(dynamic err) {
+  void _logError(dynamic err, {dynamic stacktrace}) {
     if (err is RequestException) {
       logger.severe("Nextcloud url: ${err.url}");
       logger.severe("Nextcloud method: ${err.method}");
       logger.severe("Nextcloud code: ${err.statusCode}");
       logger.severe("Nextcloud body: ${err.body}");
-    } else {
-      logger.severe(err);
+      return;
     }
+
+    logger.severe(err, err, stacktrace);
   }
 }

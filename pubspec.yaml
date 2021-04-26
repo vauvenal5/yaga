@@ -11,7 +11,7 @@ description: A Nextcloud gallary app.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.25.1+2501
+version: 0.25.2+2502
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -23,43 +23,43 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   # cupertino_icons: ^1.0.0
-  built_value: ^7.1.0
-  flutter_secure_storage: ^3.3.5
-  flutter_sticky_header: ^0.5.0
-  get_it: ^5.0.1
-  image: ^2.1.18
-  mime: ^0.9.7
-  nextcloud: ^2.1.2
-  package_info: ^0.4.3
-  path_provider: ^1.6.21
-  permission_handler: ^5.0.1+1
-  photo_view: ^0.10.3
-  rx_command: ^5.2.1
-  rxdart: ^0.24.1
-  shared_preferences: ^0.5.12+2
-  sticky_infinite_list: ^3.0.0
+  ansicolor: ^2.0.1
+  built_value: ^8.0.5
+  catcher: ^0.6.5
+  device_info: ^2.0.0
+  equatable: ^2.0.0
+  flutter_secure_storage: ^4.1.0
+  flutter_sticky_header: ^0.6.0
+  flutter_svg: ^0.22.0
+  get_it: ^6.1.1
+  image: ^3.0.2
+  logging: ^1.0.1
+  mime: ^1.0.0
+  nextcloud: ^3.0.1
+  package_info: ^2.0.0
+  path_provider: ^2.0.1
+  permission_handler: ^7.0.0
+  photo_view: ^0.11.1
+  rx_command: ^5.3.0
+  rxdart: ^0.25.0
+  share: ^2.0.1
+  shared_preferences: ^2.0.5
+  sticky_infinite_list: ^4.0.1
+  url_launcher: ^6.0.3
+  uuid: ^3.0.4
   validators: ^3.0.0
-  uuid: ^2.2.2
   webview_flutter: ^1.0.3
-  share: ^0.6.5+4
-  url_launcher: ^5.7.10
-  equatable: ^1.2.5
-  flutter_svg: ^0.19.2+1
-  catcher: ^0.4.2
-  device_info: ^1.0.0
-  logging: ^0.11.4
-  ansicolor: ^1.1.1
 
-dependency_overrides:
-  analyzer: "0.40.6"
+# dependency_overrides:
+#   analyzer: "0.40.6"
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^1.10.6
-  built_value_generator: ^7.1.0
-  mockito: ^4.1.2
-  flutter_launcher_icons: "^0.8.1"
+  build_runner: ^1.12.2
+  built_value_generator: ^8.0.5
+  flutter_launcher_icons: "^0.9.0"
+  mockito: ^5.0.5
 
 # dev_dependency_overrides:
 # petitparser: ^3.0.0

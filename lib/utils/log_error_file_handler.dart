@@ -6,6 +6,7 @@ import 'package:catcher/model/platform_type.dart';
 import 'package:catcher/model/report.dart';
 import 'package:catcher/model/report_handler.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:device_info/device_info.dart';
@@ -41,7 +42,7 @@ class LogErrorFileHandler extends ReportHandler {
         assert(printLogs != null, "printLogs can't be null");
 
   @override
-  Future<bool> handle(Report report) async {
+  Future<bool> handle(Report report, BuildContext context) async {
     try {
       if (_sink == null) {
         await init();

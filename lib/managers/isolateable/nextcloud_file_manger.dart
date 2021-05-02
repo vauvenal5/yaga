@@ -8,6 +8,7 @@ import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/isolateable/sync_manager.dart';
 import 'package:yaga/model/local_file.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/model/preview_fetch_meta.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
@@ -27,6 +28,9 @@ class NextcloudFileManager
 
   RxCommand<NcFile, NcFile> _getPreviewCommand =
       RxCommand.createSync((param) => param);
+  RxCommand<int, int> _readyForNextPreviewRequest =
+      RxCommand.createSync((param) => param);
+
   RxCommand<NcFile, NcFile> downloadPreviewCommand =
       RxCommand.createSync((param) => param);
   RxCommand<NcFile, NcFile> updatePreviewCommand =
@@ -43,29 +47,78 @@ class NextcloudFileManager
   ) {
     this._fileManager.registerFileManager(this);
 
-    //todo: this has to be improved; currently asyncMap blocks for download + writing file to local storage; we need it to block only for download
-    //todo: bug: this also tries to fetch previews for local files; no check if the file is local or remote
     _getPreviewCommand
-        .asyncMap((ncFile) =>
-            this._nextCloudService.getPreview(ncFile.uri).then((value) async {
-              ncFile.previewFile.file = await _localFileService.createFile(
-                  file: ncFile.previewFile.file,
-                  bytes: value,
-                  lastModified: ncFile.lastModified);
-              ncFile.previewFile.exists = true;
-              _logger.fine("Preview fetched. (${ncFile.uri})");
-              return ncFile;
-            }, onError: (err, stacktrace) {
-              _logger.severe(
-                "Unexpected error while loading preview",
-                err,
-                stacktrace,
-              );
-              downloadPreviewFaildCommand(ncFile);
-              return null;
-            }))
-        .where((event) => event != null)
-        .listen((value) => updatePreviewCommand(value));
+        .zipWith(
+          // this stream is managing the amount of allowed parallel downloads of previews (currently 10)
+          _readyForNextPreviewRequest.doOnData(
+            (event) => _logger.info("Arming preview index: $event"),
+          ),
+          (ncFile, number) => PreviewFetchMeta(ncFile, number),
+        )
+        .doOnData(
+          (event) => _logger.info(
+            "Fetching preview index: ${event.fetchIndex}",
+          ),
+        )
+        // debounce requests which have been added multiple times due to scrolling
+        .where((ncFileMeta) {
+          if (ncFileMeta.file.previewFile.file.existsSync()) {
+            _logger.info("Preview exists index: ${ncFileMeta.fetchIndex}");
+            _readyForNextPreviewRequest(ncFileMeta.fetchIndex);
+            return false;
+          }
+          return true;
+        })
+        .flatMap(
+          (ncFileMeta) => Stream.fromFuture(
+            this._nextCloudService.getPreview(ncFileMeta.file.uri).then(
+              (value) async {
+                ncFileMeta.file.previewFile.file =
+                    await _localFileService.createFile(
+                        file: ncFileMeta.file.previewFile.file,
+                        bytes: value,
+                        lastModified: ncFileMeta.file.lastModified);
+                ncFileMeta.file.previewFile.exists = true;
+                _logger.info("Preview fetched index: ${ncFileMeta.fetchIndex}");
+                _logger.fine("Preview fetched: (${ncFileMeta.file.uri})");
+                return ncFileMeta;
+              },
+              //todo: do we really need both error handlers
+              onError: (err, stacktrace) {
+                _logger.warning(
+                  "Preview fetching failed, index: ${ncFileMeta.fetchIndex}",
+                );
+                _logger.severe(
+                  "Unexpected error while loading preview",
+                  err,
+                  stacktrace,
+                );
+                downloadPreviewFaildCommand(ncFileMeta.file);
+                return PreviewFetchMeta(null, ncFileMeta.fetchIndex);
+              },
+            ),
+          ),
+        )
+        .doOnData((event) => _readyForNextPreviewRequest(event.fetchIndex))
+        .where((event) => event.file != null)
+        .listen(
+          (ncFileMeta) => updatePreviewCommand(ncFileMeta.file),
+          onError: (error, stacktrace) {
+            int index = (_readyForNextPreviewRequest.lastResult + 1) % 10;
+
+            _logger.warning("Error on stream. Reintroducing index: $index");
+            _readyForNextPreviewRequest(index);
+
+            _logger.severe(
+              "Unexpected error in preview stream",
+              error,
+              stacktrace,
+            );
+          },
+        );
+
+    //init preview stream for 10 simultanious requests
+    RangeStream(1, 10).listen((event) => _readyForNextPreviewRequest(event));
 
     downloadPreviewCommand.listen((ncFile) {
       if (ncFile.previewFile != null && ncFile.previewFile.file.existsSync()) {

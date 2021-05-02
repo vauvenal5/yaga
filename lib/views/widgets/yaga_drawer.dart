@@ -11,6 +11,7 @@ import 'package:yaga/utils/nextcloud_colors.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/nc_address_screen.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
+import 'package:yaga/views/widgets/action_danger_dialog.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
 
 class YagaDrawer extends StatelessWidget {
@@ -85,7 +86,7 @@ class YagaDrawer extends StatelessWidget {
                 return ListTile(
                   leading: Icon(Icons.power_settings_new),
                   title: Text("Logout"),
-                  onTap: () => getIt.get<NextCloudManager>().logoutCommand(),
+                  onTap: () => _logout(context),
                 );
               }
 
@@ -111,5 +112,22 @@ class YagaDrawer extends StatelessWidget {
         )
       ],
     ));
+  }
+
+  void _logout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => ActionDangerDialog(
+        title: "Logout",
+        cancelButton: "Cancel",
+        aggressiveAction: "Logout",
+        action: getIt.get<NextCloudManager>().logoutCommand,
+        bodyBuilder: (builderContext) => <Widget>[
+          Text(
+            "Logging out will reset your local preferences.",
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,1 +1,2 @@
 - add confirmation dialog for logout
+- re-work preview fetching

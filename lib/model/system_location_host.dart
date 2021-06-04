@@ -5,6 +5,10 @@ class SystemLocationHost {
 
   const SystemLocationHost._(this.name);
 
+  factory SystemLocationHost.sd(String name) {
+    return SystemLocationHost._("$name");
+  }
+
   static const SystemLocationHost local = SystemLocationHost._("device.local");
   static const SystemLocationHost tmp = SystemLocationHost._("device.tmp");
 }

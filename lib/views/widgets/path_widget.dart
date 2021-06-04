@@ -34,7 +34,8 @@ class PathWidget extends StatelessWidget {
             List<DropdownMenuItem<String>> items = [];
 
             items.add(_getMenuItem(
-                getIt.get<SystemLocationService>().getOrigin().toString()));
+              getIt.get<SystemLocationService>().getOrigin().toString(),
+            ));
 
             if (getIt.get<NextCloudService>().isLoggedIn()) {
               items.add(
@@ -47,6 +48,15 @@ class PathWidget extends StatelessWidget {
                 ),
               );
             }
+
+            getIt.get<SystemLocationService>().externals.forEach((element) {
+              items.add(_getMenuItem(
+                getIt
+                    .get<SystemLocationService>()
+                    .getOrigin(host: element)
+                    .toString(),
+              ));
+            });
 
             return DropdownButtonHideUnderline(
               child: DropdownButton(
@@ -88,8 +98,12 @@ class PathWidget extends StatelessWidget {
       return AvatarWidget.phone();
     }
 
-    return AvatarWidget.command(
-      getIt.get<NextCloudManager>().updateAvatarCommand,
-    );
+    if (origin.startsWith(getIt.get<NextCloudService>().scheme)) {
+      return AvatarWidget.command(
+        getIt.get<NextCloudManager>().updateAvatarCommand,
+      );
+    }
+
+    return AvatarWidget.sd();
   }
 }

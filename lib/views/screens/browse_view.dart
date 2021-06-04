@@ -64,6 +64,28 @@ class BrowseView extends StatelessWidget {
               ));
             }
 
+            getIt
+                .get<SystemLocationService>()
+                .externals
+                .map((e) => getIt.get<SystemLocationService>().getLocation(e))
+                .forEach((element) {
+              children.add(
+                ListTile(
+                  isThreeLine: false,
+                  leading: AvatarWidget.sd(),
+                  title: Text(element.host.name),
+                  onTap: () =>
+                      getIt.get<NavigationManager>().showDirectoryNavigation(
+                            _getArgs(
+                                context,
+                                getIt
+                                    .get<SystemLocationService>()
+                                    .getOrigin(host: element.host)),
+                          ),
+                ),
+              );
+            });
+
             return ListView(
               children: children,
             );

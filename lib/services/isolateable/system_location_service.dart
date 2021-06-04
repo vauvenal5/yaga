@@ -12,10 +12,15 @@ import 'package:yaga/utils/uri_utils.dart';
 class SystemLocationService extends Service<SystemLocationService>
     implements Isolateable<SystemLocationService> {
   Map<String, SystemLocation> _locations = Map();
+  List<SystemLocationHost> externals = [];
 
   @override
   Future<SystemLocationService> init() async {
-    _init(await getExternalStorageDirectory(), await getTemporaryDirectory());
+    _init(
+      await getExternalStorageDirectory(),
+      await getTemporaryDirectory(),
+      await getExternalStorageDirectories(),
+    );
     return this;
   }
 
@@ -24,15 +29,25 @@ class SystemLocationService extends Service<SystemLocationService>
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    _init(init.externalPath, init.tmpPath);
+    _init(init.externalPath, init.tmpPath, []);
     return this;
   }
 
-  void _init(Directory externalDir, Directory tmpDir) {
+  void _init(
+      Directory externalDir, Directory tmpDir, List<Directory> external) {
     _locations[SystemLocationHost.local.name] = SystemLocation.fromSplitter(
         externalDir, SystemLocationHost.local, "/Android");
     _locations[SystemLocationHost.tmp.name] =
         SystemLocation.fromSplitter(tmpDir, SystemLocationHost.tmp, "/cache");
+    external
+        .where((element) => element.toString() != externalDir.toString())
+        .forEach((element) {
+      SystemLocationHost host =
+          SystemLocationHost.sd(element.uri.pathSegments[1]);
+      externals.add(host);
+      _locations[host.name] =
+          SystemLocation.fromSplitter(element, host, "/Android");
+    });
   }
 
   Uri getOrigin({SystemLocationHost host = SystemLocationHost.local}) {
@@ -49,7 +64,7 @@ class SystemLocationService extends Service<SystemLocationService>
   //todo: second, we can require passing the host from the calling manager which should know if we are dealing with a local or tmp file
   Uri internalUriFromAbsolute(Uri absolute, {SystemLocationHost host}) {
     if (host != null) {
-      SystemLocation loc = _getLocation(host);
+      SystemLocation loc = getLocation(host);
       if (absolute.path.startsWith(loc.privatePath)) {
         return Uri(
           scheme: absolute.scheme,
@@ -102,13 +117,12 @@ class SystemLocationService extends Service<SystemLocationService>
 
   //todo: can we make this const?
   Uri get externalAppDirUri => UriUtils.fromUri(
-      uri: getOrigin(),
-      path: _getLocation(SystemLocationHost.local).publicPath);
+      uri: getOrigin(), path: getLocation(SystemLocationHost.local).publicPath);
   Uri get tmpAppDirUri => UriUtils.fromUri(
       uri: getOrigin(host: SystemLocationHost.tmp),
-      path: _getLocation(SystemLocationHost.tmp).publicPath);
+      path: getLocation(SystemLocationHost.tmp).publicPath);
 
-  SystemLocation _getLocation(SystemLocationHost host) {
+  SystemLocation getLocation(SystemLocationHost host) {
     return this._locations[host.name];
   }
 }

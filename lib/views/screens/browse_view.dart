@@ -43,7 +43,7 @@ class BrowseView extends StatelessWidget {
                     .get<NavigationManager>()
                     .showDirectoryNavigation(_getArgs(
                       context,
-                      getIt.get<SystemLocationService>().getOrigin(),
+                      getIt.get<SystemLocationService>().internalStorage.origin,
                     )),
               ),
             );
@@ -64,23 +64,18 @@ class BrowseView extends StatelessWidget {
               ));
             }
 
-            getIt
-                .get<SystemLocationService>()
-                .externals
-                .map((e) => getIt.get<SystemLocationService>().getLocation(e))
-                .forEach((element) {
+            getIt.get<SystemLocationService>().externals.forEach((element) {
               children.add(
                 ListTile(
                   isThreeLine: false,
                   leading: AvatarWidget.sd(),
-                  title: Text(element.host.name),
+                  title: Text(element.origin.userInfo),
                   onTap: () =>
                       getIt.get<NavigationManager>().showDirectoryNavigation(
                             _getArgs(
-                                context,
-                                getIt
-                                    .get<SystemLocationService>()
-                                    .getOrigin(host: element.host)),
+                              context,
+                              element.origin,
+                            ),
                           ),
                 ),
               );

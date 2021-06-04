@@ -85,8 +85,10 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
     getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt
         .get<SettingsManager>()
         .persistStringSettingCommand(
-            widget._categoryViewConfig.generalViewConfig.path.rebuild((b) => b
-              ..value = getIt.get<SystemLocationService>().externalAppDirUri)));
+            widget._categoryViewConfig.generalViewConfig.path.rebuild(
+          (b) =>
+              b..value = getIt.get<SystemLocationService>().internalStorage.uri,
+        )));
 
     //todo: is it still necessary for tab to be a stateful widget?
     //image state wrapper is a widget local manager

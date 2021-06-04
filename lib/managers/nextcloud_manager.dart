@@ -96,7 +96,7 @@ class NextCloudManager {
   File get _avatarFile => File(
         UriUtils.chainPathSegments(
           _systemLocationService
-              .absoluteUriFromInternal(_systemLocationService.tmpAppDirUri)
+              .absoluteUriFromInternal(_systemLocationService.internalCache.uri)
               .path,
           "${_nextCloudService.origin?.userDomain}.avatar",
         ),

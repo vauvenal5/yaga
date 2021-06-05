@@ -20,7 +20,7 @@ class LocalFileManager
   final SystemLocationService _systemPathService;
 
   @override
-  String get scheme => _systemPathService.getOrigin().scheme;
+  String get scheme => _systemPathService.internalStorage.origin.scheme;
 
   LocalFileManager(
       this._fileManager, this._localFileService, this._systemPathService) {

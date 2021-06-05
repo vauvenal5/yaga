@@ -13,9 +13,12 @@ abstract class UriPreference
         SerializablePreference<String, Uri, UriPreference>,
         Built<UriPreference, UriPreferenceBuilder> {
   bool get fixedOrigin;
+  String get schemeFilter;
 
   static void _initializeBuilder(UriPreferenceBuilder b) =>
-      ValuePreference.initBuilder<UriPreferenceBuilder>(b)..fixedOrigin = false;
+      ValuePreference.initBuilder<UriPreferenceBuilder>(b)
+        ..fixedOrigin = false
+        ..schemeFilter = "";
 
   factory UriPreference([void Function(UriPreferenceBuilder) updates]) =
       _$UriPreference;

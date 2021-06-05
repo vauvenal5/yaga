@@ -36,17 +36,19 @@ class DirectoryScreen extends StatefulWidget {
   final bool leading;
 
   final bool fixedOrigin;
+  final String schemeFilter;
 
-  DirectoryScreen(
-      {@required this.uri,
-      @required this.viewConfig,
-      this.title,
-      this.bottomBarBuilder,
-      this.navigationRoute,
-      this.getNavigationArgs,
-      this.leading,
-      this.fixedOrigin = false})
-      : super(key: ValueKey(uri.toString()));
+  DirectoryScreen({
+    @required this.uri,
+    @required this.viewConfig,
+    this.title,
+    this.bottomBarBuilder,
+    this.navigationRoute,
+    this.getNavigationArgs,
+    this.leading,
+    this.fixedOrigin = false,
+    this.schemeFilter = "",
+  }) : super(key: ValueKey(uri.toString()));
 
   @override
   _DirectoryScreenState createState() =>
@@ -177,6 +179,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
                 this._fileListLocalManager.uri,
                 (Uri subPath) => Navigator.of(context).pop(subPath),
                 fixedOrigin: this.widget.fixedOrigin,
+                schemeFilter: this.widget.schemeFilter,
               ),
             ),
           ),

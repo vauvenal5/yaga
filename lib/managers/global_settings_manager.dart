@@ -79,7 +79,7 @@ class GlobalSettingsManager {
 
     this._nextcloudManager.logoutCommand.listen((value) {
       MappingPreference mapping = this.getDefaultMappingPreference(
-        local: _systemLocationService.externalAppDirUri,
+        local: _systemLocationService.internalStorage.uri,
         remote: Uri(),
       );
 
@@ -124,9 +124,9 @@ class GlobalSettingsManager {
     if (this._nextCloudService.isLoggedIn()) {
       MappingPreference mapping = this.getDefaultMappingPreference(
         local: UriUtils.fromUri(
-          uri: _systemLocationService.externalAppDirUri,
+          uri: _systemLocationService.internalStorage.uri,
           path:
-              "${_systemLocationService.externalAppDirUri.path}/${_nextCloudService.origin.userDomain}",
+              "${_systemLocationService.internalStorage.uri.path}/${_nextCloudService.origin.userDomain}",
         ),
         remote: _nextCloudService.origin.userEncodedDomainRoot,
       );

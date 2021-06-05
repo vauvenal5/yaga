@@ -43,10 +43,27 @@ class BrowseView extends StatelessWidget {
                     .get<NavigationManager>()
                     .showDirectoryNavigation(_getArgs(
                       context,
-                      getIt.get<SystemLocationService>().getOrigin(),
+                      getIt.get<SystemLocationService>().internalStorage.origin,
                     )),
               ),
             );
+
+            getIt.get<SystemLocationService>().externals.forEach((element) {
+              children.add(
+                ListTile(
+                  isThreeLine: false,
+                  leading: AvatarWidget.sd(),
+                  title: Text(element.origin.userInfo),
+                  onTap: () =>
+                      getIt.get<NavigationManager>().showDirectoryNavigation(
+                            _getArgs(
+                              context,
+                              element.origin,
+                            ),
+                          ),
+                ),
+              );
+            });
 
             if (getIt.get<NextCloudService>().isLoggedIn()) {
               NcOrigin origin = getIt.get<NextCloudService>().origin;

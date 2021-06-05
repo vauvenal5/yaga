@@ -11,7 +11,8 @@ class HomeView extends CategoryViewScreen {
   HomeView()
       : super(
           CategoryViewConfig(
-              defaultPath: getIt.get<SystemLocationService>().externalAppDirUri,
+              defaultPath:
+                  getIt.get<SystemLocationService>().internalStorage.uri,
               pref: pref,
               pathEnabled: true,
               hasDrawer: true,

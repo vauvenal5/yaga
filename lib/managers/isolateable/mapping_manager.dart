@@ -98,7 +98,7 @@ class MappingManager with Isolateable<MappingManager> {
   MappingPreference _getRootMappingPreference(Uri remoteUri) =>
       _getMappingPrefernce(
           remoteUri,
-          _getDefaultMapping(this._systemLocationService.externalAppDirUri),
+          _getDefaultMapping(this._systemLocationService.internalStorage.uri),
           0,
           root);
 
@@ -120,7 +120,7 @@ class MappingManager with Isolateable<MappingManager> {
 
   Future<Uri> mapToTmpUri(Uri remoteUri) async {
     return _mapUri(remoteUri,
-        _getDefaultMapping(this._systemLocationService.tmpAppDirUri));
+        _getDefaultMapping(this._systemLocationService.internalCache.uri));
   }
 
   Uri _mapUri(Uri remoteUri, MappingPreference mapping) {
@@ -154,7 +154,7 @@ class MappingManager with Isolateable<MappingManager> {
     MappingPreference mapping = _getRootMappingPreference(remote);
     String relativePath = local.path.replaceFirst(
       mapping == null
-          ? this._systemLocationService.externalAppDirUri.path
+          ? this._systemLocationService.internalStorage.uri.path
           : mapping.local.value.path,
       "",
     );
@@ -163,7 +163,7 @@ class MappingManager with Isolateable<MappingManager> {
   }
 
   Future<Uri> mapTmpToRemoteUri(Uri local, Uri remote) async {
-    Uri defaultInternal = this._systemLocationService.tmpAppDirUri;
+    Uri defaultInternal = this._systemLocationService.internalCache.uri;
     String relativePath = local.path
         .replaceFirst(_appendLocalMappingFolder(defaultInternal.path), "");
     return UriUtils.fromUri(uri: remote, path: relativePath);

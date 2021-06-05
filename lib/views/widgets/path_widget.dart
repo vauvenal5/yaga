@@ -10,8 +10,14 @@ class PathWidget extends StatelessWidget {
   final Uri _uri;
   final Function(Uri) _onTap;
   final bool fixedOrigin;
+  final String schemeFilter;
 
-  PathWidget(this._uri, this._onTap, {this.fixedOrigin = false});
+  PathWidget(
+    this._uri,
+    this._onTap, {
+    this.fixedOrigin = false,
+    this.schemeFilter = "",
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,33 +31,44 @@ class PathWidget extends StatelessWidget {
         itemCount: _uri.pathSegments.length == 0 ? 1 : _uri.pathSegments.length,
         itemBuilder: (context, index) {
           if (index == 0) {
-            String selected = UriUtils.getRootFromUri(_uri).toString();
+            Uri selected = UriUtils.getRootFromUri(_uri);
 
             if (fixedOrigin) {
               return _getDisabledAvatar(selected);
             }
 
-            List<DropdownMenuItem<String>> items = [];
+            List<DropdownMenuItem<Uri>> items = [];
+            SystemLocationService systemLocationService =
+                getIt.get<SystemLocationService>();
 
             items.add(_getMenuItem(
-                getIt.get<SystemLocationService>().getOrigin().toString()));
+              systemLocationService.internalStorage.origin,
+            ));
+
+            getIt.get<SystemLocationService>().externals.forEach((element) {
+              items.add(_getMenuItem(
+                element.origin,
+              ));
+            });
 
             if (getIt.get<NextCloudService>().isLoggedIn()) {
               items.add(
                 _getMenuItem(
-                  getIt
-                      .get<NextCloudService>()
-                      .origin
-                      .userEncodedDomainRoot
-                      .toString(),
+                  getIt.get<NextCloudService>().origin.userEncodedDomainRoot,
                 ),
               );
+            }
+
+            if (schemeFilter.isNotEmpty) {
+              items = items
+                  .where((element) => element.value.scheme == schemeFilter)
+                  .toList();
             }
 
             return DropdownButtonHideUnderline(
               child: DropdownButton(
                 value: selected,
-                onChanged: (value) => _onTap(Uri.parse(value)),
+                onChanged: (value) => _onTap(value),
                 items: items,
               ),
             );
@@ -69,27 +86,31 @@ class PathWidget extends StatelessWidget {
     );
   }
 
-  DropdownMenuItem<String> _getMenuItem(String origin) {
-    return DropdownMenuItem<String>(
+  DropdownMenuItem<Uri> _getMenuItem(Uri origin) {
+    return DropdownMenuItem<Uri>(
       value: origin,
       child: _getAvatarForOrigin(origin),
     );
   }
 
-  Widget _getDisabledAvatar(String origin) {
+  Widget _getDisabledAvatar(Uri origin) {
     return InkWell(
-      onTap: () => _onTap(Uri.parse(origin)),
+      onTap: () => _onTap(origin),
       child: _getAvatarForOrigin(origin),
     );
   }
 
-  Widget _getAvatarForOrigin(String origin) {
-    if (getIt.get<SystemLocationService>().getOrigin().toString() == origin) {
+  Widget _getAvatarForOrigin(Uri origin) {
+    if (getIt.get<SystemLocationService>().internalStorage.origin == origin) {
       return AvatarWidget.phone();
     }
 
-    return AvatarWidget.command(
-      getIt.get<NextCloudManager>().updateAvatarCommand,
-    );
+    if (origin.scheme == getIt.get<NextCloudService>().scheme) {
+      return AvatarWidget.command(
+        getIt.get<NextCloudManager>().updateAvatarCommand,
+      );
+    }
+
+    return AvatarWidget.sd();
   }
 }

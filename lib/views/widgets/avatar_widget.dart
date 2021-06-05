@@ -27,6 +27,11 @@ class AvatarWidget extends StatelessWidget {
         this._iconData = Icons.phone_android,
         this._command = null,
         this._radius = radius;
+  AvatarWidget.sd({double radius = 14, this.border = true})
+      : _avatar = null,
+        this._iconData = Icons.sd_card_outlined,
+        this._command = null,
+        this._radius = radius;
 
   Widget _buildAvatar(BuildContext context, File data) {
     if (border) {

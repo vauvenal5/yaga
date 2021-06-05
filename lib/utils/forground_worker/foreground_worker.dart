@@ -64,6 +64,7 @@ class ForegroundWorker {
         isolateToMain.sendPort,
         await getExternalStorageDirectory(),
         await getTemporaryDirectory(),
+        await getExternalStorageDirectories(),
         _nextCloudManager.updateLoginStateCommand.lastResult,
         _globalSettingsManager.updateRootMappingPreference.lastResult,
         _selfSignedCertHandler.fingerprint,

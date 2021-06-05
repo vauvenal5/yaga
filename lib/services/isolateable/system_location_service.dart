@@ -3,7 +3,6 @@ import 'dart:isolate';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:yaga/model/system_location.dart';
-import 'package:yaga/model/system_location_host.dart';
 import 'package:yaga/services/service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
@@ -11,11 +10,24 @@ import 'package:yaga/utils/uri_utils.dart';
 
 class SystemLocationService extends Service<SystemLocationService>
     implements Isolateable<SystemLocationService> {
+  static final _internalOrigin =
+      Uri(scheme: "file", host: "device.local", path: "/");
+  static final _tmpOrigin = Uri(scheme: "file", host: "device.tmp", path: "/");
+  static final _externalHost = "device.ext";
+
   Map<String, SystemLocation> _locations = Map();
+  List<SystemLocation> get externals => _locations.values
+      .where((element) => element.origin != _internalOrigin)
+      .where((element) => element.origin != _tmpOrigin)
+      .toList();
 
   @override
   Future<SystemLocationService> init() async {
-    _init(await getExternalStorageDirectory(), await getTemporaryDirectory());
+    _init(
+      await getExternalStorageDirectory(),
+      await getTemporaryDirectory(),
+      await getExternalStorageDirectories(),
+    );
     return this;
   }
 
@@ -24,49 +36,40 @@ class SystemLocationService extends Service<SystemLocationService>
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    _init(init.externalPath, init.tmpPath);
+    _init(init.externalPath, init.tmpPath, init.externalPaths);
     return this;
   }
 
-  void _init(Directory externalDir, Directory tmpDir) {
-    _locations[SystemLocationHost.local.name] = SystemLocation.fromSplitter(
-        externalDir, SystemLocationHost.local, "/Android");
-    _locations[SystemLocationHost.tmp.name] =
-        SystemLocation.fromSplitter(tmpDir, SystemLocationHost.tmp, "/cache");
-  }
-
-  Uri getOrigin({SystemLocationHost host = SystemLocationHost.local}) {
-    SystemLocation location = _locations[host.name];
-    return Uri(
-      scheme: location.directory.uri.scheme,
-      host: host.name,
-      path: "/",
-    );
+  void _init(
+      Directory externalDir, Directory tmpDir, List<Directory> external) {
+    _locations[_internalOrigin.authority] =
+        SystemLocation.fromSplitter(externalDir, _internalOrigin, "/Android");
+    _locations[_tmpOrigin.authority] =
+        SystemLocation.fromSplitter(tmpDir, _tmpOrigin, "/cache");
+    external
+        .where((element) => element.toString() != externalDir.toString())
+        .forEach((element) {
+      Uri origin = Uri(
+        scheme: "file",
+        userInfo: element.uri.pathSegments[1],
+        host: _externalHost,
+        path: "/",
+      );
+      _locations[origin.authority] =
+          SystemLocation.fromSplitter(element, origin, "/Android");
+    });
   }
 
   //todo: think about this -> there are two ways of solving this
   //todo: first, we can infer the host by matching the starting part of the URI, advantage: self-contained, disadvantage: will require checking for every file
   //todo: second, we can require passing the host from the calling manager which should know if we are dealing with a local or tmp file
-  Uri internalUriFromAbsolute(Uri absolute, {SystemLocationHost host}) {
-    if (host != null) {
-      SystemLocation loc = _getLocation(host);
-      if (absolute.path.startsWith(loc.privatePath)) {
-        return Uri(
-          scheme: absolute.scheme,
-          host: host.name,
-          path: _internalUriNormalizePath(absolute, loc),
-        );
-      }
-      throw ArgumentError("Unknown system location!");
-    }
-
+  Uri internalUriFromAbsolute(Uri absolute) {
     Uri res;
 
     _locations.forEach((key, value) {
       if (absolute.path.startsWith(value.privatePath)) {
-        res = Uri(
-          scheme: absolute.scheme,
-          host: key,
+        res = UriUtils.fromUri(
+          uri: value.origin,
           path: _internalUriNormalizePath(absolute, value),
         );
       }
@@ -92,23 +95,15 @@ class SystemLocationService extends Service<SystemLocationService>
     //--> this happens when a server is behind a subpath cloud.com/nc
     //--> then NC Files App will create a local folder like cloud.com%2Fnc
     return UriUtils.fromPathList(
-      uri: _locations[internal.host].directory.uri,
+      uri: _locations[internal.authority].absoluteUri,
       paths: [
-        _locations[internal.host].privatePath,
+        _locations[internal.authority].privatePath,
         internal.path,
       ],
     );
   }
 
-  //todo: can we make this const?
-  Uri get externalAppDirUri => UriUtils.fromUri(
-      uri: getOrigin(),
-      path: _getLocation(SystemLocationHost.local).publicPath);
-  Uri get tmpAppDirUri => UriUtils.fromUri(
-      uri: getOrigin(host: SystemLocationHost.tmp),
-      path: _getLocation(SystemLocationHost.tmp).publicPath);
-
-  SystemLocation _getLocation(SystemLocationHost host) {
-    return this._locations[host.name];
-  }
+  SystemLocation get internalStorage =>
+      this._locations[_internalOrigin.authority];
+  SystemLocation get internalCache => this._locations[_tmpOrigin.authority];
 }

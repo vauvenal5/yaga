@@ -9,6 +9,7 @@ class InitMsg {
   final SendPort sendPort;
   final Directory externalPath;
   final Directory tmpPath;
+  final List<Directory> externalPaths;
   final NextCloudLoginData lastLoginData;
   final MappingPreference mapping;
   final String fingerprint;
@@ -18,6 +19,7 @@ class InitMsg {
     this.sendPort,
     this.externalPath,
     this.tmpPath,
+    this.externalPaths,
     this.lastLoginData,
     this.mapping,
     this.fingerprint,

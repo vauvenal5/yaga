@@ -15,6 +15,7 @@ class PathSelectorScreen extends StatelessWidget {
   final void Function(List<NcFile>, int) onFileTap;
   final String title;
   final bool fixedOrigin;
+  final String schemeFilter;
 
   PathSelectorScreen(
     this._uri,
@@ -22,6 +23,7 @@ class PathSelectorScreen extends StatelessWidget {
     this.onFileTap,
     this.title,
     this.fixedOrigin = false,
+    this.schemeFilter = "",
   });
 
   @override
@@ -59,6 +61,7 @@ class PathSelectorScreen extends StatelessWidget {
         title: this.title ?? "Select path...",
         viewConfig: viewConfig,
         fixedOrigin: this.fixedOrigin,
+        schemeFilter: this.schemeFilter,
         bottomBarBuilder: bottomBarBuilder);
   }
 }

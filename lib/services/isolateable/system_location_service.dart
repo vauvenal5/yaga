@@ -36,7 +36,7 @@ class SystemLocationService extends Service<SystemLocationService>
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    _init(init.externalPath, init.tmpPath, []);
+    _init(init.externalPath, init.tmpPath, init.externalPaths);
     return this;
   }
 

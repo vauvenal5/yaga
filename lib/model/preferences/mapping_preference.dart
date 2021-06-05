@@ -25,10 +25,11 @@ abstract class MappingPreference
         ..value = true
         ..remote.key = "remote"
         ..remote.title = "Remote Path"
-        ..remote.fixedOrigin = true
+        //todo: scheme has to be retrieved from actual service
+        ..remote.schemeFilter = "nc"
         ..local.key = "local"
         ..local.title = "Local Path"
-        ..local.fixedOrigin = true
+        ..local.schemeFilter = "file"
         ..syncDeletes.key = "syncDeletes"
         ..syncDeletes.title = "Sync Server Deletes"
         ..syncDeletes.value = true;

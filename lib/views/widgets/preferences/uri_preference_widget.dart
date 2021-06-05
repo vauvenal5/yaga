@@ -34,6 +34,7 @@ class UriPreferenceWidget extends StatelessWidget {
           pref.rebuild((b) => b..value = path),
         ),
         fixedOrigin: pref.fixedOrigin,
+        schemeFilter: pref.schemeFilter,
       ),
     );
   }

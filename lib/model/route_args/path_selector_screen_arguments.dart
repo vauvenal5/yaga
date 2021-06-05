@@ -7,6 +7,7 @@ class PathSelectorScreenArguments extends NavigatableScreenArguments {
   final void Function(List<NcFile>, int) onFileTap;
   final String title;
   final bool fixedOrigin;
+  final String schemeFilter;
 
   PathSelectorScreenArguments({
     @required uri,
@@ -14,5 +15,6 @@ class PathSelectorScreenArguments extends NavigatableScreenArguments {
     this.onFileTap,
     this.title,
     this.fixedOrigin = false,
+    this.schemeFilter = "",
   }) : super(uri: uri);
 }

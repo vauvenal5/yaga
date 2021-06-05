@@ -10,8 +10,14 @@ class PathWidget extends StatelessWidget {
   final Uri _uri;
   final Function(Uri) _onTap;
   final bool fixedOrigin;
+  final String schemeFilter;
 
-  PathWidget(this._uri, this._onTap, {this.fixedOrigin = false});
+  PathWidget(
+    this._uri,
+    this._onTap, {
+    this.fixedOrigin = false,
+    this.schemeFilter = "",
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +58,12 @@ class PathWidget extends StatelessWidget {
                 element.origin,
               ));
             });
+
+            if (schemeFilter.isNotEmpty) {
+              items = items
+                  .where((element) => element.value.scheme == schemeFilter)
+                  .toList();
+            }
 
             return DropdownButtonHideUnderline(
               child: DropdownButton(

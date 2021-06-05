@@ -6,6 +6,7 @@ class DirectoryNavigationScreenArguments extends NavigatableScreenArguments {
   final ViewConfiguration viewConfig;
   final bool leadingBackArrow;
   final bool fixedOrigin;
+  final String schemeFilter;
   final String title;
   final Widget Function(BuildContext, Uri) bottomBarBuilder;
 
@@ -16,5 +17,6 @@ class DirectoryNavigationScreenArguments extends NavigatableScreenArguments {
     this.bottomBarBuilder,
     this.leadingBackArrow = true,
     this.fixedOrigin = false,
+    this.schemeFilter = "",
   }) : super(uri: uri);
 }

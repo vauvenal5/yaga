@@ -1,0 +1,1 @@
+- experimental sd card support, pls read https://github.com/vauvenal5/yaga/issues/23

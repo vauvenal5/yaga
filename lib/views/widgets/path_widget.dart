@@ -45,6 +45,12 @@ class PathWidget extends StatelessWidget {
               systemLocationService.internalStorage.origin,
             ));
 
+            getIt.get<SystemLocationService>().externals.forEach((element) {
+              items.add(_getMenuItem(
+                element.origin,
+              ));
+            });
+
             if (getIt.get<NextCloudService>().isLoggedIn()) {
               items.add(
                 _getMenuItem(
@@ -52,12 +58,6 @@ class PathWidget extends StatelessWidget {
                 ),
               );
             }
-
-            getIt.get<SystemLocationService>().externals.forEach((element) {
-              items.add(_getMenuItem(
-                element.origin,
-              ));
-            });
 
             if (schemeFilter.isNotEmpty) {
               items = items

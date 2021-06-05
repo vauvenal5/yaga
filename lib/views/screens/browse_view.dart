@@ -48,22 +48,6 @@ class BrowseView extends StatelessWidget {
               ),
             );
 
-            if (getIt.get<NextCloudService>().isLoggedIn()) {
-              NcOrigin origin = getIt.get<NextCloudService>().origin;
-              children.add(ListTile(
-                isThreeLine: true,
-                leading: AvatarWidget.command(
-                  getIt.get<NextCloudManager>().updateAvatarCommand,
-                ),
-                title: Text(origin.displayName),
-                subtitle: Text(origin.domain),
-                onTap: () =>
-                    getIt.get<NavigationManager>().showDirectoryNavigation(
-                          _getArgs(context, origin.userEncodedDomainRoot),
-                        ),
-              ));
-            }
-
             getIt.get<SystemLocationService>().externals.forEach((element) {
               children.add(
                 ListTile(
@@ -80,6 +64,22 @@ class BrowseView extends StatelessWidget {
                 ),
               );
             });
+
+            if (getIt.get<NextCloudService>().isLoggedIn()) {
+              NcOrigin origin = getIt.get<NextCloudService>().origin;
+              children.add(ListTile(
+                isThreeLine: true,
+                leading: AvatarWidget.command(
+                  getIt.get<NextCloudManager>().updateAvatarCommand,
+                ),
+                title: Text(origin.displayName),
+                subtitle: Text(origin.domain),
+                onTap: () =>
+                    getIt.get<NavigationManager>().showDirectoryNavigation(
+                          _getArgs(context, origin.userEncodedDomainRoot),
+                        ),
+              ));
+            }
 
             return ListView(
               children: children,

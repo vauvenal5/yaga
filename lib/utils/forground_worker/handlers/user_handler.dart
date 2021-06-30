@@ -15,8 +15,8 @@ class UserHandler implements IsolateMsgHandler<UserHandler> {
   @override
   Future<UserHandler> initIsolated(InitMsg init, SendPort isolateToMain,
       IsolateHandlerRegistry registry) async {
-    registry.registerHandler<LoginStateMsg>(
-        (msg) => handleLoginStateChanged(msg));
+    registry
+        .registerHandler<LoginStateMsg>((msg) => handleLoginStateChanged(msg));
     registry.registerHandler<PreferenceMsg>(
       (msg) => getIt
           .get<IsolatedSettingsManager>()

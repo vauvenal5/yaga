@@ -27,8 +27,7 @@ abstract class FileManagerBase {
   }
 
   void registerFileManager(FileSubManager fileSubManager) {
-    fileSubManagers
-        .putIfAbsent(fileSubManager.scheme, () => fileSubManager);
+    fileSubManagers.putIfAbsent(fileSubManager.scheme, () => fileSubManager);
   }
 
   Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {

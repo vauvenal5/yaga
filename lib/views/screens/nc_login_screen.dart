@@ -25,8 +25,7 @@ class NextCloudLoginScreen extends StatelessWidget {
         userAgent: getIt.get<NextCloudClientFactory>().userAgent,
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (WebViewController webViewController) {
-          webViewController.loadUrl(
-              "$_url/index.php/login/flow",
+          webViewController.loadUrl("$_url/index.php/login/flow",
               headers: <String, String>{"OCS-APIREQUEST": "true"});
         },
         navigationDelegate: (NavigationRequest request) async {

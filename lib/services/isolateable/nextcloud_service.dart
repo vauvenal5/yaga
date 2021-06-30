@@ -65,7 +65,7 @@ class NextCloudService
     _client = null;
   }
 
-  bool isLoggedIn() => _client != null ;
+  bool isLoggedIn() => _client != null;
 
   @override
   Stream<NcFile> list(Uri dir) {

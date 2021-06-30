@@ -54,8 +54,7 @@ class LocalFileManager
         .map((uri) => Directory.fromUri(uri))
         .flatMap((dir) => _localFileService.list(dir))
         .map((event) {
-      final Uri uri =
-          _systemPathService.internalUriFromAbsolute(event.uri);
+      final Uri uri = _systemPathService.internalUriFromAbsolute(event.uri);
 
       final NcFile file = _createFile(uri, event);
       file.localFile = LocalFile(event);
@@ -93,22 +92,24 @@ class LocalFileManager
   }
 
   @override
-  Future<NcFile> copyFile(NcFile file, Uri destination, {bool overwrite}) async {
+  Future<NcFile> copyFile(NcFile file, Uri destination,
+      {bool overwrite}) async {
     _localFileService.copyFile(
-          file,
-          _systemPathService.absoluteUriFromInternal(destination),
-          overwrite: overwrite,
-        );
+      file,
+      _systemPathService.absoluteUriFromInternal(destination),
+      overwrite: overwrite,
+    );
     return file;
   }
 
   @override
-  Future<NcFile> moveFile(NcFile file, Uri destination, {bool overwrite}) async {
+  Future<NcFile> moveFile(NcFile file, Uri destination,
+      {bool overwrite}) async {
     _localFileService.moveFile(
-          file,
-          _systemPathService.absoluteUriFromInternal(destination),
-          overwrite: overwrite,
-        );
+      file,
+      _systemPathService.absoluteUriFromInternal(destination),
+      overwrite: overwrite,
+    );
     return file;
   }
 }

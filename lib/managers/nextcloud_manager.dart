@@ -69,8 +69,7 @@ class NextCloudManager {
       updateAvatarCommand();
     });
 
-    updateAvatarCommand = RxCommand.createAsync(
-        (_) => _handleAvatarUpdate(),
+    updateAvatarCommand = RxCommand.createAsync((_) => _handleAvatarUpdate(),
         initialLastResult: _avatarFile);
   }
 

@@ -162,7 +162,7 @@ class NextcloudFileManager
 
   Stream<NcFile> _listNextcloudFiles(Uri uri, bool recursive) {
     return _listNextcloudFilesUpstream(uri)
-        .recursively( _listNextcloudFilesUpstream, recursive: recursive)
+        .recursively(_listNextcloudFilesUpstream, recursive: recursive)
         .doOnData((file) => _syncManager.addRemoteFile(uri, file))
         .doOnError((err, stack) => _syncManager.removeUri(uri));
   }

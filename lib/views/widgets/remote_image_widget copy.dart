@@ -100,12 +100,11 @@ class RemoteImageWidgetOther extends StatelessWidget {
   Widget _buildPreview(bool localFileExists) {
     // todo: clean up the future (from Future<object> to Future<bool>)
     return FutureBuilder(
-      future: Future.value(_file.previewFile != null).then(
-          (value) => value ? _file.previewFile.file.exists() : value),
+      future: Future.value(_file.previewFile != null)
+          .then((value) => value ? _file.previewFile.file.exists() : value),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return _createDefaultIconPreview(
-              _file, localFileExists, context);
+          return _createDefaultIconPreview(_file, localFileExists, context);
         }
 
         if (snapshot.data as bool) {

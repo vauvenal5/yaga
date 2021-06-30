@@ -58,7 +58,8 @@ class YagaRouter {
       case NextCloudLoginScreen.route:
         return MaterialPageRoute(
             settings: settings,
-            builder: (context) => NextCloudLoginScreen(settings.arguments as Uri));
+            builder: (context) =>
+                NextCloudLoginScreen(settings.arguments as Uri));
       case ImageScreen.route:
         final ImageScreenArguments args =
             settings.arguments as ImageScreenArguments;

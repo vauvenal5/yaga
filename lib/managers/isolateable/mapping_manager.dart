@@ -22,7 +22,8 @@ class MappingManager with Isolateable<MappingManager> {
   MappingNode root;
   Map<String, MappingPreference> mappings = {};
 
-  MappingManager(this._settingsManager, this._nextCloudService, this._systemLocationService) {
+  MappingManager(this._settingsManager, this._nextCloudService,
+      this._systemLocationService) {
     root = MappingNode();
 
     mappingUpdatedCommand = RxCommand.createSync((param) => param);

@@ -89,7 +89,8 @@ class GlobalSettingsManager {
 
     _settingsManager.updateSettingCommand
         .where((event) => event.key == ncSection.prepareKey(_MAPPING_KEY))
-        .listen((event) => updateRootMappingPreference(event as MappingPreference));
+        .listen(
+            (event) => updateRootMappingPreference(event as MappingPreference));
   }
 
   Future<GlobalSettingsManager> init() async {

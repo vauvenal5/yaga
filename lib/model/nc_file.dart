@@ -12,12 +12,7 @@ class NcFile {
   DateTime lastModified;
   bool selected = false;
 
-  NcFile(
-    this.uri,
-    this.name,
-    this.fileExtension,
-    {this.isDirectory}
-  );
+  NcFile(this.uri, this.name, this.fileExtension, {this.isDirectory});
 
   factory NcFile.file(Uri uri, String name, String mime) {
     String ext = p.extension(name).replaceAll('.', '');

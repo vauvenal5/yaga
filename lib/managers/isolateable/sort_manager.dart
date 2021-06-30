@@ -27,7 +27,7 @@ class SortManager with Isolateable<SortManager> {
     _sortListHandlers[SortProperty.dateModified] = _sortListByDateModified;
 
     _mergeSortHandlers[SortType.list] =
-        (SortedFileList  main, SortedFileList addition) =>
+        (SortedFileList main, SortedFileList addition) =>
             _mergeFileFolders(main, addition);
     _mergeSortHandlers[SortType.category] =
         (SortedFileList main, SortedFileList addition) =>
@@ -154,7 +154,7 @@ class SortManager with Isolateable<SortManager> {
   ) {
     final sorted = SortedCategoryList(config, folders: folders);
 
-    for (final file in files){
+    for (final file in files) {
       final String key = SortedCategoryList.createKey(file);
 
       if (!sorted.categories.contains(key)) {

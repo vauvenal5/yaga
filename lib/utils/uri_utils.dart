@@ -20,7 +20,7 @@ class UriUtils {
 
   static Uri fromPathList({@required Uri uri, @required List<String> paths}) {
     String path = "";
-    for (final element in paths){
+    for (final element in paths) {
       path = UriUtils.chainPathSegments(path, element);
     }
     // do not double encode here because paths are already double encoded

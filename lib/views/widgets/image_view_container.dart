@@ -63,8 +63,8 @@ class ImageViewContainer extends StatelessWidget {
             .map((event) => event as ChoicePreference),
         builder: (context, choice) {
           final bool sortChanged = fileListLocalManager.setSortConfig(
-                ViewConfiguration.getSortConfigFromViewChoice(choice.data),
-              );
+            ViewConfiguration.getSortConfigFromViewChoice(choice.data),
+          );
           return _buildImageContainterStreamBuilder(
             context,
             choice.data,
@@ -92,14 +92,12 @@ class ImageViewContainer extends StatelessWidget {
           ? fileListLocalManager.emptyFileList
           : fileListLocalManager.filesChangedCommand.lastResult,
       stream: fileListLocalManager.filesChangedCommand.where(
-            // this filter makes sure that if viewType is changed while loading we do not run into trouble
-            (event) =>
-                event.config.sortType ==
-                fileListLocalManager.sortConfig.sortType,
-          ),
+        // this filter makes sure that if viewType is changed while loading we do not run into trouble
+        (event) =>
+            event.config.sortType == fileListLocalManager.sortConfig.sortType,
+      ),
       builder: (context, files) => RefreshIndicator(
-        onRefresh: () async =>
-            fileListLocalManager.updateFilesAndFolders(),
+        onRefresh: () async => fileListLocalManager.updateFilesAndFolders(),
         child: _buildImageView(choice, files.data),
       ),
     );

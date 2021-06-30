@@ -94,7 +94,8 @@ class ImageScreenState extends State<ImageScreen> {
             Container(
               color: Colors.black,
               child: previewExists
-                  ? Image.file(widget._images[_currentIndex].previewFile.file as File,
+                  ? Image.file(
+                      widget._images[_currentIndex].previewFile.file as File,
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.contain)

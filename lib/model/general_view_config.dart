@@ -7,14 +7,11 @@ class GeneralViewConfig {
   final SectionPreference general;
   final UriPreference path;
 
-  @protected
-  GeneralViewConfig.internal(this.general, this.path);
-
-  factory GeneralViewConfig(String pref, Uri defaultPath, bool pathEnabled) {
-    SectionPreference general = SectionPreference((b) => b
+  factory GeneralViewConfig(String pref, Uri defaultPath, {bool pathEnabled}) {
+    final SectionPreference general = SectionPreference((b) => b
       ..key = Preference.prefixKey(pref, "general")
       ..title = "General");
-    UriPreference path = UriPreference((b) => b
+    final UriPreference path = UriPreference((b) => b
       ..key = general.prepareKey("path")
       ..title = "Path"
       ..value = defaultPath
@@ -22,4 +19,7 @@ class GeneralViewConfig {
 
     return GeneralViewConfig.internal(general, path);
   }
+
+  @protected
+  GeneralViewConfig.internal(this.general, this.path);
 }

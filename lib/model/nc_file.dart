@@ -16,7 +16,7 @@ class NcFile {
     this.uri,
     this.name,
     this.fileExtension,
-    this.isDirectory,
+    {this.isDirectory}
   );
 
   factory NcFile.file(Uri uri, String name, String mime) {
@@ -24,14 +24,14 @@ class NcFile {
     if (ext.isEmpty) {
       ext = extensionFromMime(mime);
     }
-    return NcFile(uri, name, ext, false);
+    return NcFile(uri, name, ext, isDirectory: false);
   }
 
   factory NcFile.directory(Uri uri, String name) => NcFile(
         uri,
         name,
         '',
-        true,
+        isDirectory: true,
       );
 
   @override

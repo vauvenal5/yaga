@@ -21,13 +21,11 @@ class NextcloudManagerBridge {
     this._nextcloudFileManager,
   ) {
     //todo: update loginStateCommand has no logout values... see todo in ncManager
-    this._nextCloudManager.updateLoginStateCommand.listen((value) {
-      this._worker.sendRequest(LoginStateMsg("", value));
+    _nextCloudManager.updateLoginStateCommand.listen((value) {
+      _worker.sendRequest(LoginStateMsg("", value));
     });
 
-    this
-        ._worker
-        .isolateResponseCommand
+    _worker.isolateResponseCommand
         .where((event) => event is DownloadPreviewComplete)
         .map((event) => event as DownloadPreviewComplete)
         .listen(
@@ -36,8 +34,8 @@ class NextcloudManagerBridge {
               : _nextcloudFileManager.downloadPreviewFaildCommand(value.file),
         );
 
-    this.downloadPreviewCommand.listen((ncFile) {
-      this._worker.sendRequest(DownloadPreviewRequest("", ncFile));
+    downloadPreviewCommand.listen((ncFile) {
+      _worker.sendRequest(DownloadPreviewRequest("", ncFile));
     });
   }
 }

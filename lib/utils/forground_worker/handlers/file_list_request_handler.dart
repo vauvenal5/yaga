@@ -23,10 +23,10 @@ class FileListRequestHandler
     IsolateHandlerRegistry registry,
   ) async {
     registry.registerHandler<FileListRequest>(
-      (msg) => this.handle(msg, isolateToMain),
+      (msg) => handle(msg, isolateToMain),
     );
     registry.registerHandler<MergeSortRequest>(
-      (msg) => this.handleMergeSort(msg, isolateToMain),
+      (msg) => handleMergeSort(msg, isolateToMain),
     );
     return this;
   }
@@ -45,7 +45,7 @@ class FileListRequestHandler
             FileListDone(
               message.key,
               message.uri,
-              message.recursive,
+              recursive: message.recursive,
             ),
           ),
         );

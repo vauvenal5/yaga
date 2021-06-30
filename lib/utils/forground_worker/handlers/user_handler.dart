@@ -16,7 +16,7 @@ class UserHandler implements IsolateMsgHandler<UserHandler> {
   Future<UserHandler> initIsolated(InitMsg init, SendPort isolateToMain,
       IsolateHandlerRegistry registry) async {
     registry.registerHandler<LoginStateMsg>(
-        (msg) => this.handleLoginStateChanged(msg));
+        (msg) => handleLoginStateChanged(msg));
     registry.registerHandler<PreferenceMsg>(
       (msg) => getIt
           .get<IsolatedSettingsManager>()
@@ -26,7 +26,7 @@ class UserHandler implements IsolateMsgHandler<UserHandler> {
   }
 
   void handleLoginStateChanged(LoginStateMsg message) {
-    NextCloudService ncService = getIt.get<NextCloudService>();
+    final NextCloudService ncService = getIt.get<NextCloudService>();
 
     if (message.loginData.server == null) {
       getIt.get<SelfSignedCertHandler>().revokeCert();

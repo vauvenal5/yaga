@@ -47,7 +47,7 @@ class _YagaHomeScreenState extends State<YagaHomeScreen>
       stream: getIt.get<TabManager>().tabChangedCommand,
       builder: (context, snapshot) {
         return IndexedStack(
-          index: this._getCurrentIndex(snapshot.data),
+          index: _getCurrentIndex(snapshot.data),
           children: <Widget>[HomeView(), BrowseView()],
         );
       },

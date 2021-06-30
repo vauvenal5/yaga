@@ -22,24 +22,22 @@ class MappingManager with Isolateable<MappingManager> {
   MappingNode root;
   Map<String, MappingPreference> mappings = {};
 
-  MappingManager(this._settingsManager, this._nextCloudService,
-      this._systemLocationService) {
+  MappingManager(this._settingsManager, this._nextCloudService, this._systemLocationService) {
     root = MappingNode();
 
-    this.mappingUpdatedCommand = RxCommand.createSync((param) => param);
+    mappingUpdatedCommand = RxCommand.createSync((param) => param);
 
-    this
-        ._settingsManager
-        .updateSettingCommand
+    _settingsManager.updateSettingCommand
         .where((event) => event is MappingPreference)
-        .listen((event) => handleMappingUpdate(event));
+        .listen((event) => handleMappingUpdate(event as MappingPreference));
   }
 
+  @override
   Future<MappingManager> initIsolated(
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    this.handleMappingUpdate(init.mapping);
+    handleMappingUpdate(init.mapping);
     return this;
   }
 
@@ -75,7 +73,7 @@ class MappingManager with Isolateable<MappingManager> {
       return;
     }
 
-    String pathSegment = pref.remote.value.pathSegments[pathIndex];
+    final String pathSegment = pref.remote.value.pathSegments[pathIndex];
     currentNode.nodes.putIfAbsent(pathSegment, () => MappingNode());
     _addMappingPreferenceToTree(
         pref, pathIndex + 1, currentNode.nodes[pathSegment]);
@@ -98,7 +96,7 @@ class MappingManager with Isolateable<MappingManager> {
   MappingPreference _getRootMappingPreference(Uri remoteUri) =>
       _getMappingPrefernce(
           remoteUri,
-          _getDefaultMapping(this._systemLocationService.internalStorage.uri),
+          _getDefaultMapping(_systemLocationService.internalStorage.uri),
           0,
           root);
 
@@ -120,20 +118,21 @@ class MappingManager with Isolateable<MappingManager> {
 
   Future<Uri> mapToTmpUri(Uri remoteUri) async {
     return _mapUri(remoteUri,
-        _getDefaultMapping(this._systemLocationService.internalCache.uri));
+        _getDefaultMapping(_systemLocationService.internalCache.uri));
   }
 
   Uri _mapUri(Uri remoteUri, MappingPreference mapping) {
-    _logger.fine("Mapping remoteUri: " + remoteUri.toString());
-    _logger.fine("Mapping local: " + mapping.local.value.toString());
-    _logger.fine("Mapping remote: " + mapping.remote.value.toString());
-    Uri mappedUri = UriUtils.fromPathList(uri: mapping.local.value, paths: [
+    _logger.fine("Mapping remoteUri: $remoteUri");
+    _logger.fine("Mapping local: ${mapping.local.value}");
+    _logger.fine("Mapping remote: ${mapping.remote.value}");
+    final Uri mappedUri =
+        UriUtils.fromPathList(uri: mapping.local.value, paths: [
       mapping.local.value.path,
       remoteUri.path.replaceFirst(mapping.remote.value.path, "")
     ]);
-    _logger.fine("Mapped uri: " + mappedUri.toString());
+    _logger.fine("Mapped uri: $mappedUri");
     //todo: is returning an absolute uri from mapping manager the best option?
-    return this._systemLocationService.absoluteUriFromInternal(mappedUri);
+    return _systemLocationService.absoluteUriFromInternal(mappedUri);
   }
 
   //todo: check what we are doing with this
@@ -142,7 +141,7 @@ class MappingManager with Isolateable<MappingManager> {
       (builder) => builder
         ..key = "default"
         ..title = "default"
-        ..remote.value = this._nextCloudService.origin.userEncodedDomainRoot
+        ..remote.value = _nextCloudService.origin.userEncodedDomainRoot
         ..local.value = UriUtils.fromUri(
           uri: root,
           path: _appendLocalMappingFolder(root.path),
@@ -151,10 +150,10 @@ class MappingManager with Isolateable<MappingManager> {
   }
 
   Future<Uri> mapToRemoteUri(Uri local, Uri remote) async {
-    MappingPreference mapping = _getRootMappingPreference(remote);
-    String relativePath = local.path.replaceFirst(
+    final MappingPreference mapping = _getRootMappingPreference(remote);
+    final String relativePath = local.path.replaceFirst(
       mapping == null
-          ? this._systemLocationService.internalStorage.uri.path
+          ? _systemLocationService.internalStorage.uri.path
           : mapping.local.value.path,
       "",
     );
@@ -163,8 +162,8 @@ class MappingManager with Isolateable<MappingManager> {
   }
 
   Future<Uri> mapTmpToRemoteUri(Uri local, Uri remote) async {
-    Uri defaultInternal = this._systemLocationService.internalCache.uri;
-    String relativePath = local.path
+    final Uri defaultInternal = _systemLocationService.internalCache.uri;
+    final String relativePath = local.path
         .replaceFirst(_appendLocalMappingFolder(defaultInternal.path), "");
     return UriUtils.fromUri(uri: remote, path: relativePath);
   }

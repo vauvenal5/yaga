@@ -11,7 +11,7 @@ enum DirectoryTraversalScreenNavActions { cancel }
 class DirectoryTraversalScreen extends StatefulWidget {
   final DirectoryNavigationScreenArguments args;
 
-  DirectoryTraversalScreen(this.args);
+  const DirectoryTraversalScreen(this.args);
 
   @override
   _DirectoryTraversalScreenState createState() =>
@@ -93,7 +93,7 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
     ViewConfiguration viewConfig,
     Uri uri,
   ) {
-    List<Page> pages = [];
+    final List<Page> pages = [];
 
     pages.add(_buildPage(UriUtils.getRootFromUri(uri), viewConfig));
 

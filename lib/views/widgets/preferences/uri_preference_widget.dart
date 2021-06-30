@@ -14,7 +14,7 @@ class UriPreferenceWidget extends StatelessWidget {
   final UriPreference _defaultPref;
   final RxCommand<Preference, dynamic> onChangeCommand;
 
-  UriPreferenceWidget(this._defaultPref, {this.onChangeCommand});
+  const UriPreferenceWidget(this._defaultPref, {this.onChangeCommand});
 
   void _notifyChange(UriPreference pref) {
     if (onChangeCommand != null) {

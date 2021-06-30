@@ -18,11 +18,12 @@ class ImageSearch extends SearchDelegate<NcFile> {
     assert(theme != null);
     return theme.copyWith(
         inputDecorationTheme: InputDecorationTheme(
-            hintStyle: TextStyle(color: theme.primaryTextTheme.headline.color)),
+            hintStyle:
+                TextStyle(color: theme.primaryTextTheme.headline5.color)),
         textTheme: theme.textTheme.copyWith(
-          headline: theme.textTheme.headline
-              .copyWith(color: theme.primaryTextTheme.headline.color),
-          title: TextStyle(
+          headline5: theme.textTheme.headline5
+              .copyWith(color: theme.primaryTextTheme.headline5.color),
+          headline6: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.normal,
             fontSize: 18,
@@ -33,34 +34,35 @@ class ImageSearch extends SearchDelegate<NcFile> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return <Widget>[
-      IconButton(icon: Icon(Icons.close), onPressed: () => query = "")
+      IconButton(icon: const Icon(Icons.close), onPressed: () => query = "")
     ];
   }
 
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-        icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context));
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.pop(context));
   }
 
   @override
   Widget buildResults(BuildContext context) {
     return ImageViewContainer(
-      fileListLocalManager: this._fileListLocalManager,
+      fileListLocalManager: _fileListLocalManager,
       viewConfig: ViewConfiguration.fromViewConfig(
         viewConfig: _viewConfig,
-        onFolderTap: (NcFile file) => this.close(context, file),
+        onFolderTap: (NcFile file) => close(context, file),
       ),
       filter: (NcFile file) =>
-          file.name.toLowerCase().contains(this.query.toLowerCase()) ||
-          file.lastModified.toString().contains(this.query),
+          file.name.toLowerCase().contains(query.toLowerCase()) ||
+          file.lastModified.toString().contains(query),
     );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     return ListView(
-      children: [],
-    );
+        //children: [],
+        );
   }
 }

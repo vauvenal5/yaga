@@ -6,11 +6,12 @@ import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 
 class IsolatedSettingsManager extends SettingsManagerBase
     with Isolateable<IsolatedSettingsManager> {
+  @override
   Future<IsolatedSettingsManager> initIsolated(
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    this.updateSettingCommand(init.mapping);
+    updateSettingCommand(init.mapping);
     return this;
   }
 }

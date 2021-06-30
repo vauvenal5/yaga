@@ -11,7 +11,7 @@ class BoolPreferenceWidget extends StatelessWidget {
   final BoolPreference _defaultPreference;
   final RxCommand<Preference, dynamic> onChangeCommand;
 
-  BoolPreferenceWidget(this._defaultPreference, {this.onChangeCommand});
+  const BoolPreferenceWidget(this._defaultPreference, {this.onChangeCommand});
 
   //todo: generalize this for all preferences
   void _notifyChange(BoolPreference pref) {

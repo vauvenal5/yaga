@@ -21,7 +21,7 @@ class ImageScreen extends StatefulWidget {
   final int index;
   final String title;
 
-  ImageScreen(
+  const ImageScreen(
     this._images,
     this.index, {
     this.title,
@@ -40,15 +40,15 @@ class ImageScreenState extends State<ImageScreen> {
   @override
   void initState() {
     pageController = PageController(initialPage: widget.index);
-    this._currentIndex = pageController.initialPage;
-    this._title = widget._images[_currentIndex].name;
+    _currentIndex = pageController.initialPage;
+    _title = widget._images[_currentIndex].name;
     super.initState();
   }
 
   void _onPageChanged(int index) {
     setState(() {
-      this._currentIndex = index;
-      this._title = widget._images[index].name;
+      _currentIndex = index;
+      _title = widget._images[index].name;
     });
   }
 
@@ -64,11 +64,11 @@ class ImageScreenState extends State<ImageScreen> {
         onPageChanged: _onPageChanged,
         itemCount: widget._images.length,
         builder: (BuildContext context, int index) {
-          NcFile image = widget._images[index];
+          final NcFile image = widget._images[index];
 
           _logger.fine("Building view for index $index");
 
-          Future<FetchedFile> localFileAvailable = getIt
+          final Future<FetchedFile> localFileAvailable = getIt
               .get<FileManager>()
               .fetchedFileCommand
               .where((event) => event.file.uri.path == image.uri.path)
@@ -87,20 +87,20 @@ class ImageScreenState extends State<ImageScreen> {
           );
         },
         loadingBuilder: (context, event) {
-          bool previewExists =
+          final bool previewExists =
               widget._images[_currentIndex].previewFile != null &&
                   widget._images[_currentIndex].previewFile.exists;
           return Stack(children: [
             Container(
               color: Colors.black,
               child: previewExists
-                  ? Image.file(widget._images[_currentIndex].previewFile.file,
+                  ? Image.file(widget._images[_currentIndex].previewFile.file as File,
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.contain)
                   : null,
             ),
-            LinearProgressIndicator()
+            const LinearProgressIndicator()
           ]);
         },
       ),
@@ -110,7 +110,7 @@ class ImageScreenState extends State<ImageScreen> {
   IconButton _buildMainAction() {
     if (getIt.get<IntentService>().isOpenForSelect) {
       return IconButton(
-        icon: Icon(Icons.check),
+        icon: const Icon(Icons.check),
         onPressed: () async {
           await getIt
               .get<IntentService>()
@@ -120,7 +120,7 @@ class ImageScreenState extends State<ImageScreen> {
     }
 
     return IconButton(
-      icon: Icon(Icons.share),
+      icon: const Icon(Icons.share),
       onPressed: () =>
           Share.shareFiles([widget._images[_currentIndex].localFile.file.path]),
     );

@@ -3,14 +3,12 @@ import 'package:rxdart/rxdart.dart';
 
 extension NcFileStreamExtensions on Stream<NcFile> {
   Stream<List<NcFile>> collectToList() {
-    return this.toList().asStream().onErrorReturn([]);
+    return toList().asStream().onErrorReturn([]);
   }
 
-  Stream<NcFile> recursively(
-    bool recursive,
-    Stream<NcFile> Function(Uri) listFilesFromUpstream,
-  ) {
-    return this.flatMap(
+  Stream<NcFile> recursively(Stream<NcFile> Function(Uri) listFilesFromUpstream,
+      {bool recursive}) {
+    return flatMap(
       (file) => Rx.merge([
         Stream.value(file),
         Stream.value(file)
@@ -20,8 +18,8 @@ extension NcFileStreamExtensions on Stream<NcFile> {
               (file) => listFilesFromUpstream(
                 file.uri,
               ).recursively(
-                recursive,
                 listFilesFromUpstream,
+                recursive: recursive,
               ),
             )
       ]),

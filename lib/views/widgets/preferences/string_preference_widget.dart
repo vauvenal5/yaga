@@ -8,7 +8,7 @@ class StringPreferenceWidget extends StatelessWidget {
   final StringPreference _defaultPreference;
   final Function(StringPreference) _onTap;
 
-  StringPreferenceWidget(this._defaultPreference, this._onTap);
+  const StringPreferenceWidget(this._defaultPreference, this._onTap);
 
   @override
   Widget build(BuildContext context) {

@@ -41,7 +41,7 @@ void main() {
       loginData = NextCloudLoginData(host, "test", "password");
 
       when(factoryMock.createNextCloudClient(
-              host.toString(), "test", "password"))
+              host, "test", "password"))
           .thenAnswer((_) => clientMock);
       when(clientMock.webDav).thenAnswer((_) => webDavClientMock);
       when(clientMock.avatar).thenAnswer((_) => avatarClientMock);
@@ -49,7 +49,7 @@ void main() {
     });
 
     test("verify isLoggedIn after login and after logout", () {
-      NextCloudService service = NextCloudService(factoryMock);
+      final NextCloudService service = NextCloudService(factoryMock);
 
       expect(service.isLoggedIn(), false);
 
@@ -80,14 +80,14 @@ void main() {
       }
 
       test("list files and folders", () {
-        NextCloudService service = NextCloudService(factoryMock);
+        final NextCloudService service = NextCloudService(factoryMock);
         service.login(loginData);
-        Uri uri = Uri(path: "/path");
-        String remotePath = "files/test${uri.path}";
+        final Uri uri = Uri(path: "/path");
+        final String remotePath = "files/test${uri.path}";
 
         when(clientMock.username).thenAnswer((_) => "test");
 
-        List<WebDavFile> webDavFiles = [
+        final List<WebDavFile> webDavFiles = [
           // WebDavFile("/path/file.jpeg", "image/jpeg", 512, DateTime(2020)),
           // WebDavFile("/path/file2.jpeg", "image/jpeg", 512, DateTime(2020)),
           // WebDavFile("/path/path2/", "", 512, DateTime(2020))
@@ -110,14 +110,14 @@ void main() {
       });
 
       test("filter wrong mime types", () {
-        NextCloudService service = NextCloudService(factoryMock);
+        final NextCloudService service = NextCloudService(factoryMock);
         service.login(loginData);
-        Uri uri = Uri(path: "/path");
-        String remotePath = "files/test${uri.path}";
+        final Uri uri = Uri(path: "/path");
+        final String remotePath = "files/test${uri.path}";
 
         when(clientMock.username).thenAnswer((_) => "test");
 
-        List<WebDavFile> webDavFiles = [
+        final List<WebDavFile> webDavFiles = [
           // WebDavFile("/path/file.html", "text/html", 512, DateTime(2020)),
           // WebDavFile("/path/file.jpeg", "image/jpeg", 512, DateTime(2020)),
           WebDavFile("/path/file.html"),
@@ -137,30 +137,30 @@ void main() {
     });
 
     test("check origin", () {
-      NextCloudService service = NextCloudService(factoryMock);
+      final NextCloudService service = NextCloudService(factoryMock);
       service.login(loginData);
 
       when(clientMock.username).thenAnswer((_) => "test");
 
-      expect(service.getOrigin(),
+      expect(service.origin,
           Uri(scheme: "nc", host: host.host, userInfo: "test", path: "/"));
     });
 
     group("isUriOfService", () {
       test("nextcloud uri", () {
-        NextCloudService service = NextCloudService(factoryMock);
+        final NextCloudService service = NextCloudService(factoryMock);
         expect(service.isUriOfService(Uri(scheme: "nc")), true);
       });
 
       test("local uri", () {
-        NextCloudService service = NextCloudService(factoryMock);
+        final NextCloudService service = NextCloudService(factoryMock);
         expect(service.isUriOfService(Uri(scheme: "file")), false);
       });
     });
 
     test("decode avatar", () async {
-      NextCloudService service = NextCloudService(factoryMock);
-      String value = "testing";
+      final NextCloudService service = NextCloudService(factoryMock);
+      const String value = "testing";
       service.login(loginData);
 
       when(clientMock.username).thenAnswer((_) => "test");
@@ -171,28 +171,28 @@ void main() {
     });
 
     test("decodes preview path before request", () {
-      NextCloudService service = NextCloudService(factoryMock);
+      final NextCloudService service = NextCloudService(factoryMock);
       service.login(loginData);
-      String file = "[test]-file.png";
+      const String file = "[test]-file.png";
 
-      when(previewClientMock.getPreview(file, 128, 128))
+      when(previewClientMock.getPreviewByPath(file, 128, 128))
           .thenAnswer((_) => Future.value(Uint8List(5)));
 
       service.getPreview(Uri(path: file));
 
-      verify(previewClientMock.getPreview(file, 128, 128)).called(1);
+      verify(previewClientMock.getPreviewByPath(file, 128, 128)).called(1);
     });
 
     test("download image path gets adapted", () {
-      NextCloudService service = NextCloudService(factoryMock);
+      final NextCloudService service = NextCloudService(factoryMock);
       service.login(loginData);
       when(clientMock.username).thenAnswer((_) => "test");
 
-      Uri file = Uri(path: "/path/[test]-file.png");
+      final Uri file = Uri(path: "/path/[test]-file.png");
 
       service.downloadImage(file);
 
-      verify(webDavClientMock.download("files/test" + file.path)).called(1);
+      verify(webDavClientMock.download("files/test${file.path}")).called(1);
     });
   });
 }

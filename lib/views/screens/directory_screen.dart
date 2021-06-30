@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
+import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart';
 import 'package:yaga/model/route_args/focus_view_arguments.dart';
@@ -51,16 +52,13 @@ class DirectoryScreen extends StatefulWidget {
   }) : super(key: ValueKey(uri.toString()));
 
   @override
-  _DirectoryScreenState createState() =>
-      _DirectoryScreenState(this.uri, this.viewConfig);
+  _DirectoryScreenState createState() => _DirectoryScreenState(uri, viewConfig);
 }
 
 class _DirectoryScreenState extends State<DirectoryScreen> {
   final FileListLocalManager _fileListLocalManager;
   final ViewConfiguration _viewConfig;
-  List<Preference> _defaultViewPreferences = [];
-
-  _DirectoryScreenState._internal(this._fileListLocalManager, this._viewConfig);
+  final List<Preference> _defaultViewPreferences = [];
 
   factory _DirectoryScreenState(Uri uri, ViewConfiguration viewConfig) {
     final fileListLocalManager = FileListLocalManager(
@@ -74,7 +72,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
       allowSelecting: viewConfig.onFileTap != null,
     );
 
-    final onFileTap = (files, index) {
+    dynamic onFileTap(List<NcFile> files, int index) {
       if (fileListLocalManager.isInSelectionMode) {
         return fileListLocalManager.selectFileCommand(files[index]);
       }
@@ -82,7 +80,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
       if (viewConfig.onFileTap != null) {
         return viewConfig.onFileTap(files, index);
       }
-    };
+    }
 
     return _DirectoryScreenState._internal(
       fileListLocalManager,
@@ -103,27 +101,29 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
     );
   }
 
+  _DirectoryScreenState._internal(this._fileListLocalManager, this._viewConfig);
+
   @override
   void initState() {
-    this._defaultViewPreferences.add(widget.viewConfig.section);
-    this._defaultViewPreferences.add(widget.viewConfig.view);
+    _defaultViewPreferences.add(widget.viewConfig.section);
+    _defaultViewPreferences.add(widget.viewConfig.view);
 
-    this._fileListLocalManager.initState();
+    _fileListLocalManager.initState();
     super.initState();
   }
 
   @override
   void dispose() {
-    this._fileListLocalManager.dispose();
+    _fileListLocalManager.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SelectionWillPopScope(
-      fileListLocalManager: this._fileListLocalManager,
+      fileListLocalManager: _fileListLocalManager,
       child: Scaffold(
-        key: ValueKey(this._fileListLocalManager.uri.toString()),
+        key: ValueKey(_fileListLocalManager.uri.toString()),
         appBar: SelectionAppBar(
           fileListLocalManager: _fileListLocalManager,
           viewConfig: _viewConfig,
@@ -131,18 +131,18 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
           bottomHeight: DirectoryScreen.appBarBottomHeight,
           searchResultHandler: (file) {
             if (file != null && file.isDirectory) {
-              this.widget.viewConfig.onFolderTap(file);
+              widget.viewConfig.onFolderTap(file);
             }
           },
         ),
         //todo: is it possible to directly pass the folder.uri?
         body: ImageViewContainer(
           fileListLocalManager: _fileListLocalManager,
-          viewConfig: this._viewConfig,
+          viewConfig: _viewConfig,
         ),
         bottomNavigationBar: widget.bottomBarBuilder == null
             ? null
-            : widget.bottomBarBuilder(context, this._fileListLocalManager.uri),
+            : widget.bottomBarBuilder(context, _fileListLocalManager.uri),
       ),
     );
   }
@@ -150,40 +150,41 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
   AppBar _buildAppBar(BuildContext context, List<Widget> actions) {
     if (!_fileListLocalManager.isInSelectionMode) {
       actions.add(YagaPopupMenuButton<BrowseViewMenu>(
-        this._buildPopupMenu,
-        this._handleMenuSelection,
+        _buildPopupMenu,
+        _handleMenuSelection,
       ));
     }
 
     return AppBar(
       title: SelectionTitle(
-        this._fileListLocalManager,
-        defaultTitel: Text(this.widget.title ??
-            this._fileListLocalManager.uri.pathSegments.last),
+        _fileListLocalManager,
+        defaultTitel:
+            Text(widget.title ?? _fileListLocalManager.uri.pathSegments.last),
       ),
       //todo: remove widget.leading argument it is always true
-      leading: this.widget.leading
+      leading: widget.leading
           ? IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               onPressed: () => _fileListLocalManager.isInSelectionMode
                   ? _fileListLocalManager.deselectAll()
                   : Navigator.of(context).pop())
           : null,
       actions: actions,
       bottom: PreferredSize(
-          child: Container(
+          preferredSize:
+              const Size.fromHeight(DirectoryScreen.appBarBottomHeight),
+          child: SizedBox(
             height: DirectoryScreen.appBarBottomHeight,
             child: Align(
               alignment: Alignment.topLeft,
               child: PathWidget(
-                this._fileListLocalManager.uri,
+                _fileListLocalManager.uri,
                 (Uri subPath) => Navigator.of(context).pop(subPath),
-                fixedOrigin: this.widget.fixedOrigin,
-                schemeFilter: this.widget.schemeFilter,
+                fixedOrigin: widget.fixedOrigin,
+                schemeFilter: widget.schemeFilter,
               ),
             ),
-          ),
-          preferredSize: Size.fromHeight(DirectoryScreen.appBarBottomHeight)),
+          )),
     );
   }
 
@@ -193,7 +194,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
         context,
         SettingsScreen.route,
         arguments:
-            new SettingsScreenArguments(preferences: _defaultViewPreferences),
+            SettingsScreenArguments(preferences: _defaultViewPreferences),
       );
     }
 
@@ -201,20 +202,20 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
       Navigator.pushNamed(
         context,
         FocusView.route,
-        arguments: new FocusViewArguments(_fileListLocalManager.uri),
+        arguments: FocusViewArguments(_fileListLocalManager.uri),
       );
     }
   }
 
   List<PopupMenuEntry<BrowseViewMenu>> _buildPopupMenu(BuildContext context) {
     return [
-      PopupMenuItem(
-        child: ListMenuEntry(Icons.settings, "Settings"),
+      const PopupMenuItem(
         value: BrowseViewMenu.settings,
+        child: ListMenuEntry(Icons.settings, "Settings"),
       ),
-      PopupMenuItem(
-        child: ListMenuEntry(Icons.remove_red_eye, "Focus"),
+      const PopupMenuItem(
         value: BrowseViewMenu.focus,
+        child: ListMenuEntry(Icons.remove_red_eye, "Focus"),
       ),
     ];
   }

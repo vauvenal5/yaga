@@ -9,7 +9,7 @@ class SearchIconButton extends StatelessWidget {
   final ViewConfiguration viewConfig;
   final Function(NcFile) searchResultHandler;
 
-  SearchIconButton({
+  const SearchIconButton({
     @required this.fileListLocalManager,
     @required this.viewConfig,
     this.searchResultHandler,
@@ -18,11 +18,11 @@ class SearchIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.search),
+      icon: const Icon(Icons.search),
       onPressed: () async {
-        NcFile file = await showSearch<NcFile>(
+        final NcFile file = await showSearch<NcFile>(
           context: context,
-          delegate: ImageSearch(this.fileListLocalManager, this.viewConfig),
+          delegate: ImageSearch(fileListLocalManager, viewConfig),
         );
         if (searchResultHandler != null) {
           searchResultHandler(file);

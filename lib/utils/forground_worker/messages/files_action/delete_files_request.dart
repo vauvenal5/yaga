@@ -5,5 +5,5 @@ class DeleteFilesRequest extends Message {
   final List<NcFile> files;
   final bool local;
 
-  DeleteFilesRequest(String key, this.files, this.local) : super(key);
+  DeleteFilesRequest(String key, this.files, {this.local}) : super(key);
 }

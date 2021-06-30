@@ -4,21 +4,21 @@ class SelectionActionCancelDialog extends StatelessWidget {
   final String title;
   final Function() cancelAction;
 
-  SelectionActionCancelDialog(this.title, this.cancelAction);
+  const SelectionActionCancelDialog(this.title, this.cancelAction);
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(this.title),
-      content: SingleChildScrollView(
+      title: Text(title),
+      content: const SingleChildScrollView(
         child: Center(
           child: CircularProgressIndicator(),
         ),
       ),
       actions: [
         TextButton(
-          child: Text('Cancel'),
           onPressed: () => cancelAction(),
+          child: const Text('Cancel'),
         ),
       ],
     );

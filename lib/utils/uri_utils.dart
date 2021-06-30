@@ -20,9 +20,9 @@ class UriUtils {
 
   static Uri fromPathList({@required Uri uri, @required List<String> paths}) {
     String path = "";
-    paths.forEach((element) {
+    for (final element in paths){
       path = UriUtils.chainPathSegments(path, element);
-    });
+    }
     // do not double encode here because paths are already double encoded
     return UriUtils.fromUri(uri: uri, path: path);
   }
@@ -42,14 +42,15 @@ class UriUtils {
   static Uri getRootFromUri(Uri uri) => UriUtils.fromUri(uri: uri, path: "/");
 
   static Uri fromUriPathSegments(Uri uri, int index) {
-    String path = "/";
+    final buffer = StringBuffer();
+    buffer.write("/");
     for (int i = 0; i <= index; i++) {
       // in cases where we have encoded chars in the folder name we have to re-encode
       // to make sure we do not change the meaning, since pathSegments does auto-decoding
-      path += Uri.encodeComponent(uri.pathSegments[i]) + "/";
+      buffer.write("${Uri.encodeComponent(uri.pathSegments[i])}/");
     }
 
-    return UriUtils.fromUri(uri: uri, path: path);
+    return UriUtils.fromUri(uri: uri, path: buffer.toString());
   }
 
   static String getNameFromUri(Uri uri) {

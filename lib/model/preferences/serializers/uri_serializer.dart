@@ -5,13 +5,13 @@ mixin UriSerializer
     implements SerializablePreference<String, Uri, UriPreference> {
   @override
   String serialize() {
-    return this.value.toString();
+    return value.toString();
   }
 
   @override
   UriPreference deserialize(String value) {
     return value == null
-        ? this
-        : this.rebuild((b) => b..value = Uri.parse(value));
+        ? this as UriPreference
+        : rebuild((b) => b..value = Uri.parse(value));
   }
 }

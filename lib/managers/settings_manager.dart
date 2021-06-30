@@ -11,7 +11,7 @@ import 'package:yaga/services/shared_preferences_service.dart';
 typedef PrefFunction = T Function<T extends ValuePreference>(T);
 
 class SettingsManager extends SettingsManagerBase {
-  SharedPreferencesService _sharedPreferencesService;
+  final SharedPreferencesService _sharedPreferencesService;
 
   RxCommand<SerializablePreference<String, dynamic, dynamic>, void>
       persistStringSettingCommand;
@@ -58,11 +58,11 @@ class SettingsManager extends SettingsManagerBase {
 
     loadMappingPreferenceCommand = RxCommand.createSync((param) => param);
     loadMappingPreferenceCommand.listen((value) {
-      UriPreference remote =
+      final UriPreference remote =
           _sharedPreferencesService.loadPreferenceFromString(value.remote);
-      UriPreference local =
+      final UriPreference local =
           _sharedPreferencesService.loadPreferenceFromString(value.local);
-      BoolPreference syncDeletes =
+      final BoolPreference syncDeletes =
           _sharedPreferencesService.loadPreferenceFromBool(value.syncDeletes);
       updateSettingCommand(_sharedPreferencesService.loadPreferenceFromBool(
         value.rebuild(

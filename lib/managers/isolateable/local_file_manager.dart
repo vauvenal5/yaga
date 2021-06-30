@@ -24,7 +24,7 @@ class LocalFileManager
 
   LocalFileManager(
       this._fileManager, this._localFileService, this._systemPathService) {
-    this._fileManager.registerFileManager(this);
+    _fileManager.registerFileManager(this);
   }
 
   @override
@@ -35,9 +35,8 @@ class LocalFileManager
     bool recursive = false,
   }) {
     //todo: add uri check? or simply handle exception?
-    return this
-        ._listLocalFiles(uri)
-        .recursively(recursive, this._listLocalFiles);
+    return _listLocalFiles(uri)
+        .recursively(_listLocalFiles, recursive: recursive);
   }
 
   @override
@@ -45,19 +44,20 @@ class LocalFileManager
     Uri uri, {
     bool recursive = false,
   }) {
-    return this.listFiles(uri, recursive: recursive).collectToList();
+    return listFiles(uri, recursive: recursive).collectToList();
   }
 
   Stream<NcFile> _listLocalFiles(Uri uri) {
     //todo: add uri check? or simply handle exception?
     return Stream.value(uri)
-        .map(this._systemPathService.absoluteUriFromInternal)
+        .map(_systemPathService.absoluteUriFromInternal)
         .map((uri) => Directory.fromUri(uri))
         .flatMap((dir) => _localFileService.list(dir))
         .map((event) {
-      Uri uri = this._systemPathService.internalUriFromAbsolute(event.uri);
+      final Uri uri =
+          _systemPathService.internalUriFromAbsolute(event.uri);
 
-      NcFile file = _createFile(uri, event);
+      final NcFile file = _createFile(uri, event);
       file.localFile = LocalFile(event);
       file.localFile.exists = event.existsSync();
       return file;
@@ -66,7 +66,7 @@ class LocalFileManager
 
   NcFile _createFile(Uri uri, FileSystemEntity event) {
     if (event is Directory) {
-      NcFile file = NcFile.directory(
+      final NcFile file = NcFile.directory(
         uri,
         UriUtils.getNameFromUri(uri),
       );
@@ -75,7 +75,7 @@ class LocalFileManager
       return file;
     }
 
-    NcFile file = NcFile.file(
+    final NcFile file = NcFile.file(
       uri,
       UriUtils.getNameFromUri(uri),
       lookupMimeType(event.path),
@@ -86,28 +86,28 @@ class LocalFileManager
   }
 
   @override
-  Future<NcFile> deleteFile(NcFile file, bool local) async {
-    this._localFileService.deleteFile(file.localFile.file);
-    this._fileManager.updateFileList(file);
+  Future<NcFile> deleteFile(NcFile file, {bool local}) async {
+    _localFileService.deleteFile(file.localFile.file);
+    _fileManager.updateFileList(file);
     return file;
   }
 
   @override
-  Future<NcFile> copyFile(NcFile file, Uri destination, bool overwrite) async {
-    this._localFileService.copyFile(
+  Future<NcFile> copyFile(NcFile file, Uri destination, {bool overwrite}) async {
+    _localFileService.copyFile(
           file,
-          this._systemPathService.absoluteUriFromInternal(destination),
-          overwrite,
+          _systemPathService.absoluteUriFromInternal(destination),
+          overwrite: overwrite,
         );
     return file;
   }
 
   @override
-  Future<NcFile> moveFile(NcFile file, Uri destination, bool overwrite) async {
-    this._localFileService.moveFile(
+  Future<NcFile> moveFile(NcFile file, Uri destination, {bool overwrite}) async {
+    _localFileService.moveFile(
           file,
-          this._systemPathService.absoluteUriFromInternal(destination),
-          overwrite,
+          _systemPathService.absoluteUriFromInternal(destination),
+          overwrite: overwrite,
         );
     return file;
   }

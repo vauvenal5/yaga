@@ -17,5 +17,5 @@ class CategoryViewConfig {
       this.hasDrawer,
       bool pathEnabled,
       this.title})
-      : generalViewConfig = GeneralViewConfig(pref, defaultPath, pathEnabled);
+      : generalViewConfig = GeneralViewConfig(pref, defaultPath, pathEnabled: pathEnabled);
 }

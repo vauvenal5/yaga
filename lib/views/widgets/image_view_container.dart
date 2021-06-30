@@ -18,11 +18,11 @@ class ImageViewContainer extends StatelessWidget {
   final ViewConfiguration viewConfig;
   final bool Function(NcFile) _filter;
 
-  ImageViewContainer({
+  const ImageViewContainer({
     @required this.fileListLocalManager,
     @required this.viewConfig,
     bool Function(NcFile) filter,
-  }) : this._filter = filter;
+  }) : _filter = filter;
 
   Widget _buildImageView(ChoicePreference choice, SortedFileList files) {
     SortedFileList filteredFiles = files;
@@ -41,7 +41,7 @@ class ImageViewContainer extends StatelessWidget {
     if (choice.value == NcListView.viewKey) {
       return NcListView(
         sorted: filteredFiles,
-        viewConfig: this.viewConfig,
+        viewConfig: viewConfig,
       );
     }
 
@@ -55,14 +55,14 @@ class ImageViewContainer extends StatelessWidget {
       StreamBuilder<ChoicePreference>(
         initialData: getIt
             .get<SharedPreferencesService>()
-            .loadPreferenceFromString(this.viewConfig.view),
+            .loadPreferenceFromString(viewConfig.view),
         stream: getIt
             .get<SettingsManager>()
             .updateSettingCommand
-            .where((event) => event.key == this.viewConfig.view.key)
+            .where((event) => event.key == viewConfig.view.key)
             .map((event) => event as ChoicePreference),
         builder: (context, choice) {
-          bool sortChanged = this.fileListLocalManager.setSortConfig(
+          final bool sortChanged = fileListLocalManager.setSortConfig(
                 ViewConfiguration.getSortConfigFromViewChoice(choice.data),
               );
           return _buildImageContainterStreamBuilder(
@@ -73,10 +73,10 @@ class ImageViewContainer extends StatelessWidget {
         },
       ),
       StreamBuilder<bool>(
-        initialData: this.fileListLocalManager.loadingChangedCommand.lastResult,
-        stream: this.fileListLocalManager.loadingChangedCommand,
+        initialData: fileListLocalManager.loadingChangedCommand.lastResult,
+        stream: fileListLocalManager.loadingChangedCommand,
         builder: (context, snapshot) =>
-            snapshot.data ? LinearProgressIndicator() : Container(),
+            snapshot.data ? const LinearProgressIndicator() : Container(),
       )
     ]);
   }
@@ -89,18 +89,18 @@ class ImageViewContainer extends StatelessWidget {
     return StreamBuilder<SortedFileList>(
       key: ValueKey(fileListLocalManager.sortConfig.sortType),
       initialData: sortChanged
-          ? this.fileListLocalManager.emptyFileList
-          : this.fileListLocalManager.filesChangedCommand.lastResult,
-      stream: this.fileListLocalManager.filesChangedCommand.where(
+          ? fileListLocalManager.emptyFileList
+          : fileListLocalManager.filesChangedCommand.lastResult,
+      stream: fileListLocalManager.filesChangedCommand.where(
             // this filter makes sure that if viewType is changed while loading we do not run into trouble
             (event) =>
                 event.config.sortType ==
                 fileListLocalManager.sortConfig.sortType,
           ),
       builder: (context, files) => RefreshIndicator(
-        child: _buildImageView(choice, files.data),
         onRefresh: () async =>
-            this.fileListLocalManager.updateFilesAndFolders(),
+            fileListLocalManager.updateFilesAndFolders(),
+        child: _buildImageView(choice, files.data),
       ),
     );
   }

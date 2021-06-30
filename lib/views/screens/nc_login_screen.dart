@@ -18,7 +18,7 @@ class NextCloudLoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sign in..."),
+        title: const Text("Sign in..."),
       ),
       body: WebView(
         key: UniqueKey(),
@@ -26,13 +26,13 @@ class NextCloudLoginScreen extends StatelessWidget {
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (WebViewController webViewController) {
           webViewController.loadUrl(
-              this._url.toString() + "/index.php/login/flow",
+              "$_url/index.php/login/flow",
               headers: <String, String>{"OCS-APIREQUEST": "true"});
         },
         navigationDelegate: (NavigationRequest request) async {
           if (request.url.startsWith("nc")) {
             //string of type: nc://login/server:<server>&user:<loginname>&password:<password>
-            Map<String, String> ncParas = request.url
+            final Map<String, String> ncParas = request.url
                 .split("nc://login/")[1]
                 .split("&")
                 .map((e) => e.split(":"))

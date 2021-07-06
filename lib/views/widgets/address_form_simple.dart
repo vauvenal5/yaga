@@ -6,7 +6,7 @@ class AddressFormSimple extends StatelessWidget {
   final GlobalKey<FormState> _formKey;
   final Function(Uri) _onSave;
 
-  AddressFormSimple(this._formKey, this._onSave);
+  const AddressFormSimple(this._formKey, this._onSave);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class AddressFormSimple extends StatelessWidget {
       key: _formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: TextFormField(
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: "Nextcloud Server address https://...",
             icon: Icon(Icons.cloud_queue)),
         onSaved: (value) => _onSave(

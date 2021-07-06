@@ -12,7 +12,7 @@ class PathWidget extends StatelessWidget {
   final bool fixedOrigin;
   final String schemeFilter;
 
-  PathWidget(
+  const PathWidget(
     this._uri,
     this._onTap, {
     this.fixedOrigin = false,
@@ -23,22 +23,22 @@ class PathWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ButtonTheme(
       minWidth: 20,
-      padding: EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: ListView.separated(
         shrinkWrap: true,
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         scrollDirection: Axis.horizontal,
-        itemCount: _uri.pathSegments.length == 0 ? 1 : _uri.pathSegments.length,
+        itemCount: _uri.pathSegments.isEmpty ? 1 : _uri.pathSegments.length,
         itemBuilder: (context, index) {
           if (index == 0) {
-            Uri selected = UriUtils.getRootFromUri(_uri);
+            final Uri selected = UriUtils.getRootFromUri(_uri);
 
             if (fixedOrigin) {
               return _getDisabledAvatar(selected);
             }
 
             List<DropdownMenuItem<Uri>> items = [];
-            SystemLocationService systemLocationService =
+            final SystemLocationService systemLocationService =
                 getIt.get<SystemLocationService>();
 
             items.add(_getMenuItem(
@@ -68,20 +68,22 @@ class PathWidget extends StatelessWidget {
             return DropdownButtonHideUnderline(
               child: DropdownButton(
                 value: selected,
-                onChanged: (value) => _onTap(value),
+                onChanged: (Uri value) => _onTap(value),
                 items: items,
               ),
             );
           }
-          Uri subUri = UriUtils.fromUriPathSegments(_uri, index - 1);
-          return FlatButton(
-            textColor: Colors.white,
+          final Uri subUri = UriUtils.fromUriPathSegments(_uri, index - 1);
+          return TextButton(
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+            ),
             onPressed: () => _onTap(subUri),
             child: Text(UriUtils.getNameFromUri(subUri)),
           );
         },
         separatorBuilder: (context, index) =>
-            Icon(Icons.keyboard_arrow_right, color: Colors.white),
+            const Icon(Icons.keyboard_arrow_right, color: Colors.white),
       ),
     );
   }
@@ -102,7 +104,7 @@ class PathWidget extends StatelessWidget {
 
   Widget _getAvatarForOrigin(Uri origin) {
     if (getIt.get<SystemLocationService>().internalStorage.origin == origin) {
-      return AvatarWidget.phone();
+      return const AvatarWidget.phone();
     }
 
     if (origin.scheme == getIt.get<NextCloudService>().scheme) {
@@ -111,6 +113,6 @@ class PathWidget extends StatelessWidget {
       );
     }
 
-    return AvatarWidget.sd();
+    return const AvatarWidget.sd();
   }
 }

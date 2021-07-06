@@ -21,7 +21,7 @@ class YagaDrawer extends StatelessWidget {
         child: ListView(
       children: <Widget>[
         DrawerHeader(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
@@ -38,7 +38,7 @@ class YagaDrawer extends StatelessWidget {
                 .updateLoginStateCommand
                 .lastResult,
             builder: (context, snapshot) {
-              NextCloudService ncService = getIt.get<NextCloudService>();
+              final NextCloudService ncService = getIt.get<NextCloudService>();
               return Align(
                   alignment: Alignment.centerLeft,
                   child: ListTile(
@@ -50,11 +50,11 @@ class YagaDrawer extends StatelessWidget {
                       ncService.isLoggedIn()
                           ? ncService.origin.displayName
                           : "",
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                     subtitle: Text(
                       ncService.isLoggedIn() ? ncService.origin.domain : "",
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ));
             },
@@ -68,11 +68,10 @@ class YagaDrawer extends StatelessWidget {
           stream:
               getIt.get<GlobalSettingsManager>().updateGlobalSettingsCommand,
           builder: (context, snapshot) => ListTile(
-            leading: Icon(Icons.settings),
-            title: Text("Global Settings"),
+            leading: const Icon(Icons.settings),
+            title: const Text("Global Settings"),
             onTap: () => Navigator.pushNamed(context, SettingsScreen.route,
-                arguments:
-                    new SettingsScreenArguments(preferences: snapshot.data)),
+                arguments: SettingsScreenArguments(preferences: snapshot.data)),
           ),
         ),
         StreamBuilder<NextCloudLoginData>(
@@ -84,15 +83,15 @@ class YagaDrawer extends StatelessWidget {
             builder: (context, snapshot) {
               if (getIt.get<NextCloudService>().isLoggedIn()) {
                 return ListTile(
-                  leading: Icon(Icons.power_settings_new),
-                  title: Text("Logout"),
+                  leading: const Icon(Icons.power_settings_new),
+                  title: const Text("Logout"),
                   onTap: () => _logout(context),
                 );
               }
 
               return ListTile(
-                leading: Icon(Icons.add_to_home_screen),
-                title: Text("Login"),
+                leading: const Icon(Icons.add_to_home_screen),
+                title: const Text("Login"),
                 onTap: () => Navigator.pushNamed(
                   context,
                   NextCloudAddressScreen.route,
@@ -101,12 +100,12 @@ class YagaDrawer extends StatelessWidget {
             }),
         //todo: improve this (fill text and move to bottom)
         AboutListTile(
-          icon: Icon(Icons.info_outline),
-          applicationVersion: "v" + getIt.get<PackageInfo>().version,
+          icon: const Icon(Icons.info_outline),
+          applicationVersion: "v${getIt.get<PackageInfo>().version}",
           applicationIcon: SvgPicture.asset(
             "assets/icon/icon.svg",
             semanticsLabel: 'Yaga Logo',
-            alignment: Alignment.center,
+            // alignment: Alignment.center,
             width: 56,
           ),
         )
@@ -123,7 +122,7 @@ class YagaDrawer extends StatelessWidget {
         aggressiveAction: "Logout",
         action: getIt.get<NextCloudManager>().logoutCommand,
         bodyBuilder: (builderContext) => <Widget>[
-          Text(
+          const Text(
             "Logging out will reset your local preferences.",
           ),
         ],

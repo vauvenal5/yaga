@@ -8,28 +8,28 @@ class NcListView extends StatelessWidget {
   final SortedFileFolderList sorted;
   final ViewConfiguration viewConfig;
 
-  NcListView({
+  const NcListView({
     @required this.sorted,
     @required this.viewConfig,
   });
 
   @override
   Widget build(BuildContext context) {
-    var slivers = <Widget>[];
+    final slivers = <Widget>[];
 
-    if (this.viewConfig.showFolders.value) {
+    if (viewConfig.showFolders.value) {
       slivers.add(SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) => ListTile(
-            leading: Icon(
+            leading: const Icon(
               Icons.folder,
               size: 48,
             ),
-            isThreeLine: false,
+            // isThreeLine: false,
             title: Text(sorted.folders[index].name),
             //todo: move this check into getter of viewConfig
-            onTap: this.viewConfig.onFolderTap != null
-                ? () => this.viewConfig.onFolderTap(sorted.folders[index])
+            onTap: viewConfig.onFolderTap != null
+                ? () => viewConfig.onFolderTap(sorted.folders[index])
                 : null,
           ),
           childCount: sorted.folders.length,
@@ -40,7 +40,7 @@ class NcListView extends StatelessWidget {
     slivers.add(SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) => ListTile(
-          leading: Container(
+          leading: SizedBox(
             width: 64,
             height: 64,
             child: RemoteImageWidget(
@@ -51,11 +51,11 @@ class NcListView extends StatelessWidget {
             ),
           ),
           title: Text(sorted.files[index].name),
-          onTap: this.viewConfig.onFileTap != null
-              ? () => this.viewConfig.onFileTap(sorted.files, index)
+          onTap: viewConfig.onFileTap != null
+              ? () => viewConfig.onFileTap(sorted.files, index)
               : null,
-          onLongPress: this.viewConfig.onSelect != null
-              ? () => this.viewConfig.onSelect(sorted.files, index)
+          onLongPress: viewConfig.onSelect != null
+              ? () => viewConfig.onSelect(sorted.files, index)
               : null,
         ),
         childCount: sorted.files.length,
@@ -63,7 +63,7 @@ class NcListView extends StatelessWidget {
     ));
 
     return CustomScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: slivers,
     );
   }

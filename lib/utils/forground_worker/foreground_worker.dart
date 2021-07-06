@@ -43,7 +43,7 @@ class ForegroundWorker {
 
     isolateToMain.listen((message) {
       if (message is SendPort) {
-        this._mainToIsolate = message;
+        _mainToIsolate = message;
         _isolateReady.complete(this);
         return;
       }
@@ -58,7 +58,7 @@ class ForegroundWorker {
       }
     });
 
-    this._isolate = await Isolate.spawn(
+    _isolate = await Isolate.spawn(
       _workerMain,
       InitMsg(
         isolateToMain.sendPort,
@@ -85,10 +85,10 @@ class ForegroundWorker {
   }
 
   void sendRequest(Message request) {
-    isolateReadyFuture.then((value) => this._mainToIsolate.send(request));
+    isolateReadyFuture.then((value) => _mainToIsolate.send(request));
   }
 
-  static void _workerMain(dynamic message) async {
+  static Future<void> _workerMain(dynamic message) async {
     SendPort isolateToMain;
     final mainToIsolate = ReceivePort();
     final handlerRegistry = IsolateHandlerRegistry();

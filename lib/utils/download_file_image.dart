@@ -8,7 +8,7 @@ import 'package:yaga/model/fetched_file.dart';
 class DownloadFileImage extends FileImage {
   final Future<FetchedFile> localFileAvailable;
 
-  DownloadFileImage(File file, this.localFileAvailable) : super(file);
+  const DownloadFileImage(File file, this.localFileAvailable) : super(file);
 
   @override
   ImageStreamCompleter load(FileImage key, DecoderCallback decode) {
@@ -24,8 +24,8 @@ class DownloadFileImage extends FileImage {
   Future<ui.Codec> _loadAsync(FileImage key, DecoderCallback decode) async {
     assert(key == this);
 
-    FetchedFile fetchedFile = await localFileAvailable;
-    assert(fetchedFile.file.localFile.file.path == this.file.path);
+    final FetchedFile fetchedFile = await localFileAvailable;
+    assert(fetchedFile.file.localFile.file.path == file.path);
 
     if (fetchedFile.data.lengthInBytes == 0) {
       // The file may become available later.
@@ -34,6 +34,6 @@ class DownloadFileImage extends FileImage {
           '${file.uri.toString()} is empty and cannot be loaded as an image.');
     }
 
-    return await decode(fetchedFile.data);
+    return decode(fetchedFile.data);
   }
 }

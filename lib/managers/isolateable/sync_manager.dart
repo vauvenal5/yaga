@@ -5,7 +5,7 @@ import 'package:yaga/utils/logger.dart';
 
 class SyncManager with Isolateable<SyncManager> {
   final _logger = YagaLogger.getLogger(SyncManager);
-  Map<Uri, Map<Uri, SyncFile>> _syncMatrix = {};
+  final Map<Uri, Map<Uri, SyncFile>> _syncMatrix = {};
 
   Future<void> addUri(Uri key) async {
     return _syncMatrix.putIfAbsent(key, () => {});

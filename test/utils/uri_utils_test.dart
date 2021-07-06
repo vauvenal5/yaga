@@ -3,7 +3,7 @@ import 'package:yaga/utils/uri_utils.dart';
 
 void main() {
   group("fromUri", () {
-    Uri originalUri = Uri(
+    final Uri originalUri = Uri(
       scheme: "https",
       userInfo: "user",
       host: "cloud.nextcloud.com",
@@ -19,7 +19,7 @@ void main() {
     });
 
     test("should override everything", () {
-      Uri expected = Uri(
+      final Uri expected = Uri(
         scheme: "http",
         userInfo: "user2",
         host: "cloud.nc.com",
@@ -41,13 +41,13 @@ void main() {
     });
   });
   group("fromPathSegments", () {
-    Uri uri = Uri(host: "cloud.nextcloud.com", path: "/original/path");
+    final Uri uri = Uri(host: "cloud.nextcloud.com", path: "/original/path");
 
     test("should ignore original uri path", () {
-      String firstPath = "/first/part";
-      String secondPath = "/second/part/";
+      const String firstPath = "/first/part";
+      const String secondPath = "/second/part/";
 
-      Uri actual = UriUtils.fromPathList(
+      final Uri actual = UriUtils.fromPathList(
         uri: uri,
         paths: [firstPath, secondPath],
       );
@@ -57,10 +57,10 @@ void main() {
     });
 
     test("should not double encode special chars", () {
-      String firstPath = "/first/part/with%2Fspecial%2Fchar";
-      String secondPath = "/second/part/";
+      const String firstPath = "/first/part/with%2Fspecial%2Fchar";
+      const String secondPath = "/second/part/";
 
-      Uri actual = UriUtils.fromPathList(
+      final Uri actual = UriUtils.fromPathList(
         uri: uri,
         paths: [firstPath, secondPath],
       );
@@ -71,36 +71,36 @@ void main() {
   });
 
   group("chainPathSegments", () {
-    String expected = "/first/part/second/part/";
+    const String expected = "/first/part/second/part/";
     test("should correctly unite path with leading and trailing slash", () {
-      String first = "/first/part/";
-      String second = "/second/part/";
+      const String first = "/first/part/";
+      const String second = "/second/part/";
       expect(UriUtils.chainPathSegments(first, second), expected);
     });
 
     test("should correctly unite path with leading slash", () {
-      String first = "/first/part";
-      String second = "/second/part/";
+      const String first = "/first/part";
+      const String second = "/second/part/";
       expect(UriUtils.chainPathSegments(first, second), expected);
     });
 
     test("should correctly unite path with trailing slash", () {
-      String first = "/first/part/";
-      String second = "second/part/";
+      const String first = "/first/part/";
+      const String second = "second/part/";
       expect(UriUtils.chainPathSegments(first, second), expected);
     });
 
     test("should correctly unite path without slash", () {
-      String first = "/first/part";
-      String second = "second/part/";
+      const  String first = "/first/part";
+      const  String second = "second/part/";
       expect(UriUtils.chainPathSegments(first, second), expected);
     });
   });
 
   group("getRootFromUri", () {
     test("should return root uri from current uri", () {
-      Uri uri = Uri(host: "cloud.nextcloud.com", path: "/some/path");
-      Uri actual = UriUtils.getRootFromUri(uri);
+      final Uri uri = Uri(host: "cloud.nextcloud.com", path: "/some/path");
+      final Uri actual = UriUtils.getRootFromUri(uri);
       expect(actual.host, uri.host);
       expect(actual.path, "/");
     });
@@ -108,36 +108,36 @@ void main() {
 
   group("fromUriPathSegments", () {
     test("should not change meaning of special chars", () {
-      String expectedPath = "/test/path%2Fwith%2Fspecial/";
-      Uri uri = Uri(path: "${expectedPath}chars");
+      const String expectedPath = "/test/path%2Fwith%2Fspecial/";
+      final Uri uri = Uri(path: "${expectedPath}chars");
       expect(UriUtils.fromUriPathSegments(uri, 1).path, expectedPath);
     });
 
     test("should not change meaning of double encoded chars", () {
-      String expectedPath = "/test/path%252Fwith%252Fspecial/t%C3%B6st/";
-      Uri uri = Uri(path: "${expectedPath}chars");
+      const String expectedPath = "/test/path%252Fwith%252Fspecial/t%C3%B6st/";
+      final Uri uri = Uri(path: "${expectedPath}chars");
       expect(UriUtils.fromUriPathSegments(uri, 2).path, expectedPath);
     });
   });
 
   group("getNameFromUri", () {
     test("should return file name from uri", () {
-      String fileName = "file.png";
-      Uri fileUri = Uri(pathSegments: ["test", "path", "to", fileName]);
+      const String fileName = "file.png";
+      final Uri fileUri = Uri(pathSegments: ["test", "path", "to", fileName]);
 
       expect(UriUtils.getNameFromUri(fileUri), fileName);
     });
 
     test("should return folder name from uri", () {
-      String folder = "folder";
-      Uri folderUri = Uri(pathSegments: ["test", "path", "to", folder, ""]);
+      const String folder = "folder";
+      final Uri folderUri = Uri(pathSegments: ["test", "path", "to", folder, ""]);
 
       expect(UriUtils.getNameFromUri(folderUri), folder);
     });
 
     test("should return host name from empty uri", () {
-      String host = "testHost";
-      Uri emptyUri = Uri(host: host);
+      const String host = "testHost";
+      final Uri emptyUri = Uri(host: host);
 
       expect(UriUtils.getNameFromUri(emptyUri), host.toLowerCase());
     });

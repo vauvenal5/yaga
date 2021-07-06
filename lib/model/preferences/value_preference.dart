@@ -15,6 +15,8 @@ abstract class ValuePreference<T> implements Preference {
           ValuePreferenceBuilder b) =>
       Preference.initBuilder(b);
 
+  @override
   ValuePreference<T> rebuild(void Function(ValuePreferenceBuilder<T>) updates);
+  @override
   ValuePreferenceBuilder<T> toBuilder();
 }

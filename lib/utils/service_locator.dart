@@ -134,7 +134,7 @@ void setupServiceLocator() {
     ),
   );
 
-  getIt.registerSingletonAsync(() async => await PackageInfo.fromPlatform());
+  getIt.registerSingletonAsync(() async => PackageInfo.fromPlatform());
 
   getIt.registerSingletonAsync(() async => NavigationManager());
 }

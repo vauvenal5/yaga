@@ -18,11 +18,13 @@ abstract class SerializablePreference<SerializableType, ValueType,
   SerializableType serialize();
   PreferenceType deserialize(SerializableType value);
 
+  @override
   PreferenceType rebuild(
       void Function(
               SerializablePreferenceBuilder<SerializableType, ValueType,
                   PreferenceType>)
           updates);
+  @override
   SerializablePreferenceBuilder<SerializableType, ValueType, PreferenceType>
       toBuilder();
 }

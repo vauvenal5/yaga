@@ -20,7 +20,7 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
 
   P loadPreferenceFromString<
           P extends SerializablePreference<String, dynamic, dynamic>>(P pref) =>
-      pref.deserialize(this._instance.getString(pref.key));
+      pref.deserialize(_instance.getString(pref.key));
 
   Future<bool> savePreferenceToBool(
           SerializablePreference<bool, dynamic, dynamic> pref) =>
@@ -28,7 +28,7 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
 
   P loadPreferenceFromBool<
           P extends SerializablePreference<bool, dynamic, dynamic>>(P pref) =>
-      pref.deserialize(this._instance.getBool(pref.key));
+      pref.deserialize(_instance.getBool(pref.key));
 
   Future<bool> savePreferenceToStringList(
           SerializablePreference<List<String>, dynamic, dynamic> pref) =>
@@ -37,5 +37,5 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
   P loadPreferenceFromStringList<
               P extends SerializablePreference<List<String>, dynamic, dynamic>>(
           P pref) =>
-      pref.deserialize(this._instance.getStringList(pref.key));
+      pref.deserialize(_instance.getStringList(pref.key));
 }

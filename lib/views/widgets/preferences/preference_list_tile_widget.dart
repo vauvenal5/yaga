@@ -8,7 +8,7 @@ class PreferenceListTileWidget<T extends Preference> extends StatelessWidget {
   final T initData;
   final Widget Function(BuildContext, T) listTileBuilder;
 
-  PreferenceListTileWidget(
+  const PreferenceListTileWidget(
       {@required this.initData, @required this.listTileBuilder});
 
   @override
@@ -17,7 +17,7 @@ class PreferenceListTileWidget<T extends Preference> extends StatelessWidget {
       stream: getIt
           .get<SettingsManager>()
           .updateSettingCommand
-          .where((event) => event.key == this.initData.key)
+          .where((event) => event.key == initData.key)
           .map((event) => event as T),
       initialData: initData,
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {

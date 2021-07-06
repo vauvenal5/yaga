@@ -15,7 +15,7 @@ abstract class FileManagerBase {
       RxCommand.createSync((param) => param);
 
   @protected
-  Map<String, FileSubManager> fileSubManagers = Map();
+  Map<String, FileSubManager> fileSubManagers = {};
 
   FileManagerBase() {
     updateFileList = RxCommand.createSync((param) => param);
@@ -27,15 +27,13 @@ abstract class FileManagerBase {
   }
 
   void registerFileManager(FileSubManager fileSubManager) {
-    this
-        .fileSubManagers
-        .putIfAbsent(fileSubManager.scheme, () => fileSubManager);
+    fileSubManagers.putIfAbsent(fileSubManager.scheme, () => fileSubManager);
   }
 
   Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
-    return this.fileSubManagers[uri.scheme].listFiles(uri).flatMap((file) =>
+    return fileSubManagers[uri.scheme].listFiles(uri).flatMap((file) =>
         file.isDirectory && recursive
-            ? this.listFiles(file.uri, recursive: recursive)
+            ? listFiles(file.uri, recursive: recursive)
             : Stream.value(file));
   }
 }

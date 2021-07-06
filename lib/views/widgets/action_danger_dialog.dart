@@ -8,7 +8,7 @@ class ActionDangerDialog extends StatelessWidget {
   final Function(bool) action;
   final List<Widget> Function(BuildContext) bodyBuilder;
 
-  ActionDangerDialog({
+  const ActionDangerDialog({
     @required this.title,
     @required this.cancelButton,
     this.normalAction,
@@ -23,33 +23,33 @@ class ActionDangerDialog extends StatelessWidget {
 
     actions.add(
       TextButton(
-        child: Text(cancelButton),
         onPressed: () {
           Navigator.pop(context);
         },
+        child: Text(cancelButton),
       ),
     );
 
     if (normalAction != null) {
       actions.add(
         TextButton(
-          child: Text(normalAction),
           onPressed: () {
             Navigator.pop(context);
             action(false);
           },
+          child: Text(normalAction),
         ),
       );
     }
 
     actions.add(
       TextButton(
-        child: Text(aggressiveAction),
         style: TextButton.styleFrom(primary: Colors.red),
         onPressed: () {
           Navigator.pop(context);
           action(true);
         },
+        child: Text(aggressiveAction),
       ),
     );
 

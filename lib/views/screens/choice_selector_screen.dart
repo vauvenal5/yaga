@@ -9,7 +9,8 @@ class ChoiceSelectorScreen extends StatefulWidget {
   final void Function() _onCancel;
   final void Function(String) _onSelect;
 
-  ChoiceSelectorScreen(this._choicePreference, this._onSelect, this._onCancel);
+  const ChoiceSelectorScreen(
+      this._choicePreference, this._onSelect, this._onCancel);
 
   @override
   _ChoiceSelectorScreenState createState() => _ChoiceSelectorScreenState();
@@ -21,14 +22,14 @@ class _ChoiceSelectorScreenState extends State<ChoiceSelectorScreen> {
   @override
   void initState() {
     super.initState();
-    this._choice = widget._choicePreference.value;
+    _choice = widget._choicePreference.value;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(this.widget._choicePreference.title),
+        title: Text(widget._choicePreference.title),
       ),
       body: ListView.separated(
           itemBuilder: (context, index) => RadioListTile(
@@ -41,9 +42,9 @@ class _ChoiceSelectorScreenState extends State<ChoiceSelectorScreen> {
           itemCount: widget._choicePreference.choices.length),
       bottomNavigationBar: SelectCancelBottomNavigation(
           onCommit: () {
-            this.widget._onSelect(_choice);
+            widget._onSelect(_choice);
           },
-          onCancel: this.widget._onCancel),
+          onCancel: widget._onCancel),
     );
   }
 }

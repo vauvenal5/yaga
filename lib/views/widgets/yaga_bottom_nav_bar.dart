@@ -6,7 +6,7 @@ import 'package:yaga/views/screens/yaga_home_screen.dart';
 class YagaBottomNavBar extends StatelessWidget {
   final YagaHomeTab _selectedTab;
 
-  YagaBottomNavBar(this._selectedTab);
+  const YagaBottomNavBar(this._selectedTab);
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class YagaBottomNavBar extends StatelessWidget {
   }
 
   int _getCurrentIndex() {
-    switch (this._selectedTab) {
+    switch (_selectedTab) {
       case YagaHomeTab.folder:
         return 1;
       default:

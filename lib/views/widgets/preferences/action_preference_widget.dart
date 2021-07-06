@@ -4,7 +4,7 @@ import 'package:yaga/model/preferences/action_preference.dart';
 class ActionPreferenceWidget extends StatelessWidget {
   final ActionPreference _pref;
 
-  ActionPreferenceWidget(this._pref);
+  const ActionPreferenceWidget(this._pref);
 
   @override
   Widget build(BuildContext context) {

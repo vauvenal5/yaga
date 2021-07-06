@@ -36,7 +36,7 @@ class LocalFileService extends Service<LocalFileService>
       DateTime lastModified}) async {
     logger.fine("Creating file ${file.path}");
     await file.create(recursive: true);
-    File res = await file.writeAsBytes(bytes, flush: true);
+    final File res = await file.writeAsBytes(bytes, flush: true);
     if (lastModified != null) {
       await res.setLastModified(lastModified);
     }
@@ -64,24 +64,24 @@ class LocalFileService extends Service<LocalFileService>
 
   //todo: is this filtering here at the right place?
   bool _checkMimeType(String path) {
-    String type = lookupMimeType(path);
+    final String type = lookupMimeType(path);
     return type != null && type.startsWith("image");
   }
 
-  void copyFile(NcFile file, Uri destination, bool overwrite) {
+  void copyFile(NcFile file, Uri destination, {bool overwrite}) {
     (file.localFile as File).copySync(
       _checkExists(destination, file.name, overwrite),
     );
   }
 
-  void moveFile(NcFile file, Uri destination, bool overwrite) {
+  void moveFile(NcFile file, Uri destination, {bool overwrite}) {
     (file.localFile as File).renameSync(
       _checkExists(destination, file.name, overwrite),
     );
   }
 
   String _checkExists(Uri destination, String name, bool overwrite) {
-    String path = UriUtils.chainPathSegments(destination.path, name);
+    final String path = UriUtils.chainPathSegments(destination.path, name);
     if (!overwrite && File(path).existsSync()) {
       throw FileSystemException("File exists!", path);
     }

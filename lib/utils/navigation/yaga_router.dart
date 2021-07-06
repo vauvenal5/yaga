@@ -17,7 +17,7 @@ class YagaRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case SettingsScreen.route:
-        SettingsScreenArguments args =
+        final SettingsScreenArguments args =
             settings.arguments as SettingsScreenArguments;
         return MaterialPageRoute(
             settings: settings,
@@ -28,7 +28,7 @@ class YagaRouter {
                   onPreferenceChangedCommand: args.onSettingChangedCommand,
                 ));
       case PathSelectorScreen.route:
-        PathSelectorScreenArguments pathSelectorScreenArguments =
+        final PathSelectorScreenArguments pathSelectorScreenArguments =
             settings.arguments as PathSelectorScreenArguments;
         return MaterialPageRoute(
             settings: settings,
@@ -53,13 +53,16 @@ class YagaRouter {
       //           ));
       case NextCloudAddressScreen.route:
         return MaterialPageRoute(
-            settings: settings, builder: (context) => NextCloudAddressScreen());
+            settings: settings,
+            builder: (context) => const NextCloudAddressScreen());
       case NextCloudLoginScreen.route:
         return MaterialPageRoute(
             settings: settings,
-            builder: (context) => NextCloudLoginScreen(settings.arguments));
+            builder: (context) =>
+                NextCloudLoginScreen(settings.arguments as Uri));
       case ImageScreen.route:
-        ImageScreenArguments args = settings.arguments as ImageScreenArguments;
+        final ImageScreenArguments args =
+            settings.arguments as ImageScreenArguments;
         return MaterialPageRoute(
           settings: settings,
           builder: (context) => ImageScreen(
@@ -69,14 +72,15 @@ class YagaRouter {
           ),
         );
       case ChoiceSelectorScreen.route:
-        ChoiceSelectorScreenArguments args =
+        final ChoiceSelectorScreenArguments args =
             settings.arguments as ChoiceSelectorScreenArguments;
         return MaterialPageRoute(
             settings: settings,
             builder: (context) => ChoiceSelectorScreen(
                 args.choicePreference, args.onSelect, args.onCancel));
       case FocusView.route:
-        FocusViewArguments args = settings.arguments as FocusViewArguments;
+        final FocusViewArguments args =
+            settings.arguments as FocusViewArguments;
         return MaterialPageRoute(
             settings: settings, builder: (context) => FocusView(args.path));
       default:

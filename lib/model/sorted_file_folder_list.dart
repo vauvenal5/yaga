@@ -3,7 +3,9 @@ import 'package:yaga/model/sort_config.dart';
 import 'package:yaga/model/sorted_file_list.dart';
 
 class SortedFileFolderList extends SortedFileList<SortedFileFolderList> {
+  @override
   final List<NcFile> files;
+  @override
   final List<NcFile> folders;
 
   SortedFileFolderList(
@@ -20,7 +22,7 @@ class SortedFileFolderList extends SortedFileList<SortedFileFolderList> {
   @override
   bool remove(NcFile file) {
     if (file.isDirectory) {
-      bool removed = folders.remove(file);
+      final bool removed = folders.remove(file);
 
       if (removed) {
         files.removeWhere(
@@ -44,14 +46,12 @@ class SortedFileFolderList extends SortedFileList<SortedFileFolderList> {
   SortedFileList<SortedFileFolderList> applyFilter(
     bool Function(NcFile p1) filter,
   ) {
-    final filteredFiles = this
-        .files
+    final filteredFiles = files
         .where(
           (element) => filter(element),
         )
         .toList();
-    final filteredFolders = this
-        .folders
+    final filteredFolders = folders
         .where(
           (element) => filter(element),
         )

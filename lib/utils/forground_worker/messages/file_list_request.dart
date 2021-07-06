@@ -9,7 +9,7 @@ class FileListRequest extends Message {
   FileListRequest(
     String key,
     this.uri,
+    this.config, {
     this.recursive,
-    this.config,
-  ) : super(key);
+  }) : super(key);
 }

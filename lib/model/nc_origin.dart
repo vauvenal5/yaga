@@ -44,9 +44,9 @@ class NcOrigin {
   /// We are using the login name for backwards compability however if a user logs out and in again with different login names
   /// then this user will not be mapped back to the right data folder.
   Uri get userEncodedDomainRoot => Uri(
-        scheme: this.uri.scheme,
-        userInfo: Uri.encodeComponent(this.loginName),
-        host: this.uri.host,
+        scheme: uri.scheme,
+        userInfo: Uri.encodeComponent(loginName),
+        host: uri.host,
         path: "/",
       );
 }

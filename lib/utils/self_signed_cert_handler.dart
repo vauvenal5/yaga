@@ -21,8 +21,8 @@ class SelfSignedCertHandler extends HttpOverrides
   SecureStorageService _secureStorageService;
 
   Future<SelfSignedCertHandler> init(SecureStorageService secStorage) async {
-    this._secureStorageService = secStorage;
-    this._fingerprint = await _secureStorageService.loadPreference(
+    _secureStorageService = secStorage;
+    _fingerprint = await _secureStorageService.loadPreference(
       _fingerprintKey,
     );
     HttpOverrides.global = this;
@@ -34,7 +34,7 @@ class SelfSignedCertHandler extends HttpOverrides
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    this._fingerprint = init.fingerprint;
+    _fingerprint = init.fingerprint;
     HttpOverrides.global = this;
     return this;
   }
@@ -46,7 +46,7 @@ class SelfSignedCertHandler extends HttpOverrides
     final HttpClient client = super.createHttpClient(context);
     client.badCertificateCallback =
         (X509Certificate cert, String host, int port) {
-      String certFingerprint = cert.sha1.toString();
+      final String certFingerprint = cert.sha1.toString();
       if (_fingerprint == certFingerprint) {
         return true;
       }
@@ -75,14 +75,13 @@ class SelfSignedCertHandler extends HttpOverrides
   }
 
   Future<void> persistCert() {
-    return this
-            ._secureStorageService
-            ?.savePreference("$_fingerprintKey", _fingerprint) ??
+    return _secureStorageService?.savePreference(
+            _fingerprintKey, _fingerprint) ??
         Future.value();
   }
 
   void revokeCert() {
-    this._fingerprint = null;
-    this._secureStorageService?.deletePreference(this._fingerprintKey);
+    _fingerprint = null;
+    _secureStorageService?.deletePreference(_fingerprintKey);
   }
 }

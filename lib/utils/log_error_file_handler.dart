@@ -95,7 +95,7 @@ class LogErrorFileHandler extends ReportHandler {
     _sink.add(utf8.encode('$text\n'));
   }
 
-  Future flushFile() async => this._sink.flush();
+  Future flushFile() async => _sink.flush();
 
   Future _closeFile() async {
     _printLog("Closing file");
@@ -104,7 +104,7 @@ class LogErrorFileHandler extends ReportHandler {
     _sink = null;
   }
 
-  void _writeReportToFile(Report report) async {
+  Future<void> _writeReportToFile(Report report) async {
     _printLog("Writing report to file");
     _writeLineToFile(
         "============================== CATCHER LOG ==============================");
@@ -167,7 +167,7 @@ class LogErrorFileHandler extends ReportHandler {
   }
 
   Future printApplicationInfo() async {
-    Map<String, dynamic> _applicationParameters = {};
+    final Map<String, dynamic> _applicationParameters = {};
     _applicationParameters["environment"] =
         describeEnum(ApplicationProfileManager.getApplicationProfile());
 
@@ -186,7 +186,7 @@ class LogErrorFileHandler extends ReportHandler {
 
   Map<String, dynamic> _loadAndroidParameters(
       AndroidDeviceInfo androidDeviceInfo) {
-    Map<String, dynamic> deviceParameters = {};
+    final Map<String, dynamic> deviceParameters = {};
     deviceParameters["id"] = androidDeviceInfo.id;
     deviceParameters["androidId"] = androidDeviceInfo.androidId;
     deviceParameters["board"] = androidDeviceInfo.board;
@@ -218,7 +218,7 @@ class LogErrorFileHandler extends ReportHandler {
 
   void _printLog(String log) {
     if (printLogs) {
-      this._logger.info(log);
+      _logger.info(log);
     }
   }
 
@@ -226,7 +226,7 @@ class LogErrorFileHandler extends ReportHandler {
   List<PlatformType> getSupportedPlatforms() =>
       [PlatformType.android, PlatformType.iOS];
 
-  void destroy() async {
+  Future<void> destroy() async {
     await _closeFile();
   }
 
@@ -235,7 +235,7 @@ class LogErrorFileHandler extends ReportHandler {
       return;
     }
 
-    this._fileValidationResult = await _checkFile();
+    _fileValidationResult = await _checkFile();
     _openFile();
   }
 }

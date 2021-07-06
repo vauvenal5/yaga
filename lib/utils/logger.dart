@@ -10,6 +10,8 @@ import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class YagaLogger {
+  const YagaLogger();
+
   static final _logUri =
       UriUtils.fromPathList(uri: Directory.systemTemp.uri, paths: [
     Directory.systemTemp.uri.path,
@@ -59,7 +61,7 @@ class YagaLogger {
     ansiColorDisabled = false;
     Logger.root.level = Level.INFO;
     Logger.root.onRecord.listen((record) {
-      List<String> logs = [
+      final List<String> logs = [
         '${record.time} ${record.level} ${record.loggerName} - ${record.message}',
       ];
 
@@ -69,10 +71,10 @@ class YagaLogger {
         );
       }
 
-      logs.forEach((log) {
+      for (final log in logs) {
         print(levelColors[record.level](log));
         YagaLogger._fileHandler.writeLineToFile(log);
-      });
+      }
     });
   }
 

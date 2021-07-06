@@ -20,7 +20,7 @@ import 'package:yaga/views/widgets/select_cancel_bottom_navigation.dart';
 class NextCloudAddressScreen extends StatefulWidget {
   static const route = "/nc/address";
 
-  NextCloudAddressScreen({Key key}) : super(key: key);
+  const NextCloudAddressScreen({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _NextCloudAddressScreenState();
@@ -45,10 +45,12 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Server Address"),
+        title: const Text("Server Address"),
         actions: [
           IconButton(
-            icon: validation ? Icon(Icons.report) : Icon(Icons.report_off),
+            icon: validation
+                ? const Icon(Icons.report)
+                : const Icon(Icons.report_off),
             onPressed: () => setState(() {
               validation = !validation;
               _formKey = GlobalKey<FormState>();
@@ -58,7 +60,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       ),
       body: Center(
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: validation
               ? AddressFormSimple(_formKey, _onSave)
               : AddressFormAdvanced(_formKey, _onSave),
@@ -68,7 +70,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       bottomNavigationBar: SelectCancelBottomNavigation(
         onCommit: () {
           _inBrowser = false;
-          this._validateAndSaveForm();
+          _validateAndSaveForm();
         },
         //todo: why does this cause a refetch?!
         onCancel: () => Navigator.popUntil(
@@ -77,7 +79,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
         ),
         labelSelect: "Continue",
         iconSelect: Icons.chevron_right,
-        betweenItems: [
+        betweenItems: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.open_in_browser),
             label: "Open in browser",
@@ -86,7 +88,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
         betweenItemsCallbacks: [
           () {
             _inBrowser = true;
-            this._validateAndSaveForm();
+            _validateAndSaveForm();
           }
         ],
       ),
@@ -100,24 +102,24 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
     _formKey.currentState.save();
   }
 
-  void _onSave(Uri uri) async {
+  Future<void> _onSave(Uri uri) async {
     final client =
         getIt.get<NextCloudClientFactory>().createUnauthenticatedClient(uri);
 
     // check if we detect a self-signed cert, if yes, enforce browser flow
-    if (!this._inBrowser) {
+    if (!_inBrowser) {
       try {
         await client.user.getUser();
-      } on HandshakeException catch (e) {
-        this._inBrowser = true;
-      } on RequestException catch (e) {
+      } on HandshakeException {
+        _inBrowser = true;
+      } on RequestException {
         _logger.info("Proper HTTPS detected.");
       }
     }
 
-    if (this._inBrowser) {
+    if (_inBrowser) {
       getIt.get<SelfSignedCertHandler>().badCertificateCallback =
-          this._askForCertApprovalBuilder(uri);
+          _askForCertApprovalBuilder(uri);
       //todo: should we move this into the manager/service?
       //todo: is canLaunch/launch a UI component?
 
@@ -141,7 +143,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
             res = await client.login.pollLogin(init);
           } on RequestException catch (e) {
             if (e.statusCode != 404) {
-              throw e;
+              rethrow;
             }
           }
         }
@@ -198,19 +200,19 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
           aggressiveAction: "Trust",
           action: (agg) {
             if (agg) {
-              completer.complete(() => this._onSave(uri));
+              completer.complete(() => _onSave(uri));
             } else {
               completer.complete(null);
             }
           },
           bodyBuilder: (context) => <Widget>[
-            Text('Do you trust this certificate?'),
-            Text(''),
+            const Text('Do you trust this certificate?'),
+            const Text(''),
             Text('Subject: $subject'),
             Text('Issuer: $issuer'),
             Text('Fingerprint: $fingerprint'),
-            Text(''),
-            Text(
+            const Text(''),
+            const Text(
               'Please note that Nextcloud Yaga only performs fingerprint comparison on self-signed certificates!',
             ),
           ],

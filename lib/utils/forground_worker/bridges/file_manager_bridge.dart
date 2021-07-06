@@ -17,7 +17,7 @@ class FileManagerBridge {
     _worker.isolateResponseCommand
         .where((event) => event is FetchedFile)
         .map((event) => event as FetchedFile)
-        .listen((event) => this._fileManager.fetchedFileCommand(event));
+        .listen((event) => _fileManager.fetchedFileCommand(event));
 
     _fileManager.downloadImageCommand.listen(
       (value) => _worker.sendRequest(value),

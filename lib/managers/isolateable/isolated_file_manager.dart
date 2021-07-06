@@ -7,6 +7,7 @@ import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/isolateable/sort_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/sort_config.dart';
+import 'package:yaga/model/sorted_file_list.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
@@ -27,21 +28,22 @@ class IsolatedFileManager extends FileManagerBase
 
   IsolatedFileManager(this._sortManager);
 
+  @override
   Future<IsolatedFileManager> initIsolated(
     InitMsg init,
     SendPort isolateToMain,
   ) async {
     //todo: we probably can improve the capsuling of front end and foreground_worker communication further
     //--> check if it is possible to completely hide communications in bridges
-    this.updateFileList.listen(
-          (value) => isolateToMain.send(FileUpdateMsg("", value)),
-        );
+    updateFileList.listen(
+      (value) => isolateToMain.send(FileUpdateMsg("", value)),
+    );
 
-    this.updateImageCommand.listen(
-          (file) => isolateToMain.send(ImageUpdateMsg("", file)),
-        );
+    updateImageCommand.listen(
+      (file) => isolateToMain.send(ImageUpdateMsg("", file)),
+    );
 
-    this.updateFilesCommand.listen((event) => isolateToMain.send(event));
+    updateFilesCommand.listen((event) => isolateToMain.send(event));
 
     return this;
   }
@@ -52,23 +54,22 @@ class IsolatedFileManager extends FileManagerBase
     SortConfig sortConfig, {
     bool recursive = false,
   }) {
-    return this
-        .fileSubManagers[uri.scheme]
+    return fileSubManagers[uri.scheme]
         .listFileList(uri, recursive: recursive)
         .map((event) => _sortManager.sortList(event, sortConfig))
         .fold(
       null,
-      (previous, element) {
+      (SortedFileList<SortedFileList<dynamic>> previous, element) {
         if (previous == null) {
-          this.updateFilesCommand(
-            FileListResponse(requestKey, uri, recursive, element),
+          updateFilesCommand(
+            FileListResponse(requestKey, uri, element, recursive: recursive),
           );
           return element;
         }
 
         if (_sortManager.mergeSort(previous, element)) {
-          this.updateFilesCommand(
-            FileListResponse(requestKey, uri, recursive, previous),
+          updateFilesCommand(
+            FileListResponse(requestKey, uri, previous, recursive: recursive),
           );
         }
 
@@ -77,31 +78,31 @@ class IsolatedFileManager extends FileManagerBase
     ).then((value) => value);
   }
 
-  Future<void> deleteFiles(List<NcFile> files, bool local) async =>
-      this._cancelableAction(
+  Future<void> deleteFiles(List<NcFile> files, {bool local}) async =>
+      _cancelableAction(
         files,
-        (file) => this.fileSubManagers[file.uri.scheme].deleteFile(
-              file,
-              local,
-            ),
+        (file) => fileSubManagers[file.uri.scheme].deleteFile(
+          file,
+          local: local,
+        ),
       );
 
-  Future<void> copyFiles(
-          List<NcFile> files, Uri destination, bool overwrite) async =>
-      this._cancelableAction(
+  Future<void> copyFiles(List<NcFile> files, Uri destination,
+          {bool overwrite}) async =>
+      _cancelableAction(
         files,
         (file) => fileSubManagers[file.uri.scheme]
-            .copyFile(file, destination, overwrite),
+            .copyFile(file, destination, overwrite: overwrite),
         filter: (file) => _destinationFilter(file, destination),
       );
 
-  Future<void> moveFiles(
-          List<NcFile> files, Uri destination, bool overwrite) async =>
-      this._cancelableAction(
+  Future<void> moveFiles(List<NcFile> files, Uri destination,
+          {bool overwrite}) async =>
+      _cancelableAction(
         files,
         (file) => fileSubManagers[file.uri.scheme]
-            .moveFile(file, destination, overwrite)
-            .then((value) => this.updateFileList(file)),
+            .moveFile(file, destination, overwrite: overwrite)
+            .then((value) => updateFileList(file)),
         filter: (file) => _destinationFilter(file, destination),
       );
 
@@ -124,8 +125,7 @@ class IsolatedFileManager extends FileManagerBase
         )
         .where((event) => event != null)
         .takeUntil(
-          this
-              .cancelActionCommand
+          cancelActionCommand
               .doOnData((event) => _logger.finest("Canceling action!")),
         )
         .last;

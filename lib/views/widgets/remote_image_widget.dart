@@ -18,7 +18,7 @@ class RemoteImageWidget extends StatelessWidget {
   final int cacheHeight;
   final bool showFileEnding;
 
-  RemoteImageWidget(
+  const RemoteImageWidget(
     this._file, {
     Key key,
     this.cacheWidth,
@@ -27,7 +27,7 @@ class RemoteImageWidget extends StatelessWidget {
   }) : super(key: key);
 
   Widget _createIconOverlay(BuildContext context, Ink mainWidget) {
-    List<Widget> children = <Widget>[
+    final List<Widget> children = <Widget>[
       mainWidget,
       Align(
         alignment: Alignment.bottomRight,
@@ -36,7 +36,7 @@ class RemoteImageWidget extends StatelessWidget {
     ];
 
     if (_file.selected) {
-      children.add(Align(
+      children.add(const Align(
         alignment: Alignment.topLeft,
         child: CircleAvatarIcon(
           icon: Icon(
@@ -57,15 +57,15 @@ class RemoteImageWidget extends StatelessWidget {
         image: ResizeImage.resizeIfNeeded(
           cacheWidth,
           cacheHeight,
-          FileImage(file),
+          FileImage(file as File),
         ),
         fit: BoxFit.cover,
       );
 
-  Widget _getLocalIcon(BuildContext context) {
+  Icon _getLocalIcon(BuildContext context) {
     if (getIt.get<NextCloudService>().isUriOfService(_file.uri)) {
       if (_file.localFile.exists) {
-        return Icon(
+        return const Icon(
           Icons.check_circle,
           color: Colors.green,
         );
@@ -75,7 +75,7 @@ class RemoteImageWidget extends StatelessWidget {
         color: Theme.of(context).accentColor,
       );
     }
-    return Icon(
+    return const Icon(
       Icons.phone_android,
       color: Colors.black,
     );
@@ -104,7 +104,7 @@ class RemoteImageWidget extends StatelessWidget {
               (event) => _file.localFile = event.localFile,
             )
       ]),
-      initialData: this._file,
+      initialData: _file,
       builder: (context, snapshot) {
         if (_file.previewFile != null && _file.previewFile.exists) {
           return _createIconOverlay(
@@ -132,7 +132,7 @@ class RemoteImageWidget extends StatelessWidget {
       SvgPicture.asset(
         "assets/icon/foreground_no_border.svg",
         semanticsLabel: 'Yaga Logo',
-        alignment: Alignment.center,
+        // alignment: Alignment.center,
         width: 48,
       ),
     ];

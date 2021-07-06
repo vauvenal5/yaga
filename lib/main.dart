@@ -11,12 +11,12 @@ import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/navigation/yaga_route_information_parser.dart';
 import 'package:yaga/views/screens/splash_screen.dart';
 
-void main() async {
+Future<void> main() async {
   await YagaLogger.init();
 
   setupServiceLocator();
 
-  CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [
+  final CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [
     YagaLogger.fileHandler,
   ]);
 
@@ -31,13 +31,13 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeData dark = ThemeData(
+    final ThemeData dark = ThemeData(
       brightness: Brightness.dark,
       accentColor: NextcloudColors.lightBlue,
       toggleableActiveColor: NextcloudColors.lightBlue,
     );
 
-    ThemeData light = ThemeData(
+    final ThemeData light = ThemeData(
       brightness: Brightness.light,
       accentColor: NextcloudColors.lightBlue,
     );
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        var settingsManager = getIt.get<SettingsManager>();
+        final settingsManager = getIt.get<SettingsManager>();
 
         return StreamBuilder<ChoicePreference>(
           initialData: getIt

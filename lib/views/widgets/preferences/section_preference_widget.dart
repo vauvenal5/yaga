@@ -4,7 +4,7 @@ import 'package:yaga/model/preferences/preference.dart';
 class SectionPreferenceWidget extends StatelessWidget {
   final Preference _pref;
 
-  SectionPreferenceWidget(this._pref);
+  const SectionPreferenceWidget(this._pref);
 
   @override
   Widget build(BuildContext context) {

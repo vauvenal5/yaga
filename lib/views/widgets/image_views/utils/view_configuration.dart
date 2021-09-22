@@ -21,14 +21,6 @@ class ViewConfiguration {
   final Function(List<NcFile>, int) onFileTap;
   final Function(List<NcFile>, int) onSelect;
 
-  ViewConfiguration._internal(this.section, this.view, this.recursive,
-      this.showFolders, this.onFileTap, this.onFolderTap, this.onSelect);
-
-  ViewConfiguration clone() {
-    return ViewConfiguration._internal(section, view, recursive, showFolders,
-        onFileTap, onFolderTap, onSelect);
-  }
-
   factory ViewConfiguration({
     @required String route,
     @required String defaultView,
@@ -36,10 +28,10 @@ class ViewConfiguration {
     @required Function(List<NcFile>, int) onFileTap,
     @required final Function(List<NcFile>, int) onSelect,
   }) {
-    SectionPreference section = SectionPreference((b) => b
+    final SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
       ..title = "View");
-    ChoicePreference view = ChoicePreference((b) => b
+    final ChoicePreference view = ChoicePreference((b) => b
       ..key = section.prepareKey("view")
       ..title = "View Type"
       ..value = defaultView
@@ -49,11 +41,11 @@ class ViewConfiguration {
         CategoryView.viewKey: "Category View",
         CategoryViewExp.viewKey: "Category View (experimental)"
       });
-    BoolPreference recursive = BoolPreference((b) => b
+    final BoolPreference recursive = BoolPreference((b) => b
       ..key = section.prepareKey("recursive")
       ..title = "Load Recursively"
       ..value = false);
-    BoolPreference showFolders = BoolPreference((b) => b
+    final BoolPreference showFolders = BoolPreference((b) => b
       ..key = section.prepareKey("folders")
       ..title = "Show Folders"
       ..value = false);
@@ -76,10 +68,10 @@ class ViewConfiguration {
     @required Function(List<NcFile>, int) onFileTap,
     @required Function(List<NcFile>, int) onSelect,
   }) {
-    SectionPreference section = SectionPreference((b) => b
+    final SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
       ..title = "View");
-    ChoicePreference view = ChoicePreference((b) => b
+    final ChoicePreference view = ChoicePreference((b) => b
       ..key = section.prepareKey("view")
       ..title = "View Type"
       ..value = defaultView
@@ -87,11 +79,11 @@ class ViewConfiguration {
         NcListView.viewKey: "List View",
         NcGridView.viewKey: "Grid View"
       });
-    BoolPreference recursive = BoolPreference((b) => b
+    final BoolPreference recursive = BoolPreference((b) => b
       ..key = section.prepareKey("recursive")
       ..title = "Load Recursively"
       ..value = false);
-    BoolPreference showFolders = BoolPreference((b) => b
+    final BoolPreference showFolders = BoolPreference((b) => b
       ..key = section.prepareKey("folders")
       ..title = "Show Folders"
       ..value = true);
@@ -127,7 +119,7 @@ class ViewConfiguration {
   static SortConfig getSortConfigFromViewChoice(ChoicePreference pref) {
     if (pref.value == CategoryView.viewKey ||
         pref.value == CategoryViewExp.viewKey) {
-      return SortConfig(
+      return const SortConfig(
         SortType.category,
         SortProperty.dateModified,
         SortProperty.name,
@@ -135,17 +127,25 @@ class ViewConfiguration {
     }
 
     if (pref.value == NcGridView.viewKey) {
-      return SortConfig(
+      return const SortConfig(
         SortType.list,
         SortProperty.dateModified,
         SortProperty.name,
       );
     }
 
-    return SortConfig(
+    return const SortConfig(
       SortType.list,
       SortProperty.name,
       SortProperty.name,
     );
+  }
+
+  ViewConfiguration._internal(this.section, this.view, this.recursive,
+      this.showFolders, this.onFileTap, this.onFolderTap, this.onSelect);
+
+  ViewConfiguration clone() {
+    return ViewConfiguration._internal(section, view, recursive, showFolders,
+        onFileTap, onFolderTap, onSelect);
   }
 }

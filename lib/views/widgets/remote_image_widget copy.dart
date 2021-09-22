@@ -18,7 +18,7 @@ class RemoteImageWidgetOther extends StatelessWidget {
   final int cacheHeight;
   final bool showFileEnding;
 
-  RemoteImageWidgetOther(
+  const RemoteImageWidgetOther(
     this._file, {
     Key key,
     this.cacheWidth,
@@ -26,8 +26,8 @@ class RemoteImageWidgetOther extends StatelessWidget {
     this.showFileEnding = true,
   }) : super(key: key);
 
-  Widget _createIconOverlay(Ink mainWidget, Widget iconWidget) {
-    List<Widget> children = <Widget>[
+  Widget _createIconOverlay(Ink mainWidget, Icon iconWidget) {
+    final List<Widget> children = <Widget>[
       mainWidget,
       Align(
         alignment: Alignment.bottomRight,
@@ -36,7 +36,7 @@ class RemoteImageWidgetOther extends StatelessWidget {
     ];
 
     if (_file.selected) {
-      children.add(Align(
+      children.add(const Align(
         alignment: Alignment.topLeft,
         child: CircleAvatarIcon(
           icon: Icon(
@@ -57,15 +57,15 @@ class RemoteImageWidgetOther extends StatelessWidget {
         image: ResizeImage.resizeIfNeeded(
           cacheWidth,
           cacheHeight,
-          FileImage(file),
+          FileImage(file as File),
         ),
         fit: BoxFit.cover,
       );
 
-  Widget _getLocalIcon(NcFile file, bool localExists, BuildContext context) {
+  Icon _getLocalIcon(NcFile file, bool localExists, BuildContext context) {
     if (getIt.get<NextCloudService>().isUriOfService(file.uri)) {
       if (localExists) {
-        return Icon(
+        return const Icon(
           Icons.check_circle,
           color: Colors.green,
         );
@@ -75,7 +75,7 @@ class RemoteImageWidgetOther extends StatelessWidget {
         color: Theme.of(context).accentColor,
       );
     }
-    return Icon(
+    return const Icon(
       Icons.phone_android,
       color: Colors.black,
     );
@@ -83,30 +83,31 @@ class RemoteImageWidgetOther extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // todo: clean up the future (from Future<object> to Future<bool>)
     return FutureBuilder(
-      future: Future.value(this._file.localFile != null)
-          .then((value) => value ? this._file.localFile.file.exists() : value),
+      future: Future.value(_file.localFile != null)
+          .then((value) => value ? _file.localFile.file.exists() : value),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return _createDefaultIconPreview(this._file, false, context);
+          return _createDefaultIconPreview(_file, false, context);
         }
 
-        return _buildPreview(snapshot.data);
+        return _buildPreview(snapshot.data as bool);
       },
     );
   }
 
   Widget _buildPreview(bool localFileExists) {
+    // todo: clean up the future (from Future<object> to Future<bool>)
     return FutureBuilder(
-      future: Future.value(this._file.previewFile != null).then(
-          (value) => value ? this._file.previewFile.file.exists() : value),
+      future: Future.value(_file.previewFile != null)
+          .then((value) => value ? _file.previewFile.file.exists() : value),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return _createDefaultIconPreview(
-              this._file, localFileExists, context);
+          return _createDefaultIconPreview(_file, localFileExists, context);
         }
 
-        if (snapshot.data) {
+        if (snapshot.data as bool) {
           return _createPreview(context, localFileExists, _file);
         }
 
@@ -154,7 +155,7 @@ class RemoteImageWidgetOther extends StatelessWidget {
       SvgPicture.asset(
         "assets/icon/foreground_no_border.svg",
         semanticsLabel: 'Yaga Logo',
-        alignment: Alignment.center,
+        // alignment: Alignment.center,
         width: 48,
       ),
     ];

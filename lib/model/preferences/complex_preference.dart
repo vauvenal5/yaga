@@ -15,6 +15,8 @@ abstract class ComplexPreference
   static T initBuilder<T extends ComplexPreferenceBuilder>(T b) =>
       ValuePreference.initBuilder(b);
 
+  @override
   ComplexPreference rebuild(void Function(ComplexPreferenceBuilder) updates);
+  @override
   ComplexPreferenceBuilder toBuilder();
 }

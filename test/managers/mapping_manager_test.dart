@@ -17,14 +17,14 @@ class NextCloudServiceMock extends Mock implements NextCloudService {}
 class SystemLocationServiceMock extends Mock implements SystemLocationService {}
 
 void main() {
-  SettingsManagerBaseMock settingsManagerBaseMock = SettingsManagerBaseMock();
-  NextCloudServiceMock nextCloudServiceMock = NextCloudServiceMock();
-  SystemLocationServiceMock systemLocationServiceMock =
+  final SettingsManagerBaseMock settingsManagerBaseMock = SettingsManagerBaseMock();
+  final NextCloudServiceMock nextCloudServiceMock = NextCloudServiceMock();
+  final SystemLocationServiceMock systemLocationServiceMock =
       SystemLocationServiceMock();
 
-  final userInfo = "yaga";
-  final host = "cloud.test.com";
-  final userDomain = "$userInfo@$host";
+  const userInfo = "yaga";
+  const host = "cloud.test.com";
+  const userDomain = "$userInfo@$host";
 
   final ncRoot = Uri(host: host, pathSegments: []);
   final ncOrigin = NcOrigin(ncRoot, userInfo, userInfo, userInfo);
@@ -32,7 +32,7 @@ void main() {
   final command = MockCommand<Preference, Preference>();
   final externalAppDirUri = Uri(host: "local", path: "/external/app/dir");
   final tmpAppDirUri = Uri(host: "local", path: "/internal/app/dir");
-  final localPath = "/some/local/path";
+  const localPath = "/some/local/path";
 
   MappingManager uut;
 
@@ -54,7 +54,7 @@ void main() {
   });
 
   void setUpMapping(String localPath, String remotePath) {
-    MappingPreference pref = MappingPreference((b) => b
+    final MappingPreference pref = MappingPreference((b) => b
       ..key = "testKey"
       ..title = "Root Mapping"
       ..value = false
@@ -65,7 +65,7 @@ void main() {
   }
 
   group("map to tmp path", () {
-    void mapToTmpPathTest(String remotePath) async {
+    Future<void> mapToTmpPathTest(String remotePath) async {
       await uut.mapToTmpUri(Uri(host: "remote", path: remotePath));
 
       expect(
@@ -77,19 +77,19 @@ void main() {
     }
 
     test("default mapps to cache dir", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       mapToTmpPathTest(remote);
     });
 
     test("mappings do not influence tmp", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       setUpMapping(localPath, "/");
       mapToTmpPathTest(remote);
     });
   });
 
   group("map to local path", () {
-    void mapToLocalPathTest({
+    Future<void> mapToLocalPathTest({
       @required String remotePath,
       String remoteTargetFolderPath,
       @required String expectedPath,
@@ -108,7 +108,7 @@ void main() {
           expectedPath);
     }
 
-    void mapRootToLocalPathTest(String remotePath) async {
+    Future<void> mapRootToLocalPathTest(String remotePath) async {
       mapToLocalPathTest(
         remotePath: remotePath,
         remoteTargetFolderPath: "/",
@@ -116,9 +116,9 @@ void main() {
       );
     }
 
-    void mapPicturesToLocalPathTest(String remotePath,
+    Future<void> mapPicturesToLocalPathTest(String remotePath,
         {String expectedPath}) async {
-      String targetPath = "/Pictures/";
+      const String targetPath = "/Pictures/";
       mapToLocalPathTest(
         remotePath: remotePath,
         remoteTargetFolderPath: targetPath,
@@ -128,33 +128,33 @@ void main() {
     }
 
     test("file with root mapping", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       mapRootToLocalPathTest(remote);
     });
 
     test("dir with root mapping", () async {
-      String remote = "/test/";
+      const String remote = "/test/";
       mapRootToLocalPathTest(remote);
     });
 
     test("file with sub mapping", () async {
-      String remote = "/Pictures/1.png";
+      const String remote = "/Pictures/1.png";
       mapPicturesToLocalPathTest(remote);
     });
 
     test("dir with sub mapping", () async {
-      String remote = "/Pictures/test/";
+      const String remote = "/Pictures/test/";
       mapPicturesToLocalPathTest(remote);
     });
 
     test("none sub mapping paths are mapped to app dir", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       mapPicturesToLocalPathTest(remote,
           expectedPath: "${externalAppDirUri.path}/$userDomain$remote");
     });
 
     test("default mapps to app dir", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       mapToLocalPathTest(
           remotePath: remote,
           expectedPath: "${externalAppDirUri.path}/$userDomain$remote");
@@ -162,19 +162,19 @@ void main() {
   });
 
   group("map tmp to remote uri", () {
-    void mapTmpToRemoteUriTest(String relativePath) async {
-      Uri tmp = Uri(
+    Future<void> mapTmpToRemoteUriTest(String relativePath) async {
+      final Uri tmp = Uri(
         host: "local",
         path: "${tmpAppDirUri.path}/$userDomain$relativePath",
       );
-      Uri remote = Uri(
+      final Uri remote = Uri(
         scheme: "nc",
         userInfo: userInfo,
         host: host,
         pathSegments: [],
       );
 
-      Uri result = await uut.mapTmpToRemoteUri(tmp, remote);
+      final Uri result = await uut.mapTmpToRemoteUri(tmp, remote);
 
       expect(result.scheme, "nc");
       expect(result.userInfo, userInfo);
@@ -192,17 +192,17 @@ void main() {
   });
 
   group("map to remote uri", () {
-    void mapToRemoteUriTest({
+    Future<void> mapToRemoteUriTest({
       String localFilePath,
       String remotePath,
       String expectedPath,
       String mappingPath,
     }) async {
-      Uri file = Uri(
+      final Uri file = Uri(
         host: "local",
         path: localFilePath,
       );
-      Uri remote = Uri(
+     final  Uri remote = Uri(
         scheme: "nc",
         userInfo: userInfo,
         host: host,
@@ -213,7 +213,7 @@ void main() {
         setUpMapping(localPath, mappingPath);
       }
 
-      Uri result = await uut.mapToRemoteUri(file, remote);
+      final Uri result = await uut.mapToRemoteUri(file, remote);
 
       expect(result.scheme, "nc");
       expect(result.userInfo, userInfo);

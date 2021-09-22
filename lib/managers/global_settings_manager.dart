@@ -15,7 +15,7 @@ import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class GlobalSettingsManager {
-  List<Preference> _globalSettingsCache = [];
+  final List<Preference> _globalSettingsCache = [];
   static const String _MAPPING_KEY = "mapping";
   static SectionPreference ncSection = SectionPreference((b) => b
     ..key = "nc"
@@ -50,11 +50,11 @@ class GlobalSettingsManager {
   RxCommand<MappingPreference, MappingPreference> updateRootMappingPreference =
       RxCommand.createSync((param) => param);
 
-  NextCloudManager _nextcloudManager;
-  SettingsManager _settingsManager;
+  final NextCloudManager _nextcloudManager;
+  final SettingsManager _settingsManager;
 
-  NextCloudService _nextCloudService;
-  SystemLocationService _systemLocationService;
+  final NextCloudService _nextCloudService;
+  final SystemLocationService _systemLocationService;
 
   GlobalSettingsManager(this._nextcloudManager, this._settingsManager,
       this._nextCloudService, this._systemLocationService) {
@@ -62,47 +62,44 @@ class GlobalSettingsManager {
       if (_globalSettingsCache.contains(pref)) {
         return;
       }
-      this._globalSettingsCache.add(pref);
-      this.updateGlobalSettingsCommand(this._globalSettingsCache);
+      _globalSettingsCache.add(pref);
+      updateGlobalSettingsCommand(_globalSettingsCache);
     });
     removeGlobalSettingCommand = RxCommand.createSync((param) =>
         _globalSettingsCache
             .removeWhere((element) => element.key == param.key));
     removeGlobalSettingCommand.listen((value) {
-      this.updateGlobalSettingsCommand(this._globalSettingsCache);
+      updateGlobalSettingsCommand(_globalSettingsCache);
     });
 
-    this
-        ._nextcloudManager
-        .updateLoginStateCommand
+    _nextcloudManager.updateLoginStateCommand
         .listen((value) => _handleLoginState(value));
 
-    this._nextcloudManager.logoutCommand.listen((value) {
-      MappingPreference mapping = this.getDefaultMappingPreference(
+    _nextcloudManager.logoutCommand.listen((value) {
+      final MappingPreference mapping = getDefaultMappingPreference(
         local: _systemLocationService.internalStorage.uri,
         remote: Uri(),
       );
 
       _settingsManager.removeMappingPreferenceCommand(mapping);
-      this.removeGlobalSettingCommand(mapping);
-      this.removeGlobalSettingCommand(autoPersist);
-      this.removeGlobalSettingCommand(ncSection);
+      removeGlobalSettingCommand(mapping);
+      removeGlobalSettingCommand(autoPersist);
+      removeGlobalSettingCommand(ncSection);
     });
 
-    this
-        ._settingsManager
-        .updateSettingCommand
+    _settingsManager.updateSettingCommand
         .where((event) => event.key == ncSection.prepareKey(_MAPPING_KEY))
-        .listen((event) => updateRootMappingPreference(event));
+        .listen(
+            (event) => updateRootMappingPreference(event as MappingPreference));
   }
 
   Future<GlobalSettingsManager> init() async {
-    this.registerGlobalSettingCommand(appSection);
-    this.registerGlobalSettingCommand(theme);
-    this.registerGlobalSettingCommand(sendLogs);
+    registerGlobalSettingCommand(appSection);
+    registerGlobalSettingCommand(theme);
+    registerGlobalSettingCommand(sendLogs);
 
     _handleLoginState(
-      this._nextcloudManager.updateLoginStateCommand.lastResult,
+      _nextcloudManager.updateLoginStateCommand.lastResult,
     );
 
     return this;
@@ -121,8 +118,8 @@ class GlobalSettingsManager {
   }
 
   void _handleLoginState(NextCloudLoginData loginData) {
-    if (this._nextCloudService.isLoggedIn()) {
-      MappingPreference mapping = this.getDefaultMappingPreference(
+    if (_nextCloudService.isLoggedIn()) {
+      final MappingPreference mapping = getDefaultMappingPreference(
         local: UriUtils.fromUri(
           uri: _systemLocationService.internalStorage.uri,
           path:
@@ -131,9 +128,9 @@ class GlobalSettingsManager {
         remote: _nextCloudService.origin.userEncodedDomainRoot,
       );
 
-      this.registerGlobalSettingCommand(ncSection);
-      this.registerGlobalSettingCommand(mapping);
-      this.registerGlobalSettingCommand(autoPersist);
+      registerGlobalSettingCommand(ncSection);
+      registerGlobalSettingCommand(mapping);
+      registerGlobalSettingCommand(autoPersist);
 
       _settingsManager.loadMappingPreferenceCommand(mapping);
     }

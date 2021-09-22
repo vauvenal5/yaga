@@ -27,14 +27,14 @@ class NextcloudFileManagerHandler
     IsolateHandlerRegistry registry,
   ) async {
     registry.registerHandler<DeleteFilesRequest>(
-        (msg) => this.handleDelete(msg, isolateToMain));
+        (msg) => handleDelete(msg, isolateToMain));
     registry.registerHandler<DestinationActionFilesRequest>(
-        (msg) => this.handleDestinationAction(msg, isolateToMain));
-    registry.registerHandler<FilesActionDone>((msg) => this.handleCancel(msg));
+        (msg) => handleDestinationAction(msg, isolateToMain));
+    registry.registerHandler<FilesActionDone>((msg) => handleCancel(msg));
     registry.registerHandler<DownloadPreviewRequest>(
-        (msg) => this.handleDownloadPreview(msg, isolateToMain));
+        (msg) => handleDownloadPreview(msg, isolateToMain));
     registry.registerHandler<DownloadFileRequest>(
-        (msg) => this.handleDownload(msg, isolateToMain));
+        (msg) => handleDownload(msg, isolateToMain));
     return this;
   }
 
@@ -56,7 +56,7 @@ class NextcloudFileManagerHandler
   void handleDelete(DeleteFilesRequest message, SendPort isolateToMain) {
     getIt
         .get<IsolatedFileManager>()
-        .deleteFiles(message.files, message.local)
+        .deleteFiles(message.files, local: message.local)
         .whenComplete(() => isolateToMain.send(FilesActionDone(message.key)));
   }
 
@@ -70,12 +70,12 @@ class NextcloudFileManagerHandler
         ? fileManager.copyFiles(
             message.files,
             message.destination,
-            message.overwrite,
+            overwrite: message.overwrite,
           )
         : fileManager.moveFiles(
             message.files,
             message.destination,
-            message.overwrite,
+            overwrite: message.overwrite,
           );
 
     action
@@ -102,11 +102,11 @@ class NextcloudFileManagerHandler
     getIt.get<NextcloudFileManager>().downloadPreviewCommand(msg.file);
   }
 
-  void handleDownload(
+  Future<void> handleDownload(
     DownloadFileRequest request,
     SendPort isolateToMain,
   ) async {
-    NcFile ncFile = request.file;
+    final NcFile ncFile = request.file;
     if (ncFile.localFile != null && await ncFile.localFile.file.exists()) {
       ncFile.localFile.exists = true;
       isolateToMain.send(FetchedFile(
@@ -120,7 +120,7 @@ class NextcloudFileManagerHandler
       if (request.overrideGlobalPersistFlag ||
           getIt.get<IsolatedGlobalSettingsManager>().autoPersist.value) {
         ncFile.localFile.file = await getIt.get<LocalFileService>().createFile(
-            file: ncFile.localFile.file,
+            file: ncFile.localFile.file as File,
             bytes: value,
             lastModified: ncFile.lastModified);
         ncFile.localFile.exists = true;

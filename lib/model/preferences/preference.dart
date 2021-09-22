@@ -15,7 +15,8 @@ abstract class Preference {
       key.startsWith(prefix) ? key : "$prefix:$key";
 
   @protected
-  static T initBuilder<T extends PreferenceBuilder>(PreferenceBuilder b) =>
+  static PreferenceBuilder initBuilder<T extends PreferenceBuilder>(
+          PreferenceBuilder b) =>
       b..enabled = true;
 
   Preference rebuild(void Function(PreferenceBuilder) updates);

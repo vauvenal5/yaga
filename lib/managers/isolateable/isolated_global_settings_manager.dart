@@ -8,11 +8,12 @@ import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 
 class IsolatedGlobalSettingsManager
     with Isolateable<IsolatedGlobalSettingsManager> {
+  @override
   Future<IsolatedGlobalSettingsManager> initIsolated(
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    this._autoPersist = init.autoPersist;
+    _autoPersist = init.autoPersist;
     return this;
   }
 
@@ -22,9 +23,7 @@ class IsolatedGlobalSettingsManager
   BoolPreference get autoPersist => _autoPersist;
 
   IsolatedGlobalSettingsManager(this._settingsManager) {
-    this
-        ._settingsManager
-        .updateSettingCommand
+    _settingsManager.updateSettingCommand
         .where((event) => event.key == GlobalSettingsManager.autoPersist.key)
         .map((event) => event as BoolPreference)
         .listen((value) => _autoPersist = value);

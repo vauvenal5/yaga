@@ -51,19 +51,19 @@ class SortManager with Isolateable<SortManager> {
     SortedCategoryList main,
     SortedFileFolderList addition,
   ) {
-    bool changed = _mergeLists(main.folders, addition.folders, null);
-    SortedCategoryList convertedAddition = this.sortList(
+    final bool changed = _mergeLists(main.folders, addition.folders, null);
+    final SortedCategoryList convertedAddition = sortList(
       addition.files,
       main.config,
     );
-    return this._mergeCategories(main, convertedAddition) || changed;
+    return _mergeCategories(main, convertedAddition) || changed;
   }
 
   bool _mergeFileFolders(
     SortedFileFolderList main,
     SortedFileList addition,
   ) {
-    bool changed = _mergeLists(
+    final bool changed = _mergeLists(
       main.files,
       addition.files,
       main.config.fileSortProperty,
@@ -116,22 +116,22 @@ class SortManager with Isolateable<SortManager> {
         .forEach((element) => main.add(element));
 
     if (prop != null) {
-      this._sortListHandlers[prop](main);
+      _sortListHandlers[prop](main);
     }
     return size < main.length;
   }
 
   SortedFileList sortList(List<NcFile> files, SortConfig config) {
-    List<NcFile> filesToSort = [];
-    List<NcFile> foldersToSort = [];
+    final List<NcFile> filesToSort = [];
+    final List<NcFile> foldersToSort = [];
 
-    files.forEach((file) {
+    for (final file in files) {
       if (file.isDirectory) {
         foldersToSort.add(file);
       } else {
         filesToSort.add(file);
       }
-    });
+    }
 
     return _sortHandlers[config.sortType](filesToSort, foldersToSort, config);
   }
@@ -141,8 +141,8 @@ class SortManager with Isolateable<SortManager> {
     List<NcFile> folders,
     SortConfig config,
   ) {
-    this._sortListHandlers[config.fileSortProperty](files);
-    this._sortListHandlers[config.folderSortProperty](folders);
+    _sortListHandlers[config.fileSortProperty](files);
+    _sortListHandlers[config.folderSortProperty](folders);
 
     return SortedFileFolderList(config, files, folders);
   }
@@ -154,8 +154,8 @@ class SortManager with Isolateable<SortManager> {
   ) {
     final sorted = SortedCategoryList(config, folders: folders);
 
-    files.forEach((file) {
-      String key = SortedCategoryList.createKey(file);
+    for (final file in files) {
+      final String key = SortedCategoryList.createKey(file);
 
       if (!sorted.categories.contains(key)) {
         sorted.categories.add(key);
@@ -166,7 +166,7 @@ class SortManager with Isolateable<SortManager> {
       if (!sorted.categorizedFiles[key].contains(file)) {
         sorted.categorizedFiles[key].add(file);
       }
-    });
+    }
 
     _sortCategories(sorted.categories);
     sorted.categorizedFiles

@@ -13,7 +13,7 @@ class ChoicePreferenceWidget extends StatelessWidget {
   final ChoicePreference _choicePreference;
   final RxCommand<Preference, dynamic> onChangeCommand;
 
-  ChoicePreferenceWidget(this._choicePreference, this.onChangeCommand);
+  const ChoicePreferenceWidget(this._choicePreference, this.onChangeCommand);
 
   //todo: generalize this for all preferences
   void _notifyChange(ChoicePreference pref) {
@@ -38,7 +38,7 @@ class ChoicePreferenceWidget extends StatelessWidget {
                   arguments:
                       ChoiceSelectorScreenArguments(pref, (String value) {
                     Navigator.pop(context);
-                    this._notifyChange(pref.rebuild((b) => b..value = value));
+                    _notifyChange(pref.rebuild((b) => b..value = value));
                   }, () => Navigator.pop(context))),
             ));
   }

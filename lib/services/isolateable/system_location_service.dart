@@ -13,9 +13,9 @@ class SystemLocationService extends Service<SystemLocationService>
   static final _internalOrigin =
       Uri(scheme: "file", host: "device.local", path: "/");
   static final _tmpOrigin = Uri(scheme: "file", host: "device.tmp", path: "/");
-  static final _externalHost = "device.ext";
+  static const _externalHost = "device.ext";
 
-  Map<String, SystemLocation> _locations = Map();
+  final Map<String, SystemLocation> _locations = {};
   List<SystemLocation> get externals => _locations.values
       .where((element) => element.origin != _internalOrigin)
       .where((element) => element.origin != _tmpOrigin)
@@ -49,7 +49,7 @@ class SystemLocationService extends Service<SystemLocationService>
     external
         .where((element) => element.toString() != externalDir.toString())
         .forEach((element) {
-      Uri origin = Uri(
+      final Uri origin = Uri(
         scheme: "file",
         userInfo: element.uri.pathSegments[1],
         host: _externalHost,
@@ -103,7 +103,6 @@ class SystemLocationService extends Service<SystemLocationService>
     );
   }
 
-  SystemLocation get internalStorage =>
-      this._locations[_internalOrigin.authority];
-  SystemLocation get internalCache => this._locations[_tmpOrigin.authority];
+  SystemLocation get internalStorage => _locations[_internalOrigin.authority];
+  SystemLocation get internalCache => _locations[_tmpOrigin.authority];
 }

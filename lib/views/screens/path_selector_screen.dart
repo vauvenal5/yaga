@@ -17,7 +17,7 @@ class PathSelectorScreen extends StatelessWidget {
   final bool fixedOrigin;
   final String schemeFilter;
 
-  PathSelectorScreen(
+  const PathSelectorScreen(
     this._uri,
     this._onSelect, {
     this.onFileTap,
@@ -48,20 +48,20 @@ class PathSelectorScreen extends StatelessWidget {
               );
     }
 
-    ViewConfiguration viewConfig = ViewConfiguration.browse(
+    final ViewConfiguration viewConfig = ViewConfiguration.browse(
       route: route,
       defaultView: NcListView.viewKey,
       onFolderTap: null,
-      onFileTap: this.onFileTap,
+      onFileTap: onFileTap,
       onSelect: null,
     );
 
     return DirectoryNavigationScreenArguments(
-        uri: this._uri,
-        title: this.title ?? "Select path...",
+        uri: _uri,
+        title: title ?? "Select path...",
         viewConfig: viewConfig,
-        fixedOrigin: this.fixedOrigin,
-        schemeFilter: this.schemeFilter,
+        fixedOrigin: fixedOrigin,
+        schemeFilter: schemeFilter,
         bottomBarBuilder: bottomBarBuilder);
   }
 }

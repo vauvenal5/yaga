@@ -4,6 +4,7 @@ import 'package:yaga/model/sort_config.dart';
 import 'package:yaga/model/sorted_file_list.dart';
 
 class SortedCategoryList extends SortedFileList<SortedCategoryList> {
+  @override
   final List<NcFile> folders;
   final List<String> categories = [];
   final Map<String, List<NcFile>> categorizedFiles = {};
@@ -31,11 +32,11 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
       removed = folders.remove(file);
 
       if (removed) {
-        categorizedFiles.values.forEach(
-          (catFiles) => catFiles.removeWhere(
+        for (final catFiles in categorizedFiles.values) {
+          catFiles.removeWhere(
             (f) => f.uri.path.startsWith(file.uri.path),
-          ),
-        );
+          );
+        }
 
         categorizedFiles.removeWhere((key, value) => value.isEmpty);
       }
@@ -43,7 +44,7 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
       return removed;
     }
 
-    String key = createKey(file);
+    final String key = createKey(file);
 
     if (categorizedFiles.containsKey(key)) {
       removed = categorizedFiles[key].remove(file);
@@ -59,9 +60,9 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
 
   @override
   void removeAll() {
-    this.categories.clear();
-    this.categorizedFiles.clear();
-    this.folders.clear();
+    categories.clear();
+    categorizedFiles.clear();
+    folders.clear();
   }
 
   @override
@@ -76,9 +77,8 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
 
     final filtered = SortedCategoryList(config, folders: filteredFolders);
 
-    this.categories.forEach((cat) {
-      final filteredCat = this
-          .categorizedFiles[cat]
+    for (final cat in categories) {
+      final filteredCat = categorizedFiles[cat]
           .where(
             (element) => filter(element),
           )
@@ -87,7 +87,7 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
         filtered.categories.add(cat);
         filtered.categorizedFiles[cat] = filteredCat;
       }
-    });
+    }
 
     return filtered;
   }

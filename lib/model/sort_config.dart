@@ -15,7 +15,8 @@ class SortConfig extends Equatable {
   final SortProperty folderSortProperty;
   final SortProperty fileSortProperty;
 
-  SortConfig(this.sortType, this.fileSortProperty, this.folderSortProperty);
+  const SortConfig(
+      this.sortType, this.fileSortProperty, this.folderSortProperty);
 
   @override
   List<Object> get props => [sortType, folderSortProperty, fileSortProperty];

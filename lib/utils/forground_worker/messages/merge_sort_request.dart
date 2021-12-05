@@ -4,7 +4,7 @@ import 'package:yaga/utils/forground_worker/messages/message.dart';
 class MergeSortRequest extends Message {
   final SortedFileList main;
   final SortedFileList addition;
-  final Uri uri;
+  final Uri? uri;
   final bool recursive;
   final bool updateLoading;
 

@@ -8,8 +8,10 @@ class PreferenceListTileWidget<T extends Preference> extends StatelessWidget {
   final T initData;
   final Widget Function(BuildContext, T) listTileBuilder;
 
-  const PreferenceListTileWidget(
-      {@required this.initData, @required this.listTileBuilder});
+  const PreferenceListTileWidget({
+    required this.initData,
+    required this.listTileBuilder,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +23,7 @@ class PreferenceListTileWidget<T extends Preference> extends StatelessWidget {
           .map((event) => event as T),
       initialData: initData,
       builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
-        return listTileBuilder(context, snapshot.data);
+        return listTileBuilder(context, snapshot.data!);
       },
     );
   }

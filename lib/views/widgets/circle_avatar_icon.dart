@@ -4,7 +4,10 @@ class CircleAvatarIcon extends StatelessWidget {
   final Icon icon;
   final double radius;
 
-  const CircleAvatarIcon({@required this.icon, this.radius = 13});
+  const CircleAvatarIcon({
+    required this.icon,
+    this.radius = 13,
+  });
 
   @override
   Widget build(BuildContext context) {

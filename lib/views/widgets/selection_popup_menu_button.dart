@@ -16,7 +16,7 @@ enum SelectionViewMenu { share, delete, copy, move, download }
 class SelectionPopupMenuButton extends StatelessWidget {
   final FileListLocalManager fileListLocalManager;
 
-  const SelectionPopupMenuButton({@required this.fileListLocalManager});
+  const SelectionPopupMenuButton({required this.fileListLocalManager});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
   void _popupMenuHandler(BuildContext context, SelectionViewMenu result) {
     if (result == SelectionViewMenu.share) {
       if (fileListLocalManager.selected
-          .where((element) => !element.localFile.exists)
+          .where((element) => !element.localFile!.exists)
           .toList()
           .isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -67,7 +67,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
       }
 
       Share.shareFiles(fileListLocalManager.selected
-          .map((e) => e.localFile.file.path)
+          .map((e) => e.localFile!.file.path)
           .toList());
       return;
     }

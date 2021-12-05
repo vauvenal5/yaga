@@ -16,7 +16,7 @@ class DownloadFileImage extends FileImage {
       codec: _loadAsync(key, decode),
       scale: key.scale,
       informationCollector: () sync* {
-        yield ErrorDescription('Path: ${file?.path}');
+        yield ErrorDescription('Path: ${file.path}');
       },
     );
   }
@@ -25,11 +25,11 @@ class DownloadFileImage extends FileImage {
     assert(key == this);
 
     final FetchedFile fetchedFile = await localFileAvailable;
-    assert(fetchedFile.file.localFile.file.path == file.path);
+    assert(fetchedFile.file.localFile!.file.path == file.path);
 
     if (fetchedFile.data.lengthInBytes == 0) {
       // The file may become available later.
-      PaintingBinding.instance.imageCache.evict(key);
+      PaintingBinding.instance?.imageCache?.evict(key);
       throw StateError(
           '${file.uri.toString()} is empty and cannot be loaded as an image.');
     }

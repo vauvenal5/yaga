@@ -10,7 +10,7 @@ class ActionPreferenceWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(
-        _pref.title,
+        _pref.title!,
       ),
       onTap: _pref.action,
     );

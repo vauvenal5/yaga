@@ -41,16 +41,16 @@ abstract class CategoryViewScreen extends StatefulWidget {
 class _CategoryViewScreenState extends State<CategoryViewScreen>
     with AutomaticKeepAliveClientMixin<CategoryViewScreen> {
   final List<Preference> _defaultViewPreferences = [];
-  ViewConfiguration _viewConfig;
+  late ViewConfiguration _viewConfig;
 
   // GeneralViewConfig _generalViewConfig;
 
-  StreamSubscription<UriPreference> _updateUriSubscription;
-  FileListLocalManager _fileListLocalManager;
+  late StreamSubscription<UriPreference> _updateUriSubscription;
+  late FileListLocalManager _fileListLocalManager;
 
   @override
   void initState() {
-    final onFileTap = (List<NcFile> files, int index) =>
+    void onFileTap(List<NcFile> files, int index) =>
         _fileListLocalManager.isInSelectionMode
             ? _fileListLocalManager.selectFileCommand(files[index])
             //todo: replace navigation by navigation manager
@@ -140,12 +140,12 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
           viewConfig: _viewConfig,
           appBarBuilder: _buildAppBar,
         ),
-        drawer: widget._categoryViewConfig.hasDrawer ? YagaDrawer() : null,
+        drawer: widget._categoryViewConfig.hasDrawer! ? YagaDrawer() : null,
         body: ImageViewContainer(
             fileListLocalManager: _fileListLocalManager,
             viewConfig: _viewConfig),
         bottomNavigationBar:
-            YagaBottomNavBar(widget._categoryViewConfig.selectedTab),
+            YagaBottomNavBar(widget._categoryViewConfig.selectedTab!),
       ),
     );
   }
@@ -162,7 +162,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
       title: SelectionTitle(
         _fileListLocalManager,
         defaultTitel: Text(
-          widget._categoryViewConfig.title,
+          widget._categoryViewConfig.title!,
           overflow: TextOverflow.fade,
         ),
       ),

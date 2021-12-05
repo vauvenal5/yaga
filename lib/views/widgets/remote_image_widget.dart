@@ -15,13 +15,13 @@ import 'package:yaga/views/widgets/circle_avatar_icon.dart';
 class RemoteImageWidget extends StatelessWidget {
   final NcFile _file;
   final int cacheWidth;
-  final int cacheHeight;
+  final int? cacheHeight;
   final bool showFileEnding;
 
   const RemoteImageWidget(
     this._file, {
-    Key key,
-    this.cacheWidth,
+    Key? key,
+    required this.cacheWidth,
     this.cacheHeight,
     this.showFileEnding = true,
   }) : super(key: key);
@@ -64,7 +64,7 @@ class RemoteImageWidget extends StatelessWidget {
 
   Icon _getLocalIcon(BuildContext context) {
     if (getIt.get<NextCloudService>().isUriOfService(_file.uri)) {
-      if (_file.localFile.exists) {
+      if (_file.localFile!.exists) {
         return const Icon(
           Icons.check_circle,
           color: Colors.green,
@@ -106,19 +106,19 @@ class RemoteImageWidget extends StatelessWidget {
       ]),
       initialData: _file,
       builder: (context, snapshot) {
-        if (_file.previewFile != null && _file.previewFile.exists) {
+        if (_file.previewFile != null && _file.previewFile!.exists) {
           return _createIconOverlay(
             context,
-            _inkFromImage(snapshot.data.previewFile.file),
+            _inkFromImage(snapshot.data!.previewFile!.file),
           );
         }
 
         _requestPreviewDownload();
 
-        if (_file.localFile != null && _file.localFile.exists) {
+        if (_file.localFile != null && _file.localFile!.exists) {
           return _createIconOverlay(
             context,
-            _inkFromImage(snapshot.data.localFile.file),
+            _inkFromImage(snapshot.data!.localFile!.file),
           );
         }
 

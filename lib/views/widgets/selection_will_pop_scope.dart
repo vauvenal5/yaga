@@ -5,14 +5,16 @@ class SelectionWillPopScope extends StatelessWidget {
   final Widget child;
   final FileListLocalManager fileListLocalManager;
 
-  const SelectionWillPopScope(
-      {@required this.child, @required this.fileListLocalManager});
+  const SelectionWillPopScope({
+    required this.child,
+    required this.fileListLocalManager,
+  });
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (fileListLocalManager.selectionModeChanged.lastResult) {
+        if (fileListLocalManager.selectionModeChanged.lastResult!) {
           fileListLocalManager.deselectAll();
           return false;
         }

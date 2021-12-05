@@ -16,6 +16,7 @@ class SystemLocationService extends Service<SystemLocationService>
   static const _externalHost = "device.ext";
 
   final Map<String, SystemLocation> _locations = {};
+
   List<SystemLocation> get externals => _locations.values
       .where((element) => element.origin != _internalOrigin)
       .where((element) => element.origin != _tmpOrigin)
@@ -24,9 +25,9 @@ class SystemLocationService extends Service<SystemLocationService>
   @override
   Future<SystemLocationService> init() async {
     _init(
-      await getExternalStorageDirectory(),
+      (await getExternalStorageDirectory())!,
       await getTemporaryDirectory(),
-      await getExternalStorageDirectories(),
+      (await getExternalStorageDirectories())!,
     );
     return this;
   }
@@ -64,11 +65,11 @@ class SystemLocationService extends Service<SystemLocationService>
   //todo: first, we can infer the host by matching the starting part of the URI, advantage: self-contained, disadvantage: will require checking for every file
   //todo: second, we can require passing the host from the calling manager which should know if we are dealing with a local or tmp file
   Uri internalUriFromAbsolute(Uri absolute) {
-    Uri res;
+    Uri? res;
 
     _locations.forEach((key, value) {
       if (absolute.path.startsWith(value.privatePath)) {
-        res = UriUtils.fromUri(
+        res = fromUri(
           uri: value.origin,
           path: _internalUriNormalizePath(absolute, value),
         );
@@ -79,7 +80,7 @@ class SystemLocationService extends Service<SystemLocationService>
       throw ArgumentError("Unknown system location!");
     }
 
-    return res;
+    return res!;
   }
 
   String _internalUriNormalizePath(Uri absolute, SystemLocation location) {
@@ -94,15 +95,16 @@ class SystemLocationService extends Service<SystemLocationService>
     //todo: add a test when a local folder contain uri encoded chars
     //--> this happens when a server is behind a subpath cloud.com/nc
     //--> then NC Files App will create a local folder like cloud.com%2Fnc
-    return UriUtils.fromPathList(
-      uri: _locations[internal.authority].absoluteUri,
+    return fromPathList(
+      uri: _locations[internal.authority]!.absoluteUri,
       paths: [
-        _locations[internal.authority].privatePath,
+        _locations[internal.authority]!.privatePath,
         internal.path,
       ],
     );
   }
 
-  SystemLocation get internalStorage => _locations[_internalOrigin.authority];
-  SystemLocation get internalCache => _locations[_tmpOrigin.authority];
+  SystemLocation get internalStorage => _locations[_internalOrigin.authority]!;
+
+  SystemLocation get internalCache => _locations[_tmpOrigin.authority]!;
 }

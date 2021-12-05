@@ -29,10 +29,10 @@ class DirectoryScreen extends StatefulWidget {
 
   final ViewConfiguration viewConfig;
   final Uri uri;
-  final String title;
-  final Widget Function(BuildContext, Uri) bottomBarBuilder;
-  final String navigationRoute;
-  final NavigatableScreenArguments Function(DirectoryNavigationScreenArguments)
+  final String? title;
+  final Widget Function(BuildContext, Uri)? bottomBarBuilder;
+  final String? navigationRoute;
+  final NavigatableScreenArguments Function(DirectoryNavigationScreenArguments)?
       getNavigationArgs;
   final bool leading;
 
@@ -40,13 +40,13 @@ class DirectoryScreen extends StatefulWidget {
   final String schemeFilter;
 
   DirectoryScreen({
-    @required this.uri,
-    @required this.viewConfig,
+    required this.uri,
+    required this.viewConfig,
     this.title,
     this.bottomBarBuilder,
     this.navigationRoute,
     this.getNavigationArgs,
-    this.leading,
+    required this.leading,
     this.fixedOrigin = false,
     this.schemeFilter = "",
   }) : super(key: ValueKey(uri.toString()));
@@ -78,7 +78,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
       }
 
       if (viewConfig.onFileTap != null) {
-        return viewConfig.onFileTap(files, index);
+        return viewConfig.onFileTap!(files, index);
       }
     }
 
@@ -87,10 +87,12 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
       ViewConfiguration.fromViewConfig(
         viewConfig: viewConfig,
         onFolderTap: (folder) {
-          if (fileListLocalManager.isInSelectionMode) {
+          if (fileListLocalManager.isInSelectionMode ||
+              viewConfig.onFolderTap == null) {
             return;
           }
-          return viewConfig.onFolderTap(folder);
+
+          return viewConfig.onFolderTap!(folder);
         },
         onSelect: getIt.get<IntentService>().isOpenForSelect
             ? onFileTap
@@ -130,8 +132,8 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
           appBarBuilder: _buildAppBar,
           bottomHeight: DirectoryScreen.appBarBottomHeight,
           searchResultHandler: (file) {
-            if (file != null && file.isDirectory) {
-              widget.viewConfig.onFolderTap(file);
+            if (file != null && file.isDirectory && widget.viewConfig.onFolderTap != null) {
+              widget.viewConfig.onFolderTap!(file);
             }
           },
         ),
@@ -142,7 +144,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
         ),
         bottomNavigationBar: widget.bottomBarBuilder == null
             ? null
-            : widget.bottomBarBuilder(context, _fileListLocalManager.uri),
+            : widget.bottomBarBuilder!(context, _fileListLocalManager.uri),
       ),
     );
   }

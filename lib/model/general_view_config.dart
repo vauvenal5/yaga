@@ -7,7 +7,11 @@ class GeneralViewConfig {
   final SectionPreference general;
   final UriPreference path;
 
-  factory GeneralViewConfig(String pref, Uri defaultPath, {bool pathEnabled}) {
+  factory GeneralViewConfig(
+    String pref,
+    Uri defaultPath, {
+    required bool pathEnabled,
+  }) {
     final SectionPreference general = SectionPreference((b) => b
       ..key = Preference.prefixKey(pref, "general")
       ..title = "General");

@@ -9,14 +9,14 @@ import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart'
 
 class BoolPreferenceWidget extends StatelessWidget {
   final BoolPreference _defaultPreference;
-  final RxCommand<Preference, dynamic> onChangeCommand;
+  final RxCommand<Preference, dynamic>? onChangeCommand;
 
   const BoolPreferenceWidget(this._defaultPreference, {this.onChangeCommand});
 
   //todo: generalize this for all preferences
   void _notifyChange(BoolPreference pref) {
     if (onChangeCommand != null) {
-      onChangeCommand(pref);
+      onChangeCommand!(pref);
       return;
     }
     getIt.get<SettingsManager>().persistBoolSettingCommand(pref);
@@ -29,7 +29,7 @@ class BoolPreferenceWidget extends StatelessWidget {
           .get<SharedPreferencesService>()
           .loadPreferenceFromBool(_defaultPreference),
       listTileBuilder: (context, pref) => SwitchListTile(
-        title: Text(pref.title),
+        title: Text(pref.title!),
         value: pref.value,
         onChanged: (value) =>
             _notifyChange(pref.rebuild((b) => b..value = value)),

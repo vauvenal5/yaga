@@ -7,17 +7,17 @@ class NcFile {
   final String name;
   final String fileExtension;
   Uri uri;
-  LocalFile localFile;
-  LocalFile previewFile;
-  DateTime lastModified;
+  LocalFile? localFile;
+  LocalFile? previewFile;
+  DateTime? lastModified;
   bool selected = false;
 
-  NcFile(this.uri, this.name, this.fileExtension, {this.isDirectory});
+  NcFile(this.uri, this.name, this.fileExtension, {required this.isDirectory});
 
-  factory NcFile.file(Uri uri, String name, String mime) {
+  factory NcFile.file(Uri uri, String name, String? mime) {
     String ext = p.extension(name).replaceAll('.', '');
     if (ext.isEmpty) {
-      ext = extensionFromMime(mime);
+      ext = extensionFromMime(mime??'');
     }
     return NcFile(uri, name, ext, isDirectory: false);
   }

@@ -19,7 +19,7 @@ class AddressFormAdvanced extends StatelessWidget {
             helperStyle: TextStyle(color: Colors.orange),
             helperText: "Validation is disabled."),
         onSaved: (value) => _onSave(
-          Uri.parse(rtrim(value.trim(), "/")),
+          Uri.parse(rtrim(value?.trim()??'', "/")),
         ),
         initialValue: "https://",
       ),

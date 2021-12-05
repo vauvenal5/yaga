@@ -48,12 +48,12 @@ class YagaDrawer extends StatelessWidget {
                     ),
                     title: Text(
                       ncService.isLoggedIn()
-                          ? ncService.origin.displayName
+                          ? ncService.origin!.displayName
                           : "",
                       style: const TextStyle(color: Colors.white),
                     ),
                     subtitle: Text(
-                      ncService.isLoggedIn() ? ncService.origin.domain : "",
+                      ncService.isLoggedIn() ? ncService.origin!.domain : "",
                       style: const TextStyle(color: Colors.white),
                     ),
                   ));
@@ -71,7 +71,7 @@ class YagaDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: const Text("Global Settings"),
             onTap: () => Navigator.pushNamed(context, SettingsScreen.route,
-                arguments: SettingsScreenArguments(preferences: snapshot.data)),
+                arguments: SettingsScreenArguments(preferences: snapshot.data!)),
           ),
         ),
         StreamBuilder<NextCloudLoginData>(

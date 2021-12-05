@@ -9,7 +9,7 @@ mixin UriSerializer
   }
 
   @override
-  UriPreference deserialize(String value) {
+  UriPreference deserialize(String? value) {
     return value == null
         ? this as UriPreference
         : rebuild((b) => b..value = Uri.parse(value));

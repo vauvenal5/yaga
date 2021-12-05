@@ -10,6 +10,6 @@ class FileListRequest extends Message {
     String key,
     this.uri,
     this.config, {
-    this.recursive,
+    this.recursive = false,
   }) : super(key);
 }

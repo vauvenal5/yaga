@@ -22,7 +22,7 @@ class LogErrorFileHandler extends ReportHandler {
   //emergency logger for when errors occure in LogErrorFileHandler
   final _logger = YagaLogger.getEmergencyLogger(LogErrorFileHandler);
 
-  IOSink _sink;
+  IOSink? _sink;
   bool _fileValidationResult = false;
 
   LogErrorFileHandler(this.file,
@@ -42,7 +42,7 @@ class LogErrorFileHandler extends ReportHandler {
         assert(printLogs != null, "printLogs can't be null");
 
   @override
-  Future<bool> handle(Report report, BuildContext context) async {
+  Future<bool> handle(Report report, BuildContext? context) async {
     try {
       if (_sink == null) {
         await init();
@@ -92,15 +92,15 @@ class LogErrorFileHandler extends ReportHandler {
   }
 
   void writeLineToFile(String text) {
-    _sink.add(utf8.encode('$text\n'));
+    _sink?.add(utf8.encode('$text\n'));
   }
 
-  Future flushFile() async => _sink.flush();
+  Future flushFile() async => _sink?.flush();
 
   Future _closeFile() async {
     _printLog("Closing file");
-    await _sink.flush();
-    await _sink.close();
+    await _sink?.flush();
+    await _sink?.close();
     _sink = null;
   }
 

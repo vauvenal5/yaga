@@ -7,12 +7,12 @@ class IsolateHandlerRegistry {
 
   void registerHandler<M extends Message>(Function(M) handler) {
     handlers.putIfAbsent(M, () => []);
-    handlers[M].add((Message msg) => handler(msg as M));
+    handlers[M]!.add((Message msg) => handler(msg as M));
   }
 
   void handleMessage(Message msg) {
     if (handlers.containsKey(msg.runtimeType)) {
-      for (final handler in handlers[msg.runtimeType]) {
+      for (final handler in handlers[msg.runtimeType]!) {
         handler(msg);
       }
     } else {

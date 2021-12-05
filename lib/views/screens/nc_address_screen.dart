@@ -20,7 +20,7 @@ import 'package:yaga/views/widgets/select_cancel_bottom_navigation.dart';
 class NextCloudAddressScreen extends StatefulWidget {
   static const route = "/nc/address";
 
-  const NextCloudAddressScreen({Key key}) : super(key: key);
+  const NextCloudAddressScreen({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _NextCloudAddressScreenState();
@@ -96,10 +96,10 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
   }
 
   void _validateAndSaveForm() {
-    if (!_formKey.currentState.validate()) {
+    if (!(_formKey.currentState?.validate()??false)) {
       return;
     }
-    _formKey.currentState.save();
+    _formKey.currentState?.save();
   }
 
   Future<void> _onSave(Uri uri) async {
@@ -135,7 +135,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
 
       if (await canLaunch(init.login)) {
         await launch(init.login);
-        LoginFlowResult res;
+        LoginFlowResult? res;
 
         while (res == null && !_disposing) {
           try {
@@ -156,7 +156,7 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
 
         getIt.get<NextCloudManager>().loginCommand(
               NextCloudLoginData(
-                Uri.parse(res.server),
+                Uri.parse(res!.server),
                 res.loginName,
                 res.appPassword,
               ),

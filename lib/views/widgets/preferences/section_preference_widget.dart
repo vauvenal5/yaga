@@ -10,7 +10,7 @@ class SectionPreferenceWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(
-        _pref.title,
+        _pref.title!,
         style: TextStyle(
             color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),
       ),

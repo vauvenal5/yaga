@@ -3,11 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:yaga/services/service.dart';
 
 class SecureStorageService extends Service<SecureStorageService> {
-  FlutterSecureStorage _storage;
-
-  SecureStorageService() {
-    _storage = const FlutterSecureStorage();
-  }
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<void> savePreference(String key, String value) {
     return _storage.write(key: key, value: value).catchError(_logAndRethrow);
@@ -24,7 +20,7 @@ class SecureStorageService extends Service<SecureStorageService> {
     return _storage.delete(key: key).catchError(_logAndRethrow);
   }
 
-  void _logAndRethrow(dynamic err) {
+  void _logAndRethrow(Object err) {
     if (err is PlatformException) {
       logger.severe("SecureStorage: ${err.code}");
       logger.severe("SecureStorage: ${err.message}");

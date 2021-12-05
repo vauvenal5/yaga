@@ -8,14 +8,11 @@ class SyncManager with Isolateable<SyncManager> {
   final Map<Uri, Map<Uri, SyncFile>> _syncMatrix = {};
 
   Future<void> addUri(Uri key) async {
-    return _syncMatrix.putIfAbsent(key, () => {});
+    _syncMatrix.putIfAbsent(key, () => {});
   }
 
-  SyncFile _addFile(Uri key, NcFile file) {
-    if (!_syncMatrix.containsKey(key)) {
-      return null;
-    }
-    return _syncMatrix[key].putIfAbsent(file.uri, () => SyncFile(file));
+  SyncFile? _addFile(Uri key, NcFile file) {
+    return _syncMatrix[key]?.putIfAbsent(file.uri, () => SyncFile(file));
   }
 
   Future<void> addFile(Uri key, NcFile file) async {
@@ -29,16 +26,13 @@ class SyncManager with Isolateable<SyncManager> {
   }
 
   Future<List<NcFile>> syncUri(Uri key) async {
-    if (!_syncMatrix.containsKey(key)) {
-      return [];
-    }
-
     return _syncMatrix
-        .remove(key)
-        .values
-        .where((file) => !file.remote)
-        .map((e) => e.file)
-        .toList();
+            .remove(key)
+            ?.values
+            .where((file) => !file.remote)
+            .map((e) => e.file)
+            .toList() ??
+        const [];
   }
 
   Future<void> removeUri(Uri key) async {

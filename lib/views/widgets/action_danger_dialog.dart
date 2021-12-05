@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 class ActionDangerDialog extends StatelessWidget {
   final String title;
   final String cancelButton;
-  final String normalAction;
+  final String? normalAction;
   final String aggressiveAction;
   final Function(bool) action;
   final List<Widget> Function(BuildContext) bodyBuilder;
 
   const ActionDangerDialog({
-    @required this.title,
-    @required this.cancelButton,
+    required this.title,
+    required this.cancelButton,
     this.normalAction,
-    @required this.aggressiveAction,
-    @required this.action,
-    @required this.bodyBuilder,
+    required this.aggressiveAction,
+    required this.action,
+    required this.bodyBuilder,
   });
 
   @override
@@ -37,7 +37,7 @@ class ActionDangerDialog extends StatelessWidget {
             Navigator.pop(context);
             action(false);
           },
-          child: Text(normalAction),
+          child: Text(normalAction!),
         ),
       );
     }

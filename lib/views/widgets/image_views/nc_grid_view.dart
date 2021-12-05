@@ -12,8 +12,8 @@ class NcGridView extends StatelessWidget {
 
   Widget _buildImage(int key, BuildContext context) {
     return InkWell(
-      onTap: () => viewConfig.onFileTap(sorted.files, key),
-      onLongPress: () => viewConfig.onSelect(sorted.files, key),
+      onTap: () => viewConfig.onFileTap?.call(sorted.files, key),
+      onLongPress: () => viewConfig.onSelect?.call(sorted.files, key),
       child: RemoteImageWidget(
         sorted.files[key],
         key: ValueKey(sorted.files[key].uri.path),
@@ -29,7 +29,7 @@ class NcGridView extends StatelessWidget {
           border: Border.all(/* width: 1 */),
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: ListTile(
-        onTap: () => viewConfig.onFolderTap(sorted.folders[key]),
+        onTap: () => viewConfig.onFolderTap?.call(sorted.folders[key]),
         leading: const Icon(
           Icons.folder,
           size: 48,

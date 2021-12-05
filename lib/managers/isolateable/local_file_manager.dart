@@ -57,8 +57,7 @@ class LocalFileManager
       final Uri uri = _systemPathService.internalUriFromAbsolute(event.uri);
 
       final NcFile file = _createFile(uri, event);
-      file.localFile = LocalFile(event);
-      file.localFile.exists = event.existsSync();
+      file.localFile = LocalFile(event, event.existsSync());
       return file;
     });
   }
@@ -67,7 +66,7 @@ class LocalFileManager
     if (event is Directory) {
       final NcFile file = NcFile.directory(
         uri,
-        UriUtils.getNameFromUri(uri),
+        getNameFromUri(uri),
       );
       //todo: think about this!
       file.lastModified = DateTime.now();
@@ -76,7 +75,7 @@ class LocalFileManager
 
     final NcFile file = NcFile.file(
       uri,
-      UriUtils.getNameFromUri(uri),
+      getNameFromUri(uri),
       lookupMimeType(event.path),
     );
     //todo: this value is not necessarily correct(!)
@@ -85,15 +84,15 @@ class LocalFileManager
   }
 
   @override
-  Future<NcFile> deleteFile(NcFile file, {bool local}) async {
-    _localFileService.deleteFile(file.localFile.file);
+  Future<NcFile> deleteFile(NcFile file, {required bool local}) async {
+    _localFileService.deleteFile(file.localFile!.file);
     _fileManager.updateFileList(file);
     return file;
   }
 
   @override
   Future<NcFile> copyFile(NcFile file, Uri destination,
-      {bool overwrite}) async {
+      {bool overwrite = false}) async {
     _localFileService.copyFile(
       file,
       _systemPathService.absoluteUriFromInternal(destination),
@@ -104,7 +103,7 @@ class LocalFileManager
 
   @override
   Future<NcFile> moveFile(NcFile file, Uri destination,
-      {bool overwrite}) async {
+      {bool overwrite = false}) async {
     _localFileService.moveFile(
       file,
       _systemPathService.absoluteUriFromInternal(destination),

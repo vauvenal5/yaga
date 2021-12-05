@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
@@ -17,16 +16,16 @@ class ViewConfiguration {
   final BoolPreference showFolders;
 
   //todo: not sure if moving the onTap handler to this objects is a good idea
-  final Function(NcFile) onFolderTap;
-  final Function(List<NcFile>, int) onFileTap;
-  final Function(List<NcFile>, int) onSelect;
+  final Function(NcFile)? onFolderTap;
+  final Function(List<NcFile>, int)? onFileTap;
+  final Function(List<NcFile>, int)? onSelect;
 
   factory ViewConfiguration({
-    @required String route,
-    @required String defaultView,
-    @required Function(NcFile) onFolderTap,
-    @required Function(List<NcFile>, int) onFileTap,
-    @required final Function(List<NcFile>, int) onSelect,
+    required String route,
+    required String defaultView,
+    required Function(NcFile)? onFolderTap,
+    required Function(List<NcFile>, int)? onFileTap,
+    required final Function(List<NcFile>, int)? onSelect,
   }) {
     final SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
@@ -62,11 +61,11 @@ class ViewConfiguration {
   }
 
   factory ViewConfiguration.browse({
-    @required String route,
-    @required String defaultView,
-    @required Function(NcFile) onFolderTap,
-    @required Function(List<NcFile>, int) onFileTap,
-    @required Function(List<NcFile>, int) onSelect,
+    required String route,
+    required String defaultView,
+    Function(NcFile)? onFolderTap,
+    Function(List<NcFile>, int)? onFileTap,
+    Function(List<NcFile>, int)? onSelect,
   }) {
     final SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
@@ -100,10 +99,10 @@ class ViewConfiguration {
   }
 
   factory ViewConfiguration.fromViewConfig({
-    @required ViewConfiguration viewConfig,
-    Function(NcFile) onFolderTap,
-    Function(List<NcFile>, int) onFileTap,
-    Function(List<NcFile>, int) onSelect,
+    required ViewConfiguration viewConfig,
+    Function(NcFile)? onFolderTap,
+    Function(List<NcFile>, int)? onFileTap,
+    Function(List<NcFile>, int)? onSelect,
   }) {
     return ViewConfiguration._internal(
       viewConfig.section,

@@ -17,7 +17,7 @@ class ChoiceSelectorScreen extends StatefulWidget {
 }
 
 class _ChoiceSelectorScreenState extends State<ChoiceSelectorScreen> {
-  String _choice;
+  late String _choice;
 
   @override
   void initState() {
@@ -29,15 +29,16 @@ class _ChoiceSelectorScreenState extends State<ChoiceSelectorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget._choicePreference.title),
+        title: Text(widget._choicePreference.title!),
       ),
       body: ListView.separated(
           itemBuilder: (context, index) => RadioListTile(
               title: Text(widget._choicePreference.choices[
-                  widget._choicePreference.choices.keys.elementAt(index)]),
+                  widget._choicePreference.choices.keys.elementAt(index)]!),
               value: widget._choicePreference.choices.keys.elementAt(index),
               groupValue: _choice,
-              onChanged: (String value) => setState(() => _choice = value)),
+              onChanged: (String? value) =>
+                  setState(() => _choice = value ?? _choice)),
           separatorBuilder: (context, index) => const Divider(),
           itemCount: widget._choicePreference.choices.length),
       bottomNavigationBar: SelectCancelBottomNavigation(

@@ -7,11 +7,11 @@ import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 class SearchIconButton extends StatelessWidget {
   final FileListLocalManager fileListLocalManager;
   final ViewConfiguration viewConfig;
-  final Function(NcFile) searchResultHandler;
+  final Function(NcFile?)? searchResultHandler;
 
   const SearchIconButton({
-    @required this.fileListLocalManager,
-    @required this.viewConfig,
+    required this.fileListLocalManager,
+    required this.viewConfig,
     this.searchResultHandler,
   });
 
@@ -20,13 +20,11 @@ class SearchIconButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.search),
       onPressed: () async {
-        final NcFile file = await showSearch<NcFile>(
+        final NcFile? file = await showSearch<NcFile>(
           context: context,
           delegate: ImageSearch(fileListLocalManager, viewConfig),
         );
-        if (searchResultHandler != null) {
-          searchResultHandler(file);
-        }
+        searchResultHandler?.call(file);
       },
     );
   }

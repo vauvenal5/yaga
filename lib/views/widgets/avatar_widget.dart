@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:rx_command/rx_command.dart';
 
 class AvatarWidget extends StatelessWidget {
-  final File _avatar;
-  final RxCommand<void, File> _command;
-  final IconData _iconData;
+  final File? _avatar;
+  final RxCommand<void, File>? _command;
+  final IconData? _iconData;
   final double _radius;
   final bool border;
 
@@ -35,7 +35,7 @@ class AvatarWidget extends StatelessWidget {
         _command = null,
         _radius = radius;
 
-  Widget _buildAvatar(BuildContext context, File data) {
+  Widget _buildAvatar(BuildContext context, File? data) {
     if (border) {
       return CircleAvatar(
         radius: _radius + 1,
@@ -47,7 +47,7 @@ class AvatarWidget extends StatelessWidget {
     return _getInnerAvatar(context, data);
   }
 
-  Widget _getInnerAvatar(BuildContext context, File data) {
+  Widget _getInnerAvatar(BuildContext context, File? data) {
     if (data != null && data.existsSync()) {
       return CircleAvatar(
         radius: _radius,
@@ -56,7 +56,7 @@ class AvatarWidget extends StatelessWidget {
     }
 
     if (_iconData != null) {
-      return _getIconAvatar(context, _iconData);
+      return _getIconAvatar(context, _iconData!);
     }
 
     return _getIconAvatar(context, Icons.cloud);
@@ -77,7 +77,7 @@ class AvatarWidget extends StatelessWidget {
   Widget _buildAvatarFromStream(BuildContext context) {
     return StreamBuilder<File>(
       stream: _command,
-      initialData: _command.lastResult,
+      initialData: _command!.lastResult,
       builder: (context, snapshot) => _buildAvatar(context, snapshot.data),
     );
   }

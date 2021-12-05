@@ -19,10 +19,10 @@ class ImageSearch extends SearchDelegate<NcFile> {
     return theme.copyWith(
         inputDecorationTheme: InputDecorationTheme(
             hintStyle:
-                TextStyle(color: theme.primaryTextTheme.headline5.color)),
+                TextStyle(color: theme.primaryTextTheme.headline5?.color)),
         textTheme: theme.textTheme.copyWith(
           headline5: theme.textTheme.headline5
-              .copyWith(color: theme.primaryTextTheme.headline5.color),
+              ?.copyWith(color: theme.primaryTextTheme.headline5?.color),
           headline6: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.normal,

@@ -17,17 +17,14 @@ class MappingManager with Isolateable<MappingManager> {
   final SystemLocationService _systemLocationService;
   final SettingsManagerBase _settingsManager;
 
-  RxCommand<MappingPreference, MappingPreference> mappingUpdatedCommand;
+  RxCommand<MappingPreference, MappingPreference> mappingUpdatedCommand =
+      RxCommand.createSync((param) => param);
 
-  MappingNode root;
+  MappingNode root = MappingNode();
   Map<String, MappingPreference> mappings = {};
 
   MappingManager(this._settingsManager, this._nextCloudService,
       this._systemLocationService) {
-    root = MappingNode();
-
-    mappingUpdatedCommand = RxCommand.createSync((param) => param);
-
     _settingsManager.updateSettingCommand
         .where((event) => event is MappingPreference)
         .listen((event) => handleMappingUpdate(event as MappingPreference));
@@ -49,11 +46,11 @@ class MappingManager with Isolateable<MappingManager> {
       return;
     }
     if (mappings.containsKey(event.key)) {
-      _removeFromTree(mappings[event.key].remote.value.pathSegments, 0, root);
+      _removeFromTree(mappings[event.key]!.remote.value.pathSegments, 0, root);
     }
     //todo: somehow/somewhere the view needs to be refreshed when the mapping changes
     _addMappingPreferenceToTree(event, 0, root);
-    mappings[event.key] = event;
+    mappings[event.key!] = event;
 
     mappingUpdatedCommand(event);
   }
@@ -64,7 +61,7 @@ class MappingManager with Isolateable<MappingManager> {
       return;
     }
 
-    _removeFromTree(path, index + 1, current.nodes[path[index]]);
+    _removeFromTree(path, index + 1, current.nodes[path[index]]!);
   }
 
   void _addMappingPreferenceToTree(
@@ -77,11 +74,11 @@ class MappingManager with Isolateable<MappingManager> {
     final String pathSegment = pref.remote.value.pathSegments[pathIndex];
     currentNode.nodes.putIfAbsent(pathSegment, () => MappingNode());
     _addMappingPreferenceToTree(
-        pref, pathIndex + 1, currentNode.nodes[pathSegment]);
+        pref, pathIndex + 1, currentNode.nodes[pathSegment]!);
   }
 
   MappingPreference _getMappingPrefernce(Uri uri, MappingPreference selected,
-      int pathIndex, MappingNode currentNode) {
+      int pathIndex, MappingNode? currentNode) {
     if (currentNode == null) {
       return selected;
     }
@@ -102,9 +99,9 @@ class MappingManager with Isolateable<MappingManager> {
           root);
 
   String _appendLocalMappingFolder(String path) {
-    return UriUtils.chainPathSegments(
+    return chainPathSegments(
       path,
-      _nextCloudService.origin.userDomain,
+      _nextCloudService.origin!.userDomain,
     );
   }
 
@@ -126,8 +123,7 @@ class MappingManager with Isolateable<MappingManager> {
     _logger.fine("Mapping remoteUri: $remoteUri");
     _logger.fine("Mapping local: ${mapping.local.value}");
     _logger.fine("Mapping remote: ${mapping.remote.value}");
-    final Uri mappedUri =
-        UriUtils.fromPathList(uri: mapping.local.value, paths: [
+    final Uri mappedUri = fromPathList(uri: mapping.local.value, paths: [
       mapping.local.value.path,
       remoteUri.path.replaceFirst(mapping.remote.value.path, "")
     ]);
@@ -142,8 +138,8 @@ class MappingManager with Isolateable<MappingManager> {
       (builder) => builder
         ..key = "default"
         ..title = "default"
-        ..remote.value = _nextCloudService.origin.userEncodedDomainRoot
-        ..local.value = UriUtils.fromUri(
+        ..remote.value = _nextCloudService.origin!.userEncodedDomainRoot
+        ..local.value = fromUri(
           uri: root,
           path: _appendLocalMappingFolder(root.path),
         ),
@@ -158,7 +154,7 @@ class MappingManager with Isolateable<MappingManager> {
           : mapping.local.value.path,
       "",
     );
-    return UriUtils.fromPathList(
+    return fromPathList(
         uri: remote, paths: [mapping.remote.value.path, relativePath]);
   }
 
@@ -166,6 +162,6 @@ class MappingManager with Isolateable<MappingManager> {
     final Uri defaultInternal = _systemLocationService.internalCache.uri;
     final String relativePath = local.path
         .replaceFirst(_appendLocalMappingFolder(defaultInternal.path), "");
-    return UriUtils.fromUri(uri: remote, path: relativePath);
+    return fromUri(uri: remote, path: relativePath);
   }
 }

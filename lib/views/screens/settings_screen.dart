@@ -18,12 +18,16 @@ class SettingsScreen extends StatelessWidget {
   static const String route = "/settings";
 
   final List<Preference> _defaultPreferences;
-  final RxCommand<Preference, dynamic> onPreferenceChangedCommand;
-  final Function onCommit;
-  final Function onCancel;
+  final RxCommand<Preference, dynamic>? onPreferenceChangedCommand;
+  final Function? onCommit;
+  final Function? onCancel;
 
-  const SettingsScreen(this._defaultPreferences,
-      {this.onPreferenceChangedCommand, this.onCancel, this.onCommit});
+  const SettingsScreen(
+    this._defaultPreferences, {
+    this.onPreferenceChangedCommand,
+    this.onCancel,
+    this.onCommit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -72,8 +76,8 @@ class SettingsScreen extends StatelessWidget {
       bottomNavigationBar: onCommit == null
           ? null
           : SelectCancelBottomNavigation(
-              onCommit: onCommit,
-              onCancel: onCancel,
+              onCommit: onCommit!,
+              onCancel: onCancel!,
             ),
     );
   }

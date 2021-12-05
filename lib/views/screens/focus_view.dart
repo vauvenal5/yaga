@@ -14,7 +14,7 @@ class FocusView extends CategoryViewScreen {
             pathEnabled: false,
             hasDrawer: false,
             selectedTab: YagaHomeTab.folder,
-            title: UriUtils.getNameFromUri(path),
+            title: getNameFromUri(path),
           ),
         );
 }

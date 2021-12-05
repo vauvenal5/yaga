@@ -5,5 +5,5 @@ abstract class Service<T extends Service<T>> {
   @protected
   final logger = YagaLogger.getLogger(T);
 
-  Future<T> init() async => this;
+  Future<T> init() async => this as T;
 }

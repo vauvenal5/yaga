@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/sort_config.dart';
 import 'package:yaga/model/sorted_file_list.dart';
@@ -11,7 +10,7 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
 
   SortedCategoryList(
     SortConfig config, {
-    @required this.folders,
+    required this.folders,
   }) : super(config);
   factory SortedCategoryList.empty(SortConfig config) =>
       SortedCategoryList(config, folders: []);
@@ -47,9 +46,9 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
     final String key = createKey(file);
 
     if (categorizedFiles.containsKey(key)) {
-      removed = categorizedFiles[key].remove(file);
+      removed = categorizedFiles[key]!.remove(file);
 
-      if (removed && categorizedFiles[key].isEmpty) {
+      if (removed && categorizedFiles[key]!.isEmpty) {
         categories.remove(key);
         categorizedFiles.remove(key);
       }
@@ -78,7 +77,7 @@ class SortedCategoryList extends SortedFileList<SortedCategoryList> {
     final filtered = SortedCategoryList(config, folders: filteredFolders);
 
     for (final cat in categories) {
-      final filteredCat = categorizedFiles[cat]
+      final filteredCat = categorizedFiles[cat]!
           .where(
             (element) => filter(element),
           )

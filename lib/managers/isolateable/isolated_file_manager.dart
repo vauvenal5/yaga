@@ -53,13 +53,13 @@ class IsolatedFileManager extends FileManagerBase
     Uri uri,
     SortConfig sortConfig, {
     bool recursive = false,
-  }) {
+  }) async {
     return fileSubManagers[uri.scheme]
-        .listFileList(uri, recursive: recursive)
+        ?.listFileList(uri, recursive: recursive)
         .map((event) => _sortManager.sortList(event, sortConfig))
         .fold(
       null,
-      (SortedFileList<SortedFileList<dynamic>> previous, element) {
+      (SortedFileList<SortedFileList<dynamic>>? previous, element) {
         if (previous == null) {
           updateFilesCommand(
             FileListResponse(requestKey, uri, element, recursive: recursive),
@@ -78,41 +78,41 @@ class IsolatedFileManager extends FileManagerBase
     ).then((value) => value);
   }
 
-  Future<void> deleteFiles(List<NcFile> files, {bool local}) async =>
+  Future<void> deleteFiles(List<NcFile> files, {required bool local}) async =>
       _cancelableAction(
         files,
-        (file) => fileSubManagers[file.uri.scheme].deleteFile(
+        (file) async => fileSubManagers[file.uri.scheme]?.deleteFile(
           file,
           local: local,
         ),
       );
 
   Future<void> copyFiles(List<NcFile> files, Uri destination,
-          {bool overwrite}) async =>
+          {required bool overwrite}) async =>
       _cancelableAction(
         files,
-        (file) => fileSubManagers[file.uri.scheme]
-            .copyFile(file, destination, overwrite: overwrite),
+        (file) async => fileSubManagers[file.uri.scheme]
+            ?.copyFile(file, destination, overwrite: overwrite),
         filter: (file) => _destinationFilter(file, destination),
       );
 
   Future<void> moveFiles(List<NcFile> files, Uri destination,
-          {bool overwrite}) async =>
+          {required bool overwrite}) async =>
       _cancelableAction(
         files,
-        (file) => fileSubManagers[file.uri.scheme]
-            .moveFile(file, destination, overwrite: overwrite)
+        (file) async => fileSubManagers[file.uri.scheme]
+            ?.moveFile(file, destination, overwrite: overwrite)
             .then((value) => updateFileList(file)),
         filter: (file) => _destinationFilter(file, destination),
       );
 
   bool _destinationFilter(NcFile file, Uri destination) =>
-      file.uri.path != UriUtils.chainPathSegments(destination.path, file.name);
+      file.uri.path != chainPathSegments(destination.path, file.name);
 
   Future<void> _cancelableAction(
     List<NcFile> files,
     Future<dynamic> Function(NcFile) action, {
-    bool Function(NcFile file) filter,
+    bool Function(NcFile file)? filter,
   }) {
     return Stream.fromIterable(files)
         .where((event) => filter == null || filter(event))

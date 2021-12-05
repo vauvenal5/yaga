@@ -15,7 +15,7 @@ class NextCloudClientFactory {
   NextCloudClientFactory(SelfSignedCertHandler handler);
 
   //todo: is this really the right place for this?
-  String get userAgent => defaultHeaders[HttpHeaders.userAgentHeader];
+  String get userAgent => defaultHeaders[HttpHeaders.userAgentHeader]!;
 
   NextCloudClient createNextCloudClient(
     Uri host,

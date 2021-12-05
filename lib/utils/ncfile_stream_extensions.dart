@@ -7,7 +7,7 @@ extension NcFileStreamExtensions on Stream<NcFile> {
   }
 
   Stream<NcFile> recursively(Stream<NcFile> Function(Uri) listFilesFromUpstream,
-      {bool recursive}) {
+      {required bool recursive}) {
     return flatMap(
       (file) => Rx.merge([
         Stream.value(file),

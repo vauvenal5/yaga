@@ -30,7 +30,7 @@ class YagaRouterDelegate extends RouterDelegate<Uri>
   Widget build(BuildContext context) {
     return Navigator(
       key: navigatorKey,
-      onGenerateRoute: YagaRouter.generateRoute,
+      onGenerateRoute: generateRoute,
       pages: [getInitialPage(), ..._buildDirectoryNavigationPage()],
       onPopPage: (route, result) {
         if (!route.didPop(result)) {
@@ -50,7 +50,7 @@ class YagaRouterDelegate extends RouterDelegate<Uri>
   }
 
   List<Page> _buildDirectoryNavigationPage() {
-    final DirectoryNavigationScreenArguments args =
+    final DirectoryNavigationScreenArguments? args =
         _navigationManager.showDirectoryNavigation.lastResult;
 
     if (args == null) {

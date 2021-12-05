@@ -17,8 +17,8 @@ import 'package:yaga/utils/service_locator.dart';
 class ForegroundWorker {
   final _logger = YagaLogger.getLogger(ForegroundWorker);
 
-  Isolate _isolate;
-  SendPort _mainToIsolate;
+  Isolate? _isolate;
+  SendPort? _mainToIsolate;
   Completer<ForegroundWorker> _isolateReady = Completer<ForegroundWorker>();
 
   final NextCloudManager _nextCloudManager;
@@ -50,7 +50,7 @@ class ForegroundWorker {
 
       if (message is List) {
         _logger.severe("Error in forground worker", message[0],
-            StackTrace.fromString(message[1]));
+            StackTrace.fromString(message[1].toString()));
       }
 
       if (message is Message) {
@@ -62,11 +62,11 @@ class ForegroundWorker {
       _workerMain,
       InitMsg(
         isolateToMain.sendPort,
-        await getExternalStorageDirectory(),
+        (await getExternalStorageDirectory())!,
         await getTemporaryDirectory(),
-        await getExternalStorageDirectories(),
-        _nextCloudManager.updateLoginStateCommand.lastResult,
-        _globalSettingsManager.updateRootMappingPreference.lastResult,
+        (await getExternalStorageDirectories())!,
+        _nextCloudManager.updateLoginStateCommand.lastResult!,
+        _globalSettingsManager.updateRootMappingPreference.lastResult!,
         _selfSignedCertHandler.fingerprint,
         _sharedPreferencesService.loadPreferenceFromBool(
           GlobalSettingsManager.autoPersist,
@@ -81,15 +81,15 @@ class ForegroundWorker {
 
   void dispose() {
     _isolateReady = Completer<ForegroundWorker>();
-    _isolate.kill();
+    _isolate?.kill();
   }
 
   void sendRequest(Message request) {
-    isolateReadyFuture.then((value) => _mainToIsolate.send(request));
+    isolateReadyFuture.then((value) => _mainToIsolate?.send(request));
   }
 
   static Future<void> _workerMain(dynamic message) async {
-    SendPort isolateToMain;
+    SendPort? isolateToMain;
     final mainToIsolate = ReceivePort();
     final handlerRegistry = IsolateHandlerRegistry();
 
@@ -98,18 +98,20 @@ class ForegroundWorker {
       await YagaLogger.init(isolate: true);
       setupIsolatedServiceLocator(message, isolateToMain, handlerRegistry);
       getIt.allReady().then((value) {
-        isolateToMain.send(mainToIsolate.sendPort);
+        isolateToMain?.send(mainToIsolate.sendPort);
       });
     }
 
     mainToIsolate.listen((message) async {
       if (message is FlushLogsMessage) {
         await YagaLogger.fileHandler.flushFile();
-        isolateToMain.send(FlushLogsMessage(flushed: true));
+        isolateToMain?.send(FlushLogsMessage(flushed: true));
         return;
       }
 
-      handlerRegistry.handleMessage(message);
+      if (message is Message) {
+        handlerRegistry.handleMessage(message);
+      }
     });
   }
 }

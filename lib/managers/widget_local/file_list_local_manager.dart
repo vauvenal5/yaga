@@ -39,28 +39,27 @@ class FileListLocalManager {
   final bool allowSelecting;
   SortConfig _sortConfig;
 
-  RxCommand<bool, bool> loadingChangedCommand;
-  RxCommand<SortedFileList, SortedFileList> filesChangedCommand;
-  RxCommand<NcFile, NcFile> selectFileCommand =
-      RxCommand.createSync((param) => param);
-  RxCommand<bool, bool> selectionModeChanged =
+  RxCommand<bool, bool> loadingChangedCommand =
       RxCommand.createSync((param) => param, initialLastResult: false);
-  RxCommand<List<NcFile>, List<NcFile>> selectionChangedCommand =
+  late RxCommand<SortedFileList, SortedFileList> filesChangedCommand;
+  late RxCommand<NcFile, NcFile> selectFileCommand =
+      RxCommand.createSync((param) => param);
+  late RxCommand<bool, bool> selectionModeChanged =
+      RxCommand.createSync((param) => param, initialLastResult: false);
+  late RxCommand<List<NcFile>, List<NcFile>> selectionChangedCommand =
       RxCommand.createSync((param) => param);
 
-  StreamSubscription<MappingPreference>
+  StreamSubscription<MappingPreference>?
       _updatedMappingPreferenceCommandSubscription;
-  StreamSubscription<FileUpdateMsg> _updateFileListSubscripton;
-  StreamSubscription<BoolPreference> _updateRecursiveSubscription;
+  StreamSubscription<FileUpdateMsg>? _updateFileListSubscripton;
+  StreamSubscription<BoolPreference>? _updateRecursiveSubscription;
 
-  ForegroundWorker _worker;
-  StreamSubscription<Message> _foregroundMessageCommandSubscription;
-  StreamSubscription<Message> _foregroundMergeSortSubscription;
-
-  Uuid uuid = const Uuid();
+  final ForegroundWorker _worker;
+  StreamSubscription<Message>? _foregroundMessageCommandSubscription;
+  StreamSubscription<Message>? _foregroundMergeSortSubscription;
 
   Uri _uri;
-  String managerKey;
+  late String managerKey;
 
   bool get isInSelectionMode => selected.isNotEmpty;
 
@@ -69,18 +68,16 @@ class FileListLocalManager {
     this.recursive,
     this._sortConfig, {
     this.allowSelecting = true,
-  }) {
-    _worker = getIt.get<ForegroundWorker>();
-    loadingChangedCommand =
-        RxCommand.createSync((param) => param, initialLastResult: false);
+  }) : _worker = getIt.get<ForegroundWorker>() {
     filesChangedCommand = RxCommand.createSync(
       (param) => param,
       initialLastResult: emptyFileList,
     );
+    Uuid uuid = const Uuid();
     managerKey = uuid.v1();
   }
 
-  SortedFileList get sorted => filesChangedCommand.lastResult;
+  SortedFileList get sorted => filesChangedCommand.lastResult!;
   Uri get uri => _uri;
   SortConfig get sortConfig => _sortConfig;
   SortedFileList get emptyFileList {
@@ -187,7 +184,7 @@ class FileListLocalManager {
 
     _sortConfig = sortConfig;
 
-    if (loadingChangedCommand.lastResult) {
+    if (loadingChangedCommand.lastResult!) {
       return changed;
     }
 
@@ -198,7 +195,7 @@ class FileListLocalManager {
         MergeSortRequest(
           managerKey,
           emptyFileList,
-          filesChangedCommand.lastResult,
+          filesChangedCommand.lastResult!,
           updateLoading: true,
         ),
       );
@@ -208,7 +205,7 @@ class FileListLocalManager {
 
   void _removeFileFromList(NcFile file) {
     _logger.warning("$managerKey (delete)");
-    final SortedFileList files = filesChangedCommand.lastResult;
+    final SortedFileList files = filesChangedCommand.lastResult!;
     //todo: delete and re-sort are interfearing with each other
     if (files.remove(file)) {
       //todo: what happens is that the deletes might be triggered on states before the resort is done
@@ -220,8 +217,8 @@ class FileListLocalManager {
     return eventKey.startsWith(managerKey);
   } */
 
-  void refetch({Uri uri}) {
-    _uri = uri ?? uri;
+  void refetch({Uri? uri}) {
+    _uri = uri ?? _uri;
     updateFilesAndFolders();
   }
 
@@ -279,7 +276,7 @@ class FileListLocalManager {
   }
 
   Future<void> removeAll() async {
-    filesChangedCommand(filesChangedCommand.lastResult..removeAll());
+    filesChangedCommand(filesChangedCommand.lastResult!..removeAll());
   }
 
   Future<void> deselectAll() async {
@@ -296,7 +293,7 @@ class FileListLocalManager {
     final fileManager = getIt.get<FileManager>();
     selected = [];
     final sorted = filesChangedCommand.lastResult;
-    for (final file in sorted.files) {
+    for (final file in sorted!.files) {
       file.selected = true;
       selected.add(file);
       fileManager.updateImageCommand(file);
@@ -304,7 +301,7 @@ class FileListLocalManager {
     selectionChangedCommand(selected);
   }
 
-  Future<bool> deleteSelected({bool local}) =>
+  Future<bool> deleteSelected({required bool local}) =>
       _executeActionForSelection(DeleteFilesRequest(
         managerKey,
         selected,

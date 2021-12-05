@@ -7,10 +7,11 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 
 abstract class FileManagerBase {
-  RxCommand<NcFile, NcFile> updateFileList;
+  RxCommand<NcFile, NcFile> updateFileList =
+      RxCommand.createSync((param) => param);
   RxCommand<NcFile, NcFile> updateImageCommand =
       RxCommand.createSync((param) => param);
-  RxCommand<FetchedFile, FetchedFile> fetchedFileCommand;
+  late RxCommand<FetchedFile, FetchedFile> fetchedFileCommand;
   RxCommand<FileListResponse, FileListResponse> updateFilesCommand =
       RxCommand.createSync((param) => param);
 
@@ -18,8 +19,6 @@ abstract class FileManagerBase {
   Map<String, FileSubManager> fileSubManagers = {};
 
   FileManagerBase() {
-    updateFileList = RxCommand.createSync((param) => param);
-
     fetchedFileCommand = RxCommand.createSync((param) {
       updateImageCommand(param.file);
       return param;
@@ -31,9 +30,11 @@ abstract class FileManagerBase {
   }
 
   Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
-    return fileSubManagers[uri.scheme].listFiles(uri).flatMap((file) =>
-        file.isDirectory && recursive
-            ? listFiles(file.uri, recursive: recursive)
-            : Stream.value(file));
+    //todo: throw when scheme is not registered
+    return fileSubManagers[uri.scheme]?.listFiles(uri).flatMap((file) =>
+            file.isDirectory && recursive
+                ? listFiles(file.uri, recursive: recursive)
+                : Stream.value(file)) ??
+        const Stream.empty();
   }
 }

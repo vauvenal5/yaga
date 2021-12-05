@@ -66,7 +66,7 @@ class BrowseView extends StatelessWidget {
             });
 
             if (getIt.get<NextCloudService>().isLoggedIn()) {
-              final NcOrigin origin = getIt.get<NextCloudService>().origin;
+              final NcOrigin origin = getIt.get<NextCloudService>().origin!;
               children.add(ListTile(
                 isThreeLine: true,
                 leading: AvatarWidget.command(
@@ -90,7 +90,7 @@ class BrowseView extends StatelessWidget {
   }
 
   //todo: unify this
-  String _getTitle() {
+  String? _getTitle() {
     if (getIt.get<IntentService>().isOpenForSelect) {
       return "Selecte image...";
     }
@@ -102,8 +102,6 @@ class BrowseView extends StatelessWidget {
     final ViewConfiguration viewConfig = ViewConfiguration.browse(
       route: _pref,
       defaultView: NcListView.viewKey,
-      onFolderTap: null,
-      onSelect: null,
       //todo: implicit navigation
       onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
         context,

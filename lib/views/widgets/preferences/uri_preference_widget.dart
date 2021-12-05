@@ -7,18 +7,17 @@ import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
-import 'package:yaga/views/screens/settings_screen.dart';
 import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart';
 
 class UriPreferenceWidget extends StatelessWidget {
   final UriPreference _defaultPref;
-  final RxCommand<Preference, dynamic> onChangeCommand;
+  final RxCommand<Preference, dynamic>? onChangeCommand;
 
   const UriPreferenceWidget(this._defaultPref, {this.onChangeCommand});
 
   void _notifyChange(UriPreference pref) {
     if (onChangeCommand != null) {
-      onChangeCommand(pref);
+      onChangeCommand!(pref);
       return;
     }
     getIt.get<SettingsManager>().persistStringSettingCommand(pref);
@@ -46,8 +45,8 @@ class UriPreferenceWidget extends StatelessWidget {
           .get<SharedPreferencesService>()
           .loadPreferenceFromString(_defaultPref),
       listTileBuilder: (context, pref) => ListTile(
-        enabled: pref.enabled,
-        title: Text(pref.title),
+        enabled: pref.enabled!,
+        title: Text(pref.title!),
         subtitle: Text(Uri.decodeComponent(pref.value.toString())),
         onTap: () => _pushToNavigation(context, pref, pref.value),
       ),

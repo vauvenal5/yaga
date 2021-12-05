@@ -13,17 +13,17 @@ class YagaLogger {
   const YagaLogger();
 
   static final _logUri =
-      UriUtils.fromPathList(uri: Directory.systemTemp.uri, paths: [
+      fromPathList(uri: Directory.systemTemp.uri, paths: [
     Directory.systemTemp.uri.path,
     "yaga.log.txt",
   ]);
   static final _isolateLogUri =
-      UriUtils.fromPathList(uri: Directory.systemTemp.uri, paths: [
+      fromPathList(uri: Directory.systemTemp.uri, paths: [
     Directory.systemTemp.uri.path,
     "yaga.isolate.log.txt",
   ]);
 
-  static LogErrorFileHandler _fileHandler;
+  static late LogErrorFileHandler _fileHandler;
   static LogErrorFileHandler get fileHandler => YagaLogger._fileHandler;
 
   static Logger getLogger(Type className) {
@@ -72,7 +72,7 @@ class YagaLogger {
       }
 
       for (final log in logs) {
-        print(levelColors[record.level](log));
+        print(levelColors[record.level]!(log));
         YagaLogger._fileHandler.writeLineToFile(log);
       }
     });
@@ -84,7 +84,7 @@ class YagaLogger {
   }
 
   static Future<void> shareLogs() async {
-    StreamSubscription sub;
+    StreamSubscription? sub;
     sub = getIt
         .get<ForegroundWorker>()
         .isolateResponseCommand

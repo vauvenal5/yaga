@@ -3,6 +3,3 @@ include: package:lint/analysis_options.yaml
 linter:
   rules:
     sort_pub_dependencies: false
-
-    #todo: when going null safe this can be removed
-    invalid_return_type_for_catch_error: false 

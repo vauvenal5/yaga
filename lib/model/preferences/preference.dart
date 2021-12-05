@@ -7,9 +7,9 @@ part 'preference.g.dart';
 
 @BuiltValue(instantiable: false)
 abstract class Preference {
-  String get key;
-  String get title;
-  bool get enabled;
+  String? get key;
+  String? get title;
+  bool? get enabled;
 
   static String prefixKey(String prefix, String key) =>
       key.startsWith(prefix) ? key : "$prefix:$key";

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
@@ -43,7 +42,7 @@ class GlobalSettingsManager {
 
   RxCommand<Preference, Preference> registerGlobalSettingCommand =
       RxCommand.createSync((param) => param);
-  RxCommand<Preference, void> removeGlobalSettingCommand;
+  late RxCommand<Preference, void> removeGlobalSettingCommand;
   RxCommand<List<Preference>, List<Preference>> updateGlobalSettingsCommand =
       RxCommand.createSync((param) => param);
 
@@ -99,15 +98,15 @@ class GlobalSettingsManager {
     registerGlobalSettingCommand(sendLogs);
 
     _handleLoginState(
-      _nextcloudManager.updateLoginStateCommand.lastResult,
+      _nextcloudManager.updateLoginStateCommand.lastResult!,
     );
 
     return this;
   }
 
   MappingPreference getDefaultMappingPreference({
-    @required Uri local,
-    Uri remote,
+    required Uri local,
+    required Uri remote,
   }) {
     return MappingPreference((b) => b
       ..key = ncSection.prepareKey(_MAPPING_KEY)
@@ -120,12 +119,12 @@ class GlobalSettingsManager {
   void _handleLoginState(NextCloudLoginData loginData) {
     if (_nextCloudService.isLoggedIn()) {
       final MappingPreference mapping = getDefaultMappingPreference(
-        local: UriUtils.fromUri(
+        local: fromUri(
           uri: _systemLocationService.internalStorage.uri,
           path:
-              "${_systemLocationService.internalStorage.uri.path}/${_nextCloudService.origin.userDomain}",
+              "${_systemLocationService.internalStorage.uri.path}/${_nextCloudService.origin!.userDomain}",
         ),
-        remote: _nextCloudService.origin.userEncodedDomainRoot,
+        remote: _nextCloudService.origin!.userEncodedDomainRoot,
       );
 
       registerGlobalSettingCommand(ncSection);

@@ -13,14 +13,14 @@ typedef PrefFunction = T Function<T extends ValuePreference>(T);
 class SettingsManager extends SettingsManagerBase {
   final SharedPreferencesService _sharedPreferencesService;
 
-  RxCommand<SerializablePreference<String, dynamic, dynamic>, void>
+  late RxCommand<SerializablePreference<String, dynamic, dynamic>, void>
       persistStringSettingCommand;
-  RxCommand<BoolPreference, void> persistBoolSettingCommand;
-  RxCommand<MappingPreference, MappingPreference>
+  late RxCommand<BoolPreference, void> persistBoolSettingCommand;
+  late RxCommand<MappingPreference, MappingPreference>
       persistMappingPreferenceCommand;
-  RxCommand<MappingPreference, MappingPreference>
+  late RxCommand<MappingPreference, MappingPreference>
       removeMappingPreferenceCommand;
-  RxCommand<MappingPreference, MappingPreference> loadMappingPreferenceCommand;
+  late RxCommand<MappingPreference, MappingPreference> loadMappingPreferenceCommand;
 
   SettingsManager(this._sharedPreferencesService) {
     persistStringSettingCommand = RxCommand.createAsync((param) =>

@@ -61,7 +61,7 @@ class FileListRequestHandler
       addition = addition.applyFilter(
         (file) =>
             file.uri.path ==
-            UriUtils.chainPathSegments(message.uri.path, file.name),
+            chainPathSegments(message.uri!.path, file.name),
       );
     }
 

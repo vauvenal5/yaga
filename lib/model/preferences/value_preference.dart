@@ -13,7 +13,7 @@ abstract class ValuePreference<T> implements Preference {
   @protected
   static T initBuilder<T extends ValuePreferenceBuilder>(
           ValuePreferenceBuilder b) =>
-      Preference.initBuilder(b);
+      Preference.initBuilder(b) as T;
 
   @override
   ValuePreference<T> rebuild(void Function(ValuePreferenceBuilder<T>) updates);

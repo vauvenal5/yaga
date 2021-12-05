@@ -35,9 +35,9 @@ abstract class MappingPreference
         ..syncDeletes.value = true;
 
   static void _finalizeBuilder(MappingPreferenceBuilder b) => b
-    ..remote.key = Preference.prefixKey(b.key, b.remote.key)
-    ..local.key = Preference.prefixKey(b.key, b.local.key)
-    ..syncDeletes.key = Preference.prefixKey(b.key, b.syncDeletes.key);
+    ..remote.key = Preference.prefixKey(b.key!, b.remote.key!)
+    ..local.key = Preference.prefixKey(b.key!, b.local.key!)
+    ..syncDeletes.key = Preference.prefixKey(b.key!, b.syncDeletes.key!);
 
   factory MappingPreference([void Function(MappingPreferenceBuilder) updates]) =
       _$MappingPreference;

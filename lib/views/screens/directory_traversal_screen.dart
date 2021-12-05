@@ -20,8 +20,8 @@ class DirectoryTraversalScreen extends StatefulWidget {
 
 class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
   final _navigatorKey = GlobalKey<NavigatorState>();
-  Uri uri;
-  ViewConfiguration viewConfig;
+  Uri? uri;
+  late ViewConfiguration viewConfig;
 
   @override
   void initState() {
@@ -33,11 +33,11 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
     super.initState();
   }
 
-  void _navigate(Uri target) {
+  void _navigate(Uri? target) {
     //this is so we can find out which use case sets null
     assert(target != null, "Target is null!");
     setState(() {
-      uri = target == null ? null : UriUtils.fromUri(uri: target);
+      uri = target == null ? null : fromUri(uri: target);
     });
   }
 
@@ -45,12 +45,12 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async =>
-          !await _navigatorKey.currentState.maybePop(context),
+          !(await _navigatorKey.currentState?.maybePop(context)??true),
       child: Navigator(
         key: _navigatorKey,
         reportsRouteUpdateToEngine: true,
-        pages: _buildPages(context, viewConfig, uri),
-        onGenerateRoute: YagaRouter.generateRoute,
+        pages: _buildPages(context, viewConfig, uri!),
+        onGenerateRoute: generateRoute,
         onPopPage: (route, result) {
           if (!route.didPop(result)) {
             return false;
@@ -71,7 +71,7 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
     //in case we are poping the root element we need to inform the parent navigatort
     if (result == DirectoryTraversalScreenNavActions.cancel ||
         uri == null || //todo: in which case is the uri == null?!
-        uri == UriUtils.getRootFromUri(uri)) {
+        uri == getRootFromUri(uri!)) {
       Navigator.of(context).pop();
       return true;
     }
@@ -79,9 +79,9 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
     //in case we are poping a non root element create the new page list
     setState(() {
       //todo: solve this better
-      uri = UriUtils.fromUriPathSegments(
-        uri,
-        uri.pathSegments.length - 3,
+      uri = fromUriPathSegments(
+        uri!,
+        uri!.pathSegments.length - 3,
       );
     });
 
@@ -95,12 +95,12 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
   ) {
     final List<Page> pages = [];
 
-    pages.add(_buildPage(UriUtils.getRootFromUri(uri), viewConfig));
+    pages.add(_buildPage(getRootFromUri(uri), viewConfig));
 
     int index = 0;
     uri.pathSegments.where((element) => element.isNotEmpty).forEach((segment) {
       pages.add(
-        _buildPage(UriUtils.fromUriPathSegments(uri, index++), viewConfig),
+        _buildPage(fromUriPathSegments(uri, index++), viewConfig),
       );
     });
 

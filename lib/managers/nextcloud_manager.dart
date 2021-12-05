@@ -12,13 +12,15 @@ import 'package:yaga/utils/self_signed_cert_handler.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class NextCloudManager {
-  RxCommand<NextCloudLoginData, NextCloudLoginData> loginCommand;
-  RxCommand<NextCloudLoginData, NextCloudLoginData> _internalLoginCommand;
-  //todo: this command has a bad naming since it only gets triggered on login not logout
-  RxCommand<NextCloudLoginData, NextCloudLoginData> updateLoginStateCommand;
-  RxCommand<void, NextCloudLoginData> logoutCommand;
+  late RxCommand<NextCloudLoginData, NextCloudLoginData> loginCommand;
+  late RxCommand<NextCloudLoginData, NextCloudLoginData> _internalLoginCommand;
 
-  RxCommand<void, File> updateAvatarCommand;
+  //todo: this command has a bad naming since it only gets triggered on login not logout
+  late RxCommand<NextCloudLoginData, NextCloudLoginData>
+      updateLoginStateCommand;
+  late RxCommand<void, NextCloudLoginData> logoutCommand;
+
+  late RxCommand<void, File> updateAvatarCommand;
 
   final SecureStorageService _secureStorageService;
   final NextCloudService _nextCloudService;
@@ -34,7 +36,7 @@ class NextCloudManager {
     this._selfSignedCertHandler,
   ) {
     loginCommand = RxCommand.createFromStream(
-        (param) => _createLoginDataPersisStream(param));
+        (param) => _createLoginDataPersisStream(param!));
     loginCommand.listen((value) => _internalLoginCommand(value));
 
     _internalLoginCommand = RxCommand.createSync((param) => param);
@@ -91,7 +93,7 @@ class NextCloudManager {
   }
 
   File get _avatarFile => File(
-        UriUtils.chainPathSegments(
+        chainPathSegments(
           _systemLocationService
               .absoluteUriFromInternal(_systemLocationService.internalCache.uri)
               .path,

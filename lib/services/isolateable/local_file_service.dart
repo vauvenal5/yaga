@@ -3,7 +3,6 @@ import 'dart:isolate';
 
 import 'package:mime/mime.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/service.dart';
@@ -13,7 +12,7 @@ import 'package:yaga/utils/uri_utils.dart';
 
 class LocalFileService extends Service<LocalFileService>
     implements Isolateable<LocalFileService> {
-  PermissionStatus _permissionState;
+  late PermissionStatus _permissionState;
 
   @override
   Future<LocalFileService> init() async {
@@ -31,9 +30,9 @@ class LocalFileService extends Service<LocalFileService>
   }
 
   Future<File> createFile(
-      {@required File file,
-      @required List<int> bytes,
-      DateTime lastModified}) async {
+      {required File file,
+      required List<int> bytes,
+      DateTime? lastModified}) async {
     logger.fine("Creating file ${file.path}");
     await file.create(recursive: true);
     final File res = await file.writeAsBytes(bytes, flush: true);
@@ -64,24 +63,24 @@ class LocalFileService extends Service<LocalFileService>
 
   //todo: is this filtering here at the right place?
   bool _checkMimeType(String path) {
-    final String type = lookupMimeType(path);
+    final String type = lookupMimeType(path) ?? '';
     return type != null && type.startsWith("image");
   }
 
-  void copyFile(NcFile file, Uri destination, {bool overwrite}) {
+  void copyFile(NcFile file, Uri destination, {bool overwrite = false}) {
     (file.localFile as File).copySync(
       _checkExists(destination, file.name, overwrite),
     );
   }
 
-  void moveFile(NcFile file, Uri destination, {bool overwrite}) {
+  void moveFile(NcFile file, Uri destination, {bool overwrite = false}) {
     (file.localFile as File).renameSync(
       _checkExists(destination, file.name, overwrite),
     );
   }
 
   String _checkExists(Uri destination, String name, bool overwrite) {
-    final String path = UriUtils.chainPathSegments(destination.path, name);
+    final String path = chainPathSegments(destination.path, name);
     if (!overwrite && File(path).existsSync()) {
       throw FileSystemException("File exists!", path);
     }

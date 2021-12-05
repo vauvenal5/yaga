@@ -19,7 +19,7 @@ class ImageScreen extends StatefulWidget {
   static const String route = "/image";
   final List<NcFile> _images;
   final int index;
-  final String title;
+  final String? title;
 
   const ImageScreen(
     this._images,
@@ -33,9 +33,9 @@ class ImageScreen extends StatefulWidget {
 
 class ImageScreenState extends State<ImageScreen> {
   final _logger = YagaLogger.getLogger(ImageScreenState);
-  String _title;
-  int _currentIndex;
-  PageController pageController;
+  late String _title;
+  late int _currentIndex;
+  late PageController pageController;
 
   @override
   void initState() {
@@ -56,7 +56,7 @@ class ImageScreenState extends State<ImageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title ?? _title),
+        title: Text(widget.title??_title),
         actions: <Widget>[_buildMainAction()],
       ),
       body: PhotoViewGallery.builder(
@@ -81,7 +81,7 @@ class ImageScreenState extends State<ImageScreen> {
             key: ValueKey(image.uri.path),
             minScale: PhotoViewComputedScale.contained,
             imageProvider: DownloadFileImage(
-              image.localFile.file as File,
+              image.localFile!.file as File,
               localFileAvailable,
             ),
           );
@@ -89,13 +89,13 @@ class ImageScreenState extends State<ImageScreen> {
         loadingBuilder: (context, event) {
           final bool previewExists =
               widget._images[_currentIndex].previewFile != null &&
-                  widget._images[_currentIndex].previewFile.exists;
+                  widget._images[_currentIndex].previewFile!.exists;
           return Stack(children: [
             Container(
               color: Colors.black,
               child: previewExists
                   ? Image.file(
-                      widget._images[_currentIndex].previewFile.file as File,
+                      widget._images[_currentIndex].previewFile!.file as File,
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.contain)
@@ -123,7 +123,7 @@ class ImageScreenState extends State<ImageScreen> {
     return IconButton(
       icon: const Icon(Icons.share),
       onPressed: () =>
-          Share.shareFiles([widget._images[_currentIndex].localFile.file.path]),
+          Share.shareFiles([widget._images[_currentIndex].localFile!.file.path]),
     );
   }
 }

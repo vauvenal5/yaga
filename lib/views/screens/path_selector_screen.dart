@@ -11,9 +11,9 @@ class PathSelectorScreen extends StatelessWidget {
   static const String route = "/pathSelector";
 
   final Uri _uri;
-  final void Function(Uri) _onSelect;
-  final void Function(List<NcFile>, int) onFileTap;
-  final String title;
+  final void Function(Uri)? _onSelect;
+  final void Function(List<NcFile>, int)? onFileTap;
+  final String? title;
   final bool fixedOrigin;
   final String schemeFilter;
 
@@ -32,7 +32,7 @@ class PathSelectorScreen extends StatelessWidget {
   }
 
   DirectoryNavigationScreenArguments _getArgs(BuildContext context) {
-    Widget Function(BuildContext, Uri) bottomBarBuilder;
+    Widget Function(BuildContext, Uri)? bottomBarBuilder;
 
     //todo: can't we simply build the bottomBar every time in this screen?
     if (_onSelect != null) {
@@ -41,7 +41,7 @@ class PathSelectorScreen extends StatelessWidget {
                 onCommit: () {
                   Navigator.of(context)
                       .pop(DirectoryTraversalScreenNavActions.cancel);
-                  _onSelect(uri);
+                  _onSelect!(uri);
                 },
                 onCancel: () => Navigator.of(context)
                     .pop(DirectoryTraversalScreenNavActions.cancel),

@@ -107,11 +107,11 @@ class NextcloudFileManagerHandler
     SendPort isolateToMain,
   ) async {
     final NcFile ncFile = request.file;
-    if (ncFile.localFile != null && await ncFile.localFile.file.exists()) {
-      ncFile.localFile.exists = true;
+    if (ncFile.localFile != null && await ncFile.localFile!.file.exists()) {
+      ncFile.localFile!.exists = true;
       isolateToMain.send(FetchedFile(
         ncFile,
-        await (ncFile.localFile.file as File).readAsBytes(),
+        await (ncFile.localFile!.file as File).readAsBytes(),
       ));
       return;
     }
@@ -119,11 +119,11 @@ class NextcloudFileManagerHandler
     getIt.get<NextCloudService>().downloadImage(ncFile.uri).then((value) async {
       if (request.overrideGlobalPersistFlag ||
           getIt.get<IsolatedGlobalSettingsManager>().autoPersist.value) {
-        ncFile.localFile.file = await getIt.get<LocalFileService>().createFile(
-            file: ncFile.localFile.file as File,
+        ncFile.localFile!.file = await getIt.get<LocalFileService>().createFile(
+            file: ncFile.localFile!.file as File,
             bytes: value,
             lastModified: ncFile.lastModified);
-        ncFile.localFile.exists = true;
+        ncFile.localFile!.exists = true;
       }
 
       isolateToMain.send(FetchedFile(ncFile, value));

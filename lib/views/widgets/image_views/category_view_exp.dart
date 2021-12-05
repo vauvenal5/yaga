@@ -30,12 +30,12 @@ class CategoryViewExp extends StatelessWidget {
   Widget _buildImage(String key, int itemIndex, BuildContext context) {
     return InkWell(
       onTap: () =>
-          viewConfig.onFileTap(sorted.categorizedFiles[key], itemIndex),
+          viewConfig.onFileTap?.call(sorted.categorizedFiles[key]!, itemIndex),
       onLongPress: () =>
-          viewConfig.onSelect(sorted.categorizedFiles[key], itemIndex),
+          viewConfig.onSelect?.call(sorted.categorizedFiles[key]!, itemIndex),
       child: RemoteImageWidget(
-        sorted.categorizedFiles[key][itemIndex],
-        key: ValueKey(sorted.categorizedFiles[key][itemIndex].uri.path),
+        sorted.categorizedFiles[key]![itemIndex],
+        key: ValueKey(sorted.categorizedFiles[key]![itemIndex].uri.path),
         cacheWidth: 512,
       ),
     );
@@ -64,7 +64,7 @@ class CategoryViewExp extends StatelessWidget {
                   key: ValueKey("${key}_grid"),
                   controller: scrollController,
                   shrinkWrap: true,
-                  itemCount: sorted.categorizedFiles[key].length,
+                  itemCount: sorted.categorizedFiles[key]!.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 2,

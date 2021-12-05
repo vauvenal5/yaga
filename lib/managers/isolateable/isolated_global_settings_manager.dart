@@ -19,7 +19,7 @@ class IsolatedGlobalSettingsManager
 
   final IsolatedSettingsManager _settingsManager;
 
-  BoolPreference _autoPersist;
+  late BoolPreference _autoPersist;
   BoolPreference get autoPersist => _autoPersist;
 
   IsolatedGlobalSettingsManager(this._settingsManager) {

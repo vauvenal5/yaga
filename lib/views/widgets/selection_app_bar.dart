@@ -8,11 +8,11 @@ import 'package:yaga/views/widgets/selection_select_all.dart';
 
 class SelectionAppBar extends PreferredSize {
   factory SelectionAppBar({
-    @required FileListLocalManager fileListLocalManager,
-    @required ViewConfiguration viewConfig,
-    @required Widget Function(BuildContext, List<Widget>) appBarBuilder,
+    required FileListLocalManager fileListLocalManager,
+    required ViewConfiguration viewConfig,
+    required Widget Function(BuildContext, List<Widget>) appBarBuilder,
     double bottomHeight = 0,
-    Function(NcFile) searchResultHandler,
+    Function(NcFile?)? searchResultHandler,
   }) {
     final Widget child = StreamBuilder(
       initialData: fileListLocalManager.selectionModeChanged.lastResult,
@@ -45,7 +45,8 @@ class SelectionAppBar extends PreferredSize {
     );
   }
 
-  const SelectionAppBar._internal(
-      {@required Size preferredSize, @required Widget child})
-      : super(preferredSize: preferredSize, child: child);
+  const SelectionAppBar._internal({
+    required Size preferredSize,
+    required Widget child,
+  }) : super(preferredSize: preferredSize, child: child);
 }

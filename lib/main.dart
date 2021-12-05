@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
               .where((event) => event is ChoicePreference)
               .map((event) => event as ChoicePreference),
           builder: (context, snapshot) {
-            if (snapshot.data.value == "system") {
+            if (snapshot.data!.value == "system") {
               return MaterialApp.router(
                 title: title,
                 theme: light,
@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
 
             return MaterialApp.router(
               title: title,
-              theme: snapshot.data.value == "light" ? light : dark,
+              theme: snapshot.data!.value == "light" ? light : dark,
               routeInformationParser: YagaRouteInformationParser(),
               routerDelegate: YagaRouterDelegate(),
             );

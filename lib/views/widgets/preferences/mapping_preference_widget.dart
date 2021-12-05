@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
-import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/uri_preference.dart';
 import 'package:yaga/model/route_args/settings_screen_arguments.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
@@ -25,10 +24,10 @@ class MappingPreferenceWidget extends StatefulWidget {
 }
 
 class _MappingPreferenceState extends State<MappingPreferenceWidget> {
-  SystemLocationService _systemLocationService;
-  UriPreference _remote;
-  UriPreference _local;
-  BoolPreference _syncDeletes;
+  late SystemLocationService _systemLocationService;
+  late UriPreference _remote;
+  late UriPreference _local;
+  late BoolPreference _syncDeletes;
 
   @override
   void initState() {
@@ -74,7 +73,7 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
     return PreferenceListTileWidget<MappingPreference>(
       initData: widget.pref,
       listTileBuilder: (context, pref) => ListTile(
-        title: Text(pref.title),
+        title: Text(pref.title!),
         onTap: () => Navigator.pushNamed(
           context,
           SettingsScreen.route,

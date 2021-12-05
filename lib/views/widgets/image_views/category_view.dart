@@ -36,7 +36,7 @@ class CategoryView extends StatelessWidget {
             delegate:
                 SliverChildBuilderDelegate((BuildContext context, int index) {
               return _buildImage(key, index, context);
-            }, childCount: sorted.categorizedFiles[key].length),
+            }, childCount: sorted.categorizedFiles[key]!.length),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               crossAxisSpacing: 2,
@@ -47,12 +47,12 @@ class CategoryView extends StatelessWidget {
   Widget _buildImage(String key, int itemIndex, BuildContext context) {
     return InkWell(
       onTap: () =>
-          viewConfig.onFileTap(sorted.categorizedFiles[key], itemIndex),
+          viewConfig.onFileTap?.call(sorted.categorizedFiles[key]!, itemIndex),
       onLongPress: () =>
-          viewConfig.onSelect(sorted.categorizedFiles[key], itemIndex),
+          viewConfig.onSelect?.call(sorted.categorizedFiles[key]!, itemIndex),
       child: RemoteImageWidget(
-        sorted.categorizedFiles[key][itemIndex],
-        key: ValueKey(sorted.categorizedFiles[key][itemIndex].uri.path),
+        sorted.categorizedFiles[key]![itemIndex],
+        key: ValueKey(sorted.categorizedFiles[key]![itemIndex].uri.path),
         cacheWidth: 512,
       ),
     );

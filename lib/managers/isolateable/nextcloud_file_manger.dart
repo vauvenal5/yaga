@@ -31,11 +31,11 @@ class NextcloudFileManager
   final RxCommand<int, int> _readyForNextPreviewRequest =
       RxCommand.createSync((param) => param);
 
-  RxCommand<NcFile, NcFile> downloadPreviewCommand =
+  final RxCommand<NcFile, NcFile> downloadPreviewCommand =
       RxCommand.createSync((param) => param);
-  RxCommand<NcFile, NcFile> updatePreviewCommand =
+  final RxCommand<NcFile, NcFile> updatePreviewCommand =
       RxCommand.createSync((param) => param);
-  RxCommand<NcFile, NcFile> downloadPreviewFaildCommand =
+  final RxCommand<NcFile, NcFile> downloadPreviewFaildCommand =
       RxCommand.createSync((param) => param);
 
   NextcloudFileManager(
@@ -62,7 +62,7 @@ class NextcloudFileManager
         )
         // debounce requests which have been added multiple times due to scrolling
         .where((ncFileMeta) {
-          if (ncFileMeta.file.previewFile.file.existsSync()) {
+          if (ncFileMeta.file.previewFile!.file.existsSync()) {
             _logger.info("Preview exists index: ${ncFileMeta.fetchIndex}");
             _readyForNextPreviewRequest(ncFileMeta.fetchIndex);
             return false;
@@ -73,12 +73,12 @@ class NextcloudFileManager
           (ncFileMeta) => Stream.fromFuture(
             _nextCloudService.getPreview(ncFileMeta.file.uri).then(
               (value) async {
-                ncFileMeta.file.previewFile.file =
+                ncFileMeta.file.previewFile!.file =
                     await _localFileService.createFile(
-                        file: ncFileMeta.file.previewFile.file as File,
+                        file: ncFileMeta.file.previewFile!.file as File,
                         bytes: value,
                         lastModified: ncFileMeta.file.lastModified);
-                ncFileMeta.file.previewFile.exists = true;
+                ncFileMeta.file.previewFile!.exists = true;
                 _logger.info("Preview fetched index: ${ncFileMeta.fetchIndex}");
                 _logger.fine("Preview fetched: (${ncFileMeta.file.uri})");
                 return ncFileMeta;
@@ -94,17 +94,18 @@ class NextcloudFileManager
                   stacktrace,
                 );
                 downloadPreviewFaildCommand(ncFileMeta.file);
-                return PreviewFetchMeta(null, ncFileMeta.fetchIndex);
+                return PreviewFetchMeta(ncFileMeta.file, ncFileMeta.fetchIndex,
+                    success: false);
               },
             ),
           ),
         )
         .doOnData((event) => _readyForNextPreviewRequest(event.fetchIndex))
-        .where((event) => event.file != null)
+        .where((event) => event.success)
         .listen(
           (ncFileMeta) => updatePreviewCommand(ncFileMeta.file),
           onError: (error, StackTrace stacktrace) {
-            final int index = (_readyForNextPreviewRequest.lastResult + 1) % 10;
+            final int index = (_readyForNextPreviewRequest.lastResult! + 1) % 10;
 
             _logger.warning("Error on stream. Reintroducing index: $index");
             _readyForNextPreviewRequest(index);
@@ -121,8 +122,8 @@ class NextcloudFileManager
     RangeStream(1, 10).listen((event) => _readyForNextPreviewRequest(event));
 
     downloadPreviewCommand.listen((ncFile) {
-      if (ncFile.previewFile != null && ncFile.previewFile.file.existsSync()) {
-        ncFile.previewFile.exists = true;
+      if (ncFile.previewFile != null && ncFile.previewFile!.file.existsSync()) {
+        ncFile.previewFile!.exists = true;
         updatePreviewCommand(ncFile);
         return;
       }
@@ -246,17 +247,17 @@ class NextcloudFileManager
 
   Future<NcFile> _deleteLocalFile(NcFile file) async {
     _logger.warning("Removing local file! (${file.uri.path})");
-    _localFileService.deleteFile(file.localFile.file);
-    _localFileService.deleteFile(file.previewFile.file);
+    _localFileService.deleteFile(file.localFile!.file);
+    _localFileService.deleteFile(file.previewFile!.file);
     _fileManager.updateFileList(file);
     return file;
   }
 
   @override
-  Future<NcFile> deleteFile(NcFile file, {bool local}) async {
+  Future<NcFile> deleteFile(NcFile file, {required bool local}) async {
     if (local) {
-      _localFileService.deleteFile(file.localFile.file);
-      file.localFile.exists = false;
+      _localFileService.deleteFile(file.localFile!.file);
+      file.localFile!.exists = false;
       _fileManager.updateImageCommand(file);
       return file;
     }
@@ -267,26 +268,22 @@ class NextcloudFileManager
   }
 
   @override
-  Future<NcFile> copyFile(NcFile file, Uri destination, {bool overwrite}) =>
+  Future<NcFile> copyFile(NcFile file, Uri destination,
+          {bool overwrite = false}) =>
       _nextCloudService.copyFile(file, destination, overwrite: overwrite);
 
   @override
-  Future<NcFile> moveFile(NcFile file, Uri destination, {bool overwrite}) =>
+  Future<NcFile> moveFile(NcFile file, Uri destination,
+          {bool overwrite = false}) =>
       _nextCloudService.moveFile(file, destination, overwrite: overwrite);
 
   Future<LocalFile> _createLocalFile(Uri uri) async {
-    final file = LocalFile(
-      File.fromUri(await _mappingManager.mapToLocalUri(uri)),
-    );
-    file.exists = file.file.existsSync();
-    return file;
+    File file = File.fromUri(await _mappingManager.mapToLocalUri(uri));
+    return LocalFile(file, file.existsSync());
   }
 
   Future<LocalFile> _createTmpFile(Uri uri) async {
-    final file = LocalFile(
-      File.fromUri(await _mappingManager.mapToTmpUri(uri)),
-    );
-    file.exists = file.file.existsSync();
-    return file;
+    File file = File.fromUri(await _mappingManager.mapToTmpUri(uri));
+    return LocalFile(file, file.existsSync());
   }
 }

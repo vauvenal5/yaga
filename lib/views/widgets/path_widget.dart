@@ -31,7 +31,7 @@ class PathWidget extends StatelessWidget {
         itemCount: _uri.pathSegments.isEmpty ? 1 : _uri.pathSegments.length,
         itemBuilder: (context, index) {
           if (index == 0) {
-            final Uri selected = UriUtils.getRootFromUri(_uri);
+            final Uri selected = getRootFromUri(_uri);
 
             if (fixedOrigin) {
               return _getDisabledAvatar(selected);
@@ -54,32 +54,32 @@ class PathWidget extends StatelessWidget {
             if (getIt.get<NextCloudService>().isLoggedIn()) {
               items.add(
                 _getMenuItem(
-                  getIt.get<NextCloudService>().origin.userEncodedDomainRoot,
+                  getIt.get<NextCloudService>().origin!.userEncodedDomainRoot,
                 ),
               );
             }
 
             if (schemeFilter.isNotEmpty) {
               items = items
-                  .where((element) => element.value.scheme == schemeFilter)
+                  .where((element) => element.value!.scheme == schemeFilter)
                   .toList();
             }
 
             return DropdownButtonHideUnderline(
               child: DropdownButton(
                 value: selected,
-                onChanged: (Uri value) => _onTap(value),
+                onChanged: (Uri? value) => _onTap(value!),
                 items: items,
               ),
             );
           }
-          final Uri subUri = UriUtils.fromUriPathSegments(_uri, index - 1);
+          final Uri subUri = fromUriPathSegments(_uri, index - 1);
           return TextButton(
             style: TextButton.styleFrom(
               primary: Colors.white,
             ),
             onPressed: () => _onTap(subUri),
-            child: Text(UriUtils.getNameFromUri(subUri)),
+            child: Text(getNameFromUri(subUri)),
           );
         },
         separatorBuilder: (context, index) =>

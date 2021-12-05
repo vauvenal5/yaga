@@ -4,5 +4,5 @@ class LocalFile {
   FileSystemEntity file;
   bool exists;
 
-  LocalFile(this.file);
+  LocalFile(this.file, this.exists);
 }

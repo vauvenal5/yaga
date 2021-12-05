@@ -13,5 +13,5 @@ class SystemLocation {
         publicPath = splitter + directory.path.split(splitter)[1],
         absoluteUri = directory.uri;
 
-  Uri get uri => UriUtils.fromUri(uri: origin, path: publicPath);
+  Uri get uri => fromUri(uri: origin, path: publicPath);
 }

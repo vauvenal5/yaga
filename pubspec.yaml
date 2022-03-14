@@ -26,7 +26,7 @@ dependencies:
   ansicolor: ^2.0.1
   built_value: ^8.0.5
   catcher: ^0.6.5
-  device_info: ^2.0.0
+  device_info_plus: ^3.2.2
   equatable: ^2.0.0
   flutter_secure_storage: ^4.1.0
   flutter_sticky_header: ^0.6.0
@@ -36,13 +36,13 @@ dependencies:
   logging: ^1.0.1
   mime: ^1.0.0
   nextcloud: ^3.0.1
-  package_info: ^2.0.0
+  package_info_plus: ^1.4.0
   path_provider: ^2.0.1
   permission_handler: ^8.2.5
   photo_view: ^0.13.0
   rx_command: ^6.0.1
   rxdart: ^0.27.2
-  share: ^2.0.1
+  share_plus: ^3.1.0
   shared_preferences: ^2.0.5
   sticky_infinite_list: ^4.0.1
   url_launcher: ^6.0.3

@@ -1,7 +1,7 @@
 import 'dart:isolate';
 
 import 'package:get_it/get_it.dart';
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';

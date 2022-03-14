@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -56,7 +56,7 @@ class ImageScreenState extends State<ImageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title??_title),
+        title: Text(widget.title ?? _title),
         actions: <Widget>[_buildMainAction()],
       ),
       body: PhotoViewGallery.builder(
@@ -122,8 +122,8 @@ class ImageScreenState extends State<ImageScreen> {
 
     return IconButton(
       icon: const Icon(Icons.share),
-      onPressed: () =>
-          Share.shareFiles([widget._images[_currentIndex].localFile!.file.path]),
+      onPressed: () => Share.shareFiles(
+          [widget._images[_currentIndex].localFile!.file.path]),
     );
   }
 }

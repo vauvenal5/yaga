@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:logging/logging.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:yaga/utils/log_error_file_handler.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/forground_worker/messages/flush_logs_message.dart';
@@ -12,8 +12,7 @@ import 'package:yaga/utils/uri_utils.dart';
 class YagaLogger {
   const YagaLogger();
 
-  static final _logUri =
-      fromPathList(uri: Directory.systemTemp.uri, paths: [
+  static final _logUri = fromPathList(uri: Directory.systemTemp.uri, paths: [
     Directory.systemTemp.uri.path,
     "yaga.log.txt",
   ]);

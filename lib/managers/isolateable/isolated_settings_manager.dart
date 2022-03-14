@@ -11,7 +11,9 @@ class IsolatedSettingsManager extends SettingsManagerBase
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    updateSettingCommand(init.mapping);
+    if(init.mapping != null) {
+      updateSettingCommand(init.mapping);
+    }
     return this;
   }
 }

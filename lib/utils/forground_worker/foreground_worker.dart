@@ -66,7 +66,7 @@ class ForegroundWorker {
         await getTemporaryDirectory(),
         (await getExternalStorageDirectories())!,
         _nextCloudManager.updateLoginStateCommand.lastResult!,
-        _globalSettingsManager.updateRootMappingPreference.lastResult!,
+        _globalSettingsManager.updateRootMappingPreference.lastResult,
         _selfSignedCertHandler.fingerprint,
         _sharedPreferencesService.loadPreferenceFromBool(
           GlobalSettingsManager.autoPersist,

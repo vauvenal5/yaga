@@ -41,7 +41,7 @@ class MappingManager with Isolateable<MappingManager> {
 
   //todo: use a bridge and commands to handle incoming msgs in forgraound worker
   // @visibleForTesting
-  void handleMappingUpdate(MappingPreference event) {
+  void handleMappingUpdate(MappingPreference? event) {
     if (event == null) {
       return;
     }

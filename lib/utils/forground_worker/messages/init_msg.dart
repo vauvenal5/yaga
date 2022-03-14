@@ -11,7 +11,7 @@ class InitMsg {
   final Directory tmpPath;
   final List<Directory> externalPaths;
   final NextCloudLoginData lastLoginData;
-  final MappingPreference mapping;
+  final MappingPreference? mapping;
   final String fingerprint;
   final BoolPreference autoPersist;
 

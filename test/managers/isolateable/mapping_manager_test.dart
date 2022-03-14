@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
@@ -12,19 +12,15 @@ import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/system_location.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
+import 'mapping_manager_test.mocks.dart';
 
-class SettingsManagerBaseMock extends Mock implements SettingsManagerBase {}
-
-class NextCloudServiceMock extends Mock implements NextCloudService {}
-
-class SystemLocationServiceMock extends Mock implements SystemLocationService {}
-
+@GenerateMocks([SettingsManagerBase, NextCloudService, SystemLocationService])
 void main() {
-  final SettingsManagerBaseMock settingsManagerBaseMock =
-      SettingsManagerBaseMock();
-  final NextCloudServiceMock nextCloudServiceMock = NextCloudServiceMock();
-  final SystemLocationServiceMock systemLocationServiceMock =
-      SystemLocationServiceMock();
+  final MockSettingsManagerBase settingsManagerBaseMock =
+      MockSettingsManagerBase();
+  final MockNextCloudService nextCloudServiceMock = MockNextCloudService();
+  final MockSystemLocationService systemLocationServiceMock =
+      MockSystemLocationService();
 
   const userInfo = "yaga";
   const host = "cloud.test.com";
@@ -36,26 +32,22 @@ void main() {
   final command = MockCommand<Preference, Preference>();
 
   final origin = Uri(scheme: 'file', host: 'device.local', path: '/');
-  final internalAppDirStorage = SystemLocation.fromSplitter(
+  final SystemLocation internalAppDirStorage = SystemLocation.fromSplitter(
       Directory('/system/path/Android/app/path'), origin, 'Android');
   final internalAppDirCache = SystemLocation.fromSplitter(
       Directory('/system/path/Android/cache/path'), origin, 'Android');
-  ;
 
   const localPath = "/some/local/path";
 
-  MappingManager uut;
+  late MappingManager uut;
 
   setUp(() async {
-    when(settingsManagerBaseMock.updateSettingCommand)
-        .thenAnswer((_) => command);
+    when(settingsManagerBaseMock.updateSettingCommand).thenAnswer((_) => command);
 
     when(nextCloudServiceMock.origin).thenReturn(ncOrigin);
 
-    when(systemLocationServiceMock.internalStorage)
-        .thenReturn(internalAppDirStorage);
-    when(systemLocationServiceMock.internalCache)
-        .thenReturn(internalAppDirCache);
+    when(systemLocationServiceMock.internalStorage).thenReturn(internalAppDirStorage);
+    when(systemLocationServiceMock.internalCache).thenReturn(internalAppDirCache);
 
     uut = MappingManager(
       settingsManagerBaseMock,
@@ -80,7 +72,7 @@ void main() {
       await uut.mapToTmpUri(Uri(host: "remote", path: remotePath));
 
       expect(
-          verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny))
+          verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny!))
               .captured
               .single
               .path,
@@ -101,9 +93,9 @@ void main() {
 
   group("map to local path", () {
     Future<void> mapToLocalPathTest({
-      @required String remotePath,
-      String remoteTargetFolderPath,
-      @required String expectedPath,
+      required String remotePath,
+      String? remoteTargetFolderPath,
+      required String expectedPath,
     }) async {
       if (remoteTargetFolderPath != null) {
         setUpMapping(localPath, remoteTargetFolderPath);
@@ -112,7 +104,7 @@ void main() {
       await uut.mapToLocalUri(Uri(host: "remote", path: remotePath));
 
       expect(
-          verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny))
+          verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny!))
               .captured
               .single
               .path,
@@ -128,7 +120,7 @@ void main() {
     }
 
     Future<void> mapPicturesToLocalPathTest(String remotePath,
-        {String expectedPath}) async {
+        {String? expectedPath}) async {
       const String targetPath = "/Pictures/";
       mapToLocalPathTest(
         remotePath: remotePath,
@@ -204,10 +196,10 @@ void main() {
 
   group("map to remote uri", () {
     Future<void> mapToRemoteUriTest({
-      String localFilePath,
-      String remotePath,
-      String expectedPath,
-      String mappingPath,
+      required String localFilePath,
+      required String remotePath,
+      required String expectedPath,
+      String? mappingPath,
     }) async {
       final Uri file = Uri(
         host: "local",

@@ -12,7 +12,7 @@
          FlutterApplication and put your custom class here. -->
     <!-- todo: investigate requestLegacyExternalStorage some more -->
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name="${applicationName}"
         android:label="Yaga"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"

@@ -162,7 +162,6 @@ class LogErrorFileHandler extends ReportHandler {
       await deviceInfo.androidInfo.then((androidInfo) {
         _logDeviceParametersFormatted(_loadAndroidParameters(androidInfo));
       });
-      await flushFile();
     }
   }
 

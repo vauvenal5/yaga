@@ -1,0 +1,3 @@
+- targeting Android API 31
+- this version requests the MANAGE_EXTERNAL_STORAGE permission
+- introducing reset button for root mapping

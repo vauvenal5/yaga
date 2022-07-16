@@ -39,6 +39,7 @@ class GlobalSettingsManager {
     ..key = appSection.prepareKey("logs")
     ..title = "Send Logs"
     ..action = YagaLogger.shareLogs);
+  static ActionPreference? reset;
 
   RxCommand<Preference, Preference> registerGlobalSettingCommand =
       RxCommand.createSync((param) => param);
@@ -82,6 +83,7 @@ class GlobalSettingsManager {
 
       _settingsManager.removeMappingPreferenceCommand(mapping);
       removeGlobalSettingCommand(mapping);
+      removeGlobalSettingCommand(reset);
       removeGlobalSettingCommand(autoPersist);
       removeGlobalSettingCommand(ncSection);
     });
@@ -113,7 +115,7 @@ class GlobalSettingsManager {
       ..title = "Root Mapping"
       ..value = false
       ..local.value = local
-      ..remote.value = remote);
+      ..remote.value = remote,);
   }
 
   void _handleLoginState(NextCloudLoginData loginData) {
@@ -127,8 +129,18 @@ class GlobalSettingsManager {
         remote: _nextCloudService.origin!.userEncodedDomainRoot,
       );
 
+      reset = ActionPreference((b) => b
+        ..key = ncSection.prepareKey("reset")
+        ..title = "Reset Root Mapping"
+        ..action = () {
+          _settingsManager.persistMappingPreferenceCommand(mapping);
+          _settingsManager.loadMappingPreferenceCommand(mapping);
+        }
+      );
+
       registerGlobalSettingCommand(ncSection);
       registerGlobalSettingCommand(mapping);
+      registerGlobalSettingCommand(reset);
       registerGlobalSettingCommand(autoPersist);
 
       _settingsManager.loadMappingPreferenceCommand(mapping);

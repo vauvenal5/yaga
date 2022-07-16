@@ -29,7 +29,7 @@ Uri fromPathList({required Uri uri, required List<String> paths}) {
 
 String chainPathSegments(String first, String second) {
   String firstNormalized = first;
-  if (!first.endsWith("/")) {
+  if (first.endsWith("/")) {
     firstNormalized = rtrim(first, "/");
   }
 

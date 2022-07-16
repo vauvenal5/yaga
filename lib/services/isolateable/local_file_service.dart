@@ -17,6 +17,7 @@ class LocalFileService extends Service<LocalFileService>
   @override
   Future<LocalFileService> init() async {
     _permissionState = await Permission.storage.request();
+    await Permission.manageExternalStorage.request();
     return this;
   }
 

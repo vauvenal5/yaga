@@ -1,5 +1,7 @@
 import 'package:validators/sanitizers.dart';
 
+//todo: refactor into non static functions in util class UriUtils
+
 Uri fromUri({
   required Uri uri,
   String? scheme,
@@ -26,15 +28,17 @@ Uri fromPathList({required Uri uri, required List<String> paths}) {
 }
 
 String chainPathSegments(String first, String second) {
+  String firstNormalized = first;
   if (!first.endsWith("/")) {
-    first = "$first/";
+    firstNormalized = rtrim(first, "/");
   }
 
+  String secondNormalized = second;
   if (second.startsWith("/")) {
-    second = ltrim(second, "/");
+    secondNormalized = ltrim(second, "/");
   }
 
-  return "$first$second";
+  return "$firstNormalized/$secondNormalized";
 }
 
 Uri getRootFromUri(Uri uri) => fromUri(uri: uri, path: "/");

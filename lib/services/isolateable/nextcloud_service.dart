@@ -84,7 +84,7 @@ class NextCloudService
             .flatMap((value) => Stream.fromIterable(value))
             .where(
               (event) =>
-                  event.isDirectory || event.mimeType!.startsWith("image"),
+                  event.isDirectory || event.mimeType != null && event.mimeType!.startsWith("image"),
             )
             .map((webDavFile) {
           logger.info("Mapping ${webDavFile.path}");

@@ -13,7 +13,7 @@ void main() {
 
     test("should override nothing", () {
       expect(
-        UriUtils.fromUri(uri: originalUri).toString(),
+        fromUri(uri: originalUri).toString(),
         originalUri.toString(),
       );
     });
@@ -28,7 +28,7 @@ void main() {
       );
 
       expect(
-        UriUtils.fromUri(
+        fromUri(
           uri: originalUri,
           scheme: expected.scheme,
           userInfo: expected.userInfo,
@@ -47,7 +47,7 @@ void main() {
       const String firstPath = "/first/part";
       const String secondPath = "/second/part/";
 
-      final Uri actual = UriUtils.fromPathList(
+      final Uri actual = fromPathList(
         uri: uri,
         paths: [firstPath, secondPath],
       );
@@ -60,7 +60,7 @@ void main() {
       const String firstPath = "/first/part/with%2Fspecial%2Fchar";
       const String secondPath = "/second/part/";
 
-      final Uri actual = UriUtils.fromPathList(
+      final Uri actual = fromPathList(
         uri: uri,
         paths: [firstPath, secondPath],
       );
@@ -75,32 +75,32 @@ void main() {
     test("should correctly unite path with leading and trailing slash", () {
       const String first = "/first/part/";
       const String second = "/second/part/";
-      expect(UriUtils.chainPathSegments(first, second), expected);
+      expect(chainPathSegments(first, second), expected);
     });
 
     test("should correctly unite path with leading slash", () {
       const String first = "/first/part";
       const String second = "/second/part/";
-      expect(UriUtils.chainPathSegments(first, second), expected);
+      expect(chainPathSegments(first, second), expected);
     });
 
     test("should correctly unite path with trailing slash", () {
       const String first = "/first/part/";
       const String second = "second/part/";
-      expect(UriUtils.chainPathSegments(first, second), expected);
+      expect(chainPathSegments(first, second), expected);
     });
 
     test("should correctly unite path without slash", () {
       const  String first = "/first/part";
       const  String second = "second/part/";
-      expect(UriUtils.chainPathSegments(first, second), expected);
+      expect(chainPathSegments(first, second), expected);
     });
   });
 
   group("getRootFromUri", () {
     test("should return root uri from current uri", () {
       final Uri uri = Uri(host: "cloud.nextcloud.com", path: "/some/path");
-      final Uri actual = UriUtils.getRootFromUri(uri);
+      final Uri actual = getRootFromUri(uri);
       expect(actual.host, uri.host);
       expect(actual.path, "/");
     });
@@ -110,13 +110,13 @@ void main() {
     test("should not change meaning of special chars", () {
       const String expectedPath = "/test/path%2Fwith%2Fspecial/";
       final Uri uri = Uri(path: "${expectedPath}chars");
-      expect(UriUtils.fromUriPathSegments(uri, 1).path, expectedPath);
+      expect(fromUriPathSegments(uri, 1).path, expectedPath);
     });
 
     test("should not change meaning of double encoded chars", () {
       const String expectedPath = "/test/path%252Fwith%252Fspecial/t%C3%B6st/";
       final Uri uri = Uri(path: "${expectedPath}chars");
-      expect(UriUtils.fromUriPathSegments(uri, 2).path, expectedPath);
+      expect(fromUriPathSegments(uri, 2).path, expectedPath);
     });
   });
 
@@ -125,21 +125,21 @@ void main() {
       const String fileName = "file.png";
       final Uri fileUri = Uri(pathSegments: ["test", "path", "to", fileName]);
 
-      expect(UriUtils.getNameFromUri(fileUri), fileName);
+      expect(getNameFromUri(fileUri), fileName);
     });
 
     test("should return folder name from uri", () {
       const String folder = "folder";
       final Uri folderUri = Uri(pathSegments: ["test", "path", "to", folder, ""]);
 
-      expect(UriUtils.getNameFromUri(folderUri), folder);
+      expect(getNameFromUri(folderUri), folder);
     });
 
     test("should return host name from empty uri", () {
       const String host = "testHost";
       final Uri emptyUri = Uri(host: host);
 
-      expect(UriUtils.getNameFromUri(emptyUri), host.toLowerCase());
+      expect(getNameFromUri(emptyUri), host.toLowerCase());
     });
   });
 }

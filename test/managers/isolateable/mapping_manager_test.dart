@@ -48,6 +48,7 @@ void main() {
 
     when(systemLocationServiceMock.internalStorage).thenReturn(internalAppDirStorage);
     when(systemLocationServiceMock.internalCache).thenReturn(internalAppDirCache);
+    when(systemLocationServiceMock.absoluteUriFromInternal(any)).thenAnswer((realInvocation) => realInvocation.positionalArguments[0] as Uri);
 
     uut = MappingManager(
       settingsManagerBaseMock,
@@ -71,12 +72,11 @@ void main() {
     Future<void> mapToTmpPathTest(String remotePath) async {
       await uut.mapToTmpUri(Uri(host: "remote", path: remotePath));
 
-      expect(
-          verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny!))
-              .captured
-              .single
-              .path,
-          "${internalAppDirCache.uri.path}/$userDomain$remotePath");
+      final Uri captured = verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny))
+          .captured
+          .single as Uri;
+
+      expect(captured.path, "${internalAppDirCache.uri.path}/$userDomain$remotePath");
     }
 
     test("default mapps to cache dir", () async {
@@ -103,12 +103,11 @@ void main() {
 
       await uut.mapToLocalUri(Uri(host: "remote", path: remotePath));
 
-      expect(
-          verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny!))
-              .captured
-              .single
-              .path,
-          expectedPath);
+      final Uri captured = verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny))
+          .captured
+          .single as Uri;
+
+      expect(captured.path, expectedPath);
     }
 
     Future<void> mapRootToLocalPathTest(String remotePath) async {

@@ -12,6 +12,7 @@ import 'package:yaga/utils/ncfile_stream_extensions.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:rxdart/rxdart.dart';
 
+//todo: remove? this file manage is currently not used since we relay on MediaStore API for local images
 class LocalFileManager
     with Isolateable<LocalFileManager>
     implements FileSubManager {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
+import 'package:yaga/services/name_exchange_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
@@ -74,12 +75,13 @@ class PathWidget extends StatelessWidget {
             );
           }
           final Uri subUri = fromUriPathSegments(_uri, index - 1);
+          final Uri readableUri = getIt.get<NameExchangeService>().convertUriToHumanReadableUri(subUri);
           return TextButton(
             style: TextButton.styleFrom(
               primary: Colors.white,
             ),
             onPressed: () => _onTap(subUri),
-            child: Text(getNameFromUri(subUri)),
+            child: Text(getNameFromUri(readableUri)),
           );
         },
         separatorBuilder: (context, index) =>

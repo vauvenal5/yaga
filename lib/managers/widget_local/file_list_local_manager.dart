@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:photo_manager/photo_manager.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaga/managers/file_manager.dart';
@@ -14,14 +15,13 @@ import 'package:yaga/model/sorted_file_folder_list.dart';
 import 'package:yaga/model/sorted_file_list.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
-import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 import 'package:yaga/utils/forground_worker/messages/merge_sort_done.dart';
 import 'package:yaga/utils/forground_worker/messages/merge_sort_request.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
@@ -54,7 +54,9 @@ class FileListLocalManager {
   StreamSubscription<FileUpdateMsg>? _updateFileListSubscripton;
   StreamSubscription<BoolPreference>? _updateRecursiveSubscription;
 
+  //todo: we are here directly using the worker, we should be going over the file manager bridge
   final ForegroundWorker _worker;
+  final FileManager _fileManager;
   StreamSubscription<Message>? _foregroundMessageCommandSubscription;
   StreamSubscription<Message>? _foregroundMergeSortSubscription;
 
@@ -68,7 +70,7 @@ class FileListLocalManager {
     this.recursive,
     this._sortConfig, {
     this.allowSelecting = true,
-  }) : _worker = getIt.get<ForegroundWorker>() {
+  }) : _worker = getIt.get<ForegroundWorker>(), _fileManager = getIt.get<FileManager>() {
     filesChangedCommand = RxCommand.createSync(
       (param) => param,
       initialLastResult: emptyFileList,
@@ -105,9 +107,7 @@ class FileListLocalManager {
 
     //todo: why are we still rebuilding this subScriptions on refetch?
     //todo: in future communication with the background worker should be done by bridges & handlers, and not directly
-    _foregroundMessageCommandSubscription = _worker.isolateResponseCommand
-        .where((event) => event is FileListMessage)
-        .map((event) => event as FileListMessage)
+    _foregroundMessageCommandSubscription = _fileManager.updateFilesCommand
         .where((event) =>
             //file list may contain recursively loaded files; this is done so we minimize the UI thread merging of lists
             //todo: maybe there is a better approach to this
@@ -152,8 +152,7 @@ class FileListLocalManager {
 
     _logger.warning("$managerKey (start)");
 
-    //todo: we are here directly using the worker, we should be going over the file manager bridge
-    _worker.sendRequest(FileListRequest(
+    _fileManager.fetchFileListCommand(FileListRequest(
       managerKey,
       uri,
       _sortConfig,
@@ -330,6 +329,7 @@ class FileListLocalManager {
   Future<bool> _executeActionForSelection(Message action) async {
     final Completer<bool> jobDone = Completer();
 
+    //todo: this has to go over into the file manager
     _worker.sendRequest(action);
 
     final StreamSubscription actionSub = _worker.isolateResponseCommand

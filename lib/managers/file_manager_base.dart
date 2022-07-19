@@ -4,6 +4,7 @@ import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 
 abstract class FileManagerBase {
@@ -12,7 +13,7 @@ abstract class FileManagerBase {
   RxCommand<NcFile, NcFile> updateImageCommand =
       RxCommand.createSync((param) => param);
   late RxCommand<FetchedFile, FetchedFile> fetchedFileCommand;
-  RxCommand<FileListResponse, FileListResponse> updateFilesCommand =
+  RxCommand<FileListMessage, FileListMessage> updateFilesCommand =
       RxCommand.createSync((param) => param);
 
   @protected
@@ -29,6 +30,7 @@ abstract class FileManagerBase {
     fileSubManagers.putIfAbsent(fileSubManager.scheme, () => fileSubManager);
   }
 
+  //todo: fileManager refactoring: this method should not be callable from the UI
   Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
     //todo: throw when scheme is not registered
     return fileSubManagers[uri.scheme]?.listFiles(uri).flatMap((file) =>

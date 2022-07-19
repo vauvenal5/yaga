@@ -8,9 +8,11 @@ import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_done.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
+import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/merge_sort_done.dart';
 import 'package:yaga/utils/forground_worker/messages/merge_sort_request.dart';
+import 'package:yaga/utils/forground_worker/messages/sort_request.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
@@ -28,6 +30,7 @@ class FileListRequestHandler
     registry.registerHandler<MergeSortRequest>(
       (msg) => handleMergeSort(msg, isolateToMain),
     );
+    registry.registerHandler<SortRequest>((msg) => handleSort(msg, isolateToMain),);
     return this;
   }
 
@@ -72,5 +75,15 @@ class FileListRequestHandler
         updateLoading: message.updateLoading,
       ));
     }
+  }
+
+  void handleSort(SortRequest message, SendPort isolateToMain,) {
+    var sorted = getIt.get<SortManager>().sortList(message.files, message.fileListRequest.config);
+    isolateToMain.send(
+      FileListResponse(message.key, message.fileListRequest.uri, sorted, recursive: message.fileListRequest.recursive),
+    );
+    isolateToMain.send(
+      FileListDone(message.key, message.fileListRequest.uri),
+    );
   }
 }

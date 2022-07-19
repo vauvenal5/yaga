@@ -49,6 +49,7 @@ dependencies:
   uuid: ^3.0.4
   validators: ^3.0.0
   webview_flutter: ^3.0.1
+  photo_manager: ^2.1.4
 
 # dependency_overrides:
 #   analyzer: "0.40.6"

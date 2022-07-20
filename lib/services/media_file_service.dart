@@ -41,14 +41,24 @@ class MediaFileService extends Service<MediaFileService> implements UriNameResol
         .map((event) =>
         NcFile.directory(
             fromUri(uri: uri, path: "/${event.id}"),
-            event.name),);
+            event.name,
+            upstreamId: event.id,
+        ),);
   }
 
   Stream<NcFile> _fetchAlbum(Uri uri) {
-    return albums[getNameFromUri(uri)]!.getAssetListPaged(page: 0, size: 100).asStream()
+    final album = albums[getNameFromUri(uri)];
+
+    if(album == null) {
+      return const Stream.empty();
+    }
+
+    // todo: here we fetch all assets, this probably can be improved by making better use of MediaStore API regarding sorting and performance
+    return album.getAssetListRange(start: 0, end: album.assetCount).asStream()
         .flatMap((files) => Stream.fromIterable(files))
         .asyncMap((event) async {
       var file = NcFile.file(fromUri(uri: uri, path: "${event.relativePath}${event.title!}"), event.title!, event.mimeType);
+      file.upstreamId = event.id;
       file.lastModified = event.modifiedDateTime;
       file.localFile = await _createLocalFile(file.uri);
       return file;

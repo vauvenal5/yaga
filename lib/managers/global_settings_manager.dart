@@ -4,10 +4,11 @@ import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preferences/action_preference.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
+import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
-import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/model/preferences/section_preference.dart';
+import 'package:yaga/model/preferences/string_preference.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/logger.dart';
@@ -40,6 +41,12 @@ class GlobalSettingsManager {
     ..title = "Send Logs"
     ..action = YagaLogger.shareLogs);
   static ActionPreference? reset;
+  static StringPreference newsSeenVersion = StringPreference(
+    (b) => b
+      ..key = appSection.prepareKey("newsSeen")
+      ..title = "News Seen Version"
+      ..value = "",
+  );
 
   RxCommand<Preference, Preference> registerGlobalSettingCommand =
       RxCommand.createSync((param) => param);
@@ -110,12 +117,16 @@ class GlobalSettingsManager {
     required Uri local,
     required Uri remote,
   }) {
-    return MappingPreference((b) => b
-      ..key = ncSection.prepareKey(_MAPPING_KEY)
-      ..title = "Root Mapping"
-      ..value = false
-      ..local.value = local
-      ..remote.value = remote,);
+    return MappingPreference(
+      (b) => b
+        ..key = ncSection.prepareKey(_MAPPING_KEY)
+        ..title = "Root Mapping"
+        ..value = false
+        ..local.value = local
+        ..local.enabled = false
+        ..remote.value = remote
+        ..remote.enabled = false,
+    );
   }
 
   void _handleLoginState(NextCloudLoginData loginData) {
@@ -129,21 +140,24 @@ class GlobalSettingsManager {
         remote: _nextCloudService.origin!.userEncodedDomainRoot,
       );
 
-      reset = ActionPreference((b) => b
-        ..key = ncSection.prepareKey("reset")
-        ..title = "Reset Root Mapping"
-        ..action = () {
-          _settingsManager.persistMappingPreferenceCommand(mapping);
-          _settingsManager.loadMappingPreferenceCommand(mapping);
-        }
+      reset = ActionPreference(
+        (b) => b
+          ..key = ncSection.prepareKey("reset")
+          ..title = "Reset Root Mapping"
+          ..action = () {
+            _settingsManager.persistMappingPreferenceCommand(mapping);
+            _settingsManager.loadMappingPreferenceCommand(mapping);
+          },
       );
 
       registerGlobalSettingCommand(ncSection);
       registerGlobalSettingCommand(mapping);
-      registerGlobalSettingCommand(reset);
+      // registerGlobalSettingCommand(reset);
       registerGlobalSettingCommand(autoPersist);
 
-      _settingsManager.loadMappingPreferenceCommand(mapping);
+      //instead of loading the root mapping we are resetting it here to default values
+      //_settingsManager.loadMappingPreferenceCommand(mapping);
+      reset!.action.call();
     }
   }
 }

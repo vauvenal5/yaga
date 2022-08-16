@@ -1,17 +1,19 @@
 package com.github.vauvenal5.yaga
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.net.Uri;
-import android.provider.MediaStore;import android.content.ContentValues;
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 
-import androidx.annotation.NonNull;
+import androidx.annotation.NonNull
+import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.plugin.common.MethodCall;
-import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
+import java.io.File
+import java.lang.IllegalArgumentException
 
 class MainActivity: FlutterActivity() {
     private val INTENT_CHANNEL = "yaga.channel.intent";
@@ -23,6 +25,16 @@ class MainActivity: FlutterActivity() {
         GeneratedPluginRegistrant.registerWith(flutterEngine);
         val intent = getIntent();
 
+        //todo: check if granted
+        //todo: check if Android verison is high enough
+//        Intent(Settings.ACTION_REQUEST_MANAGE_MEDIA).apply {
+//            data = Uri.parse("package:$packageName")
+//            try {
+//                startActivityForResult(this, 303)
+//            } catch (e: Exception) {
+//            }
+//        }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, INTENT_CHANNEL).setMethodCallHandler {
                 call, result ->
             if(call.method.contentEquals(GET_INTENT_ACTION_METHOD)) {
@@ -30,54 +42,92 @@ class MainActivity: FlutterActivity() {
             } else if (call.method.contentEquals(GET_INTENT_TYPE_METHOD)) {
                 result.success(intent.getType());
             } else if (call.method.contentEquals(GET_INTENT_SET_RESULT)) {
-                val res = Intent();
-                val name = call.argument<String>("name");
-                val path = call.argument<String>("path");
-                val mime = call.argument<String>("mime");
-
-                if(name == null || path == null || mime == null) {
-                    result.success(false);
-                }
-
-                res.setData(getUriFromPath(name!!, path!!, mime!!));
-                setResult(RESULT_OK, res);
-                finish();
+                handleShareSelectedImageIntent(call, result)
             } else {
                 result.notImplemented()
             }
-        };
+        }
     }
 
-    /**
-     * Returns the Uri which can be used to delete/work with images in the photo gallery.
-     * @param filePath Path to IMAGE on SD card
-     * @return Uri in the format of... content://media/external/images/media/[NUMBER]
-     */
-    private fun getUriFromPath(name: String, filePath: String, mime: String): Uri {
-        //todo: this is only a very simplistic implementation: read up on MediaStore and improve appropriately
-        val values = ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, name);
-        values.put(MediaStore.Images.Media.DESCRIPTION, "Image from Nextcloud Yaga.");
-        values.put(MediaStore.Images.Media.MIME_TYPE, mime);
-        values.put("_data", filePath);
-        getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+    private fun handleShareSelectedImageIntent(call: MethodCall, resultChannel: MethodChannel.Result) {
+        val resultIntent = Intent();
+        val path = call.argument<String>("path");
+        val mime = call.argument<String>("mime");
 
-        val photoUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        val projection = arrayOf(MediaStore.Images.ImageColumns._ID);
-        // TODO This will break if we have no matching item in the MediaStore.
-        val cursor = getContentResolver().query(photoUri, projection, MediaStore.Images.ImageColumns.DATA + " LIKE ?", arrayOf(filePath), null);
-
-        if(cursor == null) {
-            return Uri.parse(filePath);
+        if(path == null || mime == null) {
+            shareSelectedImageFailed(resultIntent, resultChannel)
         }
 
-        cursor.moveToFirst();
+        val fileUri: Uri? = try {
+            FileProvider.getUriForFile(
+                this,
+                this.packageName + ".fileprovider",
+                File(path!!)
+            )
+        } catch (e: IllegalArgumentException) {
+            Log.e("File Provider", "Could not retrieve content url for file.", e)
+            null
+        }
 
-        val columnIndex = cursor.getColumnIndex(projection[0]);
-        val photoId = cursor.getLong(columnIndex);
+        if(fileUri == null) {
+            shareSelectedImageFailed(resultIntent, resultChannel)
+        }
 
-        cursor.close();
-        return Uri.parse(photoUri.toString() + "/" + photoId);
+        resultIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        resultIntent.setDataAndType(fileUri, mime)
+        setResult(RESULT_OK, resultIntent)
+        resultChannel.success(true)
+        finish()
     }
+
+    private fun shareSelectedImageFailed(resultIntent: Intent, resultChannel: MethodChannel.Result) {
+        Toast.makeText(activity, "Failed to share image.", Toast.LENGTH_SHORT).show()
+        resultIntent.setDataAndType(null, "")
+        setResult(RESULT_CANCELED, resultIntent)
+        resultChannel.success(false)
+        finish()
+    }
+
+    //todo: this code might solve the copy issue
+//    private fun addItem(name: String, filePath: String, mime: String): Uri {
+//        val collection = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+////            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+//            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_INTERNAL)
+//        } else {
+//            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+//        }
+//
+//        var relativePath = filePath.split("/0/").last()
+//        relativePath = relativePath.substring(0, relativePath.length - name.length - 1)
+//        Log.i("MediaStore", relativePath);
+//
+//        val values = ContentValues().apply {
+//            put(MediaStore.Images.Media.DISPLAY_NAME, name)
+//            put(MediaStore.Images.Media.MIME_TYPE, mime)
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+////                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + File.separator + "Yaga")
+//                put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
+//                put(MediaStore.Images.Media.IS_PENDING, 1)
+//            }
+//        }
+//
+//        val resolver = applicationContext.contentResolver
+//        val uri = resolver.insert(collection, values)!!
+//
+//        try {
+////            resolver.openOutputStream(uri).use { os ->
+////                File(filePath).inputStream().use { it.copyTo(os!!) }
+////            }
+//
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//                values.clear()
+//                values.put(MediaStore.Images.Media.IS_PENDING, 0)
+//                resolver.update(uri, values, null, null)
+//            }
+//        } catch (ex: IOException) {
+//            Log.e("MediaStore", ex.message, ex)
+//        }
+//
+//        return uri;
+//    }
 }

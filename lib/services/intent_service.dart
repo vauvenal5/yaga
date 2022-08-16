@@ -25,7 +25,6 @@ class IntentService extends Service<IntentService> {
     //todo: maybe we should keep the mime type in the NcFile object
     final String mime = lookupMimeType(file.localFile!.file.path)??'';
     return _intentChannel.invokeMethod("setSelectedFile", {
-      "name": file.name,
       "path": file.localFile!.file.path,
       "mime": mime,
     }).then((value) => value as bool);

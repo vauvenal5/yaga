@@ -1,3 +1,10 @@
-- targeting Android API 31
-- this version requests the MANAGE_EXTERNAL_STORAGE permission
-- introducing reset button for root mapping
+- targeting Android 12 (API Level 31)
+- refactoring to MediaStore API for local file access
+- root mapping deprecated: will be refactored in future when full MediaStore API support is implemented
+- automatically resetting root mapping to revert back to default app directory
+- local move/copy are currently not supported
+- local delete is supported but requires user confirmation
+- on Android 12 (API 31+) you can assign MANAGE_MEDIA rights to the app to avoid delete confirmation dialog (see docs for details)
+- SD card support is broken
+- file provider for other apps is fixed
+- about app dialog was updated to support news

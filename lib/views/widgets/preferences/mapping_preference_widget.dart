@@ -10,8 +10,8 @@ import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
-import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart';
 import 'package:yaga/views/widgets/action_danger_dialog.dart';
+import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart';
 
 class MappingPreferenceWidget extends StatefulWidget {
   final MappingPreference pref;
@@ -73,6 +73,7 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
     return PreferenceListTileWidget<MappingPreference>(
       initData: widget.pref,
       listTileBuilder: (context, pref) => ListTile(
+        enabled: pref.enabled!,
         title: Text(pref.title!),
         onTap: () => Navigator.pushNamed(
           context,

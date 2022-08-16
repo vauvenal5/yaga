@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:nextcloud/nextcloud.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/utils/logger.dart';
@@ -133,8 +133,8 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
         return;
       }
 
-      if (await canLaunch(init.login)) {
-        await launch(init.login);
+      try {
+        await launchUrlString(init.login);
         LoginFlowResult? res;
 
         while (res == null && !_disposing) {
@@ -164,15 +164,20 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
 
         getIt.get<SelfSignedCertHandler>().badCertificateCallback = null;
 
+        if (!mounted) return;
+
         Navigator.popUntil(
           context,
           ModalRoute.withName(YagaHomeScreen.route),
         );
-      } else {
-        throw 'Could not launch $uri';
+      } on Exception catch (e) {
+        //todo: show message to user
+        _logger.severe('Could not launch $uri', e);
       }
       return;
     }
+
+    if (!mounted) return;
 
     Navigator.pushNamed(
       context,

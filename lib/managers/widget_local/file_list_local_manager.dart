@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:photo_manager/photo_manager.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaga/managers/file_manager.dart';
@@ -22,6 +21,7 @@ import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_request.dart';
 import 'package:yaga/utils/forground_worker/messages/merge_sort_done.dart';
 import 'package:yaga/utils/forground_worker/messages/merge_sort_request.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
@@ -145,9 +145,7 @@ class FileListLocalManager {
       }
     });
 
-    _updateFileListSubscripton = _worker.isolateResponseCommand
-        .where((event) => event is FileUpdateMsg)
-        .map((event) => event as FileUpdateMsg)
+    _updateFileListSubscripton = _fileManager.fileUpdateMessage
         .listen((event) => _removeFileFromList(event.file));
 
     _logger.warning("$managerKey (start)");
@@ -302,40 +300,40 @@ class FileListLocalManager {
 
   Future<bool> deleteSelected({required bool local}) =>
       _executeActionForSelection(DeleteFilesRequest(
-        managerKey,
-        selected,
+        key: managerKey,
+        files: selected,
         local: local,
+        sourceDir: uri,
       ));
 
   Future<bool> copySelected(Uri destination, {bool overwrite = false}) =>
       _executeActionForSelection(DestinationActionFilesRequest(
-        managerKey,
-        selected,
-        destination,
-        _sortConfig,
+        key: managerKey,
+        files: selected,
+        destination: destination,
+        config: _sortConfig,
         overwrite: overwrite,
+        sourceDir: uri,
       ));
 
   Future<bool> moveSelected(Uri destination, {bool overwrite = false}) =>
       _executeActionForSelection(DestinationActionFilesRequest(
-        managerKey,
-        selected,
-        destination,
-        _sortConfig,
+        key: managerKey,
+        files: selected,
+        destination: destination,
+        config: _sortConfig,
         action: DestinationAction.move,
         overwrite: overwrite,
+        sourceDir: uri,
       ));
 
-  Future<bool> _executeActionForSelection(Message action) async {
+  Future<bool> _executeActionForSelection(FilesActionRequest action) async {
     final Completer<bool> jobDone = Completer();
 
-    //todo: this has to go over into the file manager
-    _worker.sendRequest(action);
+    _fileManager.filesActionCommand(action);
 
-    final StreamSubscription actionSub = _worker.isolateResponseCommand
+    final StreamSubscription actionSub = _fileManager.filesActionDoneCommand
         .where((event) => event.key == managerKey)
-        .where((event) => event is FilesActionDone)
-        .map((event) => event as FilesActionDone)
         .listen((event) {
       jobDone.complete(true);
     });

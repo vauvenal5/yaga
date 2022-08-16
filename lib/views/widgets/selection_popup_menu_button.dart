@@ -6,10 +6,10 @@ import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
-import 'package:yaga/views/widgets/selection_action_cancel_dialog.dart';
 import 'package:yaga/views/widgets/action_danger_dialog.dart';
-import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
+import 'package:yaga/views/widgets/selection_action_cancel_dialog.dart';
+import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 
 enum SelectionViewMenu { share, delete, copy, move, download }
 
@@ -28,6 +28,31 @@ class SelectionPopupMenuButton extends StatelessWidget {
 
   List<PopupMenuEntry<SelectionViewMenu>> _buildSelectionPopupMenu(
       BuildContext context) {
+    if (fileListLocalManager.isRemoteUri) {
+      return const [
+        PopupMenuItem(
+          value: SelectionViewMenu.share,
+          child: ListMenuEntry(Icons.share, "Share"),
+        ),
+        PopupMenuItem(
+          value: SelectionViewMenu.delete,
+          child: ListMenuEntry(Icons.delete, "Delete"),
+        ),
+        PopupMenuItem(
+          value: SelectionViewMenu.copy,
+          child: ListMenuEntry(Icons.copy, "Copy"),
+        ),
+        PopupMenuItem(
+          value: SelectionViewMenu.move,
+          child: ListMenuEntry(Icons.forward, "Move"),
+        ),
+        PopupMenuItem(
+          value: SelectionViewMenu.download,
+          child: ListMenuEntry(Icons.file_download, "Download"),
+        ),
+      ];
+    }
+
     return const [
       PopupMenuItem(
         value: SelectionViewMenu.share,
@@ -36,18 +61,6 @@ class SelectionPopupMenuButton extends StatelessWidget {
       PopupMenuItem(
         value: SelectionViewMenu.delete,
         child: ListMenuEntry(Icons.delete, "Delete"),
-      ),
-      PopupMenuItem(
-        value: SelectionViewMenu.copy,
-        child: ListMenuEntry(Icons.copy, "Copy"),
-      ),
-      PopupMenuItem(
-        value: SelectionViewMenu.move,
-        child: ListMenuEntry(Icons.forward, "Move"),
-      ),
-      PopupMenuItem(
-        value: SelectionViewMenu.download,
-        child: ListMenuEntry(Icons.file_download, "Download"),
       ),
     ];
   }
@@ -58,11 +71,14 @@ class SelectionPopupMenuButton extends StatelessWidget {
           .where((element) => !element.localFile!.exists)
           .toList()
           .isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text("Currently sharing supports only already downloaded files."),
-          behavior: SnackBarBehavior.floating,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Currently sharing supports only already downloaded files.",
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return;
       }
 

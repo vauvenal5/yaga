@@ -50,6 +50,8 @@ dependencies:
   validators: ^3.0.0
   webview_flutter: ^3.0.1
   photo_manager: ^2.1.4
+  flutter_markdown: ^0.6.10+3
+  markdown: ^5.0.0
 
 # dependency_overrides:
 #   analyzer: "0.40.6"
@@ -81,6 +83,7 @@ flutter:
     - assets/icon/icon.svg
     - assets/icon/foreground.svg
     - assets/icon/foreground_no_border.svg
+    - assets/news.md
   #  - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

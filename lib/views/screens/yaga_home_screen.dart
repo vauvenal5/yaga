@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/tab_manager.dart';
+import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/home_view.dart';
 import 'package:yaga/views/screens/browse_view.dart';
+import 'package:yaga/views/widgets/yaga_about_dialog.dart';
 
 //todo: this has to be renamed
 enum YagaHomeTab { grid, folder }
@@ -42,6 +46,8 @@ class _YagaHomeScreenState extends State<YagaHomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    _showNewsDialog(context);
+
     return StreamBuilder<YagaHomeTab>(
       initialData: YagaHomeTab.grid,
       stream: getIt.get<TabManager>().tabChangedCommand,
@@ -61,5 +67,27 @@ class _YagaHomeScreenState extends State<YagaHomeScreen>
       default:
         return 0;
     }
+  }
+
+  void _showNewsDialog(BuildContext context) {
+    Future.delayed(Duration.zero, () async {
+      final sharedPrefService = getIt.get<SharedPreferencesService>();
+      final version = getIt.get<PackageInfo>().version;
+
+      if (sharedPrefService
+          .loadPreferenceFromString(GlobalSettingsManager.newsSeenVersion)
+          .value !=
+          version) {
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) => YagaAboutDialog(),
+        ).whenComplete(
+              () => sharedPrefService.savePreferenceToString(
+            GlobalSettingsManager.newsSeenVersion
+                .rebuild((b) => b..value = version),
+          ),
+        );
+      }
+    });
   }
 }

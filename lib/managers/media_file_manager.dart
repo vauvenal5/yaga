@@ -4,22 +4,17 @@ import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/media_file_service.dart';
 
 class MediaFileManager implements FileSubManager {
-
   final MediaFileService _mediaFileService;
-
 
   MediaFileManager(this._mediaFileService);
 
   @override
-  Future<NcFile> copyFile(NcFile file, Uri destination, {bool overwrite = false}) {
-    // TODO: implement copyFile
-    throw UnimplementedError();
+  Future<NcFile> deleteFile(NcFile file, {required bool local}) {
+    return deleteFiles(List.filled(1, file)).then((value) => value.first);
   }
 
-  @override
-  Future<NcFile> deleteFile(NcFile file, {required bool local}) {
-    // TODO: implement copyFile
-    throw UnimplementedError();
+  Future<List<NcFile>> deleteFiles(List<NcFile> files) {
+    return _mediaFileService.deleteFile(files);
   }
 
   @override
@@ -34,12 +29,20 @@ class MediaFileManager implements FileSubManager {
   }
 
   @override
-  Future<NcFile> moveFile(NcFile file, Uri destination, {bool overwrite = false}) {
-    // TODO: implement moveFile
+  // todo: currently this is reusing the file-scheme which is meant for local access probably should use a different one?
+  String get scheme => _mediaFileService.scheme;
+
+  @override
+  Future<NcFile> copyFile(NcFile file, Uri destination,
+      {bool overwrite = false}) {
+    // TODO: implement copyFile
     throw UnimplementedError();
   }
 
   @override
-  // todo: currently this is reusing the file-scheme which is meant for local access probably should use a different one?
-  String get scheme => _mediaFileService.scheme;
+  Future<NcFile> moveFile(NcFile file, Uri destination,
+      {bool overwrite = false}) {
+    // TODO: implement moveFile
+    throw UnimplementedError();
+  }
 }

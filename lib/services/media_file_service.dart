@@ -10,8 +10,8 @@ import 'package:yaga/services/uri_name_resolver.dart';
 import 'package:yaga/utils/ncfile_stream_extensions.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
-class MediaFileService extends Service<MediaFileService> implements UriNameResolver {
-
+class MediaFileService extends Service<MediaFileService>
+    implements UriNameResolver {
   final SystemLocationService _systemLocationService;
 
   Map<String, AssetPathEntity> albums = {};
@@ -19,12 +19,12 @@ class MediaFileService extends Service<MediaFileService> implements UriNameResol
   MediaFileService(this._systemLocationService);
 
   Stream<NcFile> listFiles(Uri uri) {
-    if(uri.path == "/") {
+    if (uri.path == "/") {
       return _fetchAlbums(uri);
     }
 
     //todo: this is a POC state; clean everything up!
-    if(albums.containsKey(getNameFromUri(uri))) {
+    if (albums.containsKey(getNameFromUri(uri))) {
       return _fetchAlbum(uri);
     }
 
@@ -34,30 +34,38 @@ class MediaFileService extends Service<MediaFileService> implements UriNameResol
   }
 
   Stream<NcFile> _fetchAlbums(Uri uri) {
-    return PhotoManager.getAssetPathList(type: RequestType.image).asStream()
+    return PhotoManager.getAssetPathList(type: RequestType.image)
+        .asStream()
         .doOnData((event) => albums = {})
         .flatMap((value) => Stream.fromIterable(value))
         .doOnData((event) => albums.putIfAbsent(event.id, () => event))
-        .map((event) =>
-        NcFile.directory(
+        .map(
+          (event) => NcFile.directory(
             fromUri(uri: uri, path: "/${event.id}"),
             event.name,
             upstreamId: event.id,
-        ),);
+          ),
+        );
   }
 
   Stream<NcFile> _fetchAlbum(Uri uri) {
     final album = albums[getNameFromUri(uri)];
 
-    if(album == null) {
+    if (album == null) {
       return const Stream.empty();
     }
 
     // todo: here we fetch all assets, this probably can be improved by making better use of MediaStore API regarding sorting and performance
-    return album.getAssetListRange(start: 0, end: album.assetCount).asStream()
+    return album
+        .getAssetListRange(start: 0, end: album.assetCount)
+        .asStream()
         .flatMap((files) => Stream.fromIterable(files))
         .asyncMap((event) async {
-      var file = NcFile.file(fromUri(uri: uri, path: "${event.relativePath}${event.title!}"), event.title!, event.mimeType);
+      final file = NcFile.file(
+        fromUri(uri: uri, path: "${event.relativePath}${event.title!}"),
+        event.title!,
+        event.mimeType,
+      );
       file.upstreamId = event.id;
       file.lastModified = event.modifiedDateTime;
       file.localFile = await _createLocalFile(file.uri);
@@ -75,7 +83,7 @@ class MediaFileService extends Service<MediaFileService> implements UriNameResol
   Uri getHumanReadableForm(Uri uri) {
     var id = getNameFromUri(uri);
 
-    if(albums.containsKey(id)) {
+    if (albums.containsKey(id)) {
       return fromUri(uri: uri, path: "/${albums[id]!.name}");
     }
 
@@ -85,4 +93,13 @@ class MediaFileService extends Service<MediaFileService> implements UriNameResol
   @override
   String get scheme => _systemLocationService.internalStorage.origin.scheme;
 
+  Future<List<NcFile>> deleteFile(List<NcFile> files) {
+    return PhotoManager.editor
+        .deleteWithIds(files.map((file) => file.upstreamId!).toList())
+        .then(
+          (deletedIds) => files
+              .where((file) => deletedIds.contains(file.upstreamId))
+              .toList(),
+        );
+  }
 }

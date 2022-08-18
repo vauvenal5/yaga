@@ -45,19 +45,30 @@ class YagaAboutDialog extends StatelessWidget {
           },
         ),
         Align(
-            alignment: Alignment.topLeft,
-            child: TextButton.icon(
-              onPressed: () =>
-                  launchUrlString("https://vauvenal5.github.io/yaga-docs/"),
-              icon: Icon(Icons.book_outlined),
-              label: const Text("Read the docs"),
-            )),
+          alignment: Alignment.topLeft,
+          child: TextButton.icon(
+            onPressed: () =>
+                launchUrlString("https://vauvenal5.github.io/yaga-docs/"),
+            icon: const Icon(Icons.book_outlined),
+            label: const Text("Read the docs"),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topLeft,
+          child: TextButton.icon(
+            onPressed: () => launchUrlString(
+              "https://vauvenal5.github.io/yaga-docs/privacy/",
+            ),
+            icon: const Icon(Icons.policy_outlined),
+            label: const Text("Privacy Policy"),
+          ),
+        ),
         Align(
           alignment: Alignment.topLeft,
           child: TextButton.icon(
             onPressed: () =>
                 launchUrlString("https://github.com/vauvenal5/yaga/issues"),
-            icon: Icon(Icons.bug_report_outlined),
+            icon: const Icon(Icons.bug_report_outlined),
             label: const Text("Report a bug"),
           ),
         ),

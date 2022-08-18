@@ -6,6 +6,6 @@
 - local delete is supported but requires user confirmation
 - on Android 12 (API 31+) you can assign MANAGE_MEDIA rights to avoid delete confirmation dialog
 - SD card support is broken
-- file provider for other apps is fixed
+- file provider for other apps fixed
 - about app dialog was updated to support news
-- privacy policy link added to app
+- privacy policy link added

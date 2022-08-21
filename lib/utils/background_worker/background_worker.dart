@@ -29,6 +29,7 @@ class BackgroundWorker {
       RxCommand.createSync((param) => param);
 
   final Map<String, Function(BackgroundDownloadedRequest)> handlers = {};
+  StreamSubscription? _initDoneSubscription;
 
   BackgroundWorker(this._nextCloudManager, this._selfSignedCertHandler);
 
@@ -96,9 +97,13 @@ class BackgroundWorker {
       return;
     }
 
-    service.on(BackgroundCommands.initDone).listen(
+    //double check old init subscription was canceled
+    await _initDoneSubscription?.cancel();
+    _initDoneSubscription = service.on(BackgroundCommands.initDone).listen(
       (event) {
         _logger.info("Inited Message: $ncFileIdentifier");
+        // as soon as init is done, we do not need the subscription anymore
+        _initDoneSubscription?.cancel();
         _sendDownloadRequest(fileRequest.file);
       },
     );

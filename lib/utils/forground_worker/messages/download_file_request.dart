@@ -3,10 +3,10 @@ import 'package:yaga/utils/forground_worker/messages/message.dart';
 
 class DownloadFileRequest extends Message {
   final NcFile file;
-  bool overrideGlobalPersistFlag;
+  bool forceDownload;
 
   DownloadFileRequest(
     this.file, {
-    this.overrideGlobalPersistFlag = false,
+    this.forceDownload = false,
   }) : super("DownloadFileRequest");
 }

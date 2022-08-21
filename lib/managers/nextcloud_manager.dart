@@ -133,6 +133,7 @@ class NextCloudManager {
 
   Stream<NextCloudLoginData> _createLoginDataPersisStream(
       NextCloudLoginData data) {
+    //todo: Background: can we persist this as a json? json support was added as part of the background worker
     return ForkJoinStream.list([
       _secureStorageService
           .savePreference(NextCloudLoginDataKeys.server, data.server.toString())

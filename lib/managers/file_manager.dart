@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/media_file_manager.dart';
+import 'package:yaga/model/fetched_file.dart';
+import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_request.dart';
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
@@ -71,5 +75,24 @@ class FileManager extends FileManagerBase {
     //         _mediaFileManager.moveFile(event.files.first, event.destination);
     //       }
     // });
+  }
+
+  Future<void> downloadFile(DownloadFileRequest request) async {
+    final NcFile ncFile = request.file;
+
+    // if file exists locally and download is not forced then load the local file
+    if (!request.forceDownload &&
+        ncFile.localFile != null &&
+        await ncFile.localFile!.file.exists()) {
+      ncFile.localFile!.exists = true;
+      fetchedFileCommand(
+        FetchedFile(
+          ncFile,
+          await (ncFile.localFile!.file as File).readAsBytes(),
+        ),
+      );
+    } else {
+      downloadImageCommand(request);
+    }
   }
 }

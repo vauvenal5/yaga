@@ -37,6 +37,15 @@ class NextCloudService
     return this;
   }
 
+  Future<NextCloudService> initBackgroundable(
+    NextCloudLoginData lastLoginData,
+  ) async {
+    if (lastLoginData.server != null) {
+      await login(lastLoginData);
+    }
+    return this;
+  }
+
   Future<NcOrigin> login(NextCloudLoginData loginData) async {
     //todo: can we get rid of the client factory?
     _client = nextCloudClientFactory.createNextCloudClient(
@@ -84,7 +93,8 @@ class NextCloudService
             .flatMap((value) => Stream.fromIterable(value))
             .where(
               (event) =>
-                  event.isDirectory || event.mimeType != null && event.mimeType!.startsWith("image"),
+                  event.isDirectory ||
+                  event.mimeType != null && event.mimeType!.startsWith("image"),
             )
             .map((webDavFile) {
           logger.info("Mapping ${webDavFile.path}");

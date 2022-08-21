@@ -7,6 +7,7 @@ import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
+import 'package:yaga/utils/background_worker/background_worker.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
@@ -107,25 +108,9 @@ class NextcloudFileManagerHandler
     SendPort isolateToMain,
   ) async {
     final NcFile ncFile = request.file;
-    if (ncFile.localFile != null && await ncFile.localFile!.file.exists()) {
-      ncFile.localFile!.exists = true;
-      isolateToMain.send(FetchedFile(
-        ncFile,
-        await (ncFile.localFile!.file as File).readAsBytes(),
-      ));
-      return;
-    }
 
+    // fetch for temp use only
     getIt.get<NextCloudService>().downloadImage(ncFile.uri).then((value) async {
-      if (request.overrideGlobalPersistFlag ||
-          getIt.get<IsolatedGlobalSettingsManager>().autoPersist.value) {
-        ncFile.localFile!.file = await getIt.get<LocalFileService>().createFile(
-            file: ncFile.localFile!.file as File,
-            bytes: value,
-            lastModified: ncFile.lastModified);
-        ncFile.localFile!.exists = true;
-      }
-
       isolateToMain.send(FetchedFile(ncFile, value));
     });
   }

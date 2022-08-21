@@ -4,15 +4,14 @@ import 'dart:isolate';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
+import 'package:yaga/utils/background_worker/messages/background_init_msg.dart';
 
-class InitMsg {
+class InitMsg extends BackgroundInitMsg {
   final SendPort sendPort;
   final Directory externalPath;
   final Directory tmpPath;
   final List<Directory> externalPaths;
-  final NextCloudLoginData lastLoginData;
   final MappingPreference? mapping;
-  final String fingerprint;
   final BoolPreference autoPersist;
 
   InitMsg(
@@ -20,9 +19,9 @@ class InitMsg {
     this.externalPath,
     this.tmpPath,
     this.externalPaths,
-    this.lastLoginData,
+    NextCloudLoginData lastLoginData,
     this.mapping,
-    this.fingerprint,
+    String fingerprint,
     this.autoPersist,
-  );
+  ): super(lastLoginData, fingerprint);
 }

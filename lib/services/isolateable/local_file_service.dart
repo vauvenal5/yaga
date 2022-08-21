@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:mime/mime.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
@@ -30,6 +30,11 @@ class LocalFileService extends Service<LocalFileService>
     return this;
   }
 
+  Future<LocalFileService> initBackgroundable() async {
+    _permissionState = PermissionStatus.granted;
+    return this;
+  }
+
   Future<File> createFile(
       {required File file,
       required List<int> bytes,
@@ -48,7 +53,7 @@ class LocalFileService extends Service<LocalFileService>
     //todo: null exception comes from webview cache files
     //todo: subtask1: local files in cache and default app dir should be in a user@cloud.bla folder
     //todo: subtask3: webview should not cache data
-    if (file != null && file.existsSync()) {
+    if (file.existsSync()) {
       file.deleteSync(recursive: true);
     }
   }
@@ -65,17 +70,17 @@ class LocalFileService extends Service<LocalFileService>
   //todo: is this filtering here at the right place?
   bool _checkMimeType(String path) {
     final String type = lookupMimeType(path) ?? '';
-    return type != null && type.startsWith("image");
+    return type.startsWith("image");
   }
 
   void copyFile(NcFile file, Uri destination, {bool overwrite = false}) {
-    (file.localFile as File).copySync(
+    (file.localFile! as File).copySync(
       _checkExists(destination, file.name, overwrite),
     );
   }
 
   void moveFile(NcFile file, Uri destination, {bool overwrite = false}) {
-    (file.localFile as File).renameSync(
+    (file.localFile! as File).renameSync(
       _checkExists(destination, file.name, overwrite),
     );
   }

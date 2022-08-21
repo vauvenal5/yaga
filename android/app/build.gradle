@@ -69,12 +69,21 @@ android {
     flavorDimensions "deploy"
 
     productFlavors {
+        dev {
+            dimension "deploy"
+            applicationIdSuffix '.dev'
+            versionNameSuffix "-dev"
+            resValue "string", "app_name", "Yaga Dev"
+        }
+
         play {
             dimension "deploy"
+            resValue "string", "app_name", "Yaga"
         }
 
         fdroid {
             dimension "deploy"
+            resValue "string", "app_name", "Yaga"
             signingConfig null
         }
     }

@@ -39,6 +39,12 @@ class SelfSignedCertHandler extends HttpOverrides
     return this;
   }
 
+  Future<SelfSignedCertHandler> initBackgroundable(String fingerprint) async {
+    _fingerprint = fingerprint;
+    HttpOverrides.global = this;
+    return this;
+  }
+
   String get fingerprint => _fingerprint ?? '';
 
   @override

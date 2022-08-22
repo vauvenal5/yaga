@@ -60,7 +60,7 @@ class FileManager extends FileManagerBase {
           fileUpdateMessage(FileUpdateMsg("", file));
         }
       }).whenComplete(
-        () => filesActionDoneCommand(FilesActionDone(event.key)),
+        () => filesActionDoneCommand(FilesActionDone(event.key, event.sourceDir)),
       );
     });
 

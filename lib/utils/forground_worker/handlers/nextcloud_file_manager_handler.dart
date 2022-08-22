@@ -1,21 +1,18 @@
-import 'dart:io';
 import 'dart:isolate';
+
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
-import 'package:yaga/managers/isolateable/isolated_global_settings_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
-import 'package:yaga/utils/background_worker/background_worker.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_complete.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/service_locator.dart';
 
@@ -54,13 +51,15 @@ class NextcloudFileManagerHandler
     );
   }
 
+  //todo: background: this should now be unused
   void handleDelete(DeleteFilesRequest message, SendPort isolateToMain) {
     getIt
         .get<IsolatedFileManager>()
         .deleteFiles(message.files, local: message.local)
-        .whenComplete(() => isolateToMain.send(FilesActionDone(message.key)));
+        .whenComplete(() => isolateToMain.send(FilesActionDone(message.key, message.sourceDir)));
   }
 
+  //todo: background: this should now be unused
   void handleDestinationAction(
     DestinationActionFilesRequest message,
     SendPort isolateToMain,
@@ -81,14 +80,7 @@ class NextcloudFileManagerHandler
 
     action
         .whenComplete(
-          () => isolateToMain.send(FilesActionDone(message.key)),
-        )
-        .whenComplete(
-          () => fileManager.listFileLists(
-            message.key,
-            message.destination,
-            message.config,
-          ),
+          () => isolateToMain.send(FilesActionDone(message.key, message.destination)),
         );
   }
 

@@ -88,6 +88,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
       return;
     }
 
+    //todo: background: check behavior if dialog gets closed while background action still running
     if (result == SelectionViewMenu.delete) {
       showDialog(
         context: context,

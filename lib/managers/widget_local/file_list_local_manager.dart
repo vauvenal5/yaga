@@ -311,7 +311,6 @@ class FileListLocalManager {
         key: managerKey,
         files: selected,
         destination: destination,
-        config: _sortConfig,
         overwrite: overwrite,
         sourceDir: uri,
       ));
@@ -321,7 +320,6 @@ class FileListLocalManager {
         key: managerKey,
         files: selected,
         destination: destination,
-        config: _sortConfig,
         action: DestinationAction.move,
         overwrite: overwrite,
         sourceDir: uri,
@@ -336,6 +334,12 @@ class FileListLocalManager {
         .where((event) => event.key == managerKey)
         .listen((event) {
       jobDone.complete(true);
+
+      _fileManager.fetchFileListCommand(FileListRequest(
+        managerKey,
+        event.destination,
+        _sortConfig,
+      ));
     });
 
     return jobDone.future
@@ -344,7 +348,7 @@ class FileListLocalManager {
   }
 
   void cancelSelectionAction() {
-    _worker.sendRequest(FilesActionDone(managerKey));
+    _worker.sendRequest(FilesActionDone(managerKey, _uri));
   }
 
   bool get isRemoteUri => getIt.get<NextCloudService>().isUriOfService(uri);

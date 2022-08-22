@@ -4,10 +4,12 @@ import 'package:get_it/get_it.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:yaga/managers/file_manager.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
+import 'package:yaga/managers/isolateable/file_action_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_global_settings_manager.dart';
 import 'package:yaga/managers/isolateable/isolated_settings_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
+import 'package:yaga/managers/isolateable/nextcloud_background_file_manager.dart';
 import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/managers/isolateable/sort_manager.dart';
 import 'package:yaga/managers/isolateable/sync_manager.dart';
@@ -24,8 +26,10 @@ import 'package:yaga/services/media_file_service.dart';
 import 'package:yaga/services/name_exchange_service.dart';
 import 'package:yaga/services/secure_storage_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
-import 'package:yaga/utils/background_worker/messages/background_init_msg.dart';
+import 'package:yaga/utils/background_worker/background_channel.dart';
 import 'package:yaga/utils/background_worker/background_worker.dart';
+import 'package:yaga/utils/background_worker/messages/background_init_msg.dart';
+import 'package:yaga/utils/background_worker/work_tracker.dart';
 import 'package:yaga/utils/forground_worker/bridges/file_manager_bridge.dart';
 import 'package:yaga/utils/forground_worker/bridges/nextcloud_manager_bridge.dart';
 import 'package:yaga/utils/forground_worker/bridges/settings_manager_bridge.dart';
@@ -139,9 +143,9 @@ void setupServiceLocator() {
   );
 
   getIt.registerSingletonAsync(() async => BackgroundWorker(
-    await getIt.getAsync<NextCloudManager>(),
-    await getIt.getAsync<SelfSignedCertHandler>(),
-  ).init());
+        await getIt.getAsync<NextCloudManager>(),
+        await getIt.getAsync<SelfSignedCertHandler>(),
+      ).init());
 
   getIt.registerSingletonAsync<FileManagerBridge>(
     () async => FileManagerBridge(
@@ -155,13 +159,12 @@ void setupServiceLocator() {
   getIt.registerSingletonAsync(() async => PackageInfo.fromPlatform());
 
   getIt.registerSingletonAsync(() async => NavigationManager());
-
-
 }
 
 //todo: Background: clean up service init for background worker
 void setupBackgroundServiceLocator(
   BackgroundInitMsg init,
+  BackgroundChannel channel,
 ) {
   getIt.registerSingletonAsync<SelfSignedCertHandler>(
     () async => SelfSignedCertHandler().initBackgroundable(init.fingerprint),
@@ -182,6 +185,23 @@ void setupBackgroundServiceLocator(
     () async => NextCloudService(
       await getIt.getAsync<NextCloudClientFactory>(),
     ).initBackgroundable(init.lastLoginData),
+  );
+
+  //Managers
+  getIt.registerSingletonAsync<FileActionManager>(
+    () async => FileActionManager().initBackground(channel),
+  );
+
+  getIt.registerSingletonAsync<NextcloudBackgroundFileManager>(
+    () async => NextcloudBackgroundFileManager(
+      await getIt.getAsync<NextCloudService>(),
+      await getIt.getAsync<LocalFileService>(),
+      await getIt.getAsync<FileActionManager>(),
+    ).initBackground(),
+  );
+
+  getIt.registerSingletonAsync<WorkTracker>(
+      () async => WorkTracker(),
   );
 }
 
@@ -276,6 +296,4 @@ void setupIsolatedServiceLocator(
       registry,
     ),
   );
-
-
 }

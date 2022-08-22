@@ -1,14 +1,14 @@
-import 'package:yaga/utils/background_worker/messages/background_download_request.dart';
+import 'package:yaga/model/nc_file.dart';
+import 'package:yaga/utils/forground_worker/messages/single_file_message.dart';
 
-class BackgroundDownloadedRequest extends BackgroundDownloadRequest {
+class BackgroundDownloadedRequest extends SingleFileMessage {
+  static const String jsonTypeConst = "BackgroundDownloadedRequest";
   static const String _jsonSuccess = "success";
 
   final bool success;
 
-  BackgroundDownloadedRequest(
-      {required this.success,
-      required BackgroundDownloadRequest request})
-      : super(uri: request.uri, localFileUri: request.localFileUri, lastModified: request.lastModified);
+  BackgroundDownloadedRequest({required NcFile file, required this.success})
+      : super(jsonTypeConst, jsonTypeConst, file);
 
   BackgroundDownloadedRequest.fromJson(Map<String, dynamic> json)
       : success = json[_jsonSuccess] as bool,

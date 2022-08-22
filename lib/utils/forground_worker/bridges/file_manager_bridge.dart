@@ -23,7 +23,7 @@ class FileManagerBridge {
     this._mediaFileManager,
     this._backgroundWorker,
   ) {
-    _worker.isolateResponseCommand
+    _backgroundWorker.isolateResponseCommand
         .where((event) => event is ImageUpdateMsg)
         .map((event) => event as ImageUpdateMsg)
         .listen((msg) => _fileManager.updateImageCommand(msg.file));
@@ -34,6 +34,8 @@ class FileManagerBridge {
         .listen((event) => _fileManager.fetchedFileCommand(event));
 
     _backgroundWorker.isolateResponseCommand
+        .where((event) => event is FetchedFile)
+        .map((event) => event as FetchedFile)
         .listen((value) => _fileManager.fetchedFileCommand(value));
 
     _worker.isolateResponseCommand
@@ -41,12 +43,12 @@ class FileManagerBridge {
         .map((event) => event as FileListMessage)
         .listen((event) => _fileManager.updateFilesCommand(event));
 
-    _worker.isolateResponseCommand
+    _backgroundWorker.isolateResponseCommand
         .where((event) => event is FilesActionDone)
         .map((event) => event as FilesActionDone)
         .listen((event) => _fileManager.filesActionDoneCommand(event));
 
-    _worker.isolateResponseCommand
+    _backgroundWorker.isolateResponseCommand
         .where((event) => event is FileUpdateMsg)
         .map((event) => event as FileUpdateMsg)
         .listen((event) => _fileManager.fileUpdateMessage(event));
@@ -59,7 +61,7 @@ class FileManagerBridge {
 
       if (request.forceDownload || autoPersist.value) {
         // in case persistence is active download in true background
-        _backgroundWorker.downloadFile(request);
+        _backgroundWorker.sendRequest(request);
       } else {
         // otherwise download in foreground worker
         _worker.sendRequest(request);
@@ -75,6 +77,6 @@ class FileManagerBridge {
 
     _fileManager.filesActionCommand
         .where((event) => event.sourceDir.scheme != _mediaFileManager.scheme)
-        .listen((event) => _worker.sendRequest(event));
+        .listen((event) => _backgroundWorker.sendRequest(event));
   }
 }

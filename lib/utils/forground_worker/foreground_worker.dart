@@ -85,7 +85,11 @@ class ForegroundWorker {
   }
 
   void sendRequest(Message request) {
-    isolateReadyFuture.then((value) => _mainToIsolate?.send(request));
+    if(_isolateReady.isCompleted) {
+      _mainToIsolate?.send(request);
+    } else {
+      isolateReadyFuture.then((value) => _mainToIsolate?.send(request));
+    }
   }
 
   static Future<void> _workerMain(dynamic message) async {

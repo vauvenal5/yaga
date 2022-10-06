@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:yaga/managers/file_manager_base.dart';
+import 'package:yaga/managers/file_manager/file_manager_base.dart';
+import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_background_file_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
-import 'package:yaga/managers/file_manager/isolateable/nextcloud_background_file_manager.dart';
 import 'package:yaga/managers/isolateable/sync_manager.dart';
 import 'package:yaga/model/local_file.dart';
 import 'package:yaga/model/nc_file.dart';

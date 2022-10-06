@@ -1,6 +1,8 @@
 import 'package:yaga/model/nc_file.dart';
 
-abstract class FileSubManager {
+/// FileServiceManagers are providing basic file manager functions
+/// encapsulating required actions for one specific source.
+abstract class FileServiceManager {
   final String scheme = "";
 
   Stream<NcFile> listFiles(Uri uri, {bool recursive = false});

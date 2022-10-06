@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:mime/mime.dart';
-import 'package:yaga/managers/file_manager_base.dart';
-import 'package:yaga/managers/file_sub_manager.dart';
+import 'package:yaga/managers/file_manager/file_manager_base.dart';
+import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/local_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
@@ -15,7 +15,7 @@ import 'package:rxdart/rxdart.dart';
 //todo: remove? this file manage is currently not used since we relay on MediaStore API for local images
 class LocalFileManager
     with Isolateable<LocalFileManager>
-    implements FileSubManager {
+    implements FileServiceManager {
   final FileManagerBase _fileManager;
   final LocalFileService _localFileService;
   final SystemLocationService _systemPathService;

@@ -1,9 +1,9 @@
-import 'package:yaga/managers/file_sub_manager.dart';
+import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 
 import 'package:yaga/services/media_file_service.dart';
 
-class MediaFileManager implements FileSubManager {
+class MediaFileManager implements FileServiceManager {
   final MediaFileService _mediaFileService;
 
   MediaFileManager(this._mediaFileService);

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:nextcloud/nextcloud.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:yaga/managers/file_manager_base.dart';
+import 'package:yaga/managers/file_manager/file_manager_base.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/background_worker/background_channel.dart';
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
@@ -33,7 +33,7 @@ class FileActionManager extends FileManagerBase {
   Future<void> deleteFiles(List<NcFile> files, {required bool local}) async =>
       _cancelableAction(
         files,
-        (file) async => fileSubManagers[file.uri.scheme]?.deleteFile(
+        (file) async => fileServiceManagers[file.uri.scheme]?.deleteFile(
           file,
           local: local,
         ),
@@ -43,7 +43,7 @@ class FileActionManager extends FileManagerBase {
           {required bool overwrite}) async =>
       _cancelableAction(
         files,
-        (file) async => fileSubManagers[file.uri.scheme]
+        (file) async => fileServiceManagers[file.uri.scheme]
             ?.copyFile(file, destination, overwrite: overwrite),
         filter: (file) => _destinationFilter(file, destination),
       );
@@ -52,7 +52,7 @@ class FileActionManager extends FileManagerBase {
           {required bool overwrite}) async =>
       _cancelableAction(
         files,
-        (file) async => fileSubManagers[file.uri.scheme]
+        (file) async => fileServiceManagers[file.uri.scheme]
             ?.moveFile(file, destination, overwrite: overwrite)
             .then((value) => updateFileList(file)),
         filter: (file) => _destinationFilter(file, destination),

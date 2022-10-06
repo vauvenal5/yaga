@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:yaga/managers/file_manager_base.dart';
-import 'package:yaga/managers/media_file_manager.dart';
+import 'package:yaga/managers/file_manager/file_manager_base.dart';
+import 'package:yaga/managers/file_service_manager/media_file_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';

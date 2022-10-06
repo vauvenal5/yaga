@@ -1,6 +1,6 @@
 import 'package:yaga/managers/file_manager/file_manager.dart';
+import 'package:yaga/managers/file_service_manager/media_file_manager.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
-import 'package:yaga/managers/media_file_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/background_worker/background_worker.dart';

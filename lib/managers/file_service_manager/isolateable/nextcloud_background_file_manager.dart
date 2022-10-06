@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:yaga/managers/file_manager_base.dart';
-import 'package:yaga/managers/file_sub_manager.dart';
+import 'package:yaga/managers/file_manager/file_manager_base.dart';
+import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/logger.dart';
 
-class NextcloudBackgroundFileManager implements FileSubManager {
+class NextcloudBackgroundFileManager implements FileServiceManager {
   final _logger = YagaLogger.getLogger(NextcloudBackgroundFileManager);
   @protected
   final NextCloudService nextCloudService;

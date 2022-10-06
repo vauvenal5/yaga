@@ -1,5 +1,5 @@
 import 'package:rx_command/rx_command.dart';
-import 'package:yaga/managers/file_sub_manager/isolateable/nextcloud_file_manger.dart';
+import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:yaga/managers/file_manager_base.dart';
 import 'package:yaga/managers/file_sub_manager.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -7,14 +8,17 @@ import 'package:yaga/utils/logger.dart';
 
 class NextcloudBackgroundFileManager implements FileSubManager {
   final _logger = YagaLogger.getLogger(NextcloudBackgroundFileManager);
-  final NextCloudService _nextCloudService;
-  final LocalFileService _localFileService;
-  final FileManagerBase _fileManager;
+  @protected
+  final NextCloudService nextCloudService;
+  @protected
+  final LocalFileService localFileService;
+  @protected
+  final FileManagerBase fileManager;
 
-  NextcloudBackgroundFileManager(this._nextCloudService, this._localFileService, this._fileManager);
+  NextcloudBackgroundFileManager(this.nextCloudService, this.localFileService, this.fileManager);
 
   Future<NextcloudBackgroundFileManager> initBackground() async {
-    _fileManager.registerFileManager(this);
+    fileManager.registerFileManager(this);
     return this;
   }
 
@@ -23,49 +27,50 @@ class NextcloudBackgroundFileManager implements FileSubManager {
   @override
   Future<NcFile> deleteFile(NcFile file, {required bool local}) async {
     if (local) {
-      _localFileService.deleteFile(file.localFile!.file);
+      localFileService.deleteFile(file.localFile!.file);
       file.localFile!.exists = false;
-      _fileManager.updateImageCommand(file);
+      fileManager.updateImageCommand(file);
       return file;
     }
 
-    return _nextCloudService
+    return nextCloudService
         .deleteFile(file)
-        .then((value) => _deleteLocalFile(file));
+        .then((value) => deleteLocalFile(file));
   }
 
-  Future<NcFile> _deleteLocalFile(NcFile file) async {
+  @protected
+  Future<NcFile> deleteLocalFile(NcFile file) async {
     _logger.warning("Removing local file! (${file.uri.path})");
-    _localFileService.deleteFile(file.localFile!.file);
-    _localFileService.deleteFile(file.previewFile!.file);
-    _fileManager.updateFileList(file);
+    localFileService.deleteFile(file.localFile!.file);
+    localFileService.deleteFile(file.previewFile!.file);
+    fileManager.updateFileList(file);
     return file;
   }
 
   @override
   Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false}) {
-    // TODO: implement listFileList
+    // not supported in true background since listing files makes only sense when app in foreground
     throw UnimplementedError();
   }
 
   @override
   Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
-    // TODO: implement listFiles
+    // not supported in true background since listing files makes only sense when app in foreground
     throw UnimplementedError();
   }
 
   @override
   Future<NcFile> copyFile(NcFile file, Uri destination,
       {bool overwrite = false}) =>
-      _nextCloudService.copyFile(file, destination, overwrite: overwrite);
+      nextCloudService.copyFile(file, destination, overwrite: overwrite);
 
   @override
   Future<NcFile> moveFile(NcFile file, Uri destination,
       {bool overwrite = false}) =>
-      _nextCloudService.moveFile(file, destination, overwrite: overwrite);
+      nextCloudService.moveFile(file, destination, overwrite: overwrite);
 
   @override
-  String get scheme => _nextCloudService.scheme;
+  String get scheme => nextCloudService.scheme;
 
 
 }

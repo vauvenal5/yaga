@@ -1,4 +1,4 @@
-import 'package:yaga/managers/file_manager.dart';
+import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/media_file_manager.dart';
 import 'package:yaga/model/fetched_file.dart';

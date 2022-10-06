@@ -5,7 +5,7 @@ import 'dart:ui';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:rx_command/rx_command.dart';
-import 'package:yaga/managers/isolateable/file_action_manager.dart';
+import 'package:yaga/managers/file_manager/isolateable/file_action_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
@@ -168,7 +168,9 @@ class BackgroundWorker {
       final init = BackgroundInitMsg.fromJson(event);
       final channel = BackgroundChannel(ser);
       setupBackgroundServiceLocator(init, channel);
-      service.invoke(BackgroundCommands.initDone);
+      getIt.allReady().then(
+            (value) => service.invoke(BackgroundCommands.initDone),
+          );
     });
 
     service.on(BackgroundCommands.mainToWorker).listen((event) {
@@ -282,30 +284,28 @@ class BackgroundWorker {
 
     await _updateNotification(service);
 
-    getIt.allReady().then((_) {
-      getIt
-          .get<NextCloudService>()
-          .downloadImage(request.file.uri)
-          .then((value) async {
-        await getIt.get<LocalFileService>().createFile(
-              file: request.file.localFile!.file as File,
-              bytes: value,
-              lastModified: request.file.lastModified,
-            );
-        request.file.localFile!.exists = true;
+    getIt
+        .get<NextCloudService>()
+        .downloadImage(request.file.uri)
+        .then((value) async {
+      await getIt.get<LocalFileService>().createFile(
+            file: request.file.localFile!.file as File,
+            bytes: value,
+            lastModified: request.file.lastModified,
+          );
+      request.file.localFile!.exists = true;
 
-        await _handleResult(
-          service: service,
-          request: request,
-          success: true,
-        );
-      }).catchError((error) async {
-        await _handleResult(
-          service: service,
-          request: request,
-          success: false,
-        );
-      });
+      await _handleResult(
+        service: service,
+        request: request,
+        success: true,
+      );
+    }).catchError((error) async {
+      await _handleResult(
+        service: service,
+        request: request,
+        success: false,
+      );
     });
   }
 

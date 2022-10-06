@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:yaga/managers/file_manager.dart';
+import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';

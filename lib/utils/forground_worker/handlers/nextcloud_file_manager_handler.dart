@@ -1,7 +1,7 @@
 import 'dart:isolate';
 
-import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
-import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
+import 'package:yaga/managers/file_manager/isolateable/isolated_file_manager.dart';
+import 'package:yaga/managers/file_sub_manager/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';

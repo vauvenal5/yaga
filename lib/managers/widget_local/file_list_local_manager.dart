@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:rx_command/rx_command.dart';
 import 'package:uuid/uuid.dart';
-import 'package:yaga/managers/file_manager.dart';
+import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_file.dart';

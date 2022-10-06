@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
+import 'package:yaga/managers/file_manager/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/isolateable/sort_manager.dart';
 import 'package:yaga/model/sorted_file_list.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';

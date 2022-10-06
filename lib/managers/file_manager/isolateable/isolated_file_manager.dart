@@ -1,7 +1,7 @@
 import 'dart:isolate';
 
 import 'package:rx_command/rx_command.dart';
-import 'package:yaga/managers/isolateable/file_action_manager.dart';
+import 'package:yaga/managers/file_manager/isolateable/file_action_manager.dart';
 import 'package:yaga/managers/isolateable/sort_manager.dart';
 import 'package:yaga/model/sort_config.dart';
 import 'package:yaga/model/sorted_file_list.dart';

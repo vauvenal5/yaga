@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:rx_command/rx_command.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -33,12 +32,5 @@ abstract class FileManagerBase {
   }
 
   //todo: fileManager refactoring: this method should not be callable from the UI
-  Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
-    //todo: throw when scheme is not registered
-    return fileServiceManagers[uri.scheme]?.listFiles(uri).flatMap((file) =>
-            file.isDirectory && recursive
-                ? listFiles(file.uri, recursive: recursive)
-                : Stream.value(file)) ??
-        const Stream.empty();
-  }
+  Stream<NcFile> listFiles(Uri uri, {bool recursive = false});
 }

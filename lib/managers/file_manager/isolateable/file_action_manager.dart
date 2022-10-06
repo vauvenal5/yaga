@@ -82,4 +82,10 @@ class FileActionManager extends FileManagerBase {
         )
         .last;
   }
+
+  @override
+  Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
+    // not supported in true background because not needed when app not in foreground
+    throw UnimplementedError();
+  }
 }

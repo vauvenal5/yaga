@@ -95,4 +95,10 @@ class FileManager extends FileManagerBase {
       downloadImageCommand(request);
     }
   }
+
+  @override
+  Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
+    // not supported in UI branch because to computational intensive
+    throw UnimplementedError();
+  }
 }

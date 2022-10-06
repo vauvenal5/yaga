@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_manager/isolateable/file_action_manager.dart';
 import 'package:yaga/managers/isolateable/sort_manager.dart';
+import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/sort_config.dart';
 import 'package:yaga/model/sorted_file_list.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
@@ -12,6 +13,7 @@ import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/image_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/logger.dart';
+import 'package:rxdart/rxdart.dart';
 
 class IsolatedFileManager extends FileActionManager
     with Isolateable<IsolatedFileManager> {
@@ -70,5 +72,15 @@ class IsolatedFileManager extends FileActionManager
         return previous;
       },
     ).then((value) => value);
+  }
+
+  @override
+  Stream<NcFile> listFiles(Uri uri, {bool recursive = false}) {
+    //todo: throw when scheme is not registered
+    return fileServiceManagers[uri.scheme]?.listFiles(uri).flatMap((file) =>
+      file.isDirectory && recursive
+        ? listFiles(file.uri, recursive: recursive)
+        : Stream.value(file)) ??
+        const Stream.empty();
   }
 }

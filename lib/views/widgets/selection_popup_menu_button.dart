@@ -160,7 +160,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
 
     if (result == SelectionViewMenu.download) {
       for (final file in fileListLocalManager.selected) {
-        getIt.get<FileManager>().downloadFile(
+        getIt.get<FileManager>().downloadImageCommand(
               DownloadFileRequest(file, forceDownload: true),
             );
       }

@@ -1,16 +1,14 @@
 import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/file_service_manager/media_file_manager.dart';
-import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
-import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/background_worker/background_worker.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 import 'package:yaga/utils/forground_worker/messages/image_update_msg.dart';
-import 'package:yaga/utils/service_locator.dart';
 
+//todo: slowly deprecate bridges; this is logic which belongs into the fileManager
 class FileManagerBridge {
   final FileManager _fileManager;
   final ForegroundWorker _worker;
@@ -53,30 +51,11 @@ class FileManagerBridge {
         .map((event) => event as FileUpdateMsg)
         .listen((event) => _fileManager.fileUpdateMessage(event));
 
-    _fileManager.downloadImageCommand.listen((request) async {
-      final autoPersist =
-          getIt.get<SharedPreferencesService>().loadPreferenceFromBool(
-                GlobalSettingsManager.autoPersist,
-              );
-
-      if (request.forceDownload || autoPersist.value) {
-        // in case persistence is active download in true background
-        _backgroundWorker.sendRequest(request);
-      } else {
-        // otherwise download in foreground worker
-        _worker.sendRequest(request);
-      }
-    });
-
     _fileManager.fetchFileListCommand
         .where((event) => event.uri.scheme != _mediaFileManager.scheme)
         .listen((event) => _worker.sendRequest(event));
 
     _fileManager.sortFilesListCommand
         .listen((value) => _worker.sendRequest(value));
-
-    _fileManager.filesActionCommand
-        .where((event) => event.sourceDir.scheme != _mediaFileManager.scheme)
-        .listen((event) => _backgroundWorker.sendRequest(event));
   }
 }

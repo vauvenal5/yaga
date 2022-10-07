@@ -3,8 +3,6 @@ import 'dart:isolate';
 import 'package:yaga/managers/file_manager/isolateable/isolated_file_manager.dart';
 import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/model/fetched_file.dart';
-import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
@@ -51,7 +49,6 @@ class NextcloudFileManagerHandler
     );
   }
 
-  //todo: background: this should now be unused
   void handleDelete(DeleteFilesRequest message, SendPort isolateToMain) {
     getIt
         .get<IsolatedFileManager>()
@@ -59,24 +56,11 @@ class NextcloudFileManagerHandler
         .whenComplete(() => isolateToMain.send(FilesActionDone(message.key, message.sourceDir)));
   }
 
-  //todo: background: this should now be unused
   void handleDestinationAction(
     DestinationActionFilesRequest message,
     SendPort isolateToMain,
   ) {
-    final fileManager = getIt.get<IsolatedFileManager>();
-
-    final action = message.action == DestinationAction.copy
-        ? fileManager.copyFiles(
-            message.files,
-            message.destination,
-            overwrite: message.overwrite,
-          )
-        : fileManager.moveFiles(
-            message.files,
-            message.destination,
-            overwrite: message.overwrite,
-          );
+    final action = getIt.get<IsolatedFileManager>().copyMoveRequest(message);
 
     action
         .whenComplete(
@@ -99,11 +83,10 @@ class NextcloudFileManagerHandler
     DownloadFileRequest request,
     SendPort isolateToMain,
   ) async {
-    final NcFile ncFile = request.file;
-
-    // fetch for temp use only
-    getIt.get<NextCloudService>().downloadImage(ncFile.uri).then((value) async {
-      isolateToMain.send(FetchedFile(ncFile, value));
+    getIt.get<IsolatedFileManager>()
+        .downloadFile(request.file, persist: request.persist)
+        .then((value) async {
+      isolateToMain.send(FetchedFile(request.file, value));
     });
   }
 }

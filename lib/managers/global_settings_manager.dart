@@ -47,6 +47,11 @@ class GlobalSettingsManager {
       ..title = "News Seen Version"
       ..value = "",
   );
+  static BoolPreference useBackground = BoolPreference((b) => b
+    ..key = ncSection.prepareKey("useBackground")
+    ..title = "File actions in background"
+    ..value = true,
+  );
 
   RxCommand<Preference, Preference> registerGlobalSettingCommand =
       RxCommand.createSync((param) => param);
@@ -103,6 +108,7 @@ class GlobalSettingsManager {
 
   Future<GlobalSettingsManager> init() async {
     registerGlobalSettingCommand(appSection);
+    registerGlobalSettingCommand(useBackground);
     registerGlobalSettingCommand(theme);
     registerGlobalSettingCommand(sendLogs);
 

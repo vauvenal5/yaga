@@ -8,8 +8,6 @@ import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_manager/isolateable/file_action_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
-import 'package:yaga/services/isolateable/local_file_service.dart';
-import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/background_worker/background_channel.dart';
 import 'package:yaga/utils/background_worker/background_commands.dart';
 import 'package:yaga/utils/background_worker/json_convertable.dart';
@@ -37,8 +35,6 @@ class BackgroundWorker {
 
   final RxCommand<Message, Message> isolateResponseCommand =
       RxCommand.createSync((param) => param);
-
-  StreamSubscription? _initDoneSubscription;
 
   BackgroundWorker(this._nextCloudManager, this._selfSignedCertHandler);
 
@@ -247,19 +243,8 @@ class BackgroundWorker {
     //todo: not unique enough; just tmp solution
     getIt.get<WorkTracker>().activeTasks[message.destination.toString()] =
         message;
-    final fileManager = getIt.get<FileActionManager>();
 
-    final action = message.action == DestinationAction.copy
-        ? fileManager.copyFiles(
-            message.files,
-            message.destination,
-            overwrite: message.overwrite,
-          )
-        : fileManager.moveFiles(
-            message.files,
-            message.destination,
-            overwrite: message.overwrite,
-          );
+    final action = getIt.get<FileActionManager>().copyMoveRequest(message);
 
     action
         .whenComplete(
@@ -284,17 +269,9 @@ class BackgroundWorker {
 
     await _updateNotification(service);
 
-    getIt
-        .get<NextCloudService>()
-        .downloadImage(request.file.uri)
+    getIt.get<FileActionManager>()
+        .downloadFile(request.file, persist: request.persist)
         .then((value) async {
-      await getIt.get<LocalFileService>().createFile(
-            file: request.file.localFile!.file as File,
-            bytes: value,
-            lastModified: request.file.lastModified,
-          );
-      request.file.localFile!.exists = true;
-
       await _handleResult(
         service: service,
         request: request,

@@ -107,6 +107,9 @@ void setupServiceLocator() {
       ));
   getIt.registerSingletonAsync(() async => FileManager(
         await getIt.getAsync<MediaFileManager>(),
+        await getIt.getAsync<SharedPreferencesService>(),
+        await getIt.getAsync<ForegroundWorker>(),
+        await getIt.getAsync<BackgroundWorker>(),
       ));
   getIt.registerSingletonAsync<NextcloudFileManager>(() async =>
       NextcloudFileManager(

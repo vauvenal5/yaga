@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:share/share.dart';
-import 'package:yaga/managers/file_manager.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 import 'package:yaga/model/route_args/path_selector_screen_arguments.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/path_selector_screen.dart';
-import 'package:yaga/views/widgets/selection_action_cancel_dialog.dart';
 import 'package:yaga/views/widgets/action_danger_dialog.dart';
-import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
+import 'package:yaga/views/widgets/selection_action_cancel_dialog.dart';
+import 'package:yaga/views/widgets/yaga_popup_menu_button.dart';
 
 enum SelectionViewMenu { share, delete, copy, move, download }
 
 class SelectionPopupMenuButton extends StatelessWidget {
   final FileListLocalManager fileListLocalManager;
 
-  SelectionPopupMenuButton({@required this.fileListLocalManager});
+  const SelectionPopupMenuButton({required this.fileListLocalManager});
 
   @override
   Widget build(BuildContext context) {
@@ -28,26 +28,39 @@ class SelectionPopupMenuButton extends StatelessWidget {
 
   List<PopupMenuEntry<SelectionViewMenu>> _buildSelectionPopupMenu(
       BuildContext context) {
-    return [
+    if (fileListLocalManager.isRemoteUri) {
+      return const [
+        PopupMenuItem(
+          value: SelectionViewMenu.share,
+          child: ListMenuEntry(Icons.share, "Share"),
+        ),
+        PopupMenuItem(
+          value: SelectionViewMenu.delete,
+          child: ListMenuEntry(Icons.delete, "Delete"),
+        ),
+        PopupMenuItem(
+          value: SelectionViewMenu.copy,
+          child: ListMenuEntry(Icons.copy, "Copy"),
+        ),
+        PopupMenuItem(
+          value: SelectionViewMenu.move,
+          child: ListMenuEntry(Icons.forward, "Move"),
+        ),
+        PopupMenuItem(
+          value: SelectionViewMenu.download,
+          child: ListMenuEntry(Icons.file_download, "Download"),
+        ),
+      ];
+    }
+
+    return const [
       PopupMenuItem(
-        child: ListMenuEntry(Icons.share, "Share"),
         value: SelectionViewMenu.share,
+        child: ListMenuEntry(Icons.share, "Share"),
       ),
       PopupMenuItem(
-        child: ListMenuEntry(Icons.delete, "Delete"),
         value: SelectionViewMenu.delete,
-      ),
-      PopupMenuItem(
-        child: ListMenuEntry(Icons.copy, "Copy"),
-        value: SelectionViewMenu.copy,
-      ),
-      PopupMenuItem(
-        child: ListMenuEntry(Icons.forward, "Move"),
-        value: SelectionViewMenu.move,
-      ),
-      PopupMenuItem(
-        child: ListMenuEntry(Icons.file_download, "Download"),
-        value: SelectionViewMenu.download,
+        child: ListMenuEntry(Icons.delete, "Delete"),
       ),
     ];
   }
@@ -55,29 +68,32 @@ class SelectionPopupMenuButton extends StatelessWidget {
   void _popupMenuHandler(BuildContext context, SelectionViewMenu result) {
     if (result == SelectionViewMenu.share) {
       if (fileListLocalManager.selected
-              .where((element) => !element.localFile.exists)
-              .toList()
-              .length >
-          0) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text("Currently sharing supports only already downloaded files."),
-          behavior: SnackBarBehavior.floating,
-        ));
+          .where((element) => !element.localFile!.exists)
+          .toList()
+          .isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Currently sharing supports only already downloaded files.",
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return;
       }
 
       Share.shareFiles(fileListLocalManager.selected
-          .map((e) => e.localFile.file.path)
+          .map((e) => e.localFile!.file.path)
           .toList());
       return;
     }
 
+    //todo: background: check behavior if dialog gets closed while background action still running
     if (result == SelectionViewMenu.delete) {
       showDialog(
         context: context,
         useRootNavigator: false,
-        builder: (contextDialog) => this.fileListLocalManager.isRemoteUri
+        builder: (contextDialog) => fileListLocalManager.isRemoteUri
             ? ActionDangerDialog(
                 title: "Delete location",
                 cancelButton: 'Keep',
@@ -85,10 +101,10 @@ class SelectionPopupMenuButton extends StatelessWidget {
                 aggressiveAction: 'Delete remotely',
                 action: (agg) => _openDeletingDialog(context, agg),
                 bodyBuilder: (builderContext) => <Widget>[
-                  Text(
+                  const Text(
                     "If you delete your images locally, they will be deleted from your phone only.",
                   ),
-                  Text(
+                  const Text(
                     "If you delete them remotely they will be deleted from your phone and server.",
                   ),
                 ],
@@ -99,7 +115,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
                 aggressiveAction: 'Delete',
                 action: (agg) => _openDeletingDialog(context, false),
                 bodyBuilder: (builderContext) => <Widget>[
-                  Text(
+                  const Text(
                     "This images seem to be local to your phone. Do you really want to delete them?",
                   ),
                 ],
@@ -112,7 +128,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
         context,
         PathSelectorScreen.route,
         arguments: PathSelectorScreenArguments(
-          uri: this.fileListLocalManager.uri,
+          uri: fileListLocalManager.uri,
           fixedOrigin: true,
           onSelect: (uri) => showDialog(
             context: context,
@@ -126,15 +142,13 @@ class SelectionPopupMenuButton extends StatelessWidget {
                 context,
                 result == SelectionViewMenu.copy ? "Copying..." : "Moving...",
                 result == SelectionViewMenu.copy
-                    ? () => this
-                        .fileListLocalManager
-                        .copySelected(uri, overwrite: agg)
-                    : () => this
-                        .fileListLocalManager
-                        .moveSelected(uri, overwrite: agg),
+                    ? () =>
+                        fileListLocalManager.copySelected(uri, overwrite: agg)
+                    : () =>
+                        fileListLocalManager.moveSelected(uri, overwrite: agg),
               ),
               bodyBuilder: (builderContext) => <Widget>[
-                Text(
+                const Text(
                   "Do you want to overwrite existing files, if any?",
                 ),
               ],
@@ -145,13 +159,11 @@ class SelectionPopupMenuButton extends StatelessWidget {
     }
 
     if (result == SelectionViewMenu.download) {
-      fileListLocalManager.selected.forEach(
-        (file) {
-          getIt.get<FileManager>().downloadImageCommand(
-                DownloadFileRequest(file, overrideGlobalPersistFlag: true),
-              );
-        },
-      );
+      for (final file in fileListLocalManager.selected) {
+        getIt.get<FileManager>().downloadImageCommand(
+              DownloadFileRequest(file, forceDownload: true),
+            );
+      }
 
       fileListLocalManager.deselectAll();
     }
@@ -161,7 +173,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
       _openCancelableDialog(
         context,
         "Deleting...",
-        () => this.fileListLocalManager.deleteSelected(!aggressive),
+        () => fileListLocalManager.deleteSelected(local: !aggressive),
       );
 
   void _openCancelableDialog(
@@ -176,7 +188,7 @@ class SelectionPopupMenuButton extends StatelessWidget {
       useRootNavigator: false,
       builder: (context) => SelectionActionCancelDialog(
         text,
-        this.fileListLocalManager.cancelSelectionAction,
+        fileListLocalManager.cancelSelectionAction,
       ),
     ).whenComplete(() => dialogOpen = false);
 

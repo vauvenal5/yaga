@@ -27,43 +27,55 @@ class SortManager with Isolateable<SortManager> {
     _sortListHandlers[SortProperty.dateModified] = _sortListByDateModified;
 
     _mergeSortHandlers[SortType.list] =
-        (SortedFileList main, SortedFileList addition) =>
-            _mergeFileFolders(main, addition);
+        (SortedFileList main, SortedFileList addition) {
+      if (main is SortedFileFolderList) {
+        return _mergeFileFolders(main, addition);
+      }
+      return false;
+    };
     _mergeSortHandlers[SortType.category] =
-        (SortedFileList main, SortedFileList addition) =>
-            _mergeCategories(main, addition);
+        (SortedFileList main, SortedFileList addition) {
+      if (main is SortedCategoryList && addition is SortedCategoryList) {
+        return _mergeCategories(main, addition);
+      }
+      return false;
+    };
 
-    _mixedMergeHandlers[SortType.list] = _mergeSortHandlers[SortType.list];
+    _mixedMergeHandlers[SortType.list] = _mergeSortHandlers[SortType.list]!;
     _mixedMergeHandlers[SortType.category] =
-        (SortedFileList main, SortedFileList addition) =>
-            _mixedMergeCategoryList(main, addition);
+        (SortedFileList main, SortedFileList addition) {
+          if(main is SortedCategoryList && addition is SortedFileFolderList) {
+            return _mixedMergeCategoryList(main, addition);
+          }
+          return false;
+        };
   }
 
   bool mergeSort(SortedFileList main, SortedFileList addition) {
     if (main.config.sortType == addition.config.sortType) {
-      return _mergeSortHandlers[main.config.sortType](main, addition);
+      return _mergeSortHandlers[main.config.sortType]!(main, addition);
     }
 
-    return _mixedMergeHandlers[main.config.sortType](main, addition);
+    return _mixedMergeHandlers[main.config.sortType]!(main, addition);
   }
 
   bool _mixedMergeCategoryList(
     SortedCategoryList main,
     SortedFileFolderList addition,
   ) {
-    bool changed = _mergeLists(main.folders, addition.folders, null);
-    SortedCategoryList convertedAddition = this.sortList(
+    final bool changed = _mergeLists(main.folders, addition.folders, null);
+    final SortedCategoryList convertedAddition = sortList(
       addition.files,
       main.config,
-    );
-    return this._mergeCategories(main, convertedAddition) || changed;
+    ) as SortedCategoryList;
+    return _mergeCategories(main, convertedAddition) || changed;
   }
 
   bool _mergeFileFolders(
     SortedFileFolderList main,
     SortedFileList addition,
   ) {
-    bool changed = _mergeLists(
+    final bool changed = _mergeLists(
       main.files,
       addition.files,
       main.config.fileSortProperty,
@@ -84,8 +96,8 @@ class SortManager with Isolateable<SortManager> {
         .where((key) => main.categories.contains(key))
         .map(
           (key) => _mergeLists(
-            main.categorizedFiles[key],
-            addition.categorizedFiles[key],
+            main.categorizedFiles[key]!,
+            addition.categorizedFiles[key]!,
             main.config.fileSortProperty,
           ),
         )
@@ -95,7 +107,7 @@ class SortManager with Isolateable<SortManager> {
       (key) {
         changed = true;
         main.categories.add(key);
-        main.categorizedFiles[key] = addition.categorizedFiles[key];
+        main.categorizedFiles[key] = addition.categorizedFiles[key]!;
       },
     );
 
@@ -107,7 +119,7 @@ class SortManager with Isolateable<SortManager> {
   bool _mergeLists(
     List<NcFile> main,
     List<NcFile> addition,
-    SortProperty prop,
+    SortProperty? prop,
   ) {
     final size = main.length;
 
@@ -116,24 +128,24 @@ class SortManager with Isolateable<SortManager> {
         .forEach((element) => main.add(element));
 
     if (prop != null) {
-      this._sortListHandlers[prop](main);
+      _sortListHandlers[prop]!(main);
     }
     return size < main.length;
   }
 
   SortedFileList sortList(List<NcFile> files, SortConfig config) {
-    List<NcFile> filesToSort = [];
-    List<NcFile> foldersToSort = [];
+    final List<NcFile> filesToSort = [];
+    final List<NcFile> foldersToSort = [];
 
-    files.forEach((file) {
+    for (final file in files) {
       if (file.isDirectory) {
         foldersToSort.add(file);
       } else {
         filesToSort.add(file);
       }
-    });
+    }
 
-    return _sortHandlers[config.sortType](filesToSort, foldersToSort, config);
+    return _sortHandlers[config.sortType]!(filesToSort, foldersToSort, config);
   }
 
   SortedFileFolderList _sortFileFolders(
@@ -141,8 +153,8 @@ class SortManager with Isolateable<SortManager> {
     List<NcFile> folders,
     SortConfig config,
   ) {
-    this._sortListHandlers[config.fileSortProperty](files);
-    this._sortListHandlers[config.folderSortProperty](folders);
+    _sortListHandlers[config.fileSortProperty]!(files);
+    _sortListHandlers[config.folderSortProperty]!(folders);
 
     return SortedFileFolderList(config, files, folders);
   }
@@ -154,8 +166,8 @@ class SortManager with Isolateable<SortManager> {
   ) {
     final sorted = SortedCategoryList(config, folders: folders);
 
-    files.forEach((file) {
-      String key = SortedCategoryList.createKey(file);
+    for (final file in files) {
+      final String key = SortedCategoryList.createKey(file);
 
       if (!sorted.categories.contains(key)) {
         sorted.categories.add(key);
@@ -163,10 +175,10 @@ class SortManager with Isolateable<SortManager> {
 
       sorted.categorizedFiles.putIfAbsent(key, () => []);
 
-      if (!sorted.categorizedFiles[key].contains(file)) {
-        sorted.categorizedFiles[key].add(file);
+      if (!sorted.categorizedFiles[key]!.contains(file)) {
+        sorted.categorizedFiles[key]!.add(file);
       }
-    });
+    }
 
     _sortCategories(sorted.categories);
     sorted.categorizedFiles
@@ -176,7 +188,7 @@ class SortManager with Isolateable<SortManager> {
   }
 
   void _sortListByDateModified(List<NcFile> list) => list.sort(
-        (a, b) => b.lastModified.compareTo(a.lastModified),
+        (a, b) => b.lastModified!.compareTo(a.lastModified!),
       );
 
   void _sortListByName(List<NcFile> list) => list.sort(

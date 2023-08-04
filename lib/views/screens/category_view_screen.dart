@@ -32,7 +32,7 @@ enum CategoryViewMenu { settings }
 abstract class CategoryViewScreen extends StatefulWidget {
   final CategoryViewConfig _categoryViewConfig;
 
-  CategoryViewScreen(this._categoryViewConfig);
+  const CategoryViewScreen(this._categoryViewConfig);
 
   @override
   _CategoryViewScreenState createState() => _CategoryViewScreenState();
@@ -41,18 +41,18 @@ abstract class CategoryViewScreen extends StatefulWidget {
 class _CategoryViewScreenState extends State<CategoryViewScreen>
     with AutomaticKeepAliveClientMixin<CategoryViewScreen> {
   final List<Preference> _defaultViewPreferences = [];
-  ViewConfiguration _viewConfig;
+  late ViewConfiguration _viewConfig;
 
   // GeneralViewConfig _generalViewConfig;
 
-  StreamSubscription<UriPreference> _updateUriSubscription;
-  FileListLocalManager _fileListLocalManager;
+  late StreamSubscription<UriPreference> _updateUriSubscription;
+  late FileListLocalManager _fileListLocalManager;
 
   @override
   void initState() {
-    final onFileTap = (List<NcFile> files, int index) =>
-        this._fileListLocalManager.isInSelectionMode
-            ? this._fileListLocalManager.selectFileCommand(files[index])
+    void onFileTap(List<NcFile> files, int index) =>
+        _fileListLocalManager.isInSelectionMode
+            ? _fileListLocalManager.selectFileCommand(files[index])
             //todo: replace navigation by navigation manager
             : Navigator.pushNamed(
                 context,
@@ -60,7 +60,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
                 arguments: ImageScreenArguments(files, index),
               );
 
-    this._viewConfig = ViewConfiguration(
+    _viewConfig = ViewConfiguration(
       route: widget._categoryViewConfig.pref,
       defaultView: CategoryViewExp.viewKey,
       onFolderTap: null,
@@ -68,18 +68,16 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
       onSelect: getIt.get<IntentService>().isOpenForSelect
           ? onFileTap
           : (files, index) =>
-              this._fileListLocalManager.selectFileCommand(files[index]),
+              _fileListLocalManager.selectFileCommand(files[index]),
     );
 
-    this
-        ._defaultViewPreferences
+    _defaultViewPreferences
         .add(widget._categoryViewConfig.generalViewConfig.general);
-    this
-        ._defaultViewPreferences
+    _defaultViewPreferences
         .add(widget._categoryViewConfig.generalViewConfig.path);
-    this._defaultViewPreferences.add(this._viewConfig.section);
-    this._defaultViewPreferences.add(this._viewConfig.recursive);
-    this._defaultViewPreferences.add(this._viewConfig.view);
+    _defaultViewPreferences.add(_viewConfig.section);
+    _defaultViewPreferences.add(_viewConfig.recursive);
+    _defaultViewPreferences.add(_viewConfig.view);
 
     //todo: refactor
     getIt.get<NextCloudManager>().logoutCommand.listen((value) => getIt
@@ -92,7 +90,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
 
     //todo: is it still necessary for tab to be a stateful widget?
     //image state wrapper is a widget local manager
-    this._fileListLocalManager = new FileListLocalManager(
+    _fileListLocalManager = FileListLocalManager(
       getIt
           .get<SharedPreferencesService>()
           .loadPreferenceFromString(
@@ -100,11 +98,11 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
           .value,
       getIt
           .get<SharedPreferencesService>()
-          .loadPreferenceFromBool(this._viewConfig.recursive),
+          .loadPreferenceFromBool(_viewConfig.recursive),
       ViewConfiguration.getSortConfigFromViewChoice(
         getIt
             .get<SharedPreferencesService>()
-            .loadPreferenceFromString(this._viewConfig.view),
+            .loadPreferenceFromString(_viewConfig.view),
       ),
     );
 
@@ -116,17 +114,17 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
             event.key == widget._categoryViewConfig.generalViewConfig.path.key)
         .map((event) => event as UriPreference)
         .listen((event) {
-      this._fileListLocalManager.refetch(uri: event.value);
+      _fileListLocalManager.refetch(uri: event.value);
     });
 
-    this._fileListLocalManager.initState();
+    _fileListLocalManager.initState();
     super.initState();
   }
 
   @override
   void dispose() {
     _updateUriSubscription.cancel();
-    this._fileListLocalManager.dispose();
+    _fileListLocalManager.dispose();
     super.dispose();
   }
 
@@ -135,19 +133,19 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
     super.build(context);
 
     return SelectionWillPopScope(
-      fileListLocalManager: this._fileListLocalManager,
+      fileListLocalManager: _fileListLocalManager,
       child: Scaffold(
         appBar: SelectionAppBar(
-          fileListLocalManager: this._fileListLocalManager,
-          viewConfig: this._viewConfig,
+          fileListLocalManager: _fileListLocalManager,
+          viewConfig: _viewConfig,
           appBarBuilder: _buildAppBar,
         ),
-        drawer: widget._categoryViewConfig.hasDrawer ? YagaDrawer() : null,
+        drawer: widget._categoryViewConfig.hasDrawer! ? YagaDrawer() : null,
         body: ImageViewContainer(
-            fileListLocalManager: this._fileListLocalManager,
-            viewConfig: this._viewConfig),
+            fileListLocalManager: _fileListLocalManager,
+            viewConfig: _viewConfig),
         bottomNavigationBar:
-            YagaBottomNavBar(widget._categoryViewConfig.selectedTab),
+            YagaBottomNavBar(widget._categoryViewConfig.selectedTab!),
       ),
     );
   }
@@ -155,8 +153,8 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
   AppBar _buildAppBar(BuildContext context, List<Widget> actions) {
     if (!_fileListLocalManager.isInSelectionMode) {
       actions.add(YagaPopupMenuButton<CategoryViewMenu>(
-        this._buildPopupMenu,
-        this._popupMenuHandler,
+        _buildPopupMenu,
+        _popupMenuHandler,
       ));
     }
 
@@ -164,15 +162,15 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
       title: SelectionTitle(
         _fileListLocalManager,
         defaultTitel: Text(
-          widget._categoryViewConfig.title,
+          widget._categoryViewConfig.title!,
           overflow: TextOverflow.fade,
         ),
       ),
       actions: actions,
-      leading: this._fileListLocalManager.isInSelectionMode
+      leading: _fileListLocalManager.isInSelectionMode
           ? IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () => this._fileListLocalManager.deselectAll(),
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => _fileListLocalManager.deselectAll(),
             )
           : null,
     );
@@ -183,7 +181,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
       Navigator.pushNamed(
         context,
         SettingsScreen.route,
-        arguments: new SettingsScreenArguments(
+        arguments: SettingsScreenArguments(
           preferences: _defaultViewPreferences,
         ),
       );
@@ -192,9 +190,9 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
 
   List<PopupMenuEntry<CategoryViewMenu>> _buildPopupMenu(BuildContext context) {
     return [
-      PopupMenuItem(
-        child: ListMenuEntry(Icons.settings, "Settings"),
+      const PopupMenuItem(
         value: CategoryViewMenu.settings,
+        child: ListMenuEntry(Icons.settings, "Settings"),
       ),
     ];
   }

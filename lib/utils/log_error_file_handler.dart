@@ -7,9 +7,9 @@ import 'package:catcher/model/report.dart';
 import 'package:catcher/model/report_handler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:yaga/utils/logger.dart';
-import 'package:device_info/device_info.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class LogErrorFileHandler extends ReportHandler {
   final File file;
@@ -22,7 +22,7 @@ class LogErrorFileHandler extends ReportHandler {
   //emergency logger for when errors occure in LogErrorFileHandler
   final _logger = YagaLogger.getEmergencyLogger(LogErrorFileHandler);
 
-  IOSink _sink;
+  IOSink? _sink;
   bool _fileValidationResult = false;
 
   LogErrorFileHandler(this.file,
@@ -42,7 +42,7 @@ class LogErrorFileHandler extends ReportHandler {
         assert(printLogs != null, "printLogs can't be null");
 
   @override
-  Future<bool> handle(Report report, BuildContext context) async {
+  Future<bool> handle(Report report, BuildContext? context) async {
     try {
       if (_sink == null) {
         await init();
@@ -92,19 +92,19 @@ class LogErrorFileHandler extends ReportHandler {
   }
 
   void writeLineToFile(String text) {
-    _sink.add(utf8.encode('$text\n'));
+    _sink?.add(utf8.encode('$text\n'));
   }
 
-  Future flushFile() async => this._sink.flush();
+  Future flushFile() async => _sink?.flush();
 
   Future _closeFile() async {
     _printLog("Closing file");
-    await _sink.flush();
-    await _sink.close();
+    await _sink?.flush();
+    await _sink?.close();
     _sink = null;
   }
 
-  void _writeReportToFile(Report report) async {
+  Future<void> _writeReportToFile(Report report) async {
     _printLog("Writing report to file");
     _writeLineToFile(
         "============================== CATCHER LOG ==============================");
@@ -162,12 +162,11 @@ class LogErrorFileHandler extends ReportHandler {
       await deviceInfo.androidInfo.then((androidInfo) {
         _logDeviceParametersFormatted(_loadAndroidParameters(androidInfo));
       });
-      await flushFile();
     }
   }
 
   Future printApplicationInfo() async {
-    Map<String, dynamic> _applicationParameters = {};
+    final Map<String, dynamic> _applicationParameters = {};
     _applicationParameters["environment"] =
         describeEnum(ApplicationProfileManager.getApplicationProfile());
 
@@ -186,9 +185,8 @@ class LogErrorFileHandler extends ReportHandler {
 
   Map<String, dynamic> _loadAndroidParameters(
       AndroidDeviceInfo androidDeviceInfo) {
-    Map<String, dynamic> deviceParameters = {};
+    final Map<String, dynamic> deviceParameters = {};
     deviceParameters["id"] = androidDeviceInfo.id;
-    deviceParameters["androidId"] = androidDeviceInfo.androidId;
     deviceParameters["board"] = androidDeviceInfo.board;
     deviceParameters["bootloader"] = androidDeviceInfo.bootloader;
     deviceParameters["brand"] = androidDeviceInfo.brand;
@@ -218,7 +216,7 @@ class LogErrorFileHandler extends ReportHandler {
 
   void _printLog(String log) {
     if (printLogs) {
-      this._logger.info(log);
+      _logger.info(log);
     }
   }
 
@@ -226,7 +224,7 @@ class LogErrorFileHandler extends ReportHandler {
   List<PlatformType> getSupportedPlatforms() =>
       [PlatformType.android, PlatformType.iOS];
 
-  void destroy() async {
+  Future<void> destroy() async {
     await _closeFile();
   }
 
@@ -235,7 +233,7 @@ class LogErrorFileHandler extends ReportHandler {
       return;
     }
 
-    this._fileValidationResult = await _checkFile();
+    _fileValidationResult = await _checkFile();
     _openFile();
   }
 }

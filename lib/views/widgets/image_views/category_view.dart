@@ -17,8 +17,8 @@ class CategoryView extends StatelessWidget {
   Widget _buildHeader(String key, BuildContext context) {
     return Container(
       height: 30.0,
-      color: Theme.of(context).accentColor,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      color: Theme.of(context).colorScheme.secondary,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       alignment: Alignment.centerLeft,
       child: Text(
         key,
@@ -32,12 +32,12 @@ class CategoryView extends StatelessWidget {
         key: ValueKey(key),
         header: _buildHeader(key, context),
         sliver: SliverGrid(
-            key: ValueKey(key + "_grid"),
+            key: ValueKey("${key}_grid"),
             delegate:
                 SliverChildBuilderDelegate((BuildContext context, int index) {
               return _buildImage(key, index, context);
-            }, childCount: this.sorted.categorizedFiles[key].length),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            }, childCount: sorted.categorizedFiles[key]!.length),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               crossAxisSpacing: 2,
               mainAxisSpacing: 2,
@@ -46,37 +46,35 @@ class CategoryView extends StatelessWidget {
 
   Widget _buildImage(String key, int itemIndex, BuildContext context) {
     return InkWell(
-      onTap: () => this
-          .viewConfig
-          .onFileTap(this.sorted.categorizedFiles[key], itemIndex),
-      onLongPress: () => this
-          .viewConfig
-          .onSelect(this.sorted.categorizedFiles[key], itemIndex),
+      onTap: () =>
+          viewConfig.onFileTap?.call(sorted.categorizedFiles[key]!, itemIndex),
+      onLongPress: () =>
+          viewConfig.onSelect?.call(sorted.categorizedFiles[key]!, itemIndex),
       child: RemoteImageWidget(
-        this.sorted.categorizedFiles[key][itemIndex],
-        key: ValueKey(this.sorted.categorizedFiles[key][itemIndex].uri.path),
+        sorted.categorizedFiles[key]![itemIndex],
+        key: ValueKey(sorted.categorizedFiles[key]![itemIndex].uri.path),
         cacheWidth: 512,
       ),
     );
   }
 
   Widget _buildStickyList(BuildContext context) {
-    List<Widget> slivers = [];
+    final List<Widget> slivers = [];
 
     //todo: the actual issue behind the performance problems is that for many categorise we are keepint all headers in memory at once and also a tone of images
     //--> it seems the headerSliver is not cleaning up properly
     //--> long terme we need to find a solution for this!
-    this.sorted.categories.forEach((key) {
+    for (final key in sorted.categories) {
       print("rebuilding list");
       slivers.add(_buildCategory(key, context));
-    });
+    }
 
-    DefaultStickyHeaderController sticky = DefaultStickyHeaderController(
-        key: ValueKey("mainGrid"),
+    final DefaultStickyHeaderController sticky = DefaultStickyHeaderController(
+        key: const ValueKey("mainGrid"),
         child: CustomScrollView(
-          key: ValueKey("mainGridView"),
+          key: const ValueKey("mainGridView"),
           slivers: slivers,
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
         ));
 
     return sticky;

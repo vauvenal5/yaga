@@ -3,21 +3,20 @@ import 'package:yaga/managers/widget_local/file_list_local_manager.dart';
 
 class SelectionTitle extends StatelessWidget {
   final FileListLocalManager _fileListLocalManager;
-  final Widget defaultTitel;
+  final Widget? defaultTitel;
 
-  SelectionTitle(this._fileListLocalManager, {this.defaultTitel});
+  const SelectionTitle(this._fileListLocalManager, {this.defaultTitel});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: this._fileListLocalManager.selectionChangedCommand,
+      stream: _fileListLocalManager.selectionChangedCommand,
       builder: (context, snapshot) {
-        if (this.defaultTitel != null &&
-            !this._fileListLocalManager.isInSelectionMode) {
-          return defaultTitel;
+        if (defaultTitel != null && !_fileListLocalManager.isInSelectionMode) {
+          return defaultTitel!;
         }
         return Text(
-          "${this._fileListLocalManager.selected.length}/${this._fileListLocalManager.sorted.files.length}",
+          "${_fileListLocalManager.selected.length}/${_fileListLocalManager.sorted.files.length}",
           overflow: TextOverflow.fade,
         );
       },

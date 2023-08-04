@@ -17,8 +17,8 @@ class CategoryViewExp extends StatelessWidget {
   Widget _buildHeader(String key, BuildContext context) {
     return Container(
       height: 30.0,
-      color: Theme.of(context).accentColor,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      color: Theme.of(context).colorScheme.secondary,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       alignment: Alignment.centerLeft,
       child: Text(
         key,
@@ -29,29 +29,27 @@ class CategoryViewExp extends StatelessWidget {
 
   Widget _buildImage(String key, int itemIndex, BuildContext context) {
     return InkWell(
-      onTap: () => this
-          .viewConfig
-          .onFileTap(this.sorted.categorizedFiles[key], itemIndex),
-      onLongPress: () => this
-          .viewConfig
-          .onSelect(this.sorted.categorizedFiles[key], itemIndex),
+      onTap: () =>
+          viewConfig.onFileTap?.call(sorted.categorizedFiles[key]!, itemIndex),
+      onLongPress: () =>
+          viewConfig.onSelect?.call(sorted.categorizedFiles[key]!, itemIndex),
       child: RemoteImageWidget(
-        this.sorted.categorizedFiles[key][itemIndex],
-        key: ValueKey(this.sorted.categorizedFiles[key][itemIndex].uri.path),
+        sorted.categorizedFiles[key]![itemIndex],
+        key: ValueKey(sorted.categorizedFiles[key]![itemIndex].uri.path),
         cacheWidth: 512,
       ),
     );
   }
 
   Widget _buildExperimental() {
-    ScrollController scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
 
-    InfiniteList infiniteList = InfiniteList(
-        posChildCount: this.sorted.categories.length,
+    final InfiniteList infiniteList = InfiniteList(
+        posChildCount: sorted.categories.length,
         controller: scrollController,
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         builder: (BuildContext context, int indexCategory) {
-          String key = this.sorted.categories[indexCategory];
+          final String key = sorted.categories[indexCategory];
 
           /// Builder requires [InfiniteList] to be returned
           return InfiniteListItem(
@@ -63,11 +61,11 @@ class CategoryViewExp extends StatelessWidget {
             /// Content builder
             contentBuilder: (BuildContext context) {
               return GridView.builder(
-                  key: ValueKey(key + "_grid"),
+                  key: ValueKey("${key}_grid"),
                   controller: scrollController,
                   shrinkWrap: true,
-                  itemCount: this.sorted.categorizedFiles[key].length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  itemCount: sorted.categorizedFiles[key]!.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 2,
                     mainAxisSpacing: 2,

@@ -32,13 +32,13 @@ class BrowseView extends StatelessWidget {
       body: StreamBuilder(
           stream: getIt.get<NextCloudManager>().updateLoginStateCommand,
           builder: (context, snapshot) {
-            List<ListTile> children = [];
+            final List<ListTile> children = [];
 
             children.add(
               ListTile(
-                isThreeLine: false,
-                leading: AvatarWidget.phone(),
-                title: Text("Internal Memory"),
+                // isThreeLine: false,
+                leading: const AvatarWidget.phone(),
+                title: const Text("Internal Memory"),
                 onTap: () => getIt
                     .get<NavigationManager>()
                     .showDirectoryNavigation(_getArgs(
@@ -51,8 +51,8 @@ class BrowseView extends StatelessWidget {
             getIt.get<SystemLocationService>().externals.forEach((element) {
               children.add(
                 ListTile(
-                  isThreeLine: false,
-                  leading: AvatarWidget.sd(),
+                  // isThreeLine: false,
+                  leading: const AvatarWidget.sd(),
                   title: Text(element.origin.userInfo),
                   onTap: () =>
                       getIt.get<NavigationManager>().showDirectoryNavigation(
@@ -66,7 +66,7 @@ class BrowseView extends StatelessWidget {
             });
 
             if (getIt.get<NextCloudService>().isLoggedIn()) {
-              NcOrigin origin = getIt.get<NextCloudService>().origin;
+              final NcOrigin origin = getIt.get<NextCloudService>().origin!;
               children.add(ListTile(
                 isThreeLine: true,
                 leading: AvatarWidget.command(
@@ -85,12 +85,12 @@ class BrowseView extends StatelessWidget {
               children: children,
             );
           }),
-      bottomNavigationBar: YagaBottomNavBar(YagaHomeTab.folder),
+      bottomNavigationBar: const YagaBottomNavBar(YagaHomeTab.folder),
     );
   }
 
   //todo: unify this
-  String _getTitle() {
+  String? _getTitle() {
     if (getIt.get<IntentService>().isOpenForSelect) {
       return "Selecte image...";
     }
@@ -99,11 +99,9 @@ class BrowseView extends StatelessWidget {
   }
 
   DirectoryNavigationScreenArguments _getArgs(BuildContext context, Uri uri) {
-    ViewConfiguration viewConfig = ViewConfiguration.browse(
+    final ViewConfiguration viewConfig = ViewConfiguration.browse(
       route: _pref,
       defaultView: NcListView.viewKey,
-      onFolderTap: null,
-      onSelect: null,
       //todo: implicit navigation
       onFileTap: (List<NcFile> files, int index) => Navigator.pushNamed(
         context,
@@ -117,7 +115,8 @@ class BrowseView extends StatelessWidget {
       title: _getTitle() ?? "Browse",
       viewConfig: viewConfig,
       //todo: this can now be probably be removed and YagaBottomNavBar can be created directly in DirectoryNavigationScreen
-      bottomBarBuilder: (context, uri) => YagaBottomNavBar(YagaHomeTab.folder),
+      bottomBarBuilder: (context, uri) =>
+          const YagaBottomNavBar(YagaHomeTab.folder),
     );
   }
 }

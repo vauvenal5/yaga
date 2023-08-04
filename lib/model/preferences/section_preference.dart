@@ -8,7 +8,7 @@ part 'section_preference.g.dart';
 
 abstract class SectionPreference
     implements Preference, Built<SectionPreference, SectionPreferenceBuilder> {
-  String prepareKey(String keyPart) => Preference.prefixKey(this.key, keyPart);
+  String prepareKey(String keyPart) => Preference.prefixKey(key!, keyPart);
 
   static void _initializeBuilder(SectionPreferenceBuilder b) =>
       Preference.initBuilder(b);

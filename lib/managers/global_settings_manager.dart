@@ -1,21 +1,21 @@
-import 'package:flutter/foundation.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preferences/action_preference.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
+import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
-import 'package:yaga/model/preferences/choice_preference.dart';
 import 'package:yaga/model/preferences/section_preference.dart';
+import 'package:yaga/model/preferences/string_preference.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class GlobalSettingsManager {
-  List<Preference> _globalSettingsCache = [];
+  final List<Preference> _globalSettingsCache = [];
   static const String _MAPPING_KEY = "mapping";
   static SectionPreference ncSection = SectionPreference((b) => b
     ..key = "nc"
@@ -40,21 +40,33 @@ class GlobalSettingsManager {
     ..key = appSection.prepareKey("logs")
     ..title = "Send Logs"
     ..action = YagaLogger.shareLogs);
+  static ActionPreference? reset;
+  static StringPreference newsSeenVersion = StringPreference(
+    (b) => b
+      ..key = appSection.prepareKey("newsSeen")
+      ..title = "News Seen Version"
+      ..value = "",
+  );
+  static BoolPreference useBackground = BoolPreference((b) => b
+    ..key = ncSection.prepareKey("useBackground")
+    ..title = "File actions in background"
+    ..value = true,
+  );
 
   RxCommand<Preference, Preference> registerGlobalSettingCommand =
       RxCommand.createSync((param) => param);
-  RxCommand<Preference, void> removeGlobalSettingCommand;
+  late RxCommand<Preference, void> removeGlobalSettingCommand;
   RxCommand<List<Preference>, List<Preference>> updateGlobalSettingsCommand =
       RxCommand.createSync((param) => param);
 
   RxCommand<MappingPreference, MappingPreference> updateRootMappingPreference =
       RxCommand.createSync((param) => param);
 
-  NextCloudManager _nextcloudManager;
-  SettingsManager _settingsManager;
+  final NextCloudManager _nextcloudManager;
+  final SettingsManager _settingsManager;
 
-  NextCloudService _nextCloudService;
-  SystemLocationService _systemLocationService;
+  final NextCloudService _nextCloudService;
+  final SystemLocationService _systemLocationService;
 
   GlobalSettingsManager(this._nextcloudManager, this._settingsManager,
       this._nextCloudService, this._systemLocationService) {
@@ -62,80 +74,96 @@ class GlobalSettingsManager {
       if (_globalSettingsCache.contains(pref)) {
         return;
       }
-      this._globalSettingsCache.add(pref);
-      this.updateGlobalSettingsCommand(this._globalSettingsCache);
+      _globalSettingsCache.add(pref);
+      updateGlobalSettingsCommand(_globalSettingsCache);
     });
     removeGlobalSettingCommand = RxCommand.createSync((param) =>
         _globalSettingsCache
             .removeWhere((element) => element.key == param.key));
     removeGlobalSettingCommand.listen((value) {
-      this.updateGlobalSettingsCommand(this._globalSettingsCache);
+      updateGlobalSettingsCommand(_globalSettingsCache);
     });
 
-    this
-        ._nextcloudManager
-        .updateLoginStateCommand
+    _nextcloudManager.updateLoginStateCommand
         .listen((value) => _handleLoginState(value));
 
-    this._nextcloudManager.logoutCommand.listen((value) {
-      MappingPreference mapping = this.getDefaultMappingPreference(
+    _nextcloudManager.logoutCommand.listen((value) {
+      final MappingPreference mapping = getDefaultMappingPreference(
         local: _systemLocationService.internalStorage.uri,
         remote: Uri(),
       );
 
       _settingsManager.removeMappingPreferenceCommand(mapping);
-      this.removeGlobalSettingCommand(mapping);
-      this.removeGlobalSettingCommand(autoPersist);
-      this.removeGlobalSettingCommand(ncSection);
+      removeGlobalSettingCommand(mapping);
+      removeGlobalSettingCommand(reset);
+      removeGlobalSettingCommand(autoPersist);
+      removeGlobalSettingCommand(ncSection);
     });
 
-    this
-        ._settingsManager
-        .updateSettingCommand
+    _settingsManager.updateSettingCommand
         .where((event) => event.key == ncSection.prepareKey(_MAPPING_KEY))
-        .listen((event) => updateRootMappingPreference(event));
+        .listen(
+            (event) => updateRootMappingPreference(event as MappingPreference));
   }
 
   Future<GlobalSettingsManager> init() async {
-    this.registerGlobalSettingCommand(appSection);
-    this.registerGlobalSettingCommand(theme);
-    this.registerGlobalSettingCommand(sendLogs);
+    registerGlobalSettingCommand(appSection);
+    registerGlobalSettingCommand(useBackground);
+    registerGlobalSettingCommand(theme);
+    registerGlobalSettingCommand(sendLogs);
 
     _handleLoginState(
-      this._nextcloudManager.updateLoginStateCommand.lastResult,
+      _nextcloudManager.updateLoginStateCommand.lastResult!,
     );
 
     return this;
   }
 
   MappingPreference getDefaultMappingPreference({
-    @required Uri local,
-    Uri remote,
+    required Uri local,
+    required Uri remote,
   }) {
-    return MappingPreference((b) => b
-      ..key = ncSection.prepareKey(_MAPPING_KEY)
-      ..title = "Root Mapping"
-      ..value = false
-      ..local.value = local
-      ..remote.value = remote);
+    return MappingPreference(
+      (b) => b
+        ..key = ncSection.prepareKey(_MAPPING_KEY)
+        ..title = "Root Mapping"
+        ..value = false
+        ..local.value = local
+        ..local.enabled = false
+        ..remote.value = remote
+        ..remote.enabled = false,
+    );
   }
 
   void _handleLoginState(NextCloudLoginData loginData) {
-    if (this._nextCloudService.isLoggedIn()) {
-      MappingPreference mapping = this.getDefaultMappingPreference(
-        local: UriUtils.fromUri(
+    if (_nextCloudService.isLoggedIn()) {
+      final MappingPreference mapping = getDefaultMappingPreference(
+        local: fromUri(
           uri: _systemLocationService.internalStorage.uri,
           path:
-              "${_systemLocationService.internalStorage.uri.path}/${_nextCloudService.origin.userDomain}",
+              "${_systemLocationService.internalStorage.uri.path}/${_nextCloudService.origin!.userDomain}",
         ),
-        remote: _nextCloudService.origin.userEncodedDomainRoot,
+        remote: _nextCloudService.origin!.userEncodedDomainRoot,
       );
 
-      this.registerGlobalSettingCommand(ncSection);
-      this.registerGlobalSettingCommand(mapping);
-      this.registerGlobalSettingCommand(autoPersist);
+      reset = ActionPreference(
+        (b) => b
+          ..key = ncSection.prepareKey("reset")
+          ..title = "Reset Root Mapping"
+          ..action = () {
+            _settingsManager.persistMappingPreferenceCommand(mapping);
+            _settingsManager.loadMappingPreferenceCommand(mapping);
+          },
+      );
 
-      _settingsManager.loadMappingPreferenceCommand(mapping);
+      registerGlobalSettingCommand(ncSection);
+      registerGlobalSettingCommand(mapping);
+      // registerGlobalSettingCommand(reset);
+      registerGlobalSettingCommand(autoPersist);
+
+      //instead of loading the root mapping we are resetting it here to default values
+      //_settingsManager.loadMappingPreferenceCommand(mapping);
+      reset!.action.call();
     }
   }
 }

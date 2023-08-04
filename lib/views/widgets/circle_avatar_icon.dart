@@ -4,7 +4,10 @@ class CircleAvatarIcon extends StatelessWidget {
   final Icon icon;
   final double radius;
 
-  CircleAvatarIcon({@required this.icon, this.radius = 13});
+  const CircleAvatarIcon({
+    required this.icon,
+    this.radius = 13,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -12,10 +15,10 @@ class CircleAvatarIcon extends StatelessWidget {
       alignment: Alignment.center,
       children: <Widget>[
         CircleAvatar(
-          radius: this.radius,
+          radius: radius,
           backgroundColor: Colors.white,
         ),
-        this.icon,
+        icon,
       ],
     );
   }

@@ -7,22 +7,18 @@ import 'package:yaga/views/widgets/selection_popup_menu_button.dart';
 import 'package:yaga/views/widgets/selection_select_all.dart';
 
 class SelectionAppBar extends PreferredSize {
-  SelectionAppBar._internal(
-      {@required Size preferredSize, @required Widget child})
-      : super(preferredSize: preferredSize, child: child);
-
   factory SelectionAppBar({
-    @required FileListLocalManager fileListLocalManager,
-    @required ViewConfiguration viewConfig,
-    @required Function(BuildContext, List<Widget>) appBarBuilder,
+    required FileListLocalManager fileListLocalManager,
+    required ViewConfiguration viewConfig,
+    required Widget Function(BuildContext, List<Widget>) appBarBuilder,
     double bottomHeight = 0,
-    Function(NcFile) searchResultHandler,
+    Function(NcFile?)? searchResultHandler,
   }) {
-    Widget child = StreamBuilder(
+    final Widget child = StreamBuilder(
       initialData: fileListLocalManager.selectionModeChanged.lastResult,
       stream: fileListLocalManager.selectionModeChanged,
       builder: (context, snapshot) {
-        List<Widget> actions = List();
+        final List<Widget> actions = [];
         if (fileListLocalManager.isInSelectionMode) {
           actions.add(SelectionSelectAll(fileListLocalManager));
         }
@@ -48,4 +44,9 @@ class SelectionAppBar extends PreferredSize {
       child: child,
     );
   }
+
+  const SelectionAppBar._internal({
+    required Size preferredSize,
+    required Widget child,
+  }) : super(preferredSize: preferredSize, child: child);
 }

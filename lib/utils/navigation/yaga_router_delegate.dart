@@ -10,8 +10,9 @@ import 'package:yaga/views/screens/yaga_home_screen.dart';
 
 class YagaRouterDelegate extends RouterDelegate<Uri>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<Uri> {
+  @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  NavigationManager _navigationManager = getIt.get<NavigationManager>();
+  final NavigationManager _navigationManager = getIt.get<NavigationManager>();
   IntentService intentService = getIt.get<IntentService>();
 
   YagaRouterDelegate() {
@@ -29,8 +30,8 @@ class YagaRouterDelegate extends RouterDelegate<Uri>
   Widget build(BuildContext context) {
     return Navigator(
       key: navigatorKey,
-      onGenerateRoute: YagaRouter.generateRoute,
-      pages: [getInitialPage()]..addAll(_buildDirectoryNavigationPage()),
+      onGenerateRoute: generateRoute,
+      pages: [getInitialPage(), ..._buildDirectoryNavigationPage()],
       onPopPage: (route, result) {
         if (!route.didPop(result)) {
           return false;
@@ -49,7 +50,7 @@ class YagaRouterDelegate extends RouterDelegate<Uri>
   }
 
   List<Page> _buildDirectoryNavigationPage() {
-    DirectoryNavigationScreenArguments args =
+    final DirectoryNavigationScreenArguments? args =
         _navigationManager.showDirectoryNavigation.lastResult;
 
     if (args == null) {
@@ -66,7 +67,7 @@ class YagaRouterDelegate extends RouterDelegate<Uri>
 
   Page getInitialPage() {
     return MaterialPage(
-      key: ValueKey(YagaHomeScreen.route),
+      key: const ValueKey(YagaHomeScreen.route),
       child: YagaHomeScreen(),
     );
   }

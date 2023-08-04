@@ -1,5 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/isolateable/mapping_manager.dart';
@@ -7,44 +9,46 @@ import 'package:yaga/managers/settings_manager_base.dart';
 import 'package:yaga/model/nc_origin.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
+import 'package:yaga/model/system_location.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
+import 'mapping_manager_test.mocks.dart';
 
-class SettingsManagerBaseMock extends Mock implements SettingsManagerBase {}
-
-class NextCloudServiceMock extends Mock implements NextCloudService {}
-
-class SystemLocationServiceMock extends Mock implements SystemLocationService {}
-
+@GenerateMocks([SettingsManagerBase, NextCloudService, SystemLocationService])
 void main() {
-  SettingsManagerBaseMock settingsManagerBaseMock = SettingsManagerBaseMock();
-  NextCloudServiceMock nextCloudServiceMock = NextCloudServiceMock();
-  SystemLocationServiceMock systemLocationServiceMock =
-      SystemLocationServiceMock();
+  final MockSettingsManagerBase settingsManagerBaseMock =
+      MockSettingsManagerBase();
+  final MockNextCloudService nextCloudServiceMock = MockNextCloudService();
+  final MockSystemLocationService systemLocationServiceMock =
+      MockSystemLocationService();
 
-  final userInfo = "yaga";
-  final host = "cloud.test.com";
-  final userDomain = "$userInfo@$host";
+  const userInfo = "yaga";
+  const host = "cloud.test.com";
+  const userDomain = "$userInfo@$host";
 
   final ncRoot = Uri(host: host, pathSegments: []);
   final ncOrigin = NcOrigin(ncRoot, userInfo, userInfo, userInfo);
 
   final command = MockCommand<Preference, Preference>();
-  final externalAppDirUri = Uri(host: "local", path: "/external/app/dir");
-  final tmpAppDirUri = Uri(host: "local", path: "/internal/app/dir");
-  final localPath = "/some/local/path";
 
-  MappingManager uut;
+  final origin = Uri(scheme: 'file', host: 'device.local', path: '/');
+  final SystemLocation internalAppDirStorage = SystemLocation.fromSplitter(
+      Directory('/system/path/Android/app/path'), origin, 'Android');
+  final internalAppDirCache = SystemLocation.fromSplitter(
+      Directory('/system/path/Android/cache/path'), origin, 'Android');
+
+  const localPath = "/some/local/path";
+
+  late MappingManager uut;
 
   setUp(() async {
-    when(settingsManagerBaseMock.updateSettingCommand)
-        .thenAnswer((_) => command);
+    when(settingsManagerBaseMock.updateSettingCommand).thenAnswer((_) => command);
 
     when(nextCloudServiceMock.origin).thenReturn(ncOrigin);
 
-    when(systemLocationServiceMock.externalAppDirUri)
-        .thenReturn(externalAppDirUri);
-    when(systemLocationServiceMock.tmpAppDirUri).thenReturn(tmpAppDirUri);
+    when(systemLocationServiceMock.internalStorage).thenReturn(internalAppDirStorage);
+    when(systemLocationServiceMock.internalCache).thenReturn(internalAppDirCache);
+    when(systemLocationServiceMock.absoluteUriFromInternal(any)).thenAnswer((realInvocation) => realInvocation.positionalArguments[0] as Uri);
 
     uut = MappingManager(
       settingsManagerBaseMock,
@@ -54,7 +58,7 @@ void main() {
   });
 
   void setUpMapping(String localPath, String remotePath) {
-    MappingPreference pref = MappingPreference((b) => b
+    final MappingPreference pref = MappingPreference((b) => b
       ..key = "testKey"
       ..title = "Root Mapping"
       ..value = false
@@ -65,34 +69,33 @@ void main() {
   }
 
   group("map to tmp path", () {
-    void mapToTmpPathTest(String remotePath) async {
+    Future<void> mapToTmpPathTest(String remotePath) async {
       await uut.mapToTmpUri(Uri(host: "remote", path: remotePath));
 
-      expect(
-          verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny))
-              .captured
-              .single
-              .path,
-          "${tmpAppDirUri.path}/$userDomain$remotePath");
+      final Uri captured = verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny))
+          .captured
+          .single as Uri;
+
+      expect(captured.path, "${internalAppDirCache.uri.path}/$userDomain$remotePath");
     }
 
     test("default mapps to cache dir", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       mapToTmpPathTest(remote);
     });
 
     test("mappings do not influence tmp", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       setUpMapping(localPath, "/");
       mapToTmpPathTest(remote);
     });
   });
 
   group("map to local path", () {
-    void mapToLocalPathTest({
-      @required String remotePath,
-      String remoteTargetFolderPath,
-      @required String expectedPath,
+    Future<void> mapToLocalPathTest({
+      required String remotePath,
+      String? remoteTargetFolderPath,
+      required String expectedPath,
     }) async {
       if (remoteTargetFolderPath != null) {
         setUpMapping(localPath, remoteTargetFolderPath);
@@ -100,15 +103,14 @@ void main() {
 
       await uut.mapToLocalUri(Uri(host: "remote", path: remotePath));
 
-      expect(
-          verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny))
-              .captured
-              .single
-              .path,
-          expectedPath);
+      final Uri captured = verify(systemLocationServiceMock.absoluteUriFromInternal(captureAny))
+          .captured
+          .single as Uri;
+
+      expect(captured.path, expectedPath);
     }
 
-    void mapRootToLocalPathTest(String remotePath) async {
+    Future<void> mapRootToLocalPathTest(String remotePath) async {
       mapToLocalPathTest(
         remotePath: remotePath,
         remoteTargetFolderPath: "/",
@@ -116,9 +118,9 @@ void main() {
       );
     }
 
-    void mapPicturesToLocalPathTest(String remotePath,
-        {String expectedPath}) async {
-      String targetPath = "/Pictures/";
+    Future<void> mapPicturesToLocalPathTest(String remotePath,
+        {String? expectedPath}) async {
+      const String targetPath = "/Pictures/";
       mapToLocalPathTest(
         remotePath: remotePath,
         remoteTargetFolderPath: targetPath,
@@ -128,53 +130,53 @@ void main() {
     }
 
     test("file with root mapping", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       mapRootToLocalPathTest(remote);
     });
 
     test("dir with root mapping", () async {
-      String remote = "/test/";
+      const String remote = "/test/";
       mapRootToLocalPathTest(remote);
     });
 
     test("file with sub mapping", () async {
-      String remote = "/Pictures/1.png";
+      const String remote = "/Pictures/1.png";
       mapPicturesToLocalPathTest(remote);
     });
 
     test("dir with sub mapping", () async {
-      String remote = "/Pictures/test/";
+      const String remote = "/Pictures/test/";
       mapPicturesToLocalPathTest(remote);
     });
 
     test("none sub mapping paths are mapped to app dir", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       mapPicturesToLocalPathTest(remote,
-          expectedPath: "${externalAppDirUri.path}/$userDomain$remote");
+          expectedPath: "${internalAppDirStorage.uri.path}/$userDomain$remote");
     });
 
     test("default mapps to app dir", () async {
-      String remote = "/test/1.png";
+      const String remote = "/test/1.png";
       mapToLocalPathTest(
           remotePath: remote,
-          expectedPath: "${externalAppDirUri.path}/$userDomain$remote");
+          expectedPath: "${internalAppDirStorage.uri.path}/$userDomain$remote");
     });
   });
 
   group("map tmp to remote uri", () {
-    void mapTmpToRemoteUriTest(String relativePath) async {
-      Uri tmp = Uri(
+    Future<void> mapTmpToRemoteUriTest(String relativePath) async {
+      final Uri tmp = Uri(
         host: "local",
-        path: "${tmpAppDirUri.path}/$userDomain$relativePath",
+        path: "${internalAppDirCache.uri.path}/$userDomain$relativePath",
       );
-      Uri remote = Uri(
+      final Uri remote = Uri(
         scheme: "nc",
         userInfo: userInfo,
         host: host,
         pathSegments: [],
       );
 
-      Uri result = await uut.mapTmpToRemoteUri(tmp, remote);
+      final Uri result = await uut.mapTmpToRemoteUri(tmp, remote);
 
       expect(result.scheme, "nc");
       expect(result.userInfo, userInfo);
@@ -192,17 +194,17 @@ void main() {
   });
 
   group("map to remote uri", () {
-    void mapToRemoteUriTest({
-      String localFilePath,
-      String remotePath,
-      String expectedPath,
-      String mappingPath,
+    Future<void> mapToRemoteUriTest({
+      required String localFilePath,
+      required String remotePath,
+      required String expectedPath,
+      String? mappingPath,
     }) async {
-      Uri file = Uri(
+      final Uri file = Uri(
         host: "local",
         path: localFilePath,
       );
-      Uri remote = Uri(
+      final Uri remote = Uri(
         scheme: "nc",
         userInfo: userInfo,
         host: host,
@@ -213,7 +215,7 @@ void main() {
         setUpMapping(localPath, mappingPath);
       }
 
-      Uri result = await uut.mapToRemoteUri(file, remote);
+      final Uri result = await uut.mapToRemoteUri(file, remote);
 
       expect(result.scheme, "nc");
       expect(result.userInfo, userInfo);
@@ -223,7 +225,8 @@ void main() {
 
     test("map file with default mapping", () async {
       mapToRemoteUriTest(
-        localFilePath: "${externalAppDirUri.path}/$userDomain/test/1.png",
+        localFilePath:
+            "${internalAppDirStorage.uri.path}/$userDomain/test/1.png",
         remotePath: "/",
         expectedPath: "/test/1.png",
       );
@@ -249,7 +252,8 @@ void main() {
 
     test("map file on different path than sub mapping", () async {
       mapToRemoteUriTest(
-        localFilePath: "${externalAppDirUri.path}/$userDomain/test/1.png",
+        localFilePath:
+            "${internalAppDirStorage.uri.path}/$userDomain/test/1.png",
         remotePath: "/",
         expectedPath: "/test/1.png",
         mappingPath: "/Pictures/",

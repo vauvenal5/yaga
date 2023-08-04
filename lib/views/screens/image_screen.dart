@@ -5,8 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:share/share.dart';
-import 'package:yaga/managers/file_manager.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/intent_service.dart';
@@ -19,9 +19,9 @@ class ImageScreen extends StatefulWidget {
   static const String route = "/image";
   final List<NcFile> _images;
   final int index;
-  final String title;
+  final String? title;
 
-  ImageScreen(
+  const ImageScreen(
     this._images,
     this.index, {
     this.title,
@@ -33,22 +33,22 @@ class ImageScreen extends StatefulWidget {
 
 class ImageScreenState extends State<ImageScreen> {
   final _logger = YagaLogger.getLogger(ImageScreenState);
-  String _title;
-  int _currentIndex;
-  PageController pageController;
+  late String _title;
+  late int _currentIndex;
+  late PageController pageController;
 
   @override
   void initState() {
     pageController = PageController(initialPage: widget.index);
-    this._currentIndex = pageController.initialPage;
-    this._title = widget._images[_currentIndex].name;
+    _currentIndex = pageController.initialPage;
+    _title = widget._images[_currentIndex].name;
     super.initState();
   }
 
   void _onPageChanged(int index) {
     setState(() {
-      this._currentIndex = index;
-      this._title = widget._images[index].name;
+      _currentIndex = index;
+      _title = widget._images[index].name;
     });
   }
 
@@ -64,11 +64,11 @@ class ImageScreenState extends State<ImageScreen> {
         onPageChanged: _onPageChanged,
         itemCount: widget._images.length,
         builder: (BuildContext context, int index) {
-          NcFile image = widget._images[index];
+          final NcFile image = widget._images[index];
 
           _logger.fine("Building view for index $index");
 
-          Future<FetchedFile> localFileAvailable = getIt
+          final Future<FetchedFile> localFileAvailable = getIt
               .get<FileManager>()
               .fetchedFileCommand
               .where((event) => event.file.uri.path == image.uri.path)
@@ -81,26 +81,27 @@ class ImageScreenState extends State<ImageScreen> {
             key: ValueKey(image.uri.path),
             minScale: PhotoViewComputedScale.contained,
             imageProvider: DownloadFileImage(
-              image.localFile.file as File,
+              image.localFile!.file as File,
               localFileAvailable,
             ),
           );
         },
         loadingBuilder: (context, event) {
-          bool previewExists =
+          final bool previewExists =
               widget._images[_currentIndex].previewFile != null &&
-                  widget._images[_currentIndex].previewFile.exists;
+                  widget._images[_currentIndex].previewFile!.exists;
           return Stack(children: [
             Container(
               color: Colors.black,
               child: previewExists
-                  ? Image.file(widget._images[_currentIndex].previewFile.file,
+                  ? Image.file(
+                      widget._images[_currentIndex].previewFile!.file as File,
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.contain)
                   : null,
             ),
-            LinearProgressIndicator()
+            const LinearProgressIndicator()
           ]);
         },
       ),
@@ -110,7 +111,7 @@ class ImageScreenState extends State<ImageScreen> {
   IconButton _buildMainAction() {
     if (getIt.get<IntentService>().isOpenForSelect) {
       return IconButton(
-        icon: Icon(Icons.check),
+        icon: const Icon(Icons.check),
         onPressed: () async {
           await getIt
               .get<IntentService>()
@@ -120,9 +121,9 @@ class ImageScreenState extends State<ImageScreen> {
     }
 
     return IconButton(
-      icon: Icon(Icons.share),
-      onPressed: () =>
-          Share.shareFiles([widget._images[_currentIndex].localFile.file.path]),
+      icon: const Icon(Icons.share),
+      onPressed: () => Share.shareFiles(
+          [widget._images[_currentIndex].localFile!.file.path]),
     );
   }
 }

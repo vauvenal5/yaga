@@ -11,12 +11,12 @@ import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/navigation/yaga_route_information_parser.dart';
 import 'package:yaga/views/screens/splash_screen.dart';
 
-void main() async {
+Future<void> main() async {
   await YagaLogger.init();
 
   setupServiceLocator();
 
-  CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [
+  final CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [
     YagaLogger.fileHandler,
   ]);
 
@@ -31,15 +31,20 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ThemeData dark = ThemeData(
+    final ThemeData dark = ThemeData(
       brightness: Brightness.dark,
-      accentColor: NextcloudColors.lightBlue,
-      toggleableActiveColor: NextcloudColors.lightBlue,
+      colorScheme: ColorScheme.fromSwatch(
+        accentColor: NextcloudColors.lightBlue,
+        brightness: Brightness.dark,
+      ),
     );
 
-    ThemeData light = ThemeData(
-      brightness: Brightness.light,
-      accentColor: NextcloudColors.lightBlue,
+    final ThemeData light = ThemeData(
+      // brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+        secondary: NextcloudColors.lightBlue,
+        brightness: Brightness.light,
+      ),
     );
 
     const String title = "Nextcloud Yaga";
@@ -58,7 +63,7 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        var settingsManager = getIt.get<SettingsManager>();
+        final settingsManager = getIt.get<SettingsManager>();
 
         return StreamBuilder<ChoicePreference>(
           initialData: getIt
@@ -69,7 +74,7 @@ class MyApp extends StatelessWidget {
               .where((event) => event is ChoicePreference)
               .map((event) => event as ChoicePreference),
           builder: (context, snapshot) {
-            if (snapshot.data.value == "system") {
+            if (snapshot.data!.value == "system") {
               return MaterialApp.router(
                 title: title,
                 theme: light,
@@ -81,7 +86,7 @@ class MyApp extends StatelessWidget {
 
             return MaterialApp.router(
               title: title,
-              theme: snapshot.data.value == "light" ? light : dark,
+              theme: snapshot.data!.value == "light" ? light : dark,
               routeInformationParser: YagaRouteInformationParser(),
               routerDelegate: YagaRouterDelegate(),
             );

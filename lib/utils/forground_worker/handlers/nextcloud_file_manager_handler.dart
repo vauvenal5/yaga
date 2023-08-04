@@ -1,20 +1,16 @@
-import 'dart:io';
 import 'dart:isolate';
-import 'package:yaga/managers/isolateable/isolated_file_manager.dart';
-import 'package:yaga/managers/isolateable/isolated_global_settings_manager.dart';
-import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
+
+import 'package:yaga/managers/file_manager/isolateable/isolated_file_manager.dart';
+import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/model/fetched_file.dart';
-import 'package:yaga/model/nc_file.dart';
-import 'package:yaga/services/isolateable/local_file_service.dart';
-import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/isolate_msg_handler.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
-import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_complete.dart';
 import 'package:yaga/utils/forground_worker/messages/download_preview_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 import 'package:yaga/utils/forground_worker/messages/init_msg.dart';
 import 'package:yaga/utils/service_locator.dart';
 
@@ -27,14 +23,14 @@ class NextcloudFileManagerHandler
     IsolateHandlerRegistry registry,
   ) async {
     registry.registerHandler<DeleteFilesRequest>(
-        (msg) => this.handleDelete(msg, isolateToMain));
+        (msg) => handleDelete(msg, isolateToMain));
     registry.registerHandler<DestinationActionFilesRequest>(
-        (msg) => this.handleDestinationAction(msg, isolateToMain));
-    registry.registerHandler<FilesActionDone>((msg) => this.handleCancel(msg));
+        (msg) => handleDestinationAction(msg, isolateToMain));
+    registry.registerHandler<FilesActionDone>((msg) => handleCancel(msg));
     registry.registerHandler<DownloadPreviewRequest>(
-        (msg) => this.handleDownloadPreview(msg, isolateToMain));
+        (msg) => handleDownloadPreview(msg, isolateToMain));
     registry.registerHandler<DownloadFileRequest>(
-        (msg) => this.handleDownload(msg, isolateToMain));
+        (msg) => handleDownload(msg, isolateToMain));
     return this;
   }
 
@@ -56,38 +52,19 @@ class NextcloudFileManagerHandler
   void handleDelete(DeleteFilesRequest message, SendPort isolateToMain) {
     getIt
         .get<IsolatedFileManager>()
-        .deleteFiles(message.files, message.local)
-        .whenComplete(() => isolateToMain.send(FilesActionDone(message.key)));
+        .deleteFiles(message.files, local: message.local)
+        .whenComplete(() => isolateToMain.send(FilesActionDone(message.key, message.sourceDir)));
   }
 
   void handleDestinationAction(
     DestinationActionFilesRequest message,
     SendPort isolateToMain,
   ) {
-    final fileManager = getIt.get<IsolatedFileManager>();
-
-    final action = message.action == DestinationAction.copy
-        ? fileManager.copyFiles(
-            message.files,
-            message.destination,
-            message.overwrite,
-          )
-        : fileManager.moveFiles(
-            message.files,
-            message.destination,
-            message.overwrite,
-          );
+    final action = getIt.get<IsolatedFileManager>().copyMoveRequest(message);
 
     action
         .whenComplete(
-          () => isolateToMain.send(FilesActionDone(message.key)),
-        )
-        .whenComplete(
-          () => fileManager.listFileLists(
-            message.key,
-            message.destination,
-            message.config,
-          ),
+          () => isolateToMain.send(FilesActionDone(message.key, message.destination)),
         );
   }
 
@@ -102,31 +79,14 @@ class NextcloudFileManagerHandler
     getIt.get<NextcloudFileManager>().downloadPreviewCommand(msg.file);
   }
 
-  void handleDownload(
+  Future<void> handleDownload(
     DownloadFileRequest request,
     SendPort isolateToMain,
   ) async {
-    NcFile ncFile = request.file;
-    if (ncFile.localFile != null && await ncFile.localFile.file.exists()) {
-      ncFile.localFile.exists = true;
-      isolateToMain.send(FetchedFile(
-        ncFile,
-        await (ncFile.localFile.file as File).readAsBytes(),
-      ));
-      return;
-    }
-
-    getIt.get<NextCloudService>().downloadImage(ncFile.uri).then((value) async {
-      if (request.overrideGlobalPersistFlag ||
-          getIt.get<IsolatedGlobalSettingsManager>().autoPersist.value) {
-        ncFile.localFile.file = await getIt.get<LocalFileService>().createFile(
-            file: ncFile.localFile.file,
-            bytes: value,
-            lastModified: ncFile.lastModified);
-        ncFile.localFile.exists = true;
-      }
-
-      isolateToMain.send(FetchedFile(ncFile, value));
+    getIt.get<IsolatedFileManager>()
+        .downloadFile(request.file, persist: request.persist)
+        .then((value) async {
+      isolateToMain.send(FetchedFile(request.file, value));
     });
   }
 }

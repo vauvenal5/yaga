@@ -11,14 +11,14 @@ import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart'
 
 class ChoicePreferenceWidget extends StatelessWidget {
   final ChoicePreference _choicePreference;
-  final RxCommand<Preference, dynamic> onChangeCommand;
+  final RxCommand<Preference, dynamic>? onChangeCommand;
 
-  ChoicePreferenceWidget(this._choicePreference, this.onChangeCommand);
+  const ChoicePreferenceWidget(this._choicePreference, this.onChangeCommand);
 
   //todo: generalize this for all preferences
   void _notifyChange(ChoicePreference pref) {
     if (onChangeCommand != null) {
-      onChangeCommand(pref);
+      onChangeCommand!(pref);
       return;
     }
     getIt.get<SettingsManager>().persistStringSettingCommand(pref);
@@ -31,14 +31,14 @@ class ChoicePreferenceWidget extends StatelessWidget {
             .get<SharedPreferencesService>()
             .loadPreferenceFromString(_choicePreference),
         listTileBuilder: (context, pref) => ListTile(
-              title: Text(pref.title),
-              subtitle: Text(pref.choices[pref.value]),
+              title: Text(pref.title!),
+              subtitle: Text(pref.choices[pref.value]!),
               onTap: () => Navigator.pushNamed(
                   context, ChoiceSelectorScreen.route,
                   arguments:
                       ChoiceSelectorScreenArguments(pref, (String value) {
                     Navigator.pop(context);
-                    this._notifyChange(pref.rebuild((b) => b..value = value));
+                    _notifyChange(pref.rebuild((b) => b..value = value));
                   }, () => Navigator.pop(context))),
             ));
   }

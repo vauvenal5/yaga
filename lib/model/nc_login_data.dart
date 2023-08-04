@@ -7,7 +7,7 @@ class NextCloudLoginDataKeys {
 }
 
 class NextCloudLoginData {
-  final Uri server;
+  final Uri? server;
   final String user;
   final String password;
   final String id;
@@ -21,9 +21,23 @@ class NextCloudLoginData {
     this.displayName = "",
   });
 
-  factory NextCloudLoginData.empty() => NextCloudLoginData(
-        null,
-        "",
-        "",
-      );
+  factory NextCloudLoginData.empty() => NextCloudLoginData(null, "", "",);
+
+  //todo: Background: use auto-generation for formJson/toJson?
+  NextCloudLoginData.fromJson(Map<String, dynamic> json)
+      : server = Uri.parse(json[NextCloudLoginDataKeys.server] as String),
+        user = json[NextCloudLoginDataKeys.user] as String,
+        password = json[NextCloudLoginDataKeys.password] as String,
+        id = json[NextCloudLoginDataKeys.id] as String,
+        displayName = json[NextCloudLoginDataKeys.displayName] as String;
+
+  Map<String, dynamic> toJson() {
+    return {
+      NextCloudLoginDataKeys.server: server.toString(),
+      NextCloudLoginDataKeys.user: user,
+      NextCloudLoginDataKeys.password: password,
+      NextCloudLoginDataKeys.id: id,
+      NextCloudLoginDataKeys.displayName: displayName,
+    };
+  }
 }

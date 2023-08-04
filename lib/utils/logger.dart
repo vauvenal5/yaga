@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:logging/logging.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:yaga/utils/log_error_file_handler.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/forground_worker/messages/flush_logs_message.dart';
@@ -10,18 +10,19 @@ import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class YagaLogger {
-  static final _logUri =
-      UriUtils.fromPathList(uri: Directory.systemTemp.uri, paths: [
+  const YagaLogger();
+
+  static final _logUri = fromPathList(uri: Directory.systemTemp.uri, paths: [
     Directory.systemTemp.uri.path,
     "yaga.log.txt",
   ]);
   static final _isolateLogUri =
-      UriUtils.fromPathList(uri: Directory.systemTemp.uri, paths: [
+      fromPathList(uri: Directory.systemTemp.uri, paths: [
     Directory.systemTemp.uri.path,
     "yaga.isolate.log.txt",
   ]);
 
-  static LogErrorFileHandler _fileHandler;
+  static late LogErrorFileHandler _fileHandler;
   static LogErrorFileHandler get fileHandler => YagaLogger._fileHandler;
 
   static Logger getLogger(Type className) {
@@ -59,7 +60,7 @@ class YagaLogger {
     ansiColorDisabled = false;
     Logger.root.level = Level.INFO;
     Logger.root.onRecord.listen((record) {
-      List<String> logs = [
+      final List<String> logs = [
         '${record.time} ${record.level} ${record.loggerName} - ${record.message}',
       ];
 
@@ -69,10 +70,10 @@ class YagaLogger {
         );
       }
 
-      logs.forEach((log) {
-        print(levelColors[record.level](log));
+      for (final log in logs) {
+        print(levelColors[record.level]!(log));
         YagaLogger._fileHandler.writeLineToFile(log);
-      });
+      }
     });
   }
 
@@ -82,7 +83,7 @@ class YagaLogger {
   }
 
   static Future<void> shareLogs() async {
-    StreamSubscription sub;
+    StreamSubscription? sub;
     sub = getIt
         .get<ForegroundWorker>()
         .isolateResponseCommand

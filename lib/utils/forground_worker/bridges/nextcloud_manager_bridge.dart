@@ -1,5 +1,5 @@
 import 'package:rx_command/rx_command.dart';
-import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
+import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
@@ -21,13 +21,11 @@ class NextcloudManagerBridge {
     this._nextcloudFileManager,
   ) {
     //todo: update loginStateCommand has no logout values... see todo in ncManager
-    this._nextCloudManager.updateLoginStateCommand.listen((value) {
-      this._worker.sendRequest(LoginStateMsg("", value));
+    _nextCloudManager.updateLoginStateCommand.listen((value) {
+      _worker.sendRequest(LoginStateMsg("", value));
     });
 
-    this
-        ._worker
-        .isolateResponseCommand
+    _worker.isolateResponseCommand
         .where((event) => event is DownloadPreviewComplete)
         .map((event) => event as DownloadPreviewComplete)
         .listen(
@@ -36,8 +34,8 @@ class NextcloudManagerBridge {
               : _nextcloudFileManager.downloadPreviewFaildCommand(value.file),
         );
 
-    this.downloadPreviewCommand.listen((ncFile) {
-      this._worker.sendRequest(DownloadPreviewRequest("", ncFile));
+    downloadPreviewCommand.listen((ncFile) {
+      _worker.sendRequest(DownloadPreviewRequest("", ncFile));
     });
   }
 }

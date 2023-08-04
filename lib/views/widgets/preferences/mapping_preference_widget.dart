@@ -10,24 +10,24 @@ import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
-import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart';
 import 'package:yaga/views/widgets/action_danger_dialog.dart';
+import 'package:yaga/views/widgets/preferences/preference_list_tile_widget.dart';
 
 class MappingPreferenceWidget extends StatefulWidget {
   final MappingPreference pref;
   final String route;
 
-  MappingPreferenceWidget(this.pref, this.route);
+  const MappingPreferenceWidget(this.pref, this.route);
 
   @override
   State<StatefulWidget> createState() => _MappingPreferenceState();
 }
 
 class _MappingPreferenceState extends State<MappingPreferenceWidget> {
-  SystemLocationService _systemLocationService;
-  UriPreference _remote;
-  UriPreference _local;
-  BoolPreference _syncDeletes;
+  late SystemLocationService _systemLocationService;
+  late UriPreference _remote;
+  late UriPreference _local;
+  late BoolPreference _syncDeletes;
 
   @override
   void initState() {
@@ -35,9 +35,9 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
     final _settingsManager = getIt.get<SettingsManager>();
 
     final prefService = getIt.get<SharedPreferencesService>();
-    this._remote = prefService.loadPreferenceFromString(widget.pref.remote);
-    this._local = prefService.loadPreferenceFromString(widget.pref.local);
-    this._syncDeletes = prefService.loadPreferenceFromBool(
+    _remote = prefService.loadPreferenceFromString(widget.pref.remote);
+    _local = prefService.loadPreferenceFromString(widget.pref.local);
+    _syncDeletes = prefService.loadPreferenceFromBool(
       widget.pref.syncDeletes,
     );
 
@@ -50,18 +50,18 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
     )
         .listen((pref) {
       if (pref.key == _remote.key) {
-        _remote = pref;
+        _remote = pref as UriPreference;
       }
 
       if (pref.key == _local.key) {
-        _local = pref;
+        _local = pref as UriPreference;
         _settingsManager.updateSettingCommand(
           _syncDeletes.rebuild((b) => b..value = false),
         );
       }
 
       if (pref.key == _syncDeletes.key) {
-        _syncDeletes = pref;
+        _syncDeletes = pref as BoolPreference;
       }
     });
 
@@ -73,7 +73,8 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
     return PreferenceListTileWidget<MappingPreference>(
       initData: widget.pref,
       listTileBuilder: (context, pref) => ListTile(
-        title: Text(pref.title),
+        enabled: pref.enabled!,
+        title: Text(pref.title!),
         onTap: () => Navigator.pushNamed(
           context,
           SettingsScreen.route,
@@ -110,7 +111,7 @@ class _MappingPreferenceState extends State<MappingPreferenceWidget> {
             }
           },
           bodyBuilder: (context) => <Widget>[
-            Text(
+            const Text(
               'The choosen local directory is not empty. Any files which do not exist on the Nextcloud side of the mapping will be erased from your phone!',
             ),
           ],

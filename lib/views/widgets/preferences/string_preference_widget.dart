@@ -8,7 +8,7 @@ class StringPreferenceWidget extends StatelessWidget {
   final StringPreference _defaultPreference;
   final Function(StringPreference) _onTap;
 
-  StringPreferenceWidget(this._defaultPreference, this._onTap);
+  const StringPreferenceWidget(this._defaultPreference, this._onTap);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class StringPreferenceWidget extends StatelessWidget {
             .get<SharedPreferencesService>()
             .loadPreferenceFromString(_defaultPreference),
         listTileBuilder: (context, pref) => ListTile(
-              title: Text(pref.title),
+              title: Text(pref.title!),
               subtitle: Text(pref.value),
               onTap: () => _onTap(pref),
             ));

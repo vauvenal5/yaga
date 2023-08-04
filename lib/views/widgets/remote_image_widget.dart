@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
-import 'package:yaga/managers/file_manager.dart';
-import 'package:yaga/managers/isolateable/nextcloud_file_manger.dart';
+import 'package:yaga/managers/file_manager/file_manager.dart';
+import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/bridges/nextcloud_manager_bridge.dart';
@@ -15,19 +15,19 @@ import 'package:yaga/views/widgets/circle_avatar_icon.dart';
 class RemoteImageWidget extends StatelessWidget {
   final NcFile _file;
   final int cacheWidth;
-  final int cacheHeight;
+  final int? cacheHeight;
   final bool showFileEnding;
 
-  RemoteImageWidget(
+  const RemoteImageWidget(
     this._file, {
-    Key key,
-    this.cacheWidth,
+    Key? key,
+    required this.cacheWidth,
     this.cacheHeight,
     this.showFileEnding = true,
   }) : super(key: key);
 
   Widget _createIconOverlay(BuildContext context, Ink mainWidget) {
-    List<Widget> children = <Widget>[
+    final List<Widget> children = <Widget>[
       mainWidget,
       Align(
         alignment: Alignment.bottomRight,
@@ -36,7 +36,7 @@ class RemoteImageWidget extends StatelessWidget {
     ];
 
     if (_file.selected) {
-      children.add(Align(
+      children.add(const Align(
         alignment: Alignment.topLeft,
         child: CircleAvatarIcon(
           icon: Icon(
@@ -57,25 +57,25 @@ class RemoteImageWidget extends StatelessWidget {
         image: ResizeImage.resizeIfNeeded(
           cacheWidth,
           cacheHeight,
-          FileImage(file),
+          FileImage(file as File),
         ),
         fit: BoxFit.cover,
       );
 
-  Widget _getLocalIcon(BuildContext context) {
+  Icon _getLocalIcon(BuildContext context) {
     if (getIt.get<NextCloudService>().isUriOfService(_file.uri)) {
-      if (_file.localFile.exists) {
-        return Icon(
+      if (_file.localFile!.exists) {
+        return const Icon(
           Icons.check_circle,
           color: Colors.green,
         );
       }
       return Icon(
         Icons.cloud_circle,
-        color: Theme.of(context).accentColor,
+        color: Theme.of(context).colorScheme.secondary,
       );
     }
-    return Icon(
+    return const Icon(
       Icons.phone_android,
       color: Colors.black,
     );
@@ -104,21 +104,21 @@ class RemoteImageWidget extends StatelessWidget {
               (event) => _file.localFile = event.localFile,
             )
       ]),
-      initialData: this._file,
+      initialData: _file,
       builder: (context, snapshot) {
-        if (_file.previewFile != null && _file.previewFile.exists) {
+        if (_file.previewFile != null && _file.previewFile!.exists) {
           return _createIconOverlay(
             context,
-            _inkFromImage(snapshot.data.previewFile.file),
+            _inkFromImage(snapshot.data!.previewFile!.file),
           );
         }
 
         _requestPreviewDownload();
 
-        if (_file.localFile != null && _file.localFile.exists) {
+        if (_file.localFile != null && _file.localFile!.exists) {
           return _createIconOverlay(
             context,
-            _inkFromImage(snapshot.data.localFile.file),
+            _inkFromImage(snapshot.data!.localFile!.file),
           );
         }
 
@@ -132,7 +132,7 @@ class RemoteImageWidget extends StatelessWidget {
       SvgPicture.asset(
         "assets/icon/foreground_no_border.svg",
         semanticsLabel: 'Yaga Logo',
-        alignment: Alignment.center,
+        // alignment: Alignment.center,
         width: 48,
       ),
     ];

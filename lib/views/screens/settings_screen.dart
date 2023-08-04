@@ -18,27 +18,31 @@ class SettingsScreen extends StatelessWidget {
   static const String route = "/settings";
 
   final List<Preference> _defaultPreferences;
-  final RxCommand<Preference, dynamic> onPreferenceChangedCommand;
-  final Function onCommit;
-  final Function onCancel;
+  final RxCommand<Preference, dynamic>? onPreferenceChangedCommand;
+  final Function? onCommit;
+  final Function? onCancel;
 
-  SettingsScreen(this._defaultPreferences,
-      {this.onPreferenceChangedCommand, this.onCancel, this.onCommit});
+  const SettingsScreen(
+    this._defaultPreferences, {
+    this.onPreferenceChangedCommand,
+    this.onCancel,
+    this.onCommit,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings"),
+        title: const Text("Settings"),
       ),
       body: ListView.separated(
         itemBuilder: (context, index) {
-          Preference defaultPref = _defaultPreferences[index];
+          final Preference defaultPref = _defaultPreferences[index];
 
           if (defaultPref is UriPreference) {
             return UriPreferenceWidget(
               defaultPref,
-              onChangeCommand: this.onPreferenceChangedCommand,
+              onChangeCommand: onPreferenceChangedCommand,
             );
           }
 
@@ -49,14 +53,14 @@ class SettingsScreen extends StatelessWidget {
           if (defaultPref is BoolPreference) {
             return BoolPreferenceWidget(
               defaultPref,
-              onChangeCommand: this.onPreferenceChangedCommand,
+              onChangeCommand: onPreferenceChangedCommand,
             );
           }
 
           if (defaultPref is ChoicePreference) {
             return ChoicePreferenceWidget(
               defaultPref,
-              this.onPreferenceChangedCommand,
+              onPreferenceChangedCommand,
             );
           }
 
@@ -72,8 +76,8 @@ class SettingsScreen extends StatelessWidget {
       bottomNavigationBar: onCommit == null
           ? null
           : SelectCancelBottomNavigation(
-              onCommit: this.onCommit,
-              onCancel: this.onCancel,
+              onCommit: onCommit!,
+              onCancel: onCancel!,
             ),
     );
   }

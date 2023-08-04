@@ -1,6 +1,6 @@
 targets:
   $default:
-    auto_apply_builders: false
+    auto_apply_builders: true
     builders:
       "built_value_generator:built_value":
         enabled: true

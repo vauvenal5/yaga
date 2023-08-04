@@ -9,9 +9,9 @@ class SelectCancelBottomNavigation extends StatelessWidget {
   final List<BottomNavigationBarItem> betweenItems;
   final List<Function> betweenItemsCallbacks;
 
-  SelectCancelBottomNavigation({
-    @required this.onCommit,
-    @required this.onCancel,
+  const SelectCancelBottomNavigation({
+    required this.onCommit,
+    required this.onCancel,
     this.labelSelect = "Select",
     this.labelCancel = "Cancel",
     this.iconSelect = Icons.check,
@@ -21,33 +21,33 @@ class SelectCancelBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<BottomNavigationBarItem> items = [];
+    final List<BottomNavigationBarItem> items = [];
     items.add(BottomNavigationBarItem(
-      icon: Icon(Icons.close),
-      label: this.labelCancel,
+      icon: const Icon(Icons.close),
+      label: labelCancel,
     ));
-    items.addAll(this.betweenItems);
+    items.addAll(betweenItems);
     items.add(BottomNavigationBarItem(
-      icon: Icon(this.iconSelect),
-      label: this.labelSelect,
+      icon: Icon(iconSelect),
+      label: labelSelect,
     ));
 
     return BottomNavigationBar(
       currentIndex: items.length - 1,
       onTap: (index) {
         if (index == items.length - 1) {
-          this.onCommit();
+          onCommit();
           return;
         }
 
         if (index == 0) {
-          this.onCancel();
+          onCancel();
           return;
         }
 
         final betweenItemsIndex = index - 1;
         if (betweenItemsIndex >= 0) {
-          this.betweenItemsCallbacks[betweenItemsIndex]?.call();
+          betweenItemsCallbacks[betweenItemsIndex].call();
           return;
         }
       },

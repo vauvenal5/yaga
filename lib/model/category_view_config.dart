@@ -4,18 +4,20 @@ import 'package:yaga/views/screens/yaga_home_screen.dart';
 class CategoryViewConfig {
   // final Uri defaultPath;
   final String pref;
-  final YagaHomeTab selectedTab;
-  final bool hasDrawer;
+  final YagaHomeTab? selectedTab;
+  final bool? hasDrawer;
+
   // final bool pathEnabled;
-  final String title;
+  final String? title;
   final GeneralViewConfig generalViewConfig;
 
-  CategoryViewConfig(
-      {Uri defaultPath,
-      this.pref,
-      this.selectedTab,
-      this.hasDrawer,
-      bool pathEnabled,
-      this.title})
-      : generalViewConfig = GeneralViewConfig(pref, defaultPath, pathEnabled);
+  CategoryViewConfig({
+    required Uri defaultPath,
+    required this.pref,
+    this.selectedTab,
+    this.hasDrawer,
+    required bool pathEnabled,
+    this.title,
+  }) : generalViewConfig =
+            GeneralViewConfig(pref, defaultPath, pathEnabled: pathEnabled);
 }

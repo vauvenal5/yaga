@@ -11,18 +11,18 @@ class SelfSignedCertHandler extends HttpOverrides
   final _logger = YagaLogger.getLogger(SelfSignedCertHandler);
 
   final String _fingerprintKey = "cert.fingerprint";
-  String _fingerprint;
+  String? _fingerprint;
 
   /// Expects a callback function if the cert is to be accepted and null otherwise.
   /// This callback function is then used to notify the caller when cert has been accepted.
-  Future<Function> Function(String subject, String issuer, String fingerprint)
+  Future<Function?> Function(String subject, String issuer, String fingerprint)?
       badCertificateCallback;
 
-  SecureStorageService _secureStorageService;
+  SecureStorageService? _secureStorageService;
 
   Future<SelfSignedCertHandler> init(SecureStorageService secStorage) async {
-    this._secureStorageService = secStorage;
-    this._fingerprint = await _secureStorageService.loadPreference(
+    _secureStorageService = secStorage;
+    _fingerprint = await _secureStorageService?.loadPreference(
       _fingerprintKey,
     );
     HttpOverrides.global = this;
@@ -34,19 +34,25 @@ class SelfSignedCertHandler extends HttpOverrides
     InitMsg init,
     SendPort isolateToMain,
   ) async {
-    this._fingerprint = init.fingerprint;
+    _fingerprint = init.fingerprint;
     HttpOverrides.global = this;
     return this;
   }
 
-  String get fingerprint => _fingerprint;
+  Future<SelfSignedCertHandler> initBackgroundable(String fingerprint) async {
+    _fingerprint = fingerprint;
+    HttpOverrides.global = this;
+    return this;
+  }
+
+  String get fingerprint => _fingerprint ?? '';
 
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     final HttpClient client = super.createHttpClient(context);
     client.badCertificateCallback =
         (X509Certificate cert, String host, int port) {
-      String certFingerprint = cert.sha1.toString();
+      final String certFingerprint = cert.sha1.toString();
       if (_fingerprint == certFingerprint) {
         return true;
       }
@@ -62,7 +68,7 @@ class SelfSignedCertHandler extends HttpOverrides
         cert.issuer,
         certFingerprint,
       )
-          ?.then((certAcceptedCallback) {
+          .then((certAcceptedCallback) {
         if (certAcceptedCallback != null) {
           // we are here temporarily accepting the cert but not persisting until a successfull login
           _fingerprint = certFingerprint;
@@ -75,14 +81,13 @@ class SelfSignedCertHandler extends HttpOverrides
   }
 
   Future<void> persistCert() {
-    return this
-            ._secureStorageService
-            ?.savePreference("$_fingerprintKey", _fingerprint) ??
+    return _secureStorageService?.savePreference(
+            _fingerprintKey, fingerprint) ??
         Future.value();
   }
 
   void revokeCert() {
-    this._fingerprint = null;
-    this._secureStorageService?.deletePreference(this._fingerprintKey);
+    _fingerprint = null;
+    _secureStorageService?.deletePreference(_fingerprintKey);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
+import 'package:yaga/services/name_exchange_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/views/widgets/avatar_widget.dart';
@@ -12,7 +13,7 @@ class PathWidget extends StatelessWidget {
   final bool fixedOrigin;
   final String schemeFilter;
 
-  PathWidget(
+  const PathWidget(
     this._uri,
     this._onTap, {
     this.fixedOrigin = false,
@@ -23,22 +24,22 @@ class PathWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ButtonTheme(
       minWidth: 20,
-      padding: EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: ListView.separated(
         shrinkWrap: true,
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         scrollDirection: Axis.horizontal,
-        itemCount: _uri.pathSegments.length == 0 ? 1 : _uri.pathSegments.length,
+        itemCount: _uri.pathSegments.isEmpty ? 1 : _uri.pathSegments.length,
         itemBuilder: (context, index) {
           if (index == 0) {
-            Uri selected = UriUtils.getRootFromUri(_uri);
+            final Uri selected = getRootFromUri(_uri);
 
             if (fixedOrigin) {
               return _getDisabledAvatar(selected);
             }
 
             List<DropdownMenuItem<Uri>> items = [];
-            SystemLocationService systemLocationService =
+            final SystemLocationService systemLocationService =
                 getIt.get<SystemLocationService>();
 
             items.add(_getMenuItem(
@@ -54,34 +55,37 @@ class PathWidget extends StatelessWidget {
             if (getIt.get<NextCloudService>().isLoggedIn()) {
               items.add(
                 _getMenuItem(
-                  getIt.get<NextCloudService>().origin.userEncodedDomainRoot,
+                  getIt.get<NextCloudService>().origin!.userEncodedDomainRoot,
                 ),
               );
             }
 
             if (schemeFilter.isNotEmpty) {
               items = items
-                  .where((element) => element.value.scheme == schemeFilter)
+                  .where((element) => element.value!.scheme == schemeFilter)
                   .toList();
             }
 
             return DropdownButtonHideUnderline(
               child: DropdownButton(
                 value: selected,
-                onChanged: (value) => _onTap(value),
+                onChanged: (Uri? value) => _onTap(value!),
                 items: items,
               ),
             );
           }
-          Uri subUri = UriUtils.fromUriPathSegments(_uri, index - 1);
-          return FlatButton(
-            textColor: Colors.white,
+          final Uri subUri = fromUriPathSegments(_uri, index - 1);
+          final Uri readableUri = getIt.get<NameExchangeService>().convertUriToHumanReadableUri(subUri);
+          return TextButton(
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+            ),
             onPressed: () => _onTap(subUri),
-            child: Text(UriUtils.getNameFromUri(subUri)),
+            child: Text(getNameFromUri(readableUri)),
           );
         },
         separatorBuilder: (context, index) =>
-            Icon(Icons.keyboard_arrow_right, color: Colors.white),
+            const Icon(Icons.keyboard_arrow_right, color: Colors.white),
       ),
     );
   }
@@ -102,7 +106,7 @@ class PathWidget extends StatelessWidget {
 
   Widget _getAvatarForOrigin(Uri origin) {
     if (getIt.get<SystemLocationService>().internalStorage.origin == origin) {
-      return AvatarWidget.phone();
+      return const AvatarWidget.phone();
     }
 
     if (origin.scheme == getIt.get<NextCloudService>().scheme) {
@@ -111,6 +115,6 @@ class PathWidget extends StatelessWidget {
       );
     }
 
-    return AvatarWidget.sd();
+    return const AvatarWidget.sd();
   }
 }

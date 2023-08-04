@@ -12,13 +12,15 @@ import 'package:yaga/utils/self_signed_cert_handler.dart';
 import 'package:yaga/utils/uri_utils.dart';
 
 class NextCloudManager {
-  RxCommand<NextCloudLoginData, NextCloudLoginData> loginCommand;
-  RxCommand<NextCloudLoginData, NextCloudLoginData> _internalLoginCommand;
-  //todo: this command has a bad naming since it only gets triggered on login not logout
-  RxCommand<NextCloudLoginData, NextCloudLoginData> updateLoginStateCommand;
-  RxCommand<void, NextCloudLoginData> logoutCommand;
+  late RxCommand<NextCloudLoginData, NextCloudLoginData> loginCommand;
+  late RxCommand<NextCloudLoginData, NextCloudLoginData> _internalLoginCommand;
 
-  RxCommand<void, File> updateAvatarCommand;
+  //todo: this command has a bad naming since it only gets triggered on login not logout
+  late RxCommand<NextCloudLoginData, NextCloudLoginData>
+      updateLoginStateCommand;
+  late RxCommand<void, NextCloudLoginData> logoutCommand;
+
+  late RxCommand<void, File> updateAvatarCommand;
 
   final SecureStorageService _secureStorageService;
   final NextCloudService _nextCloudService;
@@ -33,12 +35,12 @@ class NextCloudManager {
     this._systemLocationService,
     this._selfSignedCertHandler,
   ) {
-    this.loginCommand = RxCommand.createFromStream(
-        (param) => this._createLoginDataPersisStream(param));
-    this.loginCommand.listen((value) => this._internalLoginCommand(value));
+    loginCommand = RxCommand.createFromStream(
+        (param) => _createLoginDataPersisStream(param!));
+    loginCommand.listen((value) => _internalLoginCommand(value));
 
-    this._internalLoginCommand = RxCommand.createSync((param) => param);
-    this._internalLoginCommand.listen((event) async {
+    _internalLoginCommand = RxCommand.createSync((param) => param);
+    _internalLoginCommand.listen((event) async {
       final origin = await _nextCloudService.login(event);
 
       if (event.id == "" || event.displayName == "") {
@@ -53,33 +55,30 @@ class NextCloudManager {
       updateAvatarCommand();
     });
 
-    this.updateLoginStateCommand = RxCommand.createSync(
+    updateLoginStateCommand = RxCommand.createSync(
       (param) => param,
       initialLastResult: NextCloudLoginData.empty(),
     );
 
-    this.logoutCommand = RxCommand.createFromStream(
-      (_) => this._createLoginDataPersisStream(NextCloudLoginData.empty()),
+    logoutCommand = RxCommand.createFromStream(
+      (_) => _createLoginDataPersisStream(NextCloudLoginData.empty()),
     );
-    this
-        .logoutCommand
+    logoutCommand
         .doOnData((event) => _nextCloudService.logout())
         .listen((value) {
-      this._selfSignedCertHandler.revokeCert();
-      this.updateLoginStateCommand(value);
-      this.updateAvatarCommand();
+      _selfSignedCertHandler.revokeCert();
+      updateLoginStateCommand(value);
+      updateAvatarCommand();
     });
 
-    this.updateAvatarCommand = RxCommand.createAsync(
-        (_) => _handleAvatarUpdate(),
+    updateAvatarCommand = RxCommand.createAsync((_) => _handleAvatarUpdate(),
         initialLastResult: _avatarFile);
   }
 
   Future<File> _handleAvatarUpdate() async {
-    File avatar = _avatarFile;
-    if (this._nextCloudService.isLoggedIn()) {
-      return this
-          ._nextCloudService
+    final File avatar = _avatarFile;
+    if (_nextCloudService.isLoggedIn()) {
+      return _nextCloudService
           .getAvatar()
           .then(
             (value) => _localFileService.createFile(
@@ -94,7 +93,7 @@ class NextCloudManager {
   }
 
   File get _avatarFile => File(
-        UriUtils.chainPathSegments(
+        chainPathSegments(
           _systemLocationService
               .absoluteUriFromInternal(_systemLocationService.internalCache.uri)
               .path,
@@ -103,24 +102,23 @@ class NextCloudManager {
       );
 
   Future<NextCloudManager> init() async {
-    String server = await _secureStorageService
+    final String server = await _secureStorageService
         .loadPreference(NextCloudLoginDataKeys.server);
-    String user =
+    final String user =
         await _secureStorageService.loadPreference(NextCloudLoginDataKeys.user);
-    String password = await _secureStorageService
+    final String password = await _secureStorageService
         .loadPreference(NextCloudLoginDataKeys.password);
-    String userId =
+    final String userId =
         await _secureStorageService.loadPreference(NextCloudLoginDataKeys.id);
-    String displayName = await _secureStorageService
+    final String displayName = await _secureStorageService
         .loadPreference(NextCloudLoginDataKeys.displayName);
 
     if (server != "" && user != "" && password != "") {
-      Completer<NextCloudManager> login = Completer();
-      this
-          .updateLoginStateCommand
+      final Completer<NextCloudManager> login = Completer();
+      updateLoginStateCommand
           .where((event) => !login.isCompleted)
           .listen((value) => login.complete(this));
-      this._internalLoginCommand(NextCloudLoginData(
+      _internalLoginCommand(NextCloudLoginData(
         Uri.parse(server),
         user,
         password,
@@ -135,6 +133,7 @@ class NextCloudManager {
 
   Stream<NextCloudLoginData> _createLoginDataPersisStream(
       NextCloudLoginData data) {
+    //todo: Background: can we persist this as a json? json support was added as part of the background worker
     return ForkJoinStream.list([
       _secureStorageService
           .savePreference(NextCloudLoginDataKeys.server, data.server.toString())

@@ -6,7 +6,7 @@ import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:yaga/views/screens/category_view_screen.dart';
 
 class HomeView extends CategoryViewScreen {
-  static final String pref = "category";
+  static const String pref = "category";
 
   HomeView()
       : super(

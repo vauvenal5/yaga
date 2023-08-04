@@ -8,12 +8,12 @@ class DirectoryNavigationScreenArguments extends NavigatableScreenArguments {
   final bool fixedOrigin;
   final String schemeFilter;
   final String title;
-  final Widget Function(BuildContext, Uri) bottomBarBuilder;
+  final Widget Function(BuildContext, Uri)? bottomBarBuilder;
 
   DirectoryNavigationScreenArguments({
-    @required Uri uri,
-    this.title,
-    this.viewConfig,
+    required Uri uri,
+    required this.title,
+    required this.viewConfig,
     this.bottomBarBuilder,
     this.leadingBackArrow = true,
     this.fixedOrigin = false,

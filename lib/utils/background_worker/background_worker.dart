@@ -150,6 +150,7 @@ class BackgroundWorker {
     return true;
   }
 
+  @pragma('vm:entry-point')
   static Future<void> _workerMain(ServiceInstance service) async {
     // Only available for flutter 3.0.0 and later
     DartPluginRegistrant.ensureInitialized();

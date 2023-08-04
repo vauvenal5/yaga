@@ -187,7 +187,6 @@ class LogErrorFileHandler extends ReportHandler {
       AndroidDeviceInfo androidDeviceInfo) {
     final Map<String, dynamic> deviceParameters = {};
     deviceParameters["id"] = androidDeviceInfo.id;
-    deviceParameters["androidId"] = androidDeviceInfo.androidId;
     deviceParameters["board"] = androidDeviceInfo.board;
     deviceParameters["bootloader"] = androidDeviceInfo.bootloader;
     deviceParameters["brand"] = androidDeviceInfo.brand;

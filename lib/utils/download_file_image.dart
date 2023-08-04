@@ -14,7 +14,20 @@ class DownloadFileImage extends FileImage {
   @override
   ImageStreamCompleter loadBuffer(FileImage key, DecoderBufferCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode, null),
+      codec: _loadAsync(key, decodeBufferDeprecated: decode),
+      scale: key.scale,
+      debugLabel: key.file.path,
+      informationCollector: () => <DiagnosticsNode>[
+        ErrorDescription('Path: ${file.path}'),
+      ],
+    );
+  }
+
+  @override
+  @protected
+  ImageStreamCompleter loadImage(FileImage key, ImageDecoderCallback decode) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, decode: decode),
       scale: key.scale,
       debugLabel: key.file.path,
       informationCollector: () => <DiagnosticsNode>[
@@ -25,7 +38,11 @@ class DownloadFileImage extends FileImage {
 
   /// this function is copied from the parent
   /// await localFileAvailable was added and Uint8List result is reused
-  Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
+  Future<ui.Codec> _loadAsync(FileImage key, {
+    ImageDecoderCallback? decode,
+    DecoderBufferCallback? decodeBufferDeprecated,
+    DecoderCallback? decodeDeprecated,
+  }) async {
     assert(key == this);
 
     final FetchedFile fetchedFile = await localFileAvailable;

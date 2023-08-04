@@ -33,13 +33,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData dark = ThemeData(
       brightness: Brightness.dark,
-      accentColor: NextcloudColors.lightBlue,
-      toggleableActiveColor: NextcloudColors.lightBlue,
+      colorScheme: ColorScheme.fromSwatch(
+        accentColor: NextcloudColors.lightBlue,
+        brightness: Brightness.dark,
+      ),
     );
 
     final ThemeData light = ThemeData(
-      brightness: Brightness.light,
-      accentColor: NextcloudColors.lightBlue,
+      // brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+        secondary: NextcloudColors.lightBlue,
+        brightness: Brightness.light,
+      ),
     );
 
     const String title = "Nextcloud Yaga";

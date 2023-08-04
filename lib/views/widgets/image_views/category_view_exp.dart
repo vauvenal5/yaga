@@ -17,7 +17,7 @@ class CategoryViewExp extends StatelessWidget {
   Widget _buildHeader(String key, BuildContext context) {
     return Container(
       height: 30.0,
-      color: Theme.of(context).accentColor,
+      color: Theme.of(context).colorScheme.secondary,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       alignment: Alignment.centerLeft,
       child: Text(

@@ -45,7 +45,7 @@ android {
     defaultConfig {
         applicationId "com.github.vauvenal5.yaga"
         minSdkVersion 24
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -81,11 +81,11 @@ android {
             resValue "string", "app_name", "Yaga"
         }
 
-        fdroid {
-            dimension "deploy"
-            resValue "string", "app_name", "Yaga"
-            signingConfig null
-        }
+//        fdroid {
+//            dimension "deploy"
+//            resValue "string", "app_name", "Yaga"
+//            signingConfig null
+//        }
     }
 }
 

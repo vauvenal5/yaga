@@ -12,7 +12,7 @@ class SectionPreferenceWidget extends StatelessWidget {
       title: Text(
         _pref.title!,
         style: TextStyle(
-            color: Theme.of(context).accentColor, fontWeight: FontWeight.bold),
+            color: Theme.of(context).colorScheme.secondary, fontWeight: FontWeight.bold),
       ),
     );
   }

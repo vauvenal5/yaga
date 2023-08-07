@@ -47,6 +47,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: yaga-play-release.aab
+          path: ./build/app/outputs/bundle/playRelease/app-play-release.aab
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0' # Not needed with a .ruby-version file

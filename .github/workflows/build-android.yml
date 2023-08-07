@@ -38,6 +38,7 @@ jobs:
           name: app-play-release.aab
           path: ./build/app/outputs/bundle/playRelease/app-play-release.aab
   publish-internal:
+    needs: build
     uses: vauvenal5/yaga/.github/workflows/publish-play-store.yml@master
     with:
       stage: 'internal'

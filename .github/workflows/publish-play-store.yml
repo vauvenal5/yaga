@@ -29,6 +29,6 @@ jobs:
         with:
           fileName: 'google-play.json'
           fileDir: './android/'
-          encodedString: ${{ secrets.GOOGLE_PLAY_JSON_BASE64 }}
+          encodedString: ${{ secrets.googlePlayJsonBase64 }}
       - run: cd fastlane
       - run: bundle exec fastlane ${{ inputs.stage }}

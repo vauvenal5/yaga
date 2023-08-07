@@ -36,7 +36,7 @@ jobs:
       - run: flutter build appbundle --flavor play
       - uses: actions/upload-artifact@v3
         with:
-          name: yaga-play-release.aab
+          name: app-play-release.aab
           path: ./build/app/outputs/bundle/playRelease/app-play-release.aab
   publish-internal:
     needs: build
@@ -46,8 +46,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
         with:
-          name: yaga-play-release.aab
-          path: ./build/app/outputs/bundle/playRelease/app-play-release.aab
+          name: app-play-release.aab
+          path: ./build/app/outputs/bundle/playRelease
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0' # Not needed with a .ruby-version file

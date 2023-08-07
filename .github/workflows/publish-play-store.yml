@@ -8,7 +8,6 @@ on:
     secrets:
       googlePlayJsonBase64:
         required: true
-        type: string
 jobs:
   publish:
     environment: ${{ input.stage }}

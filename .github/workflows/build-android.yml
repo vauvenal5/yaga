@@ -40,6 +40,7 @@ jobs:
           path: ./build/app/outputs/bundle/playRelease/app-play-release.aab
   publish-internal:
     needs: build
+    environment: 'internal'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

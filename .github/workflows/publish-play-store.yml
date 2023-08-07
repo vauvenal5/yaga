@@ -10,7 +10,7 @@ on:
         required: true
 jobs:
   publish:
-    environment: ${{ input.stage }}
+    environment: ${{ inputs.stage }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -31,4 +31,4 @@ jobs:
           fileDir: './android/'
           encodedString: ${{ secrets.GOOGLE_PLAY_JSON_BASE64 }}
       - run: cd fastlane
-      - run: bundle exec fastlane ${{ input.stage }}
+      - run: bundle exec fastlane ${{ inputs.stage }}

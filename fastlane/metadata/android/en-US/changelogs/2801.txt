@@ -1,0 +1,2 @@
+- moved file actions into background thread
+- background feature can be switched on and off in general settings

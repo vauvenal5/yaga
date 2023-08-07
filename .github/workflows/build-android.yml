@@ -33,7 +33,7 @@ jobs:
           cahce: true
       - run: flutter pub get
       - run: flutter pub run build_runner build --delete-conflicting-outputs
-      - run: flutter build apk --flavor dev
+      - run: flutter build appbundle --flavor play
       - uses: actions/upload-artifact@v3
         with:
           name: yaga-play-release.aab

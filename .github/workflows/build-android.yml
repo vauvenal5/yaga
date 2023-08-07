@@ -38,23 +38,23 @@ jobs:
         with:
           name: yaga-play-release.aab
           path: ./build/app/outputs/bundle/playRelease/app-play-release.aab
-publish-internal:
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v3
-    - uses: actions/download-artifact@v3
-      with:
-        name: yaga-play-release.aab
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.0' # Not needed with a .ruby-version file
-        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - name: Create Android Keystore
-      id: android_keystore
-      uses: timheuer/base64-to-file@v1.2
-      with:
-        fileName: 'google-play.json'
-        fileDir: './android/'
-        encodedString: ${{ secrets.GOOGLE_PLAY_JSON_BASE64 }}
-    - run: cd fastlane
-    - run: bundle exec fastlane internal
+  publish-internal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: yaga-play-release.aab
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0' # Not needed with a .ruby-version file
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Create Android Keystore
+        id: android_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: 'google-play.json'
+          fileDir: './android/'
+          encodedString: ${{ secrets.GOOGLE_PLAY_JSON_BASE64 }}
+      - run: cd fastlane
+      - run: bundle exec fastlane internal

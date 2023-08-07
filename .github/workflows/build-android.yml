@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Create Android Keystore
@@ -39,25 +38,32 @@ jobs:
           name: app-play-release.aab
           path: ./build/app/outputs/bundle/playRelease/app-play-release.aab
   publish-internal:
-    needs: build
-    environment: 'internal'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: app-play-release.aab
-          path: ./build/app/outputs/bundle/playRelease
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0' # Not needed with a .ruby-version file
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - name: Create Android Keystore
-        id: android_keystore
-        uses: timheuer/base64-to-file@v1.2
-        with:
-          fileName: 'google-play.json'
-          fileDir: './android/'
-          encodedString: ${{ secrets.GOOGLE_PLAY_JSON_BASE64 }}
-      - run: cd fastlane
-      - run: bundle exec fastlane internal
+    uses: vauvenal5/yaga/.github/workflows/publish-play-store.yml@main
+    with:
+      stage: 'internal'
+    secrets:
+      googlePlayJsonBase64: ${{ secrets.GOOGLE_PLAY_JSON_BASE64 }}
+
+#  publish-internal:
+#    needs: build
+#    environment: 'internal'
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/download-artifact@v3
+#        with:
+#          name: app-play-release.aab
+#          path: ./build/app/outputs/bundle/playRelease
+#      - uses: ruby/setup-ruby@v1
+#        with:
+#          ruby-version: '3.0' # Not needed with a .ruby-version file
+#          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+#      - name: Create Android Keystore
+#        id: android_keystore
+#        uses: timheuer/base64-to-file@v1.2
+#        with:
+#          fileName: 'google-play.json'
+#          fileDir: './android/'
+#          encodedString: ${{ secrets.GOOGLE_PLAY_JSON_BASE64 }}
+#      - run: cd fastlane
+#      - run: bundle exec fastlane internal

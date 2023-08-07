@@ -53,3 +53,5 @@ android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
 .fvm/flutter_sdk
 .fvm/fvm_config.json
+/yaga.jks
+/yaga.jks.base64

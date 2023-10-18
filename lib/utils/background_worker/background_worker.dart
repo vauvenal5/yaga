@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/file_manager/isolateable/file_action_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
@@ -39,6 +40,8 @@ class BackgroundWorker {
   BackgroundWorker(this._nextCloudManager, this._selfSignedCertHandler);
 
   Future<BackgroundWorker> init() async {
+    await Permission.notification.request();
+    await Permission.scheduleExactAlarm.request();
     await service.configure(
       androidConfiguration: AndroidConfiguration(
         // this will be executed when app is in foreground or background in separated isolate

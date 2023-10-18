@@ -57,7 +57,7 @@ class ImageScreenState extends State<ImageScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title ?? _title),
-        actions: <Widget>[_buildMainAction()],
+        actions: _buildMainAction(),
       ),
       body: PhotoViewGallery.builder(
         pageController: pageController,
@@ -108,22 +108,27 @@ class ImageScreenState extends State<ImageScreen> {
     );
   }
 
-  IconButton _buildMainAction() {
+  List<Widget> _buildMainAction() {
     if (getIt.get<IntentService>().isOpenForSelect) {
-      return IconButton(
+      return [IconButton(
         icon: const Icon(Icons.check),
         onPressed: () async {
           await getIt
               .get<IntentService>()
               .setSelectedFile(widget._images[_currentIndex]);
         },
-      );
+      ),];
     }
 
-    return IconButton(
+    return [IconButton(
+      icon: const Icon(Icons.wallpaper),
+      onPressed: () => getIt.get<IntentService>()
+          .attachData(widget._images[_currentIndex]),
+    ),
+      IconButton(
       icon: const Icon(Icons.share),
       onPressed: () => Share.shareFiles(
           [widget._images[_currentIndex].localFile!.file.path]),
-    );
+    ),];
   }
 }

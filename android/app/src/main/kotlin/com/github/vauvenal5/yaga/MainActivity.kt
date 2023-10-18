@@ -20,6 +20,7 @@ class MainActivity: FlutterActivity() {
     private val GET_INTENT_ACTION_METHOD = "getIntentAction";
     private val GET_INTENT_TYPE_METHOD = "getIntentType";
     private val GET_INTENT_SET_RESULT = "setSelectedFile";
+    private val ATTACH_DATA = "attachData";
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine);
@@ -43,13 +44,29 @@ class MainActivity: FlutterActivity() {
                 result.success(intent.getType());
             } else if (call.method.contentEquals(GET_INTENT_SET_RESULT)) {
                 handleShareSelectedImageIntent(call, result)
+            } else if (call.method.contentEquals(ATTACH_DATA)) {
+                attachData(call, result)
             } else {
                 result.notImplemented()
             }
         }
     }
 
+    private fun attachData(call: MethodCall, resultChannel: MethodChannel.Result) {
+        val resultIntent = prepIntent(call, resultChannel)
+        resultIntent.setAction(Intent.ACTION_ATTACH_DATA)
+        this.startActivity(Intent.createChooser(resultIntent, "Use picture as..."))
+        resultChannel.success(null)
+    }
+
     private fun handleShareSelectedImageIntent(call: MethodCall, resultChannel: MethodChannel.Result) {
+        val resultIntent = prepIntent(call, resultChannel)
+        setResult(RESULT_OK, resultIntent)
+        resultChannel.success(true)
+        finish()
+    }
+
+    private fun prepIntent(call: MethodCall, resultChannel: MethodChannel.Result): Intent {
         val resultIntent = Intent();
         val path = call.argument<String>("path");
         val mime = call.argument<String>("mime");
@@ -75,9 +92,7 @@ class MainActivity: FlutterActivity() {
 
         resultIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         resultIntent.setDataAndType(fileUri, mime)
-        setResult(RESULT_OK, resultIntent)
-        resultChannel.success(true)
-        finish()
+        return resultIntent;
     }
 
     private fun shareSelectedImageFailed(resultIntent: Intent, resultChannel: MethodChannel.Result) {

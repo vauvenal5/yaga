@@ -1,0 +1,1 @@
+- add support for attach to functionality of Android (needed for wallpapers)

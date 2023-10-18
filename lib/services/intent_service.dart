@@ -30,6 +30,14 @@ class IntentService extends Service<IntentService> {
     }).then((value) => value as bool);
   }
 
+  Future attachData(NcFile file) async {
+    final String mime = lookupMimeType(file.localFile!.file.path)??'';
+    return _intentChannel.invokeMethod("attachData", {
+      "path": file.localFile!.file.path,
+      "mime": mime,
+    });
+  }
+
   bool get isOpenForSelect =>
       _intentAction == "android.intent.action.GET_CONTENT" ||
       _intentAction == "android.intent.action.PICK";

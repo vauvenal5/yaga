@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:share_plus/share_plus.dart';
@@ -63,7 +64,13 @@ class ImageScreenState extends State<ImageScreen> {
             )
           : null,
       body: GestureDetector(
-        onTap: () => setState(() => _showAppBar = !_showAppBar),
+        onTap: () => setState(() {
+          _showAppBar = !_showAppBar;
+          _showAppBar
+              ? SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                  overlays: SystemUiOverlay.values)
+              : SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+        }),
         child: PhotoViewGallery.builder(
           pageController: pageController,
           onPageChanged: _onPageChanged,

@@ -1,0 +1,1 @@
+- enable hidding of app bar in image view by tap

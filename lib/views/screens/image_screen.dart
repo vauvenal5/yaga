@@ -36,6 +36,7 @@ class ImageScreenState extends State<ImageScreen> {
   late String _title;
   late int _currentIndex;
   late PageController pageController;
+  var _showAppBar = true;
 
   @override
   void initState() {
@@ -55,80 +56,90 @@ class ImageScreenState extends State<ImageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title ?? _title),
-        actions: _buildMainAction(),
-      ),
-      body: PhotoViewGallery.builder(
-        pageController: pageController,
-        onPageChanged: _onPageChanged,
-        itemCount: widget._images.length,
-        builder: (BuildContext context, int index) {
-          final NcFile image = widget._images[index];
+      appBar: _showAppBar
+          ? AppBar(
+              title: Text(widget.title ?? _title),
+              actions: _buildMainAction(),
+            )
+          : null,
+      body: GestureDetector(
+        onTap: () => setState(() => _showAppBar = !_showAppBar),
+        child: PhotoViewGallery.builder(
+          pageController: pageController,
+          onPageChanged: _onPageChanged,
+          itemCount: widget._images.length,
+          builder: (BuildContext context, int index) {
+            final NcFile image = widget._images[index];
 
-          _logger.fine("Building view for index $index");
+            _logger.fine("Building view for index $index");
 
-          final Future<FetchedFile> localFileAvailable = getIt
-              .get<FileManager>()
-              .fetchedFileCommand
-              .where((event) => event.file.uri.path == image.uri.path)
-              .first;
-          getIt.get<FileManager>().downloadImageCommand(
-                DownloadFileRequest(image),
-              );
+            final Future<FetchedFile> localFileAvailable = getIt
+                .get<FileManager>()
+                .fetchedFileCommand
+                .where((event) => event.file.uri.path == image.uri.path)
+                .first;
+            getIt.get<FileManager>().downloadImageCommand(
+                  DownloadFileRequest(image),
+                );
 
-          return PhotoViewGalleryPageOptions(
-            key: ValueKey(image.uri.path),
-            minScale: PhotoViewComputedScale.contained,
-            imageProvider: DownloadFileImage(
-              image.localFile!.file as File,
-              localFileAvailable,
-            ),
-          );
-        },
-        loadingBuilder: (context, event) {
-          final bool previewExists =
-              widget._images[_currentIndex].previewFile != null &&
-                  widget._images[_currentIndex].previewFile!.exists;
-          return Stack(children: [
-            Container(
-              color: Colors.black,
-              child: previewExists
-                  ? Image.file(
-                      widget._images[_currentIndex].previewFile!.file as File,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.contain)
-                  : null,
-            ),
-            const LinearProgressIndicator()
-          ]);
-        },
+            return PhotoViewGalleryPageOptions(
+              key: ValueKey(image.uri.path),
+              minScale: PhotoViewComputedScale.contained,
+              imageProvider: DownloadFileImage(
+                image.localFile!.file as File,
+                localFileAvailable,
+              ),
+            );
+          },
+          loadingBuilder: (context, event) {
+            final bool previewExists =
+                widget._images[_currentIndex].previewFile != null &&
+                    widget._images[_currentIndex].previewFile!.exists;
+            return Stack(children: [
+              Container(
+                color: Colors.black,
+                child: previewExists
+                    ? Image.file(
+                        widget._images[_currentIndex].previewFile!.file as File,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.contain)
+                    : null,
+              ),
+              const LinearProgressIndicator()
+            ]);
+          },
+        ),
       ),
     );
   }
 
   List<Widget> _buildMainAction() {
     if (getIt.get<IntentService>().isOpenForSelect) {
-      return [IconButton(
-        icon: const Icon(Icons.check),
-        onPressed: () async {
-          await getIt
-              .get<IntentService>()
-              .setSelectedFile(widget._images[_currentIndex]);
-        },
-      ),];
+      return [
+        IconButton(
+          icon: const Icon(Icons.check),
+          onPressed: () async {
+            await getIt
+                .get<IntentService>()
+                .setSelectedFile(widget._images[_currentIndex]);
+          },
+        ),
+      ];
     }
 
-    return [IconButton(
-      icon: const Icon(Icons.wallpaper),
-      onPressed: () => getIt.get<IntentService>()
-          .attachData(widget._images[_currentIndex]),
-    ),
+    return [
       IconButton(
-      icon: const Icon(Icons.share),
-      onPressed: () => Share.shareFiles(
-          [widget._images[_currentIndex].localFile!.file.path]),
-    ),];
+        icon: const Icon(Icons.wallpaper),
+        onPressed: () => getIt
+            .get<IntentService>()
+            .attachData(widget._images[_currentIndex]),
+      ),
+      IconButton(
+        icon: const Icon(Icons.share),
+        onPressed: () => Share.shareFiles(
+            [widget._images[_currentIndex].localFile!.file.path]),
+      ),
+    ];
   }
 }

@@ -69,7 +69,7 @@ class ImageScreenState extends State<ImageScreen> {
           _showAppBar
               ? SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
                   overlays: SystemUiOverlay.values)
-              : SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+              : SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
         }),
         child: PhotoViewGallery.builder(
           pageController: pageController,

@@ -1,0 +1,2 @@
+- enable hidding of app bar in image view by tap
+- enable hidding of android overlays

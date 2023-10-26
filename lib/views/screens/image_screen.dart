@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:wakelock/wakelock.dart';
 import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
@@ -59,10 +60,15 @@ class ImageScreenState extends State<ImageScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _stopSlideShow();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: SystemUiOverlay.values);
     super.dispose();
+  }
+
+  void _stopSlideShow() {
+    Wakelock.disable();
+    _timer?.cancel();
   }
 
   @override
@@ -150,27 +156,31 @@ class ImageScreenState extends State<ImageScreen> {
       if (_timer == null)
         IconButton(
           icon: const Icon(Icons.play_circle_outline),
-          onPressed: () => setState(
-            () => _timer = Timer.periodic(
-              Duration(
-                seconds: getIt
-                    .get<SharedPreferencesService>()
-                    .loadPreferenceFromInt(
-                        GlobalSettingsManager.slideShowInterval)
-                    .value,
+          onPressed: ()
+          {
+            Wakelock.enable();
+            setState(
+              () => _timer = Timer.periodic(
+                Duration(
+                  seconds: getIt
+                      .get<SharedPreferencesService>()
+                      .loadPreferenceFromInt(
+                          GlobalSettingsManager.slideShowInterval)
+                      .value,
+                ),
+                (Timer t) => pageController.nextPage(
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.ease,
+                ),
               ),
-              (Timer t) => pageController.nextPage(
-                duration: const Duration(seconds: 1),
-                curve: Curves.ease,
-              ),
-            ),
-          ),
+            );
+          },
         )
       else
         IconButton(
           icon: const Icon(Icons.stop_circle_outlined),
           onPressed: () {
-            _timer?.cancel();
+            _stopSlideShow();
             setState(() => _timer = null);
           },
         ),

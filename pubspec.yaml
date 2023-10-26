@@ -54,6 +54,7 @@ dependencies:
   markdown: ^7.1.1
   flutter_background_service: ^5.0.1
   flutter_background_service_android: ^6.0.1
+  wakelock: ^0.6.2
 
 # dependency_overrides:
 #   analyzer: "0.40.6"

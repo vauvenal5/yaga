@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,7 @@ class ImageScreenState extends State<ImageScreen> {
   late PageController pageController;
   var _showAppBar = true;
   Timer? _timer;
+  final rng = Random();
 
   @override
   void initState() {
@@ -77,7 +79,7 @@ class ImageScreenState extends State<ImageScreen> {
       appBar: _showAppBar
           ? AppBar(
               title: Text(widget.title ?? _title),
-              actions: _buildMainAction(),
+              actions: _buildMainAction(context),
             )
           : null,
       body: GestureDetector(
@@ -138,7 +140,23 @@ class ImageScreenState extends State<ImageScreen> {
     );
   }
 
-  List<Widget> _buildMainAction() {
+  int _calculatePage(BuildContext context) {
+    if(getIt.get<SharedPreferencesService>().loadPreferenceFromBool(GlobalSettingsManager.slideShowRandom).value) {
+      return rng.nextInt(widget._images.length);
+    }
+
+    if(widget._images.length == _currentIndex + 1) {
+      if(getIt.get<SharedPreferencesService>().loadPreferenceFromBool(GlobalSettingsManager.slideShowAutoStop).value) {
+        _stopSlideShow();
+        Navigator.pop(context);
+      }
+      return 0;
+    }
+
+    return _currentIndex + 1;
+  }
+
+  List<Widget> _buildMainAction(BuildContext context) {
     if (getIt.get<IntentService>().isOpenForSelect) {
       return [
         IconButton(
@@ -168,10 +186,7 @@ class ImageScreenState extends State<ImageScreen> {
                           GlobalSettingsManager.slideShowInterval)
                       .value,
                 ),
-                (Timer t) => pageController.nextPage(
-                  duration: const Duration(seconds: 1),
-                  curve: Curves.ease,
-                ),
+                (Timer t) => pageController.jumpToPage(_calculatePage(context)),
               ),
             );
           },

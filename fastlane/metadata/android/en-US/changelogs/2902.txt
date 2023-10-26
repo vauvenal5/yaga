@@ -1,0 +1,5 @@
+- implement slideshow feature
+- add wakelock
+- add random mode
+- add back to beginning
+- add auto stop at end

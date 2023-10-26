@@ -65,6 +65,16 @@ class GlobalSettingsManager {
       ..title = "Interval in seconds"
       ..value = 5,
   );
+  static BoolPreference slideShowRandom = BoolPreference(
+      (b) => b..key = slideshowSection.prepareKey("random")
+        ..title = "Random order"
+        ..value = false,
+  );
+  static BoolPreference slideShowAutoStop = BoolPreference(
+        (b) => b..key = slideshowSection.prepareKey("autoStop")
+      ..title = "Stop at end"
+      ..value = false,
+  );
 
   RxCommand<Preference, Preference> registerGlobalSettingCommand =
       RxCommand.createSync((param) => param);
@@ -127,6 +137,8 @@ class GlobalSettingsManager {
     
     registerGlobalSettingCommand(slideshowSection);
     registerGlobalSettingCommand(slideShowInterval);
+    registerGlobalSettingCommand(slideShowRandom);
+    registerGlobalSettingCommand(slideShowAutoStop);
 
     _handleLoginState(
       _nextcloudManager.updateLoginStateCommand.lastResult!,

@@ -1,6 +1,7 @@
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/settings_manager_base.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
+import 'package:yaga/model/preferences/int_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/serializable_preference.dart';
@@ -20,7 +21,9 @@ class SettingsManager extends SettingsManagerBase {
       persistMappingPreferenceCommand;
   late RxCommand<MappingPreference, MappingPreference>
       removeMappingPreferenceCommand;
-  late RxCommand<MappingPreference, MappingPreference> loadMappingPreferenceCommand;
+  late RxCommand<MappingPreference, MappingPreference>
+      loadMappingPreferenceCommand;
+  late RxCommand<IntPreference, void> persistIntSettingCommand;
 
   SettingsManager(this._sharedPreferencesService) {
     persistStringSettingCommand = RxCommand.createAsync((param) =>
@@ -32,6 +35,16 @@ class SettingsManager extends SettingsManagerBase {
         _sharedPreferencesService.savePreferenceToBool(param).then((value) =>
             _checkPersistResult(value, param,
                 _sharedPreferencesService.loadPreferenceFromBool)));
+
+    persistIntSettingCommand = RxCommand.createAsync(
+      (param) => _sharedPreferencesService.savePreferenceToInt(param).then(
+            (value) => _checkPersistResult(
+              value,
+              param,
+              _sharedPreferencesService.loadPreferenceFromInt,
+            ),
+          ),
+    );
 
     persistMappingPreferenceCommand = RxCommand.createSync((param) => param);
     persistMappingPreferenceCommand.listen((value) async {

@@ -8,9 +8,11 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:yaga/managers/file_manager/file_manager.dart';
+import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/intent_service.dart';
+import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/download_file_image.dart';
 import 'package:yaga/utils/forground_worker/messages/download_file_request.dart';
 import 'package:yaga/utils/logger.dart';
@@ -38,6 +40,7 @@ class ImageScreenState extends State<ImageScreen> {
   late int _currentIndex;
   late PageController pageController;
   var _showAppBar = true;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -52,6 +55,14 @@ class ImageScreenState extends State<ImageScreen> {
       _currentIndex = index;
       _title = widget._images[index].name;
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: SystemUiOverlay.values);
+    super.dispose();
   }
 
   @override
@@ -136,6 +147,33 @@ class ImageScreenState extends State<ImageScreen> {
     }
 
     return [
+      if (_timer == null)
+        IconButton(
+          icon: const Icon(Icons.play_circle_outline),
+          onPressed: () => setState(
+            () => _timer = Timer.periodic(
+              Duration(
+                seconds: getIt
+                    .get<SharedPreferencesService>()
+                    .loadPreferenceFromInt(
+                        GlobalSettingsManager.slideShowInterval)
+                    .value,
+              ),
+              (Timer t) => pageController.nextPage(
+                duration: const Duration(seconds: 1),
+                curve: Curves.ease,
+              ),
+            ),
+          ),
+        )
+      else
+        IconButton(
+          icon: const Icon(Icons.stop_circle_outlined),
+          onPressed: () {
+            _timer?.cancel();
+            setState(() => _timer = null);
+          },
+        ),
       IconButton(
         icon: const Icon(Icons.wallpaper),
         onPressed: () => getIt

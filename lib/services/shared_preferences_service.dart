@@ -30,6 +30,14 @@ class SharedPreferencesService extends Service<SharedPreferencesService> {
           P extends SerializablePreference<bool, dynamic, dynamic>>(P pref) =>
       pref.deserialize(_instance.getBool(pref.key!)) as P;
 
+  Future<bool> savePreferenceToInt(
+          SerializablePreference<int, dynamic, dynamic> pref) =>
+      _instance.setInt(pref.key!, pref.serialize());
+
+  P loadPreferenceFromInt<
+          P extends SerializablePreference<int, dynamic, dynamic>>(P pref) =>
+      pref.deserialize(_instance.getInt(pref.key!)) as P;
+
   Future<bool> savePreferenceToStringList(
           SerializablePreference<List<String>, dynamic, dynamic> pref) =>
       _instance.setStringList(pref.key!, pref.serialize());

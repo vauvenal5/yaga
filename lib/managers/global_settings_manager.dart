@@ -5,6 +5,7 @@ import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/preferences/action_preference.dart';
 import 'package:yaga/model/preferences/bool_preference.dart';
 import 'package:yaga/model/preferences/choice_preference.dart';
+import 'package:yaga/model/preferences/int_preference.dart';
 import 'package:yaga/model/preferences/mapping_preference.dart';
 import 'package:yaga/model/preferences/preference.dart';
 import 'package:yaga/model/preferences/section_preference.dart';
@@ -47,10 +48,22 @@ class GlobalSettingsManager {
       ..title = "News Seen Version"
       ..value = "",
   );
-  static BoolPreference useBackground = BoolPreference((b) => b
-    ..key = ncSection.prepareKey("useBackground")
-    ..title = "File actions in background"
-    ..value = true,
+  static BoolPreference useBackground = BoolPreference(
+    (b) => b
+      ..key = ncSection.prepareKey("useBackground")
+      ..title = "File actions in background"
+      ..value = true,
+  );
+  static SectionPreference slideshowSection = SectionPreference(
+    (b) => b
+      ..key = "show"
+      ..title = "Slideshow",
+  );
+  static IntPreference slideShowInterval = IntPreference(
+    (b) => b
+      ..key = slideshowSection.prepareKey("interval")
+      ..title = "Interval in seconds"
+      ..value = 5,
   );
 
   RxCommand<Preference, Preference> registerGlobalSettingCommand =
@@ -111,6 +124,9 @@ class GlobalSettingsManager {
     registerGlobalSettingCommand(useBackground);
     registerGlobalSettingCommand(theme);
     registerGlobalSettingCommand(sendLogs);
+    
+    registerGlobalSettingCommand(slideshowSection);
+    registerGlobalSettingCommand(slideShowInterval);
 
     _handleLoginState(
       _nextcloudManager.updateLoginStateCommand.lastResult!,

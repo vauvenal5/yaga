@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
@@ -69,7 +68,7 @@ class ImageScreenState extends State<ImageScreen> {
   }
 
   void _stopSlideShow() {
-    Wakelock.disable();
+    WakelockPlus.disable();
     _timer?.cancel();
   }
 
@@ -176,7 +175,7 @@ class ImageScreenState extends State<ImageScreen> {
           icon: const Icon(Icons.play_circle_outline),
           onPressed: ()
           {
-            Wakelock.enable();
+            WakelockPlus.enable();
             setState(
               () => _timer = Timer.periodic(
                 Duration(

@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:nextcloud/core.dart';
 import 'package:nextcloud/nextcloud.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/utils/logger.dart';
@@ -109,11 +110,10 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
     // check if we detect a self-signed cert, if yes, enforce browser flow
     if (!_inBrowser) {
       try {
-        await client.user.getUser();
+        await client.httpClient.getUrl(uri);
+        _logger.info("Proper HTTPS detected.");
       } on HandshakeException {
         _inBrowser = true;
-      } on RequestException {
-        _logger.info("Proper HTTPS detected.");
       }
     }
 
@@ -123,9 +123,9 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       //todo: should we move this into the manager/service?
       //todo: is canLaunch/launch a UI component?
 
-      LoginFlowInit init;
+      LoginFlowV2 init;
       try {
-        init = await client.login.initLoginFlow();
+        init = await client.core.clientFlowLoginV2.init().then((value) => value.body);
       } catch (e) {
         _logger.severe("Could not init login flow", e);
         getIt.get<SelfSignedCertHandler>().revokeCert();
@@ -134,42 +134,49 @@ class _NextCloudAddressScreenState extends State<NextCloudAddressScreen> {
       }
 
       try {
-        await launchUrlString(init.login);
-        LoginFlowResult? res;
+        // final res = await client.core.clientFlowLoginV2.poll(token: init.poll.token).then((value) => value.body);
+        if(await launchUrl(Uri.parse(init.login), mode: LaunchMode.externalApplication,)) {
+          // await launchUrlString(init.login, mode: LaunchMode.externalApplication);
+          LoginFlowV2Credentials? res;
 
-        while (res == null && !_disposing) {
-          try {
+          while (res == null) {
             _logger.fine("Requesting");
-            res = await client.login.pollLogin(init);
-          } on RequestException catch (e) {
-            if (e.statusCode != 404) {
-              rethrow;
+            try {
+              res =
+              await client.core.clientFlowLoginV2.poll(token: init.poll.token)
+                  .then((value) => value.body);
+            } on DynamiteApiException catch (e) {
+              if (e.statusCode != 404) {
+                throw e;
+              }
             }
           }
+
+          if (_disposing) {
+            // revoke tmp granted cert if login is aborted
+            getIt.get<SelfSignedCertHandler>().revokeCert();
+            return;
+          }
+
+          getIt.get<NextCloudManager>().loginCommand(
+            NextCloudLoginData(
+              Uri.parse(res!.server),
+              res.loginName,
+              res.appPassword,
+            ),
+          );
+
+          getIt
+              .get<SelfSignedCertHandler>()
+              .badCertificateCallback = null;
+
+          if (!mounted) return;
+
+          Navigator.popUntil(
+            context,
+            ModalRoute.withName(YagaHomeScreen.route),
+          );
         }
-
-        if (_disposing) {
-          // revoke tmp granted cert if login is aborted
-          getIt.get<SelfSignedCertHandler>().revokeCert();
-          return;
-        }
-
-        getIt.get<NextCloudManager>().loginCommand(
-              NextCloudLoginData(
-                Uri.parse(res!.server),
-                res.loginName,
-                res.appPassword,
-              ),
-            );
-
-        getIt.get<SelfSignedCertHandler>().badCertificateCallback = null;
-
-        if (!mounted) return;
-
-        Navigator.popUntil(
-          context,
-          ModalRoute.withName(YagaHomeScreen.route),
-        );
       } on Exception catch (e) {
         //todo: show message to user
         _logger.severe('Could not launch $uri', e);

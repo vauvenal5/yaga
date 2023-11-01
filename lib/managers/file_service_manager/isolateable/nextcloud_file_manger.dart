@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:nextcloud/nextcloud.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_manager/file_manager_base.dart';
@@ -81,14 +82,20 @@ class NextcloudFileManager extends NextcloudBackgroundFileManager
               },
               //todo: do we really need both error handlers
               onError: (err, StackTrace stacktrace) {
-                _logger.warning(
-                  "Preview fetching failed, index: ${ncFileMeta.fetchIndex}",
-                );
-                _logger.severe(
-                  "Unexpected error while loading preview",
-                  err,
-                  stacktrace,
-                );
+                if(err is DynamiteApiException && err.statusCode == 404) {
+                  _logger.warning(
+                    "Preview not found for file: ${ncFileMeta.file.name}",
+                  );
+                } else {
+                  _logger.warning(
+                    "Preview fetching failed, index: ${ncFileMeta.fetchIndex}",
+                  );
+                  _logger.severe(
+                    "Unexpected error while loading preview",
+                    err,
+                    stacktrace,
+                  );
+                }
                 downloadPreviewFaildCommand(ncFileMeta.file);
                 return PreviewFetchMeta(ncFileMeta.file, ncFileMeta.fetchIndex,
                     success: false);

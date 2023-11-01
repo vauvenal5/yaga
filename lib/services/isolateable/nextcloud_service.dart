@@ -1,9 +1,12 @@
-import 'dart:convert';
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:nextcloud/core.dart';
+import 'package:nextcloud/provisioning_api.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
+import 'package:validators/sanitizers.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/nc_origin.dart';
@@ -21,7 +24,7 @@ class NextCloudService
   // --> however this is a breaking change
   final String scheme = "nc";
   NcOrigin? _origin;
-  NextCloudClient? _client;
+  NextcloudClient? _client;
   NextCloudClientFactory nextCloudClientFactory;
 
   NextCloudService(this.nextCloudClientFactory);
@@ -54,18 +57,25 @@ class NextCloudService
       loginData.password,
     );
 
-    UserData? userData;
-
     if (loginData.id == "" || loginData.displayName == "") {
-      userData = await _client?.user.getUser().catchError(_logAndRethrow);
-    }
+      final userData = await _client?.provisioningApi.users
+          .getCurrentUser()
+          .catchError(_logAndRethrow);
 
-    //todo: why is logging here not possible?
+      final displayName = userData?.body.ocs.data.displayName ?? userData?.body.ocs.data.displayName;
+
+      return _origin = NcOrigin(
+        fromUri(uri: loginData.server!, scheme: scheme),
+        userData?.body.ocs.data.id ?? loginData.id,
+        displayName ?? loginData.displayName,
+        loginData.user,
+      );
+    }
 
     return _origin = NcOrigin(
       fromUri(uri: loginData.server!, scheme: scheme),
-      userData?.id ?? loginData.id,
-      userData?.displayName ?? loginData.displayName,
+      loginData.id,
+      loginData.displayName,
       loginData.user,
     );
   }
@@ -77,12 +87,22 @@ class NextCloudService
 
   bool isLoggedIn() => _client != null;
 
+  // todo: this is a workaround for https://github.com/nextcloud/neon/issues/1045
+  Uri _prepUriForLib(Uri path) => Uri(path: ltrim(path.path, '/'));
+
   @override
   Stream<NcFile> list(Uri dir) {
     logger.info("Listing ${dir.toString()}");
     logger.info("NcOrigin: ${_origin?.userEncodedDomainRoot}");
-    return _client?.webDav
-            .ls(dir.path)
+    return _client?.webdav
+            .propfind(
+              _prepUriForLib(dir),
+              prop: WebDavPropWithoutValues.fromBools(
+                nchaspreview: true,
+                davgetcontenttype: true,
+                davgetlastmodified: true,
+              ),
+            )
             //todo: this will improve responsiveness in case of a bad connection but it can not be used as long
             // as we are using the sync manager for deletes and not the activity log.
             // .catchError((err) {
@@ -90,7 +110,7 @@ class NextCloudService
             //   return <WebDavFile>[];
             // })
             .asStream()
-            .flatMap((value) => Stream.fromIterable(value))
+            .flatMap((value) => Stream.fromIterable(value.toWebDavFiles()..removeAt(0)))
             .where(
               (event) =>
                   event.isDirectory ||
@@ -130,19 +150,19 @@ class NextCloudService
   }
 
   Future<Uint8List> getAvatar() =>
-      _client?.avatar
-          .getAvatar(origin!.username, 100)
+      _client?.core.avatar
+          .getAvatar(userId: origin!.username, size: 100)
           .catchError(_logAndRethrow)
-          .then((value) => base64.decode(value)) ??
+          .then((value) => value.body) ??
       Future.error("Not logged in!");
 
   Future<Uint8List> getPreview(Uri file) {
     final String path = Uri.decodeComponent(file.path);
     logger.fine("Fetching preview $path");
     //todo: think about image sizes vs in code scaling
-    return _client?.preview
-            .getPreviewByPath(path, 128, 128)
-            .catchError(_logAndRethrow) ??
+    return _client?.core.preview
+            .getPreview(file: path, x: 128, y: 128, a: 1, mode: 'cover',)
+            .then((value) => value.body) ??
         Future.error("Not logged in!");
     //todo: implement proper error handling
     // .catchError((err) {
@@ -152,7 +172,7 @@ class NextCloudService
   }
 
   Future<Uint8List> downloadImage(Uri file) =>
-      _client?.webDav.download(file.path).catchError(_logAndRethrow) ??
+      _client?.webdav.get(_prepUriForLib(file)).catchError(_logAndRethrow) ??
       Future.error("Not logged in!");
 
   NcOrigin? get origin => _origin;
@@ -161,18 +181,18 @@ class NextCloudService
   bool isUriOfService(Uri uri) => uri.scheme == scheme;
 
   Future<NcFile> deleteFile(NcFile file) =>
-      _client?.webDav
-          .delete(file.uri.path)
+      _client?.webdav
+          .delete(_prepUriForLib(file.uri))
           .catchError(_logAndRethrow)
           .then((_) => file) ??
       Future.error("Not logged in!");
 
   Future<NcFile> copyFile(NcFile file, Uri destination,
           {bool overwrite = false}) =>
-      _client?.webDav
+      _client?.webdav
           .copy(
-            file.uri.path,
-            chainPathSegments(destination.path, file.name),
+            _prepUriForLib(file.uri),
+            _prepUriForLib(destination.resolve(file.name)),
             overwrite: overwrite,
           )
           .catchError(_logAndRethrow)
@@ -181,10 +201,10 @@ class NextCloudService
 
   Future<NcFile> moveFile(NcFile file, Uri destination,
           {bool overwrite = false}) =>
-      _client?.webDav
+      _client?.webdav
           .move(
-            file.uri.path,
-            chainPathSegments(destination.path, file.name),
+            _prepUriForLib(file.uri),
+            _prepUriForLib(destination.resolve(file.name)),
             overwrite: overwrite,
           )
           .catchError(_logAndRethrow)
@@ -197,14 +217,6 @@ class NextCloudService
   }
 
   void _logError(dynamic err, {StackTrace? stacktrace}) {
-    if (err is RequestException) {
-      logger.severe("Nextcloud url: ${err.url}");
-      logger.severe("Nextcloud method: ${err.method}");
-      logger.severe("Nextcloud code: ${err.statusCode}");
-      logger.severe("Nextcloud body: ${err.body}");
-      return;
-    }
-
     logger.severe(err, err, stacktrace);
   }
 }

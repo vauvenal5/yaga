@@ -1,4 +1,5 @@
-import 'package:catcher/catcher.dart';
+
+import 'package:catcher_2/catcher_2.dart';
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
@@ -16,11 +17,11 @@ Future<void> main() async {
 
   setupServiceLocator();
 
-  final CatcherOptions releaseOptions = CatcherOptions(SilentReportMode(), [
+  final Catcher2Options releaseOptions = Catcher2Options(SilentReportMode(), [
     YagaLogger.fileHandler,
   ]);
 
-  Catcher(
+  Catcher2(
     rootWidget: MyApp(),
     debugConfig: releaseOptions,
     releaseConfig: releaseOptions,

@@ -107,7 +107,7 @@ class FileActionManager extends FileManagerBase {
           (file) => action(file).catchError(
             (err) => null,
             test: (err) =>
-                err is RequestException || err is FileSystemException,
+                err is DynamiteApiException || err is FileSystemException,
           ),
         )
         .where((event) => event != null)

@@ -1,3 +1,4 @@
+import 'package:rxdart/rxdart.dart';
 import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/file_service_manager/media_file_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
@@ -27,21 +28,18 @@ class FileManagerBridge {
         .listen((msg) => _fileManager.updateImageCommand(msg.file));
 
     _worker.isolateResponseCommand
+        .mergeWith([_backgroundWorker.isolateResponseCommand])
         .where((event) => event is FetchedFile)
         .map((event) => event as FetchedFile)
         .listen((event) => _fileManager.fetchedFileCommand(event));
-
-    _backgroundWorker.isolateResponseCommand
-        .where((event) => event is FetchedFile)
-        .map((event) => event as FetchedFile)
-        .listen((value) => _fileManager.fetchedFileCommand(value));
 
     _worker.isolateResponseCommand
         .where((event) => event is FileListMessage)
         .map((event) => event as FileListMessage)
         .listen((event) => _fileManager.updateFilesCommand(event));
 
-    _backgroundWorker.isolateResponseCommand
+    _worker.isolateResponseCommand
+        .mergeWith([_backgroundWorker.isolateResponseCommand])
         .where((event) => event is FilesActionDone)
         .map((event) => event as FilesActionDone)
         .listen((event) => _fileManager.filesActionDoneCommand(event));

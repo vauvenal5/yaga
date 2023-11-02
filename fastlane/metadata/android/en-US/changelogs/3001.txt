@@ -1,0 +1,2 @@
+- replace deprecated NC client with new one
+- fix file action dialog in foreground worker mode

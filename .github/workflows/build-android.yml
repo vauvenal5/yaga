@@ -29,7 +29,7 @@ jobs:
         with:
           flutter-version: '3.13.6'
           channel: 'stable'
-          cache: true
+          cache: false
       - run: flutter pub get
       - run: flutter pub run build_runner build --delete-conflicting-outputs
       - run: flutter build appbundle --flavor play

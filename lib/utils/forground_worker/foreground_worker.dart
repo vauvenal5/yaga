@@ -49,11 +49,12 @@ class ForegroundWorker {
       }
 
       if (message is List) {
-        _logger.severe("Error in forground worker", message[0],
+        _logger.severe("Error in forground worker: ${message[0]}", null,
             StackTrace.fromString(message[1].toString()));
       }
 
       if (message is Message) {
+        _logger.info("Main received: $message");
         isolateResponseCommand(message);
       }
     });
@@ -96,6 +97,7 @@ class ForegroundWorker {
     SendPort? isolateToMain;
     final mainToIsolate = ReceivePort();
     final handlerRegistry = IsolateHandlerRegistry();
+    final _logger = YagaLogger.getLogger(ForegroundWorker);
 
     if (message is InitMsg) {
       isolateToMain = message.sendPort;
@@ -114,6 +116,7 @@ class ForegroundWorker {
       }
 
       if (message is Message) {
+        _logger.info("Isolate received: $message");
         handlerRegistry.handleMessage(message);
       }
     });

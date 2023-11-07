@@ -94,7 +94,7 @@ class FileActionManager extends FileManagerBase {
       );
 
   bool _destinationFilter(NcFile file, Uri destination) =>
-      file.uri.path != chainPathSegments(destination.path, file.name);
+      !compareFilePathToTargetFilePath(file, destination);
 
   Future<void> _cancelableAction(
     List<NcFile> files,
@@ -115,7 +115,7 @@ class FileActionManager extends FileManagerBase {
           cancelActionCommand
               .doOnData((event) => _logger.finest("Canceling action!")),
         )
-        .last;
+        .toList();
   }
 
   @override

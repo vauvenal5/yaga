@@ -652,8 +652,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/nextcloud"
-      ref: "4f6ff4d"
-      resolved-ref: "4f6ff4df2e3ff152dc20595c83fd5a36d3e68e7c"
+      ref: a9e43b8f
+      resolved-ref: a9e43b8fe4f55e082d29cf6a027607fc204588f3
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "1.0.0"

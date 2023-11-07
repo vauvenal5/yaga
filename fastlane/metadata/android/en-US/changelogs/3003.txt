@@ -1,0 +1,2 @@
+- minor fixes in file action handling
+- new Nextcloud client version

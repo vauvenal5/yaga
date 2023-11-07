@@ -11,7 +11,7 @@ description: A Nextcloud gallary app.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.30.2+3002
+version: 0.30.3+3003
 
 environment:
   sdk: '>=3.1.0 <4.0.0'
@@ -59,8 +59,9 @@ dependencies:
   nextcloud:
     git:
       url: https://github.com/vauvenal5/neon
+#      url: https://github.com/nextcloud/neon
       path: packages/nextcloud
-      ref: 4f6ff4d
+      ref: a9e43b8f
 
 # dependency_overrides:
 #   analyzer: "0.40.6"

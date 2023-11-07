@@ -35,7 +35,11 @@ class NextcloudBackgroundFileManager implements FileServiceManager {
 
     return nextCloudService
         .deleteFile(file)
-        .then((value) => deleteLocalFile(file));
+        .then((value) => deleteLocalFile(file))
+        .then((file) {
+      fileManager.updateFileList(file);
+      return file;
+    });
   }
 
   @protected
@@ -43,7 +47,6 @@ class NextcloudBackgroundFileManager implements FileServiceManager {
     _logger.warning("Removing local file! (${file.uri.path})");
     localFileService.deleteFile(file.localFile!.file);
     localFileService.deleteFile(file.previewFile!.file);
-    fileManager.updateFileList(file);
     return file;
   }
 
@@ -61,16 +64,24 @@ class NextcloudBackgroundFileManager implements FileServiceManager {
 
   @override
   Future<NcFile> copyFile(NcFile file, Uri destination,
-      {bool overwrite = false}) =>
+          {bool overwrite = false}) =>
       nextCloudService.copyFile(file, destination, overwrite: overwrite);
 
   @override
   Future<NcFile> moveFile(NcFile file, Uri destination,
-      {bool overwrite = false}) =>
-      nextCloudService.moveFile(file, destination, overwrite: overwrite);
+          {bool overwrite = false}) =>
+      nextCloudService
+          .moveFile(file, destination, overwrite: overwrite)
+          // this is a very simplified fix for a complex problem:
+          // if we want to move existing files locally we need to decide if it
+          // is really necessary to do this in the background
+          // if yes, we have also to consider the implications on the UI:
+          // * dialog has to be removed
+          // * this makes the action non cancelable
+          // technical requirements:
+          // * MappingManger has to be refactored to be usable in background
+          .then((value) => deleteLocalFile(value));
 
   @override
   String get scheme => nextCloudService.scheme;
-
-
 }

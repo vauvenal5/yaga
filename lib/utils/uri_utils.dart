@@ -1,4 +1,5 @@
 import 'package:validators/sanitizers.dart';
+import 'package:yaga/model/nc_file.dart';
 
 //todo: refactor into non static functions in util class UriUtils
 
@@ -25,6 +26,14 @@ Uri fromPathList({required Uri uri, required List<String> paths}) {
   }
   // do not double encode here because paths are already double encoded
   return fromUri(uri: uri, path: path);
+}
+
+bool compareFilePathToTargetFilePath(NcFile file, Uri destination) {
+  return file.uri.path ==
+      chainPathSegments(
+        destination.path,
+        Uri.encodeComponent(file.name),
+      );
 }
 
 String chainPathSegments(String first, String second) {

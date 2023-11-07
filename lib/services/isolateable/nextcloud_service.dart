@@ -6,7 +6,6 @@ import 'package:nextcloud/core.dart';
 import 'package:nextcloud/provisioning_api.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:nextcloud/nextcloud.dart';
-import 'package:validators/sanitizers.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/model/nc_login_data.dart';
 import 'package:yaga/model/nc_origin.dart';
@@ -88,7 +87,7 @@ class NextCloudService
   bool isLoggedIn() => _client != null;
 
   // todo: this is a workaround for https://github.com/nextcloud/neon/issues/1045
-  Uri _prepUriForLib(Uri path) => Uri(path: ltrim(path.path, '/'));
+  Uri _prepUriForLib(Uri path) => path;
 
   @override
   Stream<NcFile> list(Uri dir) {
@@ -133,7 +132,7 @@ class NextCloudService
           // --> this however requires a rather big refactoring of the [MappingManager] including persistance
           final Uri uri = fromUri(
             uri: origin!.userEncodedDomainRoot,
-            path: webDavFile.path,
+            path: webDavFile.path.path,
           );
 
           final NcFile file = webDavFile.isDirectory

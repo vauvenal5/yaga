@@ -62,9 +62,7 @@ class FileListRequestHandler
 
     if (message.uri != null && !message.recursive) {
       addition = addition.applyFilter(
-        (file) =>
-            file.uri.path ==
-            chainPathSegments(message.uri!.path, file.name),
+        (file) => compareFilePathToTargetFilePath(file, message.uri!),
       );
     }
 

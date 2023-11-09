@@ -6,8 +6,8 @@ extension NcFileStreamExtensions on Stream<NcFile> {
     return toList().asStream().onErrorReturn([]);
   }
 
-  Stream<NcFile> recursively(Stream<NcFile> Function(Uri) listFilesFromUpstream,
-      {required bool recursive}) {
+  Stream<NcFile> recursively(Stream<NcFile> Function(Uri, {bool favorites}) listFilesFromUpstream,
+      {required bool recursive, bool favorites = false}) {
     return flatMap(
       (file) => Rx.merge([
         Stream.value(file),
@@ -17,9 +17,11 @@ extension NcFileStreamExtensions on Stream<NcFile> {
             .flatMap(
               (file) => listFilesFromUpstream(
                 file.uri,
+                favorites: favorites,
               ).recursively(
                 listFilesFromUpstream,
                 recursive: recursive,
+                favorites: favorites,
               ),
             )
       ]),

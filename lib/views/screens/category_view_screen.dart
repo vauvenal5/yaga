@@ -69,6 +69,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
           ? onFileTap
           : (files, index) =>
               _fileListLocalManager.selectFileCommand(files[index]),
+      favorites: widget._categoryViewConfig.favorites
     );
 
     _defaultViewPreferences
@@ -104,6 +105,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen>
             .get<SharedPreferencesService>()
             .loadPreferenceFromString(_viewConfig.view),
       ),
+      favorites: _viewConfig.favorites,
     );
 
     //todo: this could be moved into imageStateWrapper

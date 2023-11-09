@@ -18,7 +18,7 @@ class MediaFileManager implements FileServiceManager {
   }
 
   @override
-  Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false}) {
+  Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false, bool favorites = false}) {
     // TODO: implement listFileList
     throw UnimplementedError();
   }

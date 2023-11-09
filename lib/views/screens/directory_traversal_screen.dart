@@ -4,6 +4,7 @@ import 'package:yaga/model/route_args/directory_navigation_screen_arguments.dart
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:yaga/utils/navigation/yaga_router.dart';
 import 'package:yaga/views/screens/directory_screen.dart';
+import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 
 enum DirectoryTraversalScreenNavActions { cancel }
@@ -45,7 +46,7 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async =>
-          !(await _navigatorKey.currentState?.maybePop(context)??true),
+          !(await _navigatorKey.currentState?.maybePop(context) ?? true),
       child: Navigator(
         key: _navigatorKey,
         reportsRouteUpdateToEngine: true,
@@ -100,7 +101,13 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
     int index = 0;
     uri.pathSegments.where((element) => element.isNotEmpty).forEach((segment) {
       pages.add(
-        _buildPage(fromUriPathSegments(uri, index++), viewConfig),
+        _buildPage(
+          fromUriPathSegments(uri, index++),
+          ViewConfiguration.fromViewConfig(
+            viewConfig: viewConfig,
+            favorites: false,
+          ),
+        ),
       );
     });
 
@@ -118,6 +125,9 @@ class _DirectoryTraversalScreenState extends State<DirectoryTraversalScreen> {
         fixedOrigin: widget.args.fixedOrigin,
         schemeFilter: widget.args.schemeFilter,
         leading: widget.args.leadingBackArrow,
+        selectedTab: this.viewConfig.favorites
+            ? YagaHomeTab.favorites
+            : YagaHomeTab.folder,
       ),
     );
   }

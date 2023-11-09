@@ -62,6 +62,7 @@ class FileListLocalManager {
 
   Uri _uri;
   late String managerKey;
+  final bool favorites;
 
   bool get isInSelectionMode => selected.isNotEmpty;
 
@@ -70,6 +71,7 @@ class FileListLocalManager {
     this.recursive,
     this._sortConfig, {
     this.allowSelecting = true,
+    this.favorites = false,
   }) : _worker = getIt.get<ForegroundWorker>(), _fileManager = getIt.get<FileManager>() {
     filesChangedCommand = RxCommand.createSync(
       (param) => param,
@@ -155,6 +157,7 @@ class FileListLocalManager {
       uri,
       _sortConfig,
       recursive: recursive.value,
+      favorites: favorites,
     ));
   }
 

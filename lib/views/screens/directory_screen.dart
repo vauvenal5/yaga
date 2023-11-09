@@ -11,6 +11,7 @@ import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/screens/focus_view.dart';
 import 'package:yaga/views/screens/settings_screen.dart';
+import 'package:yaga/views/screens/yaga_home_screen.dart';
 import 'package:yaga/views/widgets/image_view_container.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/list_menu_entry.dart';
@@ -39,6 +40,8 @@ class DirectoryScreen extends StatefulWidget {
   final bool fixedOrigin;
   final String schemeFilter;
 
+  final YagaHomeTab _selectedTab;
+
   DirectoryScreen({
     required this.uri,
     required this.viewConfig,
@@ -49,7 +52,9 @@ class DirectoryScreen extends StatefulWidget {
     required this.leading,
     this.fixedOrigin = false,
     this.schemeFilter = "",
-  }) : super(key: ValueKey(uri.toString()));
+    required YagaHomeTab selectedTab,
+  })  : _selectedTab = selectedTab,
+        super(key: ValueKey(uri.toString()));
 
   @override
   _DirectoryScreenState createState() => _DirectoryScreenState(uri, viewConfig);
@@ -70,6 +75,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
             .loadPreferenceFromString(viewConfig.view),
       ),
       allowSelecting: viewConfig.onFileTap != null,
+      favorites: viewConfig.favorites,
     );
 
     dynamic onFileTap(List<NcFile> files, int index) {
@@ -132,7 +138,9 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
           appBarBuilder: _buildAppBar,
           bottomHeight: DirectoryScreen.appBarBottomHeight,
           searchResultHandler: (file) {
-            if (file != null && file.isDirectory && widget.viewConfig.onFolderTap != null) {
+            if (file != null &&
+                file.isDirectory &&
+                widget.viewConfig.onFolderTap != null) {
               widget.viewConfig.onFolderTap!(file);
             }
           },
@@ -204,7 +212,12 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
       Navigator.pushNamed(
         context,
         FocusView.route,
-        arguments: FocusViewArguments(_fileListLocalManager.uri),
+        arguments: FocusViewArguments(
+          _fileListLocalManager.uri,
+          _viewConfig.favorites,
+          widget._selectedTab,
+          _viewConfig.route,
+        ),
       );
     }
   }

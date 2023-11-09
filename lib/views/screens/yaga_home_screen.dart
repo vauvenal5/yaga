@@ -5,12 +5,13 @@ import 'package:yaga/managers/tab_manager.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/forground_worker/foreground_worker.dart';
 import 'package:yaga/utils/service_locator.dart';
+import 'package:yaga/views/screens/favorites_view.dart';
 import 'package:yaga/views/screens/home_view.dart';
 import 'package:yaga/views/screens/browse_view.dart';
 import 'package:yaga/views/widgets/yaga_about_dialog.dart';
 
 //todo: this has to be renamed
-enum YagaHomeTab { grid, folder }
+enum YagaHomeTab { grid, folder, favorites }
 
 class YagaHomeScreen extends StatefulWidget {
   static const String route = "home://";
@@ -54,7 +55,7 @@ class _YagaHomeScreenState extends State<YagaHomeScreen>
       builder: (context, snapshot) {
         return IndexedStack(
           index: _getCurrentIndex(snapshot.data),
-          children: <Widget>[HomeView(), BrowseView()],
+          children: <Widget>[HomeView(), FavoritesView(), BrowseView()],
         );
       },
     );
@@ -63,6 +64,8 @@ class _YagaHomeScreenState extends State<YagaHomeScreen>
   int _getCurrentIndex(YagaHomeTab? tab) {
     switch (tab) {
       case YagaHomeTab.folder:
+        return 2;
+      case YagaHomeTab.favorites:
         return 1;
       default:
         return 0;

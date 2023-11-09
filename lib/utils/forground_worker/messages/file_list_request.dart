@@ -4,6 +4,7 @@ import 'package:yaga/utils/forground_worker/messages/message.dart';
 class FileListRequest extends Message {
   final Uri uri;
   final bool recursive;
+  final bool favorites;
   final SortConfig config;
 
   FileListRequest(
@@ -11,5 +12,6 @@ class FileListRequest extends Message {
     this.uri,
     this.config, {
     this.recursive = false,
+    this.favorites = false,
   }) : super(key);
 }

@@ -51,7 +51,7 @@ class NextcloudBackgroundFileManager implements FileServiceManager {
   }
 
   @override
-  Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false}) {
+  Stream<List<NcFile>> listFileList(Uri uri, {bool recursive = false, bool favorites = false,}) {
     // not supported in true background since listing files makes only sense when app in foreground
     throw UnimplementedError();
   }

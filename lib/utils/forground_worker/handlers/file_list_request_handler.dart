@@ -42,6 +42,7 @@ class FileListRequestHandler
           message.uri,
           message.config,
           recursive: message.recursive,
+          favorites: message.favorites,
         )
         .then(
           (_) => isolateToMain.send(

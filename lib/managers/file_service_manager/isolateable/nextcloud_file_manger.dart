@@ -153,26 +153,27 @@ class NextcloudFileManager extends NextcloudBackgroundFileManager
   Stream<List<NcFile>> listFileList(
     Uri uri, {
     bool recursive = false,
+    bool favorites = false,
   }) {
     //todo: add uri check
     _logger.finer("Listing... ($uri)");
     return _syncManager.addUri(uri).asStream().flatMap((_) => Rx.merge([
           _listLocalFileList(uri, recursive),
-          _listNextcloudFiles(uri, recursive).collectToList(),
+          _listNextcloudFiles(uri, recursive, favorites: favorites).collectToList(),
         ]).doOnData((event) {
           _logger.finer("Emiting list! ($uri)");
         }).doOnDone(() => _finishSync(uri)));
   }
 
-  Stream<NcFile> _listNextcloudFiles(Uri uri, bool recursive) {
-    return _listNextcloudFilesUpstream(uri)
-        .recursively(_listNextcloudFilesUpstream, recursive: recursive)
+  Stream<NcFile> _listNextcloudFiles(Uri uri, bool recursive, {bool favorites = false}) {
+    return _listNextcloudFilesUpstream(uri, favorites: favorites)
+        .recursively(_listNextcloudFilesUpstream, recursive: recursive, favorites: favorites)
         .doOnData((file) => _syncManager.addRemoteFile(uri, file))
         .doOnError((err, stack) => _syncManager.removeUri(uri));
   }
 
-  Stream<NcFile> _listNextcloudFilesUpstream(Uri uri) {
-    return nextCloudService.list(uri).asyncMap((file) async {
+  Stream<NcFile> _listNextcloudFilesUpstream(Uri uri, {bool favorites = false}) {
+    return nextCloudService.list(uri, favorites).asyncMap((file) async {
       if (!file.isDirectory) {
         file.localFile = await _createLocalFile(file.uri);
         file.previewFile = await _createTmpFile(file.uri);

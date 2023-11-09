@@ -6,6 +6,7 @@ class CategoryViewConfig {
   final String pref;
   final YagaHomeTab? selectedTab;
   final bool? hasDrawer;
+  final bool favorites;
 
   // final bool pathEnabled;
   final String? title;
@@ -18,6 +19,7 @@ class CategoryViewConfig {
     this.hasDrawer,
     required bool pathEnabled,
     this.title,
+    this.favorites = false
   }) : generalViewConfig =
             GeneralViewConfig(pref, defaultPath, pathEnabled: pathEnabled);
 }

@@ -6,15 +6,16 @@ import 'package:yaga/views/screens/category_view_screen.dart';
 class FocusView extends CategoryViewScreen {
   static const String route = "/focus";
 
-  FocusView(Uri path)
+  FocusView(Uri path, bool favorites, YagaHomeTab selectedTab, String prefPrefix)
       : super(
           CategoryViewConfig(
             defaultPath: path,
-            pref: "focus",
+            pref: "$prefPrefix/focus",
             pathEnabled: false,
             hasDrawer: false,
-            selectedTab: YagaHomeTab.folder,
+            selectedTab: selectedTab,
             title: getNameFromUri(path),
+            favorites: favorites,
           ),
         );
 }

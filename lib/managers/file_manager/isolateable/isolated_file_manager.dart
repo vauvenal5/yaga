@@ -49,9 +49,10 @@ class IsolatedFileManager extends FileActionManager
     Uri uri,
     SortConfig sortConfig, {
     bool recursive = false,
+    bool favorites = false,
   }) async {
     return fileServiceManagers[uri.scheme]
-        ?.listFileList(uri, recursive: recursive)
+        ?.listFileList(uri, recursive: recursive, favorites: favorites)
         .map((event) => _sortManager.sortList(event, sortConfig))
         .fold(
       null,

@@ -44,11 +44,12 @@ class LocalFileManager
   Stream<List<NcFile>> listFileList(
     Uri uri, {
     bool recursive = false,
+    bool favorites = false,
   }) {
     return listFiles(uri, recursive: recursive).collectToList();
   }
 
-  Stream<NcFile> _listLocalFiles(Uri uri) {
+  Stream<NcFile> _listLocalFiles(Uri uri, {bool favorites = false}) {
     //todo: add uri check? or simply handle exception?
     return Stream.value(uri)
         .map(_systemPathService.absoluteUriFromInternal)

@@ -89,28 +89,44 @@ class NextCloudService
   // todo: this is a workaround for https://github.com/nextcloud/neon/issues/1045
   Uri _prepUriForLib(Uri path) => path;
 
+  Stream<WebDavFile>? _tempFavTest(Uri dir, bool favorite) {
+    return favorite ? _client?.webdav.report(
+      Uri(path: '/'),
+      WebDavOcFilterRules(
+        ocfavorite: 1,
+      ),
+      prop: WebDavPropWithoutValues.fromBools(
+        nchaspreview: true,
+        davgetcontenttype: true,
+        davgetlastmodified: true,
+        davresourcetype: true,
+        ocfavorite: true,
+      ),
+    ).asStream().flatMap((value) => Stream.fromIterable(value.toWebDavFiles())) : _client?.webdav
+        .propfind(
+      _prepUriForLib(dir),
+      prop: WebDavPropWithoutValues.fromBools(
+        nchaspreview: true,
+        davgetcontenttype: true,
+        davgetlastmodified: true,
+        ocfavorite: true,
+      ),
+    ).asStream().flatMap((value) => Stream.fromIterable(value.toWebDavFiles()..removeAt(0)));
+  }
+
   @override
-  Stream<NcFile> list(Uri dir) {
+  Stream<NcFile> list(Uri dir, bool favorite) {
     logger.info("Listing ${dir.toString()}");
     logger.info("NcOrigin: ${_origin?.userEncodedDomainRoot}");
-    return _client?.webdav
-            .propfind(
-              _prepUriForLib(dir),
-              prop: WebDavPropWithoutValues.fromBools(
-                nchaspreview: true,
-                davgetcontenttype: true,
-                davgetlastmodified: true,
-              ),
-            )
+
+    return _tempFavTest(dir, favorite)
             //todo: this will improve responsiveness in case of a bad connection but it can not be used as long
             // as we are using the sync manager for deletes and not the activity log.
             // .catchError((err) {
             //   _logError(err);
             //   return <WebDavFile>[];
             // })
-            .asStream()
-            .flatMap((value) => Stream.fromIterable(value.toWebDavFiles()..removeAt(0)))
-            .where(
+            ?.where(
               (event) =>
                   event.isDirectory ||
                   event.mimeType != null && event.mimeType!.startsWith("image"),

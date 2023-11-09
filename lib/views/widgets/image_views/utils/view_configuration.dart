@@ -14,6 +14,8 @@ class ViewConfiguration {
   final ChoicePreference view;
   final BoolPreference recursive;
   final BoolPreference showFolders;
+  final bool favorites;
+  final String route;
 
   //todo: not sure if moving the onTap handler to this objects is a good idea
   final Function(NcFile)? onFolderTap;
@@ -26,6 +28,7 @@ class ViewConfiguration {
     required Function(NcFile)? onFolderTap,
     required Function(List<NcFile>, int)? onFileTap,
     required final Function(List<NcFile>, int)? onSelect,
+    required bool favorites,
   }) {
     final SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
@@ -57,6 +60,8 @@ class ViewConfiguration {
       onFileTap,
       onFolderTap,
       onSelect,
+      route,
+      favorites: favorites
     );
   }
 
@@ -66,6 +71,7 @@ class ViewConfiguration {
     Function(NcFile)? onFolderTap,
     Function(List<NcFile>, int)? onFileTap,
     Function(List<NcFile>, int)? onSelect,
+    bool favorites = false,
   }) {
     final SectionPreference section = SectionPreference((b) => b
       ..key = Preference.prefixKey(route, "view")
@@ -95,6 +101,8 @@ class ViewConfiguration {
       onFileTap,
       onFolderTap,
       onSelect,
+      route,
+      favorites: favorites,
     );
   }
 
@@ -103,6 +111,7 @@ class ViewConfiguration {
     Function(NcFile)? onFolderTap,
     Function(List<NcFile>, int)? onFileTap,
     Function(List<NcFile>, int)? onSelect,
+    bool? favorites,
   }) {
     return ViewConfiguration._internal(
       viewConfig.section,
@@ -112,6 +121,8 @@ class ViewConfiguration {
       onFileTap ?? viewConfig.onFileTap,
       onFolderTap ?? viewConfig.onFolderTap,
       onSelect ?? viewConfig.onSelect,
+      viewConfig.route,
+      favorites: favorites ?? viewConfig.favorites,
     );
   }
 
@@ -141,10 +152,10 @@ class ViewConfiguration {
   }
 
   ViewConfiguration._internal(this.section, this.view, this.recursive,
-      this.showFolders, this.onFileTap, this.onFolderTap, this.onSelect);
+      this.showFolders, this.onFileTap, this.onFolderTap, this.onSelect, this.route, {this.favorites = false});
 
   ViewConfiguration clone() {
     return ViewConfiguration._internal(section, view, recursive, showFolders,
-        onFileTap, onFolderTap, onSelect);
+        onFileTap, onFolderTap, onSelect, route, favorites: favorites);
   }
 }

@@ -14,8 +14,11 @@ class YagaBottomNavBar extends StatelessWidget {
       currentIndex: _getCurrentIndex(),
       onTap: (index) {
         switch (index) {
-          case 1:
+          case 2:
             getIt.get<TabManager>().tabChangedCommand(YagaHomeTab.folder);
+            return;
+          case 1:
+            getIt.get<TabManager>().tabChangedCommand(YagaHomeTab.favorites);
             return;
           default:
             getIt.get<TabManager>().tabChangedCommand(YagaHomeTab.grid);
@@ -24,11 +27,15 @@ class YagaBottomNavBar extends StatelessWidget {
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home View',
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.star),
+          label: 'Favorites',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.folder),
-          label: 'Browse View',
+          label: 'Browse',
         ),
       ],
     );
@@ -37,6 +44,8 @@ class YagaBottomNavBar extends StatelessWidget {
   int _getCurrentIndex() {
     switch (_selectedTab) {
       case YagaHomeTab.folder:
+        return 2;
+      case YagaHomeTab.favorites:
         return 1;
       default:
         return 0;

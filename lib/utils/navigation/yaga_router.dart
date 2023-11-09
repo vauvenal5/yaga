@@ -80,7 +80,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case FocusView.route:
       final FocusViewArguments args = settings.arguments as FocusViewArguments;
       return MaterialPageRoute(
-          settings: settings, builder: (context) => FocusView(args.path));
+          settings: settings,
+          builder: (context) => FocusView(
+                args.path,
+                args.favorites,
+                args.selected,
+                args.prefPrefix,
+              ));
     default:
       return MaterialPageRoute(
         settings: settings,

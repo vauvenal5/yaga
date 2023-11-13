@@ -155,6 +155,7 @@ class NextCloudService
               ? NcFile.directory(uri, webDavFile.name)
               : NcFile.file(uri, webDavFile.name, webDavFile.mimeType);
           file.lastModified = webDavFile.lastModified;
+          file.favorite = webDavFile.favorite ?? false;
 
           return file;
         }).doOnError((error, stacktrace) {

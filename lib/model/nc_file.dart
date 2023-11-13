@@ -12,6 +12,7 @@ class NcFile {
   static const String _jsonPreviewFile = "previewFile";
   static const String _jsonLastModified = "lastModified";
   static const String _jsonSelected = "selected";
+  static const String _jsonFavorite = "favorite";
 
   final bool isDirectory;
   final String name;
@@ -22,6 +23,7 @@ class NcFile {
   LocalFile? previewFile;
   DateTime? lastModified;
   bool selected = false;
+  bool favorite = false;
 
   NcFile(this.uri, this.name, this.fileExtension,
       {required this.isDirectory, this.upstreamId});
@@ -49,7 +51,8 @@ class NcFile {
         lastModified = json[_jsonLastModified] == null
             ? null
             : DateTime.parse(json[_jsonLastModified] as String),
-        selected = json[_jsonSelected] as bool;
+        selected = json[_jsonSelected] as bool,
+        favorite = json[_jsonFavorite] as bool;
 
   factory NcFile.file(Uri uri, String name, String? mime) {
     String ext = p.extension(name).replaceAll('.', '');
@@ -89,7 +92,8 @@ class NcFile {
       _jsonLocalFile: localFile?.toJson(),
       _jsonPreviewFile: previewFile?.toJson(),
       _jsonLastModified: lastModified?.toString(),
-      _jsonSelected: selected
+      _jsonSelected: selected,
+      _jsonFavorite: favorite
     };
   }
 }

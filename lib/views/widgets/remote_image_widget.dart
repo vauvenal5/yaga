@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:flutter/material.dart';
 import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -11,6 +11,7 @@ import 'package:yaga/utils/forground_worker/bridges/nextcloud_manager_bridge.dar
 import 'package:yaga/utils/nextcloud_colors.dart';
 import 'package:yaga/utils/service_locator.dart';
 import 'package:yaga/views/widgets/circle_avatar_icon.dart';
+import 'package:yaga/views/widgets/favorite_icon.dart';
 
 class RemoteImageWidget extends StatelessWidget {
   final NcFile _file;
@@ -35,14 +36,19 @@ class RemoteImageWidget extends StatelessWidget {
       ),
     ];
 
+    if (_file.favorite) {
+      children.add(FavoriteIcon());
+    }
+
     if (_file.selected) {
       children.add(const Align(
-        alignment: Alignment.topLeft,
+        alignment: Alignment.center,
         child: CircleAvatarIcon(
           icon: Icon(
             Icons.check,
             color: NextcloudColors.lightBlue,
           ),
+          radius: 20,
         ),
       ));
     }

@@ -11,7 +11,7 @@ description: A Nextcloud gallary app.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.40.1+4001
+version: 0.40.2+4002
 
 environment:
   sdk: '>=3.1.0 <4.0.0'
@@ -48,7 +48,8 @@ dependencies:
   uuid: ^3.0.4
   validators: ^3.0.0
   webview_flutter: ^4.2.2
-  photo_manager: ^2.1.4
+  photo_manager: ^3.0.0-dev.5
+  photo_manager_image_provider: ^2.1.0
   flutter_markdown: ^0.6.10+3
   markdown: ^7.1.1
   flutter_background_service: ^5.0.1
@@ -58,10 +59,18 @@ dependencies:
   # pointing to forked repo to support NC26
   nextcloud:
     git:
-      url: https://github.com/vauvenal5/neon
-#      url: https://github.com/nextcloud/neon
+#      url: https://github.com/vauvenal5/neon
+      url: https://github.com/nextcloud/neon
       path: packages/nextcloud
-      ref: a9e43b8f
+      ref: 06e2eef
+#      ref: a9e43b8f
+
+dependency_overrides:
+  dynamite_runtime:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/dynamite/dynamite_runtime
+      ref: bd408bc
 
 # dependency_overrides:
 #   analyzer: "0.40.6"

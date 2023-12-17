@@ -61,7 +61,8 @@ class NextCloudService
           .getCurrentUser()
           .catchError(_logAndRethrow);
 
-      final displayName = userData?.body.ocs.data.displayName ?? userData?.body.ocs.data.displayName;
+      final displayName = userData?.body.ocs.data.displayName ??
+          userData?.body.ocs.data.displayName;
 
       return _origin = NcOrigin(
         fromUri(uri: loginData.server!, scheme: scheme),
@@ -86,32 +87,39 @@ class NextCloudService
 
   bool isLoggedIn() => _client != null;
 
-  // todo: this is a workaround for https://github.com/nextcloud/neon/issues/1045
-  Uri _prepUriForLib(Uri path) => path;
+  PathUri _prepUriForLib(Uri path) => PathUri.parse(path.path);
 
-  Stream<WebDavFile>? _tempFavTest(Uri dir, bool favorite) {
-    return favorite ? _client?.webdav.report(
-      Uri(path: '/'),
-      WebDavOcFilterRules(
-        ocfavorite: 1,
-      ),
-      prop: WebDavPropWithoutValues.fromBools(
-        nchaspreview: true,
-        davgetcontenttype: true,
-        davgetlastmodified: true,
-        davresourcetype: true,
-        ocfavorite: true,
-      ),
-    ).asStream().flatMap((value) => Stream.fromIterable(value.toWebDavFiles())) : _client?.webdav
-        .propfind(
-      _prepUriForLib(dir),
-      prop: WebDavPropWithoutValues.fromBools(
-        nchaspreview: true,
-        davgetcontenttype: true,
-        davgetlastmodified: true,
-        ocfavorite: true,
-      ),
-    ).asStream().flatMap((value) => Stream.fromIterable(value.toWebDavFiles()..removeAt(0)));
+  Stream<WebDavFile>? _listOrReport(Uri dir, bool favorite) {
+    return favorite
+        ? _client?.webdav
+            .report(
+              PathUri.parse('/'),
+              WebDavOcFilterRules(
+                ocfavorite: 1,
+              ),
+              prop: WebDavPropWithoutValues.fromBools(
+                nchaspreview: true,
+                davgetcontenttype: true,
+                davgetlastmodified: true,
+                davresourcetype: true,
+                ocfavorite: true,
+              ),
+            )
+            .asStream()
+            .flatMap((value) => Stream.fromIterable(value.toWebDavFiles()))
+        : _client?.webdav
+            .propfind(
+              _prepUriForLib(dir),
+              prop: WebDavPropWithoutValues.fromBools(
+                nchaspreview: true,
+                davgetcontenttype: true,
+                davgetlastmodified: true,
+                ocfavorite: true,
+              ),
+            )
+            .asStream()
+            .flatMap((value) =>
+                Stream.fromIterable(value.toWebDavFiles()..removeAt(0)));
   }
 
   @override
@@ -119,7 +127,7 @@ class NextCloudService
     logger.info("Listing ${dir.toString()}");
     logger.info("NcOrigin: ${_origin?.userEncodedDomainRoot}");
 
-    return _tempFavTest(dir, favorite)
+    return _listOrReport(dir, favorite)
             //todo: this will improve responsiveness in case of a bad connection but it can not be used as long
             // as we are using the sync manager for deletes and not the activity log.
             // .catchError((err) {
@@ -127,10 +135,10 @@ class NextCloudService
             //   return <WebDavFile>[];
             // })
             ?.where(
-              (event) =>
-                  event.isDirectory ||
-                  event.mimeType != null && event.mimeType!.startsWith("image"),
-            )
+          (event) =>
+              event.isDirectory ||
+              event.mimeType != null && event.mimeType!.startsWith("image"),
+        )
             .map((webDavFile) {
           logger.info("Mapping ${webDavFile.path}");
           //todo: here we are hiding the origin path, if any, because we are not interested in it, the much bigger problem is:
@@ -177,7 +185,13 @@ class NextCloudService
     logger.fine("Fetching preview $path");
     //todo: think about image sizes vs in code scaling
     return _client?.core.preview
-            .getPreview(file: path, x: 128, y: 128, a: 1, mode: 'cover',)
+            .getPreview(
+              file: path,
+              x: 128,
+              y: 128,
+              a: 1,
+              mode: 'cover',
+            )
             .then((value) => value.body) ??
         Future.error("Not logged in!");
     //todo: implement proper error handling
@@ -231,6 +245,16 @@ class NextCloudService
     _logError(err);
     throw err;
   }
+
+  Future<NcFile> toggleFavorite(NcFile file) =>
+      _client?.webdav
+          .proppatch(
+            _prepUriForLib(file.uri),
+            set: WebDavProp(ocfavorite: file.favorite ? 0 : 1),
+          )
+          .catchError(_logAndRethrow)
+          .then((_) => file) ??
+      Future.error("Not logged in!");
 
   void _logError(dynamic err, {StackTrace? stacktrace}) {
     logger.severe(err, err, stacktrace);

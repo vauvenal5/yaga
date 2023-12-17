@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData dark = ThemeData(
+      useMaterial3: false,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSwatch(
         accentColor: NextcloudColors.lightBlue,
@@ -41,9 +42,10 @@ class MyApp extends StatelessWidget {
     );
 
     final ThemeData light = ThemeData(
+      useMaterial3: false,
       // brightness: Brightness.light,
-      colorScheme: ColorScheme.fromSwatch().copyWith(
-        secondary: NextcloudColors.lightBlue,
+      colorScheme: ColorScheme.fromSwatch(
+        accentColor: NextcloudColors.lightBlue,
         brightness: Brightness.light,
       ),
     );

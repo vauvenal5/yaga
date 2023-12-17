@@ -189,10 +189,10 @@ packages:
     dependency: transitive
     description:
       name: collection
-      sha256: f092b211a4319e98e5ff58223576de6c2803db36221657b46c82574721240687
+      sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.2"
+    version: "1.18.0"
   convert:
     dependency: transitive
     description:
@@ -274,11 +274,11 @@ packages:
     source: hosted
     version: "5.3.3"
   dynamite_runtime:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "packages/dynamite/dynamite_runtime"
-      ref: HEAD
-      resolved-ref: cf137e221bec69ff9fc2fc634de29ba39fbeba25
+      ref: bd408bc
+      resolved-ref: bd408bc596f7abdb1c29438e6fbd5020915a3952
       url: "https://github.com/nextcloud/neon"
     source: git
     version: "1.0.0"
@@ -628,10 +628,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: "3c74dbf8763d36539f114c799d8a2d87343b5067e9d796ca22b5eb8437090ee3"
+      sha256: a6e590c838b18133bb482a2745ad77c5bb7715fb0451209e1a7567d416678b8e
       url: "https://pub.dev"
     source: hosted
-    version: "1.9.1"
+    version: "1.10.0"
   mime:
     dependency: "direct main"
     description:
@@ -652,9 +652,9 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/nextcloud"
-      ref: a9e43b8f
-      resolved-ref: a9e43b8fe4f55e082d29cf6a027607fc204588f3
-      url: "https://github.com/vauvenal5/neon"
+      ref: "06e2eef"
+      resolved-ref: "06e2eefe3763d8feccb824549ee2555a9e2cc58d"
+      url: "https://github.com/nextcloud/neon"
     source: git
     version: "1.0.0"
   package_config:
@@ -805,10 +805,18 @@ packages:
     dependency: "direct main"
     description:
       name: photo_manager
-      sha256: df31e29a81831d1ec136d80ba4a43a90077994ada6acd565fcfbd8ed181ca0e8
+      sha256: "8cf79918f6de9843b394a1670fe1aec54ebcac852b4b4c9ef88211894547dc61"
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.0"
+    version: "3.0.0-dev.5"
+  photo_manager_image_provider:
+    dependency: "direct main"
+    description:
+      name: photo_manager_image_provider
+      sha256: c187f60c3fdbe5630735d9a0bccbb071397ec03dcb1ba6085c29c8adece798a0
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   photo_view:
     dependency: "direct main"
     description:
@@ -821,10 +829,10 @@ packages:
     dependency: transitive
     description:
       name: platform
-      sha256: "4a451831508d7d6ca779f7ac6e212b4023dd5a7d08a27a63da33756410e32b76"
+      sha256: ae68c7bfcd7383af3629daafb32fb4e8681c7154428da4febcff06200585f102
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "3.1.2"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -1018,10 +1026,10 @@ packages:
     dependency: transitive
     description:
       name: stack_trace
-      sha256: c3c7d8edb15bee7f0f74debd4b9c5f3c2ea86766fe4178eb2a18eb30a0bdaed5
+      sha256: "73713990125a6d93122541237550ee3352a2d84baad52d375a4cad2eb9b7ce0b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.11.0"
+    version: "1.11.1"
   sticky_infinite_list:
     dependency: "direct main"
     description:
@@ -1034,10 +1042,10 @@ packages:
     dependency: transitive
     description:
       name: stream_channel
-      sha256: "83615bee9045c1d322bbbd1ba209b7a749c2cbcdcb3fdd1df8eb488b3279c1c8"
+      sha256: ba2aa5d8cc609d96bbb2899c28934f9e1af5cddbd60a827822ea467161eb54e7
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   stream_transform:
     dependency: transitive
     description:
@@ -1074,10 +1082,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "75760ffd7786fffdfb9597c35c5b27eaeec82be8edfb6d71d32651128ed7aab8"
+      sha256: "5c2f730018264d276c20e4f1503fd1308dfbbae39ec8ee63c5236311ac06954b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "0.6.1"
   timing:
     dependency: transitive
     description:
@@ -1102,6 +1110,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
+  uri:
+    dependency: transitive
+    description:
+      name: uri
+      sha256: "889eea21e953187c6099802b7b4cf5219ba8f3518f604a1033064d45b1b8268a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   url_launcher:
     dependency: "direct main"
     description:
@@ -1210,10 +1226,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: c620a6f783fa22436da68e42db7ebbf18b8c44b9a46ab911f666ff09ffd9153f
+      sha256: c538be99af830f478718b51630ec1b6bee5e74e52c8a802d328d9e71d35d2583
       url: "https://pub.dev"
     source: hosted
-    version: "11.7.1"
+    version: "11.10.0"
   wakelock_plus:
     dependency: "direct main"
     description:
@@ -1242,10 +1258,10 @@ packages:
     dependency: transitive
     description:
       name: web
-      sha256: dc8ccd225a2005c1be616fe02951e2e342092edf968cf0844220383757ef8f10
+      sha256: afe077240a270dcfd2aafe77602b4113645af95d0ad31128cc02bce5ac5d5152
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.4-beta"
+    version: "0.3.0"
   web_socket_channel:
     dependency: transitive
     description:
@@ -1343,5 +1359,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.1.0 <4.0.0"
-  flutter: ">=3.10.0"
+  dart: ">=3.2.0-194.0.dev <4.0.0"
+  flutter: ">=3.14.0"

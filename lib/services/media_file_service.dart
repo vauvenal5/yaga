@@ -56,21 +56,26 @@ class MediaFileService extends Service<MediaFileService>
     }
 
     // todo: here we fetch all assets, this probably can be improved by making better use of MediaStore API regarding sorting and performance
-    return album
-        .getAssetListRange(start: 0, end: album.assetCount)
-        .asStream()
-        .flatMap((files) => Stream.fromIterable(files))
-        .asyncMap((event) async {
-      final file = NcFile.file(
-        fromUri(uri: uri, path: "${event.relativePath}${event.title!}"),
-        event.title!,
-        event.mimeType,
-      );
-      file.upstreamId = event.id;
-      file.lastModified = event.modifiedDateTime;
-      file.localFile = await _createLocalFile(file.uri);
-      return file;
-    });
+
+    return album.assetCountAsync.asStream().flatMap(
+          (count) => album
+              .getAssetListRange(start: 0, end: count)
+              .asStream()
+              .flatMap((files) => Stream.fromIterable(files))
+              .asyncMap(
+            (event) async {
+              final file = NcFile.file(
+                fromUri(uri: uri, path: "${event.relativePath}${event.title!}"),
+                event.title!,
+                event.mimeType,
+              );
+              file.upstreamId = event.id;
+              file.lastModified = event.modifiedDateTime;
+              file.localFile = await _createLocalFile(file.uri);
+              return file;
+            },
+          ),
+        );
   }
 
   Future<LocalFile> _createLocalFile(Uri uri) async {

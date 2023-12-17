@@ -16,7 +16,7 @@ class CircleAvatarIcon extends StatelessWidget {
       children: <Widget>[
         CircleAvatar(
           radius: radius,
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.white,
         ),
         icon,
       ],

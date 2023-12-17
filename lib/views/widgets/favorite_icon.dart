@@ -8,7 +8,7 @@ class FavoriteIcon extends StatelessWidget {
       alignment: Alignment.bottomLeft,
       child: CircleAvatarIcon(
         icon: Icon(
-          Icons.star,
+          Icons.stars,
           color: Colors.amber,
         ),
       ),

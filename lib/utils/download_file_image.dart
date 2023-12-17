@@ -5,6 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:yaga/model/fetched_file.dart';
 
+typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
+
+// this entire class is a copy of the respective FileImage functions
+// with the addition of an await for the localFileAvailable
+// proper solution would probably be to write an own ImageProvider
 class DownloadFileImage extends FileImage {
   final Future<FetchedFile> localFileAvailable;
 
@@ -14,7 +19,7 @@ class DownloadFileImage extends FileImage {
   @override
   ImageStreamCompleter loadBuffer(FileImage key, DecoderBufferCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decodeBufferDeprecated: decode),
+      codec: _loadAsync(key, decode: decode),
       scale: key.scale,
       debugLabel: key.file.path,
       informationCollector: () => <DiagnosticsNode>[
@@ -38,26 +43,24 @@ class DownloadFileImage extends FileImage {
 
   /// this function is copied from the parent
   /// await localFileAvailable was added and Uint8List result is reused
-  Future<ui.Codec> _loadAsync(FileImage key, {
-    ImageDecoderCallback? decode,
-    DecoderBufferCallback? decodeBufferDeprecated,
-    DecoderCallback? decodeDeprecated,
-  }) async {
+  Future<ui.Codec> _loadAsync(
+      FileImage key, {
+        required _SimpleDecoderCallback decode,
+      }) async {
+    await localFileAvailable;
     assert(key == this);
-
-    final FetchedFile fetchedFile = await localFileAvailable;
-    assert(fetchedFile.file.localFile!.file.path == file.path);
-
-    final Uint8List bytes = fetchedFile.data;
-    if (bytes.lengthInBytes == 0) {
+    // TODO(jonahwilliams): making this sync caused test failures that seem to
+    // indicate that we can fail to call evict unless at least one await has
+    // occurred in the test.
+    // https://github.com/flutter/flutter/issues/113044
+    final int lengthInBytes = await file.length();
+    if (lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
-
-    if (decode != null) {
-      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
-    }
-    return decodeDeprecated!(bytes);
+    return (file.runtimeType == File)
+        ? decode(await ui.ImmutableBuffer.fromFilePath(file.path))
+        : decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
   }
 }

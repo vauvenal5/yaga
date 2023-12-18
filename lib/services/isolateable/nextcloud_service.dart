@@ -87,7 +87,7 @@ class NextCloudService
 
   bool isLoggedIn() => _client != null;
 
-  PathUri _prepUriForLib(Uri path) => PathUri.parse(path.path);
+  PathUri _prepUriForLib(Uri path) => PathUri.parse(Uri.decodeComponent(path.path));
 
   Stream<WebDavFile>? _listOrReport(Uri dir, bool favorite) {
     return favorite

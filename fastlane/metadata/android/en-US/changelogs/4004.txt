@@ -1,0 +1,2 @@
+- fix minor issue with special characters in folder names
+- internal testing of Github releases

@@ -67,9 +67,9 @@ platform :android do
   end
 
   lane :github do 
-    Dir.chdir("..") do
-      sh("flutter build apk --flavor play")
-    end
+#     Dir.chdir("..") do
+#       sh("flutter build apk --flavor play")
+#     end
 
     version = get_version()
     code = get_code()
@@ -81,7 +81,7 @@ platform :android do
       tag_name: version,
       description: (File.read("metadata/android/en-US/changelogs/"+code.to_s+".txt") rescue "No changelog provided."),
       commitish: "master",
-      upload_assets: ["build/app/outputs/flutter-apk/app-play-release.apk"]
+      upload_assets: ["./build/app/outputs/flutter-apk/app-play-release.apk"]
     )
   end
 

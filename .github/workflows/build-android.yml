@@ -37,6 +37,20 @@ jobs:
         with:
           name: app-play-release.aab
           path: ./build/app/outputs/bundle/playRelease/app-play-release.aab
+      - name: Convert aab to apk
+        id: convert_aab
+        uses: mukeshsolanki/bundletool-action@v1.0.2
+        with:
+          aabFile: ./build/app/outputs/bundle/playRelease/app-play-release.aab
+          base64Keystore: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          keystorePassword: ${{ secrets.STORE_PASSWORD }}
+          keystoreAlias: ${{ secrets.KEY_ALIAS }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          bundletoolVersion: '1.15.6'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: app-play-release.apk
+          path: ${{ steps.convert_aab.outputs.apkPath }}
   internal:
     needs: build
     uses: vauvenal5/yaga/.github/workflows/publish-play-store.yml@master

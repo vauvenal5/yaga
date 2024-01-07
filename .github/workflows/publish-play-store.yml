@@ -37,5 +37,5 @@ jobs:
           encodedString: ${{ secrets.googlePlayJsonBase64 }}
       - run: cd fastlane
       - run: bundle exec fastlane ${{ inputs.stage }}
-        env: # Or as an environment variable
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

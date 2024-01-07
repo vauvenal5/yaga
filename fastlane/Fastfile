@@ -76,7 +76,8 @@ platform :android do
 
     set_github_release(
       repository_name: "vauvenal5/yaga",
-      api_token: ENV["GITHUB_TOKEN"],
+#       api_token: ENV["GITHUB_TOKEN"],
+      api_bearer: ENV["GITHUB_TOKEN"],
       name: version,
       tag_name: version,
       description: (File.read("metadata/android/en-US/changelogs/"+code.to_s+".txt") rescue "No changelog provided."),

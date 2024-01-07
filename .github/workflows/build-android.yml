@@ -66,7 +66,7 @@ jobs:
     secrets:
       googlePlayJsonBase64: ${{ secrets.GOOGLE_PLAY_JSON_BASE64 }}
   github:
-    needs: internal
+    needs: build
     uses: vauvenal5/yaga/.github/workflows/publish-play-store.yml@master
     with:
       stage: 'github'

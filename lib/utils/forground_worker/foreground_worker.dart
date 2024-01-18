@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/global_settings_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
+import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/services/shared_preferences_service.dart';
 import 'package:yaga/utils/forground_worker/isolate_handler_regestry.dart';
 import 'package:yaga/utils/forground_worker/messages/flush_logs_message.dart';
@@ -25,6 +25,7 @@ class ForegroundWorker {
   final GlobalSettingsManager _globalSettingsManager;
   final SelfSignedCertHandler _selfSignedCertHandler;
   final SharedPreferencesService _sharedPreferencesService;
+  final SystemLocationService _systemLocationService;
 
   RxCommand<Message, Message> isolateResponseCommand =
       RxCommand.createSync((param) => param);
@@ -34,6 +35,7 @@ class ForegroundWorker {
     this._globalSettingsManager,
     this._selfSignedCertHandler,
     this._sharedPreferencesService,
+    this._systemLocationService,
   );
 
   Future<ForegroundWorker> get isolateReadyFuture => _isolateReady.future;
@@ -63,9 +65,9 @@ class ForegroundWorker {
       _workerMain,
       InitMsg(
         isolateToMain.sendPort,
-        (await getExternalStorageDirectory())!,
-        await getTemporaryDirectory(),
-        (await getExternalStorageDirectories())!,
+        (await _systemLocationService.getExternal())!,
+        await _systemLocationService.getCacheDir(),
+        (await _systemLocationService.getExternals())!,
         _nextCloudManager.updateLoginStateCommand.lastResult!,
         _globalSettingsManager.updateRootMappingPreference.lastResult,
         _selfSignedCertHandler.fingerprint,

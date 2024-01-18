@@ -40,71 +40,72 @@ class BackgroundWorker {
   BackgroundWorker(this._nextCloudManager, this._selfSignedCertHandler);
 
   Future<BackgroundWorker> init() async {
-    await Permission.notification.request();
-    await Permission.scheduleExactAlarm.request();
-    await service.configure(
-      androidConfiguration: AndroidConfiguration(
-        // this will be executed when app is in foreground or background in separated isolate
-        onStart: _workerMain,
-        // auto start service
-        autoStart: false,
-        isForegroundMode: true,
-      ),
-      iosConfiguration: IosConfiguration(
-        // auto start service
-        autoStart: false,
-        // this will be executed when app is in foreground in separated isolate
-        onForeground: _workerMain,
-        // you have to enable background fetch capability on xcode project
-        onBackground: _onIosBackground,
-      ),
-    );
+    if(Platform.isAndroid) {
+      await Permission.notification.request();
+      await Permission.scheduleExactAlarm.request();
+      await service.configure(
+        androidConfiguration: AndroidConfiguration(
+          // this will be executed when app is in foreground or background in separated isolate
+          onStart: _workerMain,
+          // auto start service
+          autoStart: false,
+          isForegroundMode: true,
+        ),
+        iosConfiguration: IosConfiguration(
+          // auto start service
+          autoStart: false,
+          // this will be executed when app is in foreground in separated isolate
+          onForeground: _workerMain,
+          // you have to enable background fetch capability on xcode project
+          onBackground: _onIosBackground,
+        ),
+      );
 
-    service.on(BackgroundCommands.workerToMain).listen((json) async {
-      if (json != null && json[JsonConvertable.jsonTypeField] != null) {
-        final type = json[JsonConvertable.jsonTypeField] as String;
+      service.on(BackgroundCommands.workerToMain).listen((json) async {
+        if (json != null && json[JsonConvertable.jsonTypeField] != null) {
+          final type = json[JsonConvertable.jsonTypeField] as String;
 
-        switch (type) {
-          case BackgroundDownloadedRequest.jsonTypeConst:
-            _fileFetchedHandler(json);
-            break;
-          case FileUpdateMsg.jsonTypeConst:
-            isolateResponseCommand(FileUpdateMsg.fromJson(json));
-            break;
-          case ImageUpdateMsg.jsonTypeConst:
-            isolateResponseCommand(ImageUpdateMsg.fromJson(json));
-            break;
-          case FilesActionDone.jsonTypeConst:
-            isolateResponseCommand(FilesActionDone.fromJson(json));
-            break;
-          default:
+          switch (type) {
+            case BackgroundDownloadedRequest.jsonTypeConst:
+              _fileFetchedHandler(json);
+              break;
+            case FileUpdateMsg.jsonTypeConst:
+              isolateResponseCommand(FileUpdateMsg.fromJson(json));
+              break;
+            case ImageUpdateMsg.jsonTypeConst:
+              isolateResponseCommand(ImageUpdateMsg.fromJson(json));
+              break;
+            case FilesActionDone.jsonTypeConst:
+              isolateResponseCommand(FilesActionDone.fromJson(json));
+              break;
+            default:
             //todo: handle error
-            return;
+              return;
+          }
         }
-      }
-    });
+      });
 
-    service.on(BackgroundCommands.started).listen((event) {
-      _logger.info("Started Message");
-      service.invoke(
-          BackgroundCommands.init,
-          BackgroundInitMsg(
-            _nextCloudManager.updateLoginStateCommand.lastResult!,
-            _selfSignedCertHandler.fingerprint,
-          ).toJson());
-    });
+      service.on(BackgroundCommands.started).listen((event) {
+        _logger.info("Started Message");
+        service.invoke(
+            BackgroundCommands.init,
+            BackgroundInitMsg(
+              _nextCloudManager.updateLoginStateCommand.lastResult!,
+              _selfSignedCertHandler.fingerprint,
+            ).toJson());
+      });
 
-    service.on(BackgroundCommands.initDone).listen(
-      (event) {
-        _logger.info("Init Done Message");
-        _isolateReady.complete(this);
-      },
-    );
+      service.on(BackgroundCommands.initDone).listen(
+            (event) {
+          _logger.info("Init Done Message");
+          _isolateReady.complete(this);
+        },
+      );
 
-    service.on(BackgroundCommands.stopped).listen((event) {
-      _isolateReady = Completer<BackgroundWorker>();
-    });
-
+      service.on(BackgroundCommands.stopped).listen((event) {
+        _isolateReady = Completer<BackgroundWorker>();
+      });
+    }
     return this;
   }
 

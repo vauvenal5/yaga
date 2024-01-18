@@ -13,6 +13,7 @@ class ActionPreferenceWidget extends StatelessWidget {
         _pref.title!,
       ),
       onTap: _pref.action,
+      enabled: _pref.enabled!,
     );
   }
 }

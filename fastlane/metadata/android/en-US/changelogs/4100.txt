@@ -1,0 +1,2 @@
+- add minimal linux support
+- refactor views to support big screens

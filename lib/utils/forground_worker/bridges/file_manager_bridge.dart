@@ -31,7 +31,7 @@ class FileManagerBridge {
     _registerWorkerMessage(_fileManager.fileUpdateMessage);
 
     _fileManager.fetchFileListCommand
-        .where((event) => event.uri.scheme != _mediaFileManager.scheme)
+        .where((event) => !_mediaFileManager.isRelevant(event.uri.scheme))
         .listen((event) => _worker.sendRequest(event));
 
     _fileManager.sortFilesListCommand

@@ -3,10 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:sticky_infinite_list/sticky_infinite_list.dart';
 import 'package:yaga/model/sorted_category_list.dart';
 import 'package:yaga/utils/logger.dart';
+import 'package:yaga/views/widgets/image_views/utils/grid_delegate.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
 
-class CategoryViewExp extends StatelessWidget {
+class CategoryViewExp extends StatelessWidget with GridDelegate {
   final _logger = YagaLogger.getLogger(CategoryViewExp);
   static const String viewKey = "category_exp";
   final ViewConfiguration viewConfig;
@@ -45,37 +46,35 @@ class CategoryViewExp extends StatelessWidget {
     final ScrollController scrollController = ScrollController();
 
     final InfiniteList infiniteList = InfiniteList(
-        posChildCount: sorted.categories.length,
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        builder: (BuildContext context, int indexCategory) {
-          final String key = sorted.categories[indexCategory];
+      posChildCount: sorted.categories.length,
+      controller: scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      builder: (BuildContext context, int indexCategory) {
+        final String key = sorted.categories[indexCategory];
 
-          /// Builder requires [InfiniteList] to be returned
-          return InfiniteListItem(
-            /// Header builder
-            headerBuilder: (BuildContext context) {
-              return _buildHeader(key, context);
-            },
+        /// Builder requires [InfiniteList] to be returned
+        return InfiniteListItem(
+          /// Header builder
+          headerBuilder: (BuildContext context) {
+            return _buildHeader(key, context);
+          },
 
-            /// Content builder
-            contentBuilder: (BuildContext context) {
-              return GridView.builder(
-                  key: ValueKey("${key}_grid"),
-                  controller: scrollController,
-                  shrinkWrap: true,
-                  itemCount: sorted.categorizedFiles[key]!.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 2,
-                    mainAxisSpacing: 2,
-                  ),
-                  itemBuilder: (context, itemIndex) {
-                    return _buildImage(key, itemIndex, context);
-                  });
-            },
-          );
-        });
+          /// Content builder
+          contentBuilder: (BuildContext context) {
+            return GridView.builder(
+              key: ValueKey("${key}_grid"),
+              controller: scrollController,
+              shrinkWrap: true,
+              itemCount: sorted.categorizedFiles[key]!.length,
+              gridDelegate: buildImageGridDelegate(context),
+              itemBuilder: (context, itemIndex) {
+                return _buildImage(key, itemIndex, context);
+              },
+            );
+          },
+        );
+      },
+    );
 
     return infiniteList;
   }

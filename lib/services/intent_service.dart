@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:mime/mime.dart';
 import 'package:yaga/model/nc_file.dart';
@@ -9,7 +11,7 @@ class IntentService extends Service<IntentService> {
 
   @override
   Future<IntentService> init() async {
-    _intentAction = await getIntentAction();
+    _intentAction = Platform.isAndroid ? await getIntentAction() : "linux";
     return this;
   }
 

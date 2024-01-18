@@ -51,7 +51,7 @@ class FileManager extends FileManagerBase {
     registerFileManager(_mediaFileManager);
 
     fetchFileListCommand
-        .where((event) => event.uri.scheme == _mediaFileManager.scheme)
+        .where((event) => _mediaFileManager.isRelevant(event.uri.scheme))
         .flatMap(
           (value) => _mediaFileManager
               .listFiles(value.uri)

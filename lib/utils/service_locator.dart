@@ -96,9 +96,11 @@ void setupServiceLocator() {
       await getIt.getAsync<NextCloudService>(),
       await getIt.getAsync<SystemLocationService>()));
   getIt.registerSingletonAsync(() async => SyncManager());
-  getIt.registerSingletonAsync(() async => MediaFileService(
-        await getIt.getAsync<SystemLocationService>(),
-      ));
+  getIt.registerSingletonAsync(
+    () async => MediaFileService(
+      await getIt.getAsync<SystemLocationService>(),
+    ).init(),
+  );
   getIt.registerSingletonAsync(() async => MediaFileManager(
         await getIt.getAsync<MediaFileService>(),
       ));
@@ -146,10 +148,12 @@ void setupServiceLocator() {
     ).init(),
   );
 
-  getIt.registerSingletonAsync(() async => BackgroundWorker(
-        await getIt.getAsync<NextCloudManager>(),
-        await getIt.getAsync<SelfSignedCertHandler>(),
-      ).init());
+  getIt.registerSingletonAsync(
+    () async => BackgroundWorker(
+      await getIt.getAsync<NextCloudManager>(),
+      await getIt.getAsync<SelfSignedCertHandler>(),
+    ).init(),
+  );
 
   getIt.registerSingletonAsync<FileManagerBridge>(
     () async => FileManagerBridge(

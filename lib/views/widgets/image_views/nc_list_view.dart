@@ -18,24 +18,38 @@ class NcListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final slivers = <Widget>[];
 
+    const Widget divider = Divider(
+      thickness: 2,
+    );
+
     if (viewConfig.showFolders.value) {
-      slivers.add(SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) => ListTile(
+      slivers.add(
+        SliverList.separated(
+          separatorBuilder: (context, index) => divider,
+          itemBuilder: (context, index) => ListTile(
             leading: FolderIcon(dir: sorted.folders[index]),
             // isThreeLine: false,
             title: Text(sorted.folders[index].name),
             //todo: move this check into getter of viewConfig
             onTap: () => viewConfig.onFolderTap?.call(sorted.folders[index]),
           ),
-          childCount: sorted.folders.length,
+          itemCount: sorted.folders.length,
         ),
-      ));
+      );
     }
 
-    slivers.add(SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) => ListTile(
+    slivers.add(
+      SliverList.list(
+        children: const [
+          divider,
+        ],
+      ),
+    );
+
+    slivers.add(
+      SliverList.separated(
+        separatorBuilder: (context, index) => divider,
+        itemBuilder: (context, index) => ListTile(
           leading: SizedBox(
             width: 64,
             height: 64,
@@ -50,9 +64,9 @@ class NcListView extends StatelessWidget {
           onTap: () => viewConfig.onFileTap?.call(sorted.files, index),
           onLongPress: () => viewConfig.onSelect?.call(sorted.files, index),
         ),
-        childCount: sorted.files.length,
+        itemCount: sorted.files.length,
       ),
-    ));
+    );
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),

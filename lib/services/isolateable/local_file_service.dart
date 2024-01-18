@@ -16,8 +16,12 @@ class LocalFileService extends Service<LocalFileService>
 
   @override
   Future<LocalFileService> init() async {
-    _permissionState = await Permission.storage.request();
-    await Permission.manageExternalStorage.request();
+    if (Platform.isAndroid) {
+      _permissionState = await Permission.storage.request();
+      await Permission.manageExternalStorage.request();
+    } else {
+      _permissionState = PermissionStatus.granted;
+    }
     return this;
   }
 
@@ -35,10 +39,11 @@ class LocalFileService extends Service<LocalFileService>
     return this;
   }
 
-  Future<File> createFile(
-      {required File file,
-      required List<int> bytes,
-      DateTime? lastModified}) async {
+  Future<File> createFile({
+    required File file,
+    required List<int> bytes,
+    DateTime? lastModified,
+  }) async {
     logger.fine("Creating file ${file.path}");
     await file.create(recursive: true);
     final File res = await file.writeAsBytes(bytes, flush: true);

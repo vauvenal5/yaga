@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:rx_command/rx_command.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
 import 'package:yaga/managers/settings_manager.dart';
@@ -40,7 +42,8 @@ class GlobalSettingsManager {
   static ActionPreference sendLogs = ActionPreference((b) => b
     ..key = appSection.prepareKey("logs")
     ..title = "Send Logs"
-    ..action = YagaLogger.shareLogs);
+    ..action = YagaLogger.shareLogs
+    ..enabled = Platform.isAndroid);
   static ActionPreference? reset;
   static StringPreference newsSeenVersion = StringPreference(
     (b) => b
@@ -52,7 +55,8 @@ class GlobalSettingsManager {
     (b) => b
       ..key = ncSection.prepareKey("useBackground")
       ..title = "File actions in background"
-      ..value = true,
+      ..value = Platform.isAndroid
+      ..enabled = Platform.isAndroid,
   );
   static SectionPreference slideshowSection = SectionPreference(
     (b) => b

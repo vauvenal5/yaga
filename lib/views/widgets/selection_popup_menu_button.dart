@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:yaga/managers/file_manager/file_manager.dart';
@@ -29,38 +31,49 @@ class SelectionPopupMenuButton extends StatelessWidget {
   List<PopupMenuEntry<SelectionViewMenu>> _buildSelectionPopupMenu(
       BuildContext context) {
     if (fileListLocalManager.isRemoteUri) {
-      return const [
-        PopupMenuItem(
-          value: SelectionViewMenu.share,
-          child: ListMenuEntry(Icons.share, "Share"),
-        ),
-        PopupMenuItem(
-          value: SelectionViewMenu.delete,
-          child: ListMenuEntry(Icons.delete, "Delete"),
-        ),
-        PopupMenuItem(
-          value: SelectionViewMenu.copy,
-          child: ListMenuEntry(Icons.copy, "Copy"),
-        ),
-        PopupMenuItem(
-          value: SelectionViewMenu.move,
-          child: ListMenuEntry(Icons.forward, "Move"),
-        ),
-        PopupMenuItem(
-          value: SelectionViewMenu.download,
-          child: ListMenuEntry(Icons.file_download, "Download"),
-        ),
-      ];
+      return _buildAndroidSpecificItems()
+        ..addAll(
+          [
+            const PopupMenuItem(
+              value: SelectionViewMenu.delete,
+              child: ListMenuEntry(Icons.delete, "Delete"),
+            ),
+            const PopupMenuItem(
+              value: SelectionViewMenu.copy,
+              child: ListMenuEntry(Icons.copy, "Copy"),
+            ),
+            const PopupMenuItem(
+              value: SelectionViewMenu.move,
+              child: ListMenuEntry(Icons.forward, "Move"),
+            ),
+            const PopupMenuItem(
+              value: SelectionViewMenu.download,
+              child: ListMenuEntry(Icons.file_download, "Download"),
+            ),
+          ],
+        );
     }
 
-    return const [
-      PopupMenuItem(
+    return _buildAndroidSpecificItems()
+      ..addAll(
+        [
+          const PopupMenuItem(
+            value: SelectionViewMenu.delete,
+            child: ListMenuEntry(Icons.delete, "Delete"),
+          ),
+        ],
+      );
+  }
+
+  List<PopupMenuEntry<SelectionViewMenu>> _buildAndroidSpecificItems() {
+    if (!Platform.isAndroid) {
+      return [];
+    }
+
+    return [
+      const PopupMenuItem(
         value: SelectionViewMenu.share,
         child: ListMenuEntry(Icons.share, "Share"),
-      ),
-      PopupMenuItem(
-        value: SelectionViewMenu.delete,
-        child: ListMenuEntry(Icons.delete, "Delete"),
       ),
     ];
   }

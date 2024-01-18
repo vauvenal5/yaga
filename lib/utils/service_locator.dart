@@ -127,11 +127,12 @@ void setupServiceLocator() {
           ).init());
 
   getIt.registerSingletonAsync<ForegroundWorker>(() async => ForegroundWorker(
-        await getIt.getAsync<NextCloudManager>(),
-        await getIt.getAsync<GlobalSettingsManager>(),
-        await getIt.getAsync<SelfSignedCertHandler>(),
-        await getIt.getAsync<SharedPreferencesService>(),
-      ).init());
+          await getIt.getAsync<NextCloudManager>(),
+          await getIt.getAsync<GlobalSettingsManager>(),
+          await getIt.getAsync<SelfSignedCertHandler>(),
+          await getIt.getAsync<SharedPreferencesService>(),
+          await getIt.getAsync<SystemLocationService>())
+      .init());
   getIt.registerSingletonAsync<NextcloudManagerBridge>(
       () async => NextcloudManagerBridge(
             await getIt.getAsync<NextCloudManager>(),
@@ -204,7 +205,7 @@ void setupBackgroundServiceLocator(
   );
 
   getIt.registerSingletonAsync<WorkTracker>(
-      () async => WorkTracker(),
+    () async => WorkTracker(),
   );
 }
 

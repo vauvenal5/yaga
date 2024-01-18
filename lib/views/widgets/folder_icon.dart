@@ -6,7 +6,7 @@ class FolderIcon extends StatelessWidget {
   final NcFile dir;
   final double size;
 
-  const FolderIcon({super.key, required this.dir, this.size = 56});
+  const FolderIcon({super.key, required this.dir, this.size = 48});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class FolderIcon extends StatelessWidget {
       stack.children.add(FavoriteIcon());
     }
 
-    return Container(
+    return SizedBox(
       height: size,
       width: size,
       child: stack,

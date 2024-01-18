@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 
@@ -44,5 +46,9 @@ class MediaFileManager implements FileServiceManager {
       {bool overwrite = false}) {
     // TODO: implement moveFile
     throw UnimplementedError();
+  }
+
+  bool isRelevant(String scheme) {
+    return Platform.isAndroid && scheme == this.scheme;
   }
 }

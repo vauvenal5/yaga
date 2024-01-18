@@ -31,8 +31,9 @@ class BoolPreferenceWidget extends StatelessWidget {
       listTileBuilder: (context, pref) => SwitchListTile(
         title: Text(pref.title!),
         value: pref.value,
-        onChanged: (value) =>
-            _notifyChange(pref.rebuild((b) => b..value = value)),
+        onChanged: pref.enabled! ?
+            (value) => _notifyChange(pref.rebuild((b) => b..value = value)) :
+            null,
       ),
     );
   }

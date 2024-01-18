@@ -25,11 +25,20 @@ class SystemLocationService extends Service<SystemLocationService>
   @override
   Future<SystemLocationService> init() async {
     _init(
-      (await getExternalStorageDirectory())!,
-      await getTemporaryDirectory(),
-      (await getExternalStorageDirectories())!,
+      (await getExternal())!,
+      await getCacheDir(),
+      (await getExternals())!,
     );
     return this;
+  }
+
+  Future<Directory> getCacheDir() => getApplicationCacheDirectory();
+  Future<Directory?> getExternal() => Platform.isAndroid ? getExternalStorageDirectory() : getApplicationSupportDirectory();
+  Future<List<Directory>?> getExternals() async {
+    if(Platform.isAndroid) {
+      return getExternalStorageDirectories();
+    }
+    return [await getApplicationSupportDirectory()];
   }
 
   @override
@@ -44,9 +53,13 @@ class SystemLocationService extends Service<SystemLocationService>
   void _init(
       Directory externalDir, Directory tmpDir, List<Directory> external) {
     _locations[_internalOrigin.authority] =
-        SystemLocation.fromSplitter(externalDir, _internalOrigin, "/Android");
+      Platform.isAndroid ?
+        SystemLocation.fromSplitter(externalDir, _internalOrigin, "/Android") :
+      SystemLocation(externalDir, _internalOrigin);
     _locations[_tmpOrigin.authority] =
-        SystemLocation.fromSplitter(tmpDir, _tmpOrigin, "/cache");
+      Platform.isAndroid ?
+      SystemLocation.fromSplitter(tmpDir, _tmpOrigin, "/cache") :
+      SystemLocation(tmpDir, _tmpOrigin);
     external
         .where((element) => element.toString() != externalDir.toString())
         .forEach((element) {
@@ -56,8 +69,9 @@ class SystemLocationService extends Service<SystemLocationService>
         host: _externalHost,
         path: "/",
       );
-      _locations[origin.authority] =
-          SystemLocation.fromSplitter(element, origin, "/Android");
+      _locations[origin.authority] = Platform.isAndroid ?
+        SystemLocation.fromSplitter(element, origin, "/Android") :
+        SystemLocation(element, origin);
     });
   }
 

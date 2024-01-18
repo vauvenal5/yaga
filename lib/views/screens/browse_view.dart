@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:yaga/managers/navigation_manager.dart';
 import 'package:yaga/managers/nextcloud_manager.dart';
@@ -39,7 +41,7 @@ class BrowseView extends StatelessWidget {
           builder: (context, snapshot) {
             final List<ListTile> children = [];
 
-            if (!favorites) {
+            if (Platform.isAndroid && !favorites) {
               children.add(_buildLocalStorageTile(context));
 
               getIt.get<SystemLocationService>().externals.forEach((element) {

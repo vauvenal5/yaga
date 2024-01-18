@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:yaga/model/sorted_category_list.dart';
 import 'package:yaga/utils/logger.dart';
+import 'package:yaga/views/widgets/image_views/utils/grid_delegate.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
 
-class CategoryView extends StatelessWidget {
+class CategoryView extends StatelessWidget with GridDelegate {
   final _logger = YagaLogger.getLogger(CategoryView);
   static const String viewKey = "category";
   final ViewConfiguration viewConfig;
@@ -29,19 +29,16 @@ class CategoryView extends StatelessWidget {
 
   SliverStickyHeader _buildCategory(String key, BuildContext context) {
     return SliverStickyHeader(
-        key: ValueKey(key),
-        header: _buildHeader(key, context),
-        sliver: SliverGrid(
-            key: ValueKey("${key}_grid"),
-            delegate:
-                SliverChildBuilderDelegate((BuildContext context, int index) {
-              return _buildImage(key, index, context);
-            }, childCount: sorted.categorizedFiles[key]!.length),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 2,
-              mainAxisSpacing: 2,
-            )));
+      key: ValueKey(key),
+      header: _buildHeader(key, context),
+      sliver: SliverGrid(
+        key: ValueKey("${key}_grid"),
+        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+          return _buildImage(key, index, context);
+        }, childCount: sorted.categorizedFiles[key]!.length),
+        gridDelegate: buildImageGridDelegate(context),
+      ),
+    );
   }
 
   Widget _buildImage(String key, int itemIndex, BuildContext context) {

@@ -8,6 +8,8 @@ class SystemLocation {
   final Uri absoluteUri;
   final Uri origin;
 
+  SystemLocation(Directory directory, this.origin,) : privatePath = directory.path, publicPath = "", absoluteUri = directory.uri;
+
   SystemLocation.fromSplitter(Directory directory, this.origin, String splitter)
       : privatePath = directory.path.split(splitter)[0],
         publicPath = splitter + directory.path.split(splitter)[1],

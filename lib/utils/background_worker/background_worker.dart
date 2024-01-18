@@ -43,6 +43,7 @@ class BackgroundWorker {
     if(Platform.isAndroid) {
       await Permission.notification.request();
       await Permission.scheduleExactAlarm.request();
+      await Permission.photos.request();
       await service.configure(
         androidConfiguration: AndroidConfiguration(
           // this will be executed when app is in foreground or background in separated isolate

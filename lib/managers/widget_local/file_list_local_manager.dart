@@ -20,6 +20,7 @@ import 'package:yaga/utils/forground_worker/messages/file_list_response.dart';
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/favorite_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/files_action_request.dart';
 import 'package:yaga/utils/forground_worker/messages/merge_sort_done.dart';
@@ -39,18 +40,13 @@ class FileListLocalManager {
   final bool allowSelecting;
   SortConfig _sortConfig;
 
-  RxCommand<bool, bool> loadingChangedCommand =
-      RxCommand.createSync((param) => param, initialLastResult: false);
+  RxCommand<bool, bool> loadingChangedCommand = RxCommand.createSync((param) => param, initialLastResult: false);
   late RxCommand<SortedFileList, SortedFileList> filesChangedCommand;
-  late RxCommand<NcFile, NcFile> selectFileCommand =
-      RxCommand.createSync((param) => param);
-  late RxCommand<bool, bool> selectionModeChanged =
-      RxCommand.createSync((param) => param, initialLastResult: false);
-  late RxCommand<List<NcFile>, List<NcFile>> selectionChangedCommand =
-      RxCommand.createSync((param) => param);
+  late RxCommand<NcFile, NcFile> selectFileCommand = RxCommand.createSync((param) => param);
+  late RxCommand<bool, bool> selectionModeChanged = RxCommand.createSync((param) => param, initialLastResult: false);
+  late RxCommand<List<NcFile>, List<NcFile>> selectionChangedCommand = RxCommand.createSync((param) => param);
 
-  StreamSubscription<MappingPreference>?
-      _updatedMappingPreferenceCommandSubscription;
+  StreamSubscription<MappingPreference>? _updatedMappingPreferenceCommandSubscription;
   StreamSubscription<FileUpdateMsg>? _updateFileListSubscripton;
   StreamSubscription<BoolPreference>? _updateRecursiveSubscription;
 
@@ -66,15 +62,16 @@ class FileListLocalManager {
 
   bool get isInSelectionMode => selected.isNotEmpty;
 
-  FileListLocalManager(
-    this._uri,
-    this.recursive,
-    this._sortConfig, {
-    this.allowSelecting = true,
-    this.favorites = false,
-  }) : _worker = getIt.get<ForegroundWorker>(), _fileManager = getIt.get<FileManager>() {
+  FileListLocalManager(this._uri,
+      this.recursive,
+      this._sortConfig, {
+        this.allowSelecting = true,
+        this.favorites = false,
+      })
+      : _worker = getIt.get<ForegroundWorker>(),
+        _fileManager = getIt.get<FileManager>() {
     filesChangedCommand = RxCommand.createSync(
-      (param) => param,
+          (param) => param,
       initialLastResult: emptyFileList,
     );
     Uuid uuid = const Uuid();
@@ -82,8 +79,11 @@ class FileListLocalManager {
   }
 
   SortedFileList get sorted => filesChangedCommand.lastResult!;
+
   Uri get uri => _uri;
+
   SortConfig get sortConfig => _sortConfig;
+
   SortedFileList get emptyFileList {
     if (_sortConfig.sortType == SortType.list) {
       return SortedFileFolderList.empty(_sortConfig);
@@ -111,11 +111,9 @@ class FileListLocalManager {
     //todo: in future communication with the background worker should be done by bridges & handlers, and not directly
     _foregroundMessageCommandSubscription = _fileManager.updateFilesCommand
         .where((event) =>
-            //file list may contain recursively loaded files; this is done so we minimize the UI thread merging of lists
-            //todo: maybe there is a better approach to this
-            (event.uri == uri) ||
-            (recursive.value &&
-                event.uri.toString().startsWith(uri.toString())))
+    //file list may contain recursively loaded files; this is done so we minimize the UI thread merging of lists
+    //todo: maybe there is a better approach to this
+    (event.uri == uri) || (recursive.value && event.uri.toString().startsWith(uri.toString())))
         .listen((event) {
       if (event is FileListResponse) {
         _logger.warning(
@@ -147,8 +145,7 @@ class FileListLocalManager {
       }
     });
 
-    _updateFileListSubscripton = _fileManager.fileUpdateMessage
-        .listen((event) => _removeFileFromList(event.file));
+    _updateFileListSubscripton = _fileManager.fileUpdateMessage.listen((event) => _removeFileFromList(event.file));
 
     _logger.warning("$managerKey (start)");
 
@@ -175,8 +172,7 @@ class FileListLocalManager {
     }
   }
 
-  void _sendMergeSortRequest(MergeSortRequest request) =>
-      _worker.sendRequest(request);
+  void _sendMergeSortRequest(MergeSortRequest request) => _worker.sendRequest(request);
 
   //todo: changing the view type while fetching the list will not fetch all files
   bool setSortConfig(SortConfig sortConfig) {
@@ -225,9 +221,11 @@ class FileListLocalManager {
   void initState() {
     updateFilesAndFolders();
 
-    _updatedMappingPreferenceCommandSubscription =
-        getIt.get<MappingManager>().mappingUpdatedCommand.listen(
-      (value) {
+    _updatedMappingPreferenceCommandSubscription = getIt
+        .get<MappingManager>()
+        .mappingUpdatedCommand
+        .listen(
+          (value) {
         // currently local file is not checked when comparing two NcFiles
         // thats why we have to clear the entire list and repopulate it
         // otherwise availability icons will not be refreshed
@@ -276,8 +274,26 @@ class FileListLocalManager {
   }
 
   Future<void> removeAll() async {
-    filesChangedCommand(filesChangedCommand.lastResult!..removeAll());
+    filesChangedCommand(filesChangedCommand.lastResult!
+      ..removeAll());
   }
+
+  bool isAllSelected() {
+    final hasSelectedFolders = this.hasSelectedFolders;
+    final hasSelectedFiles = this.hasSelectedFiles;
+
+    if (hasSelectedFiles && hasSelectedFolders) {
+      return selected.length == sorted.length;
+    }
+
+    if (hasSelectedFiles) {
+      return selected.length == sorted.files.length;
+    }
+
+    return selected.length == sorted.folders.length;
+  }
+
+  Future<void> toggleSelect() => isAllSelected() ? deselectAll() : selectAll();
 
   Future<void> deselectAll() async {
     final fileManager = getIt.get<FileManager>();
@@ -291,51 +307,75 @@ class FileListLocalManager {
 
   Future<void> selectAll() async {
     final fileManager = getIt.get<FileManager>();
-    selected = [];
+    final hasSelectedFolders = this.hasSelectedFolders;
+    final hasSelectedFiles = this.hasSelectedFiles;
     final sorted = filesChangedCommand.lastResult;
-    for (final file in sorted!.files) {
+    selected = [];
+    if (hasSelectedFiles) {
+      selected.addAll(sorted!.files);
+    }
+
+    if (hasSelectedFolders) {
+      selected.addAll(sorted!.folders);
+    }
+
+    for (final file in selected) {
       file.selected = true;
-      selected.add(file);
       fileManager.updateImageCommand(file);
     }
+
     selectionChangedCommand(selected);
   }
 
   Future<bool> deleteSelected({required bool local}) =>
-      _executeActionForSelection(DeleteFilesRequest(
-        key: managerKey,
-        files: selected,
-        local: local,
-        sourceDir: uri,
-      ));
+      _executeActionForSelection(
+        DeleteFilesRequest(
+          key: managerKey,
+          files: selected,
+          local: local,
+          sourceDir: uri,
+        ),
+      );
+
+  Future<bool> favoriteSelected() =>
+      _executeActionForSelection(
+        FavoriteFilesRequest(
+          key: managerKey,
+          files: selected,
+          sourceDir: uri,
+        ),
+      );
 
   Future<bool> copySelected(Uri destination, {bool overwrite = false}) =>
-      _executeActionForSelection(DestinationActionFilesRequest(
-        key: managerKey,
-        files: selected,
-        destination: destination,
-        overwrite: overwrite,
-        sourceDir: uri,
-      ));
+      _executeActionForSelection(
+        DestinationActionFilesRequest(
+          key: managerKey,
+          files: selected,
+          destination: destination,
+          overwrite: overwrite,
+          sourceDir: uri,
+        ),
+      );
 
   Future<bool> moveSelected(Uri destination, {bool overwrite = false}) =>
-      _executeActionForSelection(DestinationActionFilesRequest(
-        key: managerKey,
-        files: selected,
-        destination: destination,
-        action: DestinationAction.move,
-        overwrite: overwrite,
-        sourceDir: uri,
-      ));
+      _executeActionForSelection(
+        DestinationActionFilesRequest(
+          key: managerKey,
+          files: selected,
+          destination: destination,
+          action: DestinationAction.move,
+          overwrite: overwrite,
+          sourceDir: uri,
+        ),
+      );
 
   Future<bool> _executeActionForSelection(FilesActionRequest action) async {
     final Completer<bool> jobDone = Completer();
 
     _fileManager.filesActionCommand(action);
 
-    final StreamSubscription actionSub = _fileManager.filesActionDoneCommand
-        .where((event) => event.key == managerKey)
-        .listen((event) {
+    final StreamSubscription actionSub =
+    _fileManager.filesActionDoneCommand.where((event) => event.key == managerKey).listen((event) {
       jobDone.complete(true);
 
       _fileManager.fetchFileListCommand(FileListRequest(
@@ -345,9 +385,7 @@ class FileListLocalManager {
       ));
     });
 
-    return jobDone.future
-        .whenComplete(() => actionSub.cancel())
-        .whenComplete(() => deselectAll());
+    return jobDone.future.whenComplete(() => actionSub.cancel()).whenComplete(() => deselectAll());
   }
 
   void cancelSelectionAction() {
@@ -355,4 +393,16 @@ class FileListLocalManager {
   }
 
   bool get isRemoteUri => getIt.get<NextCloudService>().isUriOfService(uri);
+
+  bool get hasSelectedFolders =>
+      selected
+          .where((e) => e.isDirectory)
+          .firstOrNull
+          ?.isDirectory ?? false;
+
+  bool get hasSelectedFiles =>
+      !(selected
+          .where((e) => !e.isDirectory)
+          .firstOrNull
+          ?.isDirectory ?? true);
 }

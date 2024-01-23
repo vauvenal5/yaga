@@ -16,4 +16,6 @@ abstract class SortedFileList<T extends SortedFileList<T>> {
   void removeAll();
 
   SortedFileList<T> applyFilter(bool Function(NcFile) filter);
+
+  int get length => files.length + folders.length;
 }

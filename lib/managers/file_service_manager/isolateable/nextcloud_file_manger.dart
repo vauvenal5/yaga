@@ -13,6 +13,7 @@ import 'package:yaga/model/preview_fetch_meta.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
+import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/logger.dart';
 import 'package:yaga/utils/ncfile_stream_extensions.dart';
 
@@ -243,7 +244,7 @@ class NextcloudFileManager extends NextcloudBackgroundFileManager
         if (await _mappingManager.isSyncDelete(file.uri)) {
           deleteLocalFile(file);
         } else {
-          fileManager.updateFileList(file);
+          fileManager.fileUpdateMessage(FileUpdateMsg("", file));
         }
       }
     });

@@ -1,0 +1,3 @@
+- favorites can be set and removed from app
+- reworked select all to smart select
+- some code clean up

@@ -20,22 +20,10 @@ import 'package:yaga/utils/forground_worker/messages/sort_request.dart';
 import 'package:yaga/utils/ncfile_stream_extensions.dart';
 
 class FileManager extends FileManagerBase {
-  RxCommand<DownloadFileRequest, DownloadFileRequest> downloadImageCommand =
-      RxCommand.createSync((param) => param);
-
-  RxCommand<FileListRequest, FileListRequest> fetchFileListCommand =
-      RxCommand.createSync((param) => param);
-
-  RxCommand<SortRequest, SortRequest> sortFilesListCommand =
-      RxCommand.createSync((param) => param);
-
-  RxCommand<FilesActionRequest, FilesActionRequest> filesActionCommand =
-      RxCommand.createSync((param) => param);
-  RxCommand<FilesActionDone, FilesActionDone> filesActionDoneCommand =
-      RxCommand.createSync((param) => param);
-
-  RxCommand<FileUpdateMsg, FileUpdateMsg> fileUpdateMessage =
-      RxCommand.createSync((param) => param);
+  RxCommand<DownloadFileRequest, DownloadFileRequest> downloadImageCommand = RxCommand.createSync((param) => param);
+  RxCommand<FileListRequest, FileListRequest> fetchFileListCommand = RxCommand.createSync((param) => param);
+  RxCommand<SortRequest, SortRequest> sortFilesListCommand = RxCommand.createSync((param) => param);
+  RxCommand<FilesActionRequest, FilesActionRequest> filesActionCommand = RxCommand.createSync((param) => param);
 
   final MediaFileManager _mediaFileManager;
   final SharedPreferencesService _sharedPreferencesService;
@@ -68,9 +56,7 @@ class FileManager extends FileManagerBase {
         .where((event) => event.sourceDir.scheme == _mediaFileManager.scheme)
         .listen(_handleLocalDeleteRequest);
 
-    filesActionCommand
-        .where((event) => event.sourceDir.scheme != _mediaFileManager.scheme)
-        .listen(_handleFilesAction);
+    filesActionCommand.where((event) => event.sourceDir.scheme != _mediaFileManager.scheme).listen(_handleFilesAction);
 
     //todo: re-enable when copy/move support is added
     // fileActionCommand
@@ -99,8 +85,7 @@ class FileManager extends FileManagerBase {
         fileUpdateMessage(FileUpdateMsg("", file));
       }
     }).whenComplete(
-      () => filesActionDoneCommand(
-          FilesActionDone(request.key, request.sourceDir)),
+      () => filesActionDoneCommand(FilesActionDone(request.key, request.sourceDir)),
     );
   }
 
@@ -111,18 +96,14 @@ class FileManager extends FileManagerBase {
         )
         .value;
 
-    useBackground
-        ? _backgroundWorker.sendRequest(request)
-        : _foregroundWorker.sendRequest(request);
+    useBackground ? _backgroundWorker.sendRequest(request) : _foregroundWorker.sendRequest(request);
   }
 
   void _handleDownload(DownloadFileRequest request) async {
     final NcFile ncFile = request.file;
 
     // if file exists locally and download is not forced then load the local file
-    if (!request.forceDownload &&
-        ncFile.localFile != null &&
-        await ncFile.localFile!.file.exists()) {
+    if (!request.forceDownload && ncFile.localFile != null && await ncFile.localFile!.file.exists()) {
       ncFile.localFile!.exists = true;
       //todo: why are we directly reading the file in here and not in the service?
       fetchedFileCommand(

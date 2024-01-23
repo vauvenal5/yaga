@@ -19,7 +19,9 @@ import 'package:yaga/utils/forground_worker/messages/download_file_request.dart'
 import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/delete_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/destination_action_files_request.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/favorite_files_request.dart';
 import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_request.dart';
 import 'package:yaga/utils/forground_worker/messages/image_update_msg.dart';
 import 'package:yaga/utils/forground_worker/messages/message.dart';
 import 'package:yaga/utils/logger.dart';
@@ -34,13 +36,12 @@ class BackgroundWorker {
 
   Completer<BackgroundWorker> _isolateReady = Completer<BackgroundWorker>();
 
-  final RxCommand<Message, Message> isolateResponseCommand =
-      RxCommand.createSync((param) => param);
+  final RxCommand<Message, Message> isolateResponseCommand = RxCommand.createSync((param) => param);
 
   BackgroundWorker(this._nextCloudManager, this._selfSignedCertHandler);
 
   Future<BackgroundWorker> init() async {
-    if(Platform.isAndroid) {
+    if (Platform.isAndroid) {
       await Permission.notification.request();
       await Permission.scheduleExactAlarm.request();
       await Permission.photos.request();
@@ -80,7 +81,7 @@ class BackgroundWorker {
               isolateResponseCommand(FilesActionDone.fromJson(json));
               break;
             default:
-            //todo: handle error
+              //todo: handle error
               return;
           }
         }
@@ -97,7 +98,7 @@ class BackgroundWorker {
       });
 
       service.on(BackgroundCommands.initDone).listen(
-            (event) {
+        (event) {
           _logger.info("Init Done Message");
           _isolateReady.complete(this);
         },
@@ -171,8 +172,18 @@ class BackgroundWorker {
       final channel = BackgroundChannel(ser);
       setupBackgroundServiceLocator(init, channel);
       getIt.allReady().then(
-            (value) => service.invoke(BackgroundCommands.initDone),
-          );
+        (_) {
+          getIt.get<FileActionManager>().filesActionDoneCommand.listen(
+                (value) => service.invoke(BackgroundCommands.workerToMain, value.toJson()),
+              );
+
+          getIt.get<FileActionManager>().fileUpdateMessage.listen(
+                (value) => service.invoke(BackgroundCommands.workerToMain, value.toJson()),
+              );
+
+          service.invoke(BackgroundCommands.initDone);
+        },
+      );
     });
 
     service.on(BackgroundCommands.mainToWorker).listen((event) {
@@ -186,16 +197,24 @@ class BackgroundWorker {
       switch (type) {
         case DownloadFileRequest.jsonTypeConst:
           _handleDownload(ser, DownloadFileRequest.fromJson(event));
-          break;
         case DestinationActionFilesRequest.jsonTypeConst:
-          _handleDestinationAction(
+          _handleFileAction(
             ser,
             DestinationActionFilesRequest.fromJson(event),
+            getIt.get<FileActionManager>().copyMoveRequest,
           );
-          break;
         case DeleteFilesRequest.jsonTypeConst:
-          _handleDelete(ser, DeleteFilesRequest.fromJson(event));
-          break;
+          _handleFileAction(
+            ser,
+            DeleteFilesRequest.fromJson(event),
+            getIt.get<FileActionManager>().deleteFiles,
+          );
+        case FavoriteFilesRequest.jsonTypeConst:
+          _handleFileAction(
+            ser,
+            FavoriteFilesRequest.fromJson(event),
+            (msg) => getIt.get<FileActionManager>().toggleFavorites(msg),
+          );
         default:
           //todo: log error
           //todo: check for stop condition
@@ -204,6 +223,21 @@ class BackgroundWorker {
     });
 
     service.invoke(BackgroundCommands.started);
+  }
+
+  static Future<void> _handleFileAction<T extends FilesActionRequest>(
+    AndroidServiceInstance service,
+    T message,
+    Future<void> Function(T) handler,
+  ) async {
+    //todo: not unique enough; just temp
+    getIt.get<WorkTracker>().activeTasks[message.sourceDir.toString()] = message;
+    return handler(message).whenComplete(
+      () => _checkAndStopService(
+        service,
+        message.sourceDir.toString(),
+      ),
+    );
   }
 
   static Future<void> _checkAndStopService(
@@ -218,55 +252,6 @@ class BackgroundWorker {
     }
   }
 
-  static Future<void> _handleDelete(
-    AndroidServiceInstance service,
-    DeleteFilesRequest message,
-  ) async {
-    //todo: not unique enough; just temp
-    getIt.get<WorkTracker>().activeTasks[message.sourceDir.toString()] =
-        message;
-    getIt
-        .get<FileActionManager>()
-        .deleteFiles(message.files, local: message.local)
-        .whenComplete(
-          () => service.invoke(
-            BackgroundCommands.workerToMain,
-            FilesActionDone(message.key, message.sourceDir).toJson(),
-          ),
-        )
-        .whenComplete(
-          () => _checkAndStopService(
-            service,
-            message.sourceDir.toString(),
-          ),
-        );
-  }
-
-  static Future<void> _handleDestinationAction(
-    AndroidServiceInstance service,
-    DestinationActionFilesRequest message,
-  ) async {
-    //todo: not unique enough; just tmp solution
-    getIt.get<WorkTracker>().activeTasks[message.destination.toString()] =
-        message;
-
-    final action = getIt.get<FileActionManager>().copyMoveRequest(message);
-
-    action
-        .whenComplete(
-          () => service.invoke(
-            BackgroundCommands.workerToMain,
-            FilesActionDone(message.key, message.destination).toJson(),
-          ),
-        )
-        .whenComplete(
-          () => _checkAndStopService(
-            service,
-            message.destination.toString(),
-          ),
-        );
-  }
-
   static Future<void> _handleDownload(
     AndroidServiceInstance service,
     DownloadFileRequest request,
@@ -275,21 +260,15 @@ class BackgroundWorker {
 
     await _updateNotification(service);
 
-    getIt.get<FileActionManager>()
+    return getIt
+        .get<FileActionManager>()
         .downloadFile(request.file, persist: request.persist)
-        .then((value) async {
-      await _handleResult(
-        service: service,
-        request: request,
-        success: true,
-      );
-    }).catchError((error) async {
-      await _handleResult(
-        service: service,
-        request: request,
-        success: false,
-      );
-    });
+        .then((value) => _handleResult(
+              service: service,
+              request: request,
+              success: true,
+            ))
+        .onError((error, stackTrace) => _handleResult(service: service, request: request, success: false));
   }
 
   static Future<void> _handleResult({
@@ -305,7 +284,7 @@ class BackgroundWorker {
       ).toJson(),
     );
     await _updateNotification(service);
-    _checkAndStopService(service, request.file.uri.toString());
+    return _checkAndStopService(service, request.file.uri.toString());
   }
 
   static Future<void> _updateNotification(

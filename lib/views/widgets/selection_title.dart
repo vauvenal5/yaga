@@ -16,7 +16,7 @@ class SelectionTitle extends StatelessWidget {
           return defaultTitel!;
         }
         return Text(
-          "${_fileListLocalManager.selected.length}/${_fileListLocalManager.sorted.files.length}",
+          "${_fileListLocalManager.selected.length}/${_fileListLocalManager.sorted.length}",
           overflow: TextOverflow.fade,
         );
       },

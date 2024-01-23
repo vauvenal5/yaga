@@ -87,19 +87,22 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
         return viewConfig.onFileTap!(files, index);
       }
     }
+    
+    dynamic onFolderTap(NcFile folder) {
+      if (fileListLocalManager.isInSelectionMode) {
+        return fileListLocalManager.selectFileCommand(folder);
+      }
+
+      if (viewConfig.onFolderTap != null) {
+        return viewConfig.onFolderTap!(folder);
+      }      
+    }
 
     return _DirectoryScreenState._internal(
       fileListLocalManager,
       ViewConfiguration.fromViewConfig(
         viewConfig: viewConfig,
-        onFolderTap: (folder) {
-          if (fileListLocalManager.isInSelectionMode ||
-              viewConfig.onFolderTap == null) {
-            return;
-          }
-
-          return viewConfig.onFolderTap!(folder);
-        },
+        onFolderTap: onFolderTap,
         onSelect: getIt.get<IntentService>().isOpenForSelect
             ? onFileTap
             : (files, index) =>

@@ -112,6 +112,10 @@ class RemoteImageWidget extends StatelessWidget {
       ]),
       initialData: _file,
       builder: (context, snapshot) {
+        if(_file.favorite != snapshot.data!.favorite) {
+          _file.favorite = snapshot.data!.favorite;
+        }
+
         if (_file.previewFile != null && _file.previewFile!.exists) {
           return _createIconOverlay(
             context,

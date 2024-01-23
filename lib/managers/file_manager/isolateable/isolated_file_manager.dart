@@ -31,9 +31,6 @@ class IsolatedFileManager extends FileActionManager
   ) async {
     //todo: we probably can improve the capsuling of front end and foreground_worker communication further
     //--> check if it is possible to completely hide communications in bridges
-    updateFileList.listen(
-      (value) => isolateToMain.send(FileUpdateMsg("", value)),
-    );
 
     updateImageCommand.listen(
       (file) => isolateToMain.send(ImageUpdateMsg("", file)),

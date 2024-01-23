@@ -1,11 +1,12 @@
 import 'dart:io';
 
+import 'package:yaga/managers/file_service_manager/favorite_not_supported_mixin.dart';
 import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 
 import 'package:yaga/services/media_file_service.dart';
 
-class MediaFileManager implements FileServiceManager {
+class MediaFileManager with FavoriteNotSupportedMixin implements FileServiceManager {
   final MediaFileService _mediaFileService;
 
   MediaFileManager(this._mediaFileService);

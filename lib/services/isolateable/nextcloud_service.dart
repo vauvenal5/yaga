@@ -253,7 +253,7 @@ class NextCloudService
             set: WebDavProp(ocfavorite: file.favorite ? 0 : 1),
           )
           .catchError(_logAndRethrow)
-          .then((_) => file) ??
+          .then((_) => file..favorite = !file.favorite) ??
       Future.error("Not logged in!");
 
   void _logError(dynamic err, {StackTrace? stacktrace}) {

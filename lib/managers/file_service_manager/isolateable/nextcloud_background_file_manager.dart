@@ -4,6 +4,7 @@ import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/nextcloud_service.dart';
+import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/logger.dart';
 
 class NextcloudBackgroundFileManager implements FileServiceManager {
@@ -37,7 +38,7 @@ class NextcloudBackgroundFileManager implements FileServiceManager {
         .deleteFile(file)
         .then((value) => deleteLocalFile(file))
         .then((file) {
-      fileManager.updateFileList(file);
+      fileManager.fileUpdateMessage(FileUpdateMsg("", file));
       return file;
     });
   }
@@ -81,6 +82,9 @@ class NextcloudBackgroundFileManager implements FileServiceManager {
           // technical requirements:
           // * MappingManger has to be refactored to be usable in background
           .then((value) => deleteLocalFile(value));
+
+  @override
+  Future<NcFile> toggleFavorite(NcFile file) => nextCloudService.toggleFavorite(file);
 
   @override
   String get scheme => nextCloudService.scheme;

@@ -4,18 +4,21 @@ import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/fetched_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/utils/forground_worker/messages/file_list_message.dart';
+import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
+import 'package:yaga/utils/forground_worker/messages/files_action/files_action_done.dart';
 
 /// File Managers provide files functions, i.e. copy/delete/move/download
 /// with context of required actions over multiple services
 abstract class FileManagerBase {
-  RxCommand<NcFile, NcFile> updateFileList =
-      RxCommand.createSync((param) => param);
-  RxCommand<NcFile, NcFile> updateImageCommand =
-      RxCommand.createSync((param) => param);
+  RxCommand<NcFile, NcFile> updateImageCommand = RxCommand.createSync((param) => param);
   late RxCommand<FetchedFile, FetchedFile> fetchedFileCommand;
+
   //todo: Background: this should be moved out of here because it does not concern FileActionsManager
-  RxCommand<FileListMessage, FileListMessage> updateFilesCommand =
-      RxCommand.createSync((param) => param);
+  RxCommand<FileListMessage, FileListMessage> updateFilesCommand = RxCommand.createSync((param) => param);
+
+  // responses
+  RxCommand<FilesActionDone, FilesActionDone> filesActionDoneCommand = RxCommand.createSync((param) => param);
+  RxCommand<FileUpdateMsg, FileUpdateMsg> fileUpdateMessage = RxCommand.createSync((param) => param);
 
   @protected
   Map<String, FileServiceManager> fileServiceManagers = {};

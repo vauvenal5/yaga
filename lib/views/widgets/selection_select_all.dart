@@ -10,10 +10,7 @@ class SelectionSelectAll extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: const Icon(Icons.select_all),
-      onPressed: () => _fileListLocalManager.selected.length <
-              _fileListLocalManager.sorted.files.length
-          ? _fileListLocalManager.selectAll()
-          : _fileListLocalManager.deselectAll(),
+      onPressed: _fileListLocalManager.toggleSelect,
     );
   }
 }

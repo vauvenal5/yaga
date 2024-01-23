@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yaga/model/sorted_file_folder_list.dart';
-import 'package:yaga/views/widgets/folder_icon.dart';
 import 'package:yaga/views/widgets/image_views/utils/view_configuration.dart';
+import 'package:yaga/views/widgets/remote_folder_widget.dart';
 import 'package:yaga/views/widgets/remote_image_widget.dart';
 
 class NcListView extends StatelessWidget {
@@ -26,13 +26,7 @@ class NcListView extends StatelessWidget {
       slivers.add(
         SliverList.separated(
           separatorBuilder: (context, index) => divider,
-          itemBuilder: (context, index) => ListTile(
-            leading: FolderIcon(dir: sorted.folders[index]),
-            // isThreeLine: false,
-            title: Text(sorted.folders[index].name),
-            //todo: move this check into getter of viewConfig
-            onTap: () => viewConfig.onFolderTap?.call(sorted.folders[index]),
-          ),
+          itemBuilder: (context, index) => RemoteFolderWidget(sorted: sorted, index: index, viewConfig: viewConfig),
           itemCount: sorted.folders.length,
         ),
       );

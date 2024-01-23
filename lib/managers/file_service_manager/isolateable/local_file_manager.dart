@@ -2,19 +2,21 @@ import 'dart:io';
 
 import 'package:mime/mime.dart';
 import 'package:yaga/managers/file_manager/file_manager_base.dart';
+import 'package:yaga/managers/file_service_manager/favorite_not_supported_mixin.dart';
 import 'package:yaga/managers/file_service_manager/file_service_manager.dart';
 import 'package:yaga/model/local_file.dart';
 import 'package:yaga/model/nc_file.dart';
 import 'package:yaga/services/isolateable/local_file_service.dart';
 import 'package:yaga/services/isolateable/system_location_service.dart';
 import 'package:yaga/utils/forground_worker/isolateable.dart';
+import 'package:yaga/utils/forground_worker/messages/file_update_msg.dart';
 import 'package:yaga/utils/ncfile_stream_extensions.dart';
 import 'package:yaga/utils/uri_utils.dart';
 import 'package:rxdart/rxdart.dart';
 
 //todo: remove? this file manage is currently not used since we relay on MediaStore API for local images
 class LocalFileManager
-    with Isolateable<LocalFileManager>
+    with Isolateable<LocalFileManager>, FavoriteNotSupportedMixin
     implements FileServiceManager {
   final FileManagerBase _fileManager;
   final LocalFileService _localFileService;
@@ -88,7 +90,7 @@ class LocalFileManager
   @override
   Future<NcFile> deleteFile(NcFile file, {required bool local}) async {
     _localFileService.deleteFile(file.localFile!.file);
-    _fileManager.updateFileList(file);
+    _fileManager.fileUpdateMessage(FileUpdateMsg("", file));
     return file;
   }
 

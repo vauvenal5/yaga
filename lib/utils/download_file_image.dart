@@ -47,20 +47,18 @@ class DownloadFileImage extends FileImage {
       FileImage key, {
         required _SimpleDecoderCallback decode,
       }) async {
-    await localFileAvailable;
+    final fetchedFile = await localFileAvailable;
     assert(key == this);
     // TODO(jonahwilliams): making this sync caused test failures that seem to
     // indicate that we can fail to call evict unless at least one await has
     // occurred in the test.
     // https://github.com/flutter/flutter/issues/113044
-    final int lengthInBytes = await file.length();
+    final int lengthInBytes = fetchedFile.data.length;
     if (lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
-    return (file.runtimeType == File)
-        ? decode(await ui.ImmutableBuffer.fromFilePath(file.path))
-        : decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
+    return decode(await ui.ImmutableBuffer.fromUint8List(fetchedFile.data));
   }
 }

@@ -1,0 +1,3 @@
+- add download button to image view
+- add favorite button to image view
+- add keybindings for linux (left/right arrow --- navigate, page up/down --- navigate, f --- Favorite)

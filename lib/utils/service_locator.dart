@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:yaga/managers/file_manager/file_manager.dart';
 import 'package:yaga/managers/file_manager/isolateable/file_action_manager.dart';
 import 'package:yaga/managers/file_manager/isolateable/isolated_file_manager.dart';
+import 'package:yaga/managers/file_service_manager/isolateable/local_file_manager.dart';
 import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_background_file_manager.dart';
 import 'package:yaga/managers/file_service_manager/isolateable/nextcloud_file_manger.dart';
 import 'package:yaga/managers/file_service_manager/media_file_manager.dart';
@@ -261,6 +262,13 @@ void setupIsolatedServiceLocator(
           await getIt.getAsync<NextCloudService>(),
           await getIt.getAsync<SystemLocationService>())
       .initIsolated(init, isolateToMain));
+
+  getIt.registerSingletonAsync<LocalFileManager>(() async =>
+      LocalFileManager(
+          await getIt.getAsync<IsolatedFileManager>(),
+          await getIt.getAsync<LocalFileService>(),
+          await getIt.getAsync<SystemLocationService>(),
+      ).initIsolated(init, isolateToMain));
 
   getIt.registerSingletonAsync<NextcloudFileManager>(() async =>
       NextcloudFileManager(

@@ -1,0 +1,39 @@
+name: Build Android app
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
+
+      # This workflow builds a downloadable artifact only; it does not publish it.
+      - name: Build Android app bundle
+        run: flutter build appbundle --release
+
+      - name: Upload Android app bundle
+        uses: actions/upload-artifact@v6
+        with:
+          name: yaga-android-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error

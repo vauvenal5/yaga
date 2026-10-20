@@ -1,0 +1,88 @@
+name: Create GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: Mark the GitHub release as a pre-release
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    # This environment supplies the Android signing secrets to the job.
+    environment: github
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Java
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version-file: .fvmrc
+          # Cache the Flutter SDK and Dart pub packages between workflow runs.
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
+
+      # Materialize ignored signing files only for this ephemeral CI build.
+      - name: Prepare Android signing
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          UPLOAD_KEYSTORE_JKS_B64: ${{ secrets.UPLOAD_KEYSTORE_JKS_B64 }}
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+        run: |
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          test -n "$UPLOAD_KEYSTORE_JKS_B64"
+          test -n "$UPLOAD_KEYSTORE_PASSWORD"
+          printf '%s' "$UPLOAD_KEYSTORE_JKS_B64" | base64 --decode > android/upload-keystore.jks
+          {
+            printf 'storeFile=upload-keystore.jks\n'
+            printf 'storePassword=%s\n' "$UPLOAD_KEYSTORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+          } > android/key.properties
+          chmod 600 android/upload-keystore.jks android/key.properties
+
+      - name: Build Android app bundle
+        run: flutter build appbundle --release
+
+      # Remove private signing material even when an earlier step fails.
+      - name: Clean up Android signing files
+        if: ${{ always() }}
+        run: rm -f android/key.properties android/upload-keystore.jks
+
+      # Publish the bundle directly from the build job without an intermediate artifact.
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          VERSION="$(sed -n 's/^version: \([^+ ]*\).*/\1/p' pubspec.yaml)"
+          test -n "$VERSION"
+          # Keep tags stable and mark beta builds in the GitHub release title.
+          TAG="v$VERSION"
+          TITLE="$TAG"
+          if [ "$PRERELEASE" = "true" ]; then
+            TITLE="$TITLE Beta"
+          fi
+          gh release create "$TAG" \
+            build/app/outputs/bundle/release/app-release.aab \
+            --target "$GITHUB_SHA" \
+            --title "$TITLE" \
+            --generate-notes \
+            --prerelease="$PRERELEASE"

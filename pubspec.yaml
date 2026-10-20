@@ -1,5 +1,5 @@
 name: yaga
-description: "A new Flutter project."
+description: "A Nextcloud first gallery app."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.8.3+8003
+version: 0.81.0+8100
 
 environment:
   sdk: ^3.8.1
@@ -35,12 +35,12 @@ dependencies:
     git:
       url: https://github.com/vauvenal5/neon
       path: packages/neon_framework
-      ref: 211f38e2013f428cb3f7b830af5f2d169fc625f4
+      ref: 85962bedca769849c1b2895f8b8c5151ca0780a4
   photos_app:
     git:
       url: https://github.com/vauvenal5/neon
       path: packages/neon_framework/packages/photos_app
-      ref: 211f38e2013f428cb3f7b830af5f2d169fc625f4
+      ref: 85962bedca769849c1b2895f8b8c5151ca0780a4
   vector_graphics: any
 
 dev_dependencies:
@@ -52,7 +52,12 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  # flutter_lints: ^5.0.0
+  neon_lints:
+    git:
+      url: https://github.com/vauvenal5/neon
+      path: packages/neon_lints
+      ref: 85962bedca769849c1b2895f8b8c5151ca0780a4
 
 dependency_overrides:
   share_plus_platform_interface:

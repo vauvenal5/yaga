@@ -52,7 +52,7 @@ jobs:
           } > android/key.properties
           chmod 600 android/upload-keystore.jks android/key.properties
 
-      # This workflow builds a downloadable artifact only; it does not publish it.
+      # Upload the bundle so the dependent release job can publish the same build.
       - name: Build Android app bundle
         run: flutter build appbundle --release
 
@@ -67,3 +67,34 @@ jobs:
       - name: Clean up Android signing files
         if: ${{ always() }}
         run: rm -f android/key.properties android/upload-keystore.jks
+
+  # The github environment can gate publication after each successful build.
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: github
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Check out the built commit
+        uses: actions/checkout@v6.1.0
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Download Android app bundle
+        uses: actions/download-artifact@v6.0.0
+        with:
+          name: yaga-android-release-aab
+          path: release-assets
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(sed -n 's/^version: \([^+ ]*\).*/\1/p' pubspec.yaml)"
+          test -n "$VERSION"
+          gh release create "v$VERSION" \
+            release-assets/app-release.aab \
+            --target "$GITHUB_SHA" \
+            --generate-notes

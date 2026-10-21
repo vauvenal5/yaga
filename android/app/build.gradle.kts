@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -7,7 +9,7 @@ plugins {
 
 // Keep release credentials in the ignored local properties file, not in this build script.
 val signingPropertiesFile = rootProject.file("key.properties")
-val signingProperties = java.util.Properties().apply {
+val signingProperties = Properties().apply {
     if (signingPropertiesFile.exists()) {
         signingPropertiesFile.inputStream().use { load(it) }
     }

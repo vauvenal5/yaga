@@ -5,6 +5,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Keep release credentials in the ignored local properties file, not in this build script.
+val signingPropertiesFile = rootProject.file("key.properties")
+val signingProperties = java.util.Properties().apply {
+    if (signingPropertiesFile.exists()) {
+        signingPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
 android {
     namespace = "com.github.vauvenal5.yaga"
 //    compileSdk = flutter.compileSdkVersion
@@ -33,11 +41,23 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (signingPropertiesFile.exists()) {
+                storeFile = rootProject.file(signingProperties.getProperty("storeFile"))
+                storePassword = signingProperties.getProperty("storePassword")
+                keyAlias = signingProperties.getProperty("keyAlias")
+                keyPassword = signingProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Keep local release runs working while CI uses the configured upload key.
+            signingConfig = signingConfigs.getByName(
+                if (signingPropertiesFile.exists()) "release" else "debug",
+            )
         }
     }
 }

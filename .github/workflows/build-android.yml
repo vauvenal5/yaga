@@ -9,6 +9,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # This environment supplies the Android signing secrets to the job.
+    environment: release
     steps:
       - name: Check out repository
         uses: actions/checkout@v6.1.0
@@ -29,6 +31,27 @@ jobs:
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile
 
+      # Materialize ignored signing files only for this ephemeral CI build.
+      - name: Prepare Android signing
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          UPLOAD_KEYSTORE_JKS_B64: ${{ secrets.UPLOAD_KEYSTORE_JKS_B64 }}
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+        run: |
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          test -n "$UPLOAD_KEYSTORE_JKS_B64"
+          test -n "$UPLOAD_KEYSTORE_PASSWORD"
+          printf '%s' "$UPLOAD_KEYSTORE_JKS_B64" | base64 --decode > android/upload-keystore.jks
+          {
+            printf 'storeFile=upload-keystore.jks\n'
+            printf 'storePassword=%s\n' "$UPLOAD_KEYSTORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+          } > android/key.properties
+          chmod 600 android/upload-keystore.jks android/key.properties
+
       # This workflow builds a downloadable artifact only; it does not publish it.
       - name: Build Android app bundle
         run: flutter build appbundle --release
@@ -39,3 +62,8 @@ jobs:
           name: yaga-android-release-aab
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
+
+      # Remove private signing material even when an earlier step fails.
+      - name: Clean up Android signing files
+        if: ${{ always() }}
+        run: rm -f android/key.properties android/upload-keystore.jks

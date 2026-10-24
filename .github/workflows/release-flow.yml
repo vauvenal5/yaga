@@ -2,6 +2,12 @@ name: Release Flow
 
 on:
   workflow_dispatch:
+    inputs:
+      prerelease:
+        description: Mark the GitHub release as a prerelease
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -91,10 +97,19 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
           VERSION="$(sed -n 's/^version: \([^+ ]*\).*/\1/p' pubspec.yaml)"
           test -n "$VERSION"
-          gh release create "v$VERSION" \
+          # Keep tags stable and mark beta builds in the GitHub release title.
+          TAG="v$VERSION"
+          TITLE="$TAG"
+          if [ "$PRERELEASE" = "true" ]; then
+            TITLE="$TITLE Beta"
+          fi
+          gh release create "$TAG" \
             release-assets/app-release.aab \
             --target "$GITHUB_SHA" \
-            --generate-notes
+            --title "$TITLE" \
+            --generate-notes \
+            --prerelease="$PRERELEASE"

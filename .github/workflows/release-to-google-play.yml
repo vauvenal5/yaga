@@ -1,0 +1,65 @@
+name: Upload to Google Play
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Enter a release tag, or use latest for the latest GitHub release
+        required: true
+        default: latest
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  upload-to-google-play:
+    environment: google-play
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download assets from the selected release
+        id: download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          # Resolve latest through GitHub, while allowing a specific tag to be selected.
+          if [ "$RELEASE_TAG" = "latest" ]; then
+            RELEASE_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          else
+            gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json tagName >/dev/null
+          fi
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          mkdir release-assets
+          # Fetch only the AAB asset(s) needed for Play publishing.
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir release-assets --pattern '*.aab'
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json name,tagName,url
+
+      - name: Find the Android package to publish
+        id: package
+        run: |
+          # Accept only one AAB so an APK release asset cannot be published accidentally.
+          mapfile -t packages < <(find release-assets -maxdepth 1 -type f -name '*.aab' -print)
+          if [ "${#packages[@]}" -ne 1 ]; then
+            echo "Expected exactly one .aab release asset; found ${#packages[@]}." >&2
+            exit 1
+          fi
+          echo "path=${packages[0]}" >> "$GITHUB_OUTPUT"
+
+      # Use short-lived GitHub OIDC credentials instead of storing a service-account key.
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
+
+      - name: Publish to Google Play internal testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
+          packageName: com.github.vauvenal5.yaga
+          releaseFiles: ${{ steps.package.outputs.path }}
+          tracks: internal
+          status: completed

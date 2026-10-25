@@ -32,10 +32,45 @@ jobs:
             gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json tagName >/dev/null
           fi
           echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          RELEASE_URL="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json url --jq .url)"
+          echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
           mkdir release-assets
           # Fetch only the AAB asset(s) needed for Play publishing.
           gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir release-assets --pattern '*.aab'
           gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json name,tagName,url
+
+      - name: Create Google Play whatsnew from GitHub release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.download.outputs.release_tag }}
+          RELEASE_URL: ${{ steps.download.outputs.release_url }}
+        run: |
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > release-notes.md
+          mkdir -p play-whatsnew
+          # Keep highlight entries while removing GitHub-only headings and footer links.
+          {
+            printf '# %s\n\n' "$RELEASE_TAG"
+            awk '
+              /^#+[[:space:]]*🔥 Highlights[[:space:]]*$/ {
+                in_highlights = 1
+                next
+              }
+              in_highlights && /^#+[[:space:]]/ { exit }
+              in_highlights { print }
+            ' release-notes.md |
+              sed -E \
+                -e '/^\*\*Full Changelog\*\*:/d' \
+                -e 's/[[:space:]]+by[[:space:]]+[^[:space:]]+[[:space:]]+in[[:space:]]+(https?:\/\/[^[:space:]]*\/pull\/[0-9]+|#[0-9]+).*$//'
+            printf '\nFull Release-Notes: %s\n' "$RELEASE_URL"
+          } | awk 'NF { blank = 0; print; next } !blank { print; blank = 1 }' > play-whatsnew/whatsnew-en-US
+          test -s play-whatsnew/whatsnew-en-US
+          # Google Play limits each localized whatsnew entry to 500 Unicode characters.
+          CHAR_COUNT="$(LC_ALL=C.UTF-8 wc -m < play-whatsnew/whatsnew-en-US | tr -d '[:space:]')"
+          if [ "$CHAR_COUNT" -gt 500 ]; then
+            echo "Generated Google Play whatsnew is $CHAR_COUNT characters; the limit is 500." >&2
+            exit 1
+          fi
+          cat play-whatsnew/whatsnew-en-US
 
       - name: Find the Android package to publish
         id: package
@@ -62,5 +97,6 @@ jobs:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName: com.github.vauvenal5.yaga
           releaseFiles: ${{ steps.package.outputs.path }}
+          whatsNewDirectory: play-whatsnew
           tracks: internal
           status: completed

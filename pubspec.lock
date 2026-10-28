@@ -13,8 +13,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/neon_framework/packages/account_repository"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "0.1.0"
@@ -222,8 +222,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/cookie_store"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "0.1.0"
@@ -416,8 +416,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/neon_framework/packages/files_app"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "1.0.0"
@@ -685,8 +685,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/interceptor_http_client"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "0.1.0"
@@ -782,8 +782,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/neon_framework"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "1.0.0"
@@ -791,8 +791,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/neon_framework/packages/neon_http_client"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "0.1.0"
@@ -800,8 +800,8 @@ packages:
     dependency: "direct dev"
     description:
       path: "packages/neon_lints"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "1.0.0"
@@ -825,8 +825,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/neon_framework/packages/notifications_push_repository"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "0.1.0"
@@ -995,8 +995,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/neon_framework/packages/photos_app"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "1.0.0"
@@ -1211,8 +1211,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/neon_framework/packages/sort_box"
-      ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
-      resolved-ref: "85962bedca769849c1b2895f8b8c5151ca0780a4"
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
+      resolved-ref: b09607b6869678c8898b6eb98bee9d5013857263
       url: "https://github.com/vauvenal5/neon"
     source: git
     version: "1.0.0"

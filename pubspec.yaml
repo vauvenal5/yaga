@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.1+10001
+version: 1.0.2+10002
 
 environment:
   sdk: ^3.8.1
@@ -35,12 +35,12 @@ dependencies:
     git:
       url: https://github.com/vauvenal5/neon
       path: packages/neon_framework
-      ref: 85962bedca769849c1b2895f8b8c5151ca0780a4
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
   photos_app:
     git:
       url: https://github.com/vauvenal5/neon
       path: packages/neon_framework/packages/photos_app
-      ref: 85962bedca769849c1b2895f8b8c5151ca0780a4
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
   vector_graphics: any
 
 dev_dependencies:
@@ -57,7 +57,7 @@ dev_dependencies:
     git:
       url: https://github.com/vauvenal5/neon
       path: packages/neon_lints
-      ref: 85962bedca769849c1b2895f8b8c5151ca0780a4
+      ref: b09607b6869678c8898b6eb98bee9d5013857263
 
 dependency_overrides:
   share_plus_platform_interface:

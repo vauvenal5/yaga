@@ -1,0 +1,9 @@
+{{ $side := .Get "side" | default "left" }}
+<div class="docs-figure-text{{ if eq $side "right" }} docs-figure-text--image-right{{ end }}" style="--docs-figure-width: {{ .Get "width" | default "300" }}px">
+  <figure class="docs-figure-text__figure">
+    {{ printf "![%s](%s)" (.Get "alt") (.Get "src") | $.Page.RenderString }}
+  </figure>
+  <div class="docs-figure-text__content">
+    {{ .Inner | markdownify }}
+  </div>
+</div>

@@ -17,6 +17,7 @@ const branding = Branding(
     ),
   ),
   nameInsteadOfSearchBar: true,
+  docsURL: 'https://vauvenal5.github.io/yaga',
   sourceCodeURL: 'https://github.com/vauvenal5/yaga',
   issueTrackerURL: 'https://github.com/vauvenal5/yaga/issues',
   legalese: 'Copyright © 2026, vauvenal5\nUnder AGPLv3 license',

@@ -1,0 +1,47 @@
+baseURL: https://vauvenal5.github.io/yaga/
+locale: en-us
+title: Yaga
+params:
+  navbar:
+    displayTitle: true
+    displayLogo: true
+    # Use the project's Yaga logo alongside the site title.
+    logo:
+      path: images/logo_inverted.svg
+      width: 48
+      height: 48
+  page:
+    # full (100%), wide (90rem), normal (1280px)
+    width: wide
+  imageZoom:
+    enable: true
+  footer:
+    enable: true
+    displayCopyright: true
+    displayPoweredBy: true
+module:
+  mounts:
+    - source: static
+      target: static
+    # Publish the shared logo directly so docs need no duplicate asset.
+    - source: ../assets/logo_inverted.svg
+      target: static/images/logo_inverted.svg
+    # Use the app's square brand icon as Hextra's browser-tab favicon.
+    - source: ../assets/logo_inverted.svg
+      target: static/favicon.svg
+  imports:
+    - path: github.com/imfing/hextra
+menu:
+  main:
+    - name: Docs
+      pageRef: /docs
+      weight: 1
+    - name: GitHub
+      weight: 2
+      url: "https://github.com/vauvenal5/yaga"
+      params:
+        icon: github
+    - name: Search
+      weight: 3
+      params:
+        type: search

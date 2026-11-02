@@ -1,0 +1,81 @@
+/* Let the landing-page footer follow its hero instead of the viewport-height main area. */
+body:has(.hextra-feature-grid) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Fill leftover viewport space on short landing pages to keep the footer at the bottom. */
+body:has(.hextra-feature-grid) > .hextra-max-page-width {
+    flex: 1;
+    width: 100%;
+}
+
+body:has(.hextra-feature-grid) #content {
+    min-height: auto;
+}
+
+/* Keep the screenshot and its explanation side by side on wide documentation pages. */
+.docs-figure-text {
+    display: grid;
+    grid-template-columns: minmax(0, var(--docs-figure-width, 300px)) minmax(0, 1fr);
+    grid-template-areas: "image content";
+    gap: 1.5rem;
+    /* Match Hextra's normal first-paragraph spacing below a heading. */
+    padding-block: calc(var(--hx-spacing) * 6) 1rem;
+    align-items: start;
+}
+
+/* Allow the shortcode to swap the desktop column order without changing mobile flow. */
+.docs-figure-text--image-right {
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--docs-figure-width, 300px));
+    grid-template-areas: "content image";
+}
+
+.docs-figure-text__figure {
+    grid-area: image;
+    padding: 0.5rem;
+    border: 1px solid var(--hx-color-gray-200);
+    border-radius: 0.75rem;
+    /*background: var(--hx-color-gray-50);*/
+    /* Match Hextra cards by smoothly highlighting the frame border on hover. */
+    transition: border-color 200ms ease;
+}
+
+.docs-figure-text__figure:hover {
+    border-color: var(--hx-color-gray-300);
+}
+
+.dark .docs-figure-text__figure {
+    border-color: var(--hx-color-neutral-700);
+    /*background: var(--hx-color-neutral-800);*/
+}
+
+.dark .docs-figure-text__figure:hover {
+    border-color: var(--hx-color-neutral-600);
+}
+
+.docs-figure-text__figure p {
+    margin: 0;
+}
+
+.docs-figure-text__content {
+    grid-area: content;
+}
+
+.docs-figure-text__figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* Remove Hextra's default vertical image margins so the frame padding stays even. */
+    margin: 0;
+}
+
+@media (max-width: 767px) {
+    .docs-figure-text {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "image" "content";
+        margin-block-end: 1rem;
+        padding-block: calc(var(--hx-spacing) * 6) 0.75rem;
+    }
+}

@@ -57,10 +57,10 @@ android {
 
     buildTypes {
         release {
-            // Keep local release runs working while CI uses the configured upload key.
-            signingConfig = signingConfigs.getByName(
-                if (signingPropertiesFile.exists()) "release" else "debug",
-            )
+            // Leave release unsigned when no private key is supplied so F-Droid can sign the APK itself.
+            if (signingPropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 }

@@ -79,7 +79,8 @@ jobs:
             # Add the pre-release suffix so beta tags stay distinct from stable tags.
             TAG="$TAG-pre"
           fi
-          TITLE="$TAG"
+          # Keep the pre-release marker in the title instead of repeating the tag suffix.
+          TITLE="v$VERSION"
           if [ "$PRERELEASE" = "true" ]; then
             TITLE="$TITLE Beta"
           fi

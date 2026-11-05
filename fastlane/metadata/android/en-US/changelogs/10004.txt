@@ -1,0 +1,2 @@
+🔥 Highlights
+- Initialize project with Yaga setup based on Neon

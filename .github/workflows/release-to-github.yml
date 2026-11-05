@@ -74,8 +74,11 @@ jobs:
         run: |
           VERSION="$(sed -n 's/^version: \([^+ ]*\).*/\1/p' pubspec.yaml)"
           test -n "$VERSION"
-          # Keep tags stable and mark beta builds in the GitHub release title.
           TAG="v$VERSION"
+          if [ "$PRERELEASE" = "true" ]; then
+            # Add the pre-release suffix so beta tags stay distinct from stable tags.
+            TAG="$TAG-pre"
+          fi
           TITLE="$TAG"
           if [ "$PRERELEASE" = "true" ]; then
             TITLE="$TITLE Beta"

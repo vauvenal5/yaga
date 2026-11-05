@@ -1,0 +1,44 @@
+name: Promote pre-release to stable
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Enter a release tag, or use latest for the latest GitHub release
+        required: true
+        default: latest
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  promote-release:
+    runs-on: ubuntu-latest
+    environment: fdroid
+    steps:
+      - name: Promote pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [ "$RELEASE_TAG" = "latest" ]; then
+            # Inspect the newest release first; the validation below aborts if it is stable.
+            RELEASE_TAG="$(gh release list --exclude-drafts --json tagName --jq '.[0].tagName')"
+          fi
+          test -n "$RELEASE_TAG"
+          IS_PRERELEASE="$(gh release view "$RELEASE_TAG" --json isPrerelease --jq .isPrerelease)"
+          if [ "$IS_PRERELEASE" != "true" ]; then
+            echo "Release $RELEASE_TAG is not a pre-release." >&2
+            exit 1
+          fi
+
+          # Derive the stable tag only after GitHub confirms this release is a pre-release.
+          STABLE_TAG="${RELEASE_TAG%-pre}"
+          if gh release view "$STABLE_TAG" >/dev/null 2>&1; then
+            echo "A release already exists for $STABLE_TAG." >&2
+            exit 1
+          fi
+
+          gh release edit "$RELEASE_TAG" \
+            --tag "$STABLE_TAG" \
+            --prerelease=false

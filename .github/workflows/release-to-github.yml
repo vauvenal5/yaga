@@ -21,6 +21,23 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7.0.1
 
+      # Fail before the Android build when this pre-release tag is already published.
+      - name: Check pre-release tag
+        if: ${{ inputs.prerelease }}
+        run: |
+          VERSION="$(sed -n 's/^version: \([^+ ]*\).*/\1/p' pubspec.yaml)"
+          test -n "$VERSION"
+          TAG="v$VERSION-pre"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "Pre-release tag $TAG already exists." >&2
+            exit 1
+          else
+            STATUS=$?
+            if [ "$STATUS" -ne 2 ]; then
+              exit "$STATUS"
+            fi
+          fi
+
       - name: Set up Java
         uses: actions/setup-java@v6.1.0
         with:

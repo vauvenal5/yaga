@@ -48,3 +48,6 @@ jobs:
             --tag "$STABLE_TAG" \
             --title "$STABLE_TITLE" \
             --prerelease=false
+
+          # Remove the old pre-release ref after the stable release is in place.
+          git push origin ":refs/tags/$RELEASE_TAG"

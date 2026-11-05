@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: fdroid
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
       - name: Promote pre-release
         env:
           GH_TOKEN: ${{ github.token }}

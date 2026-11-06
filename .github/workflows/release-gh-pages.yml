@@ -4,11 +4,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Keep the build job read-only; deployment permissions are granted only to deploy.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -27,13 +25,27 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HUGO_VERSION: 0.169.0
+      HUGO_SHA256: a20f7da84e0981bebbecc032cc87f0dda2049a844727720aab14e61ce416e5e9
+      DART_SASS_VERSION: 1.107.1
+      DART_SASS_SHA256: 6cefe78692d03ca53843394bb98de4dccf9a3d8ee5ece40be7316be852624003
     steps:
       - name: Install Hugo CLI
         run: |
-          wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \
-          && sudo dpkg -i ${{ runner.temp }}/hugo.deb
+          # Verify the pinned Hugo package before installing it.
+          curl --fail --location --silent --show-error \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb" \
+            --output "$RUNNER_TEMP/hugo.deb"
+          echo "$HUGO_SHA256  $RUNNER_TEMP/hugo.deb" | sha256sum --check --status
+          sudo dpkg -i "$RUNNER_TEMP/hugo.deb"
       - name: Install Dart Sass
-        run: sudo snap install dart-sass
+        run: |
+          # Install a fixed Sass release and verify its archive before extraction.
+          curl --fail --location --silent --show-error \
+            "https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz" \
+            --output "$RUNNER_TEMP/dart-sass.tar.gz"
+          echo "$DART_SASS_SHA256  $RUNNER_TEMP/dart-sass.tar.gz" | sha256sum --check --status
+          tar --extract --gzip --file "$RUNNER_TEMP/dart-sass.tar.gz" --directory "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/dart-sass" >> "$GITHUB_PATH"
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:
@@ -46,8 +58,6 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v6.0.0
-      - name: Install Node.js dependencies
-        run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
       - name: Build with Hugo
         working-directory: docs
         env:
@@ -64,6 +74,10 @@ jobs:
 
   # Deployment job
   deploy:
+    # Pages publishing and its OIDC token are needed only by the deployment job.
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

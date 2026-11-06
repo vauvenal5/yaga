@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   id-token: write
+  attestations: read
 
 jobs:
   upload-to-google-play:
@@ -82,6 +83,16 @@ jobs:
             exit 1
           fi
           echo "path=${packages[0]}" >> "$GITHUB_OUTPUT"
+
+      # Verify the selected AAB was attested by the GitHub release workflow before publishing.
+      - name: Verify release artifact attestation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AAB_PATH: ${{ steps.package.outputs.path }}
+        run: |
+          gh attestation verify "$AAB_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release-to-github.yml"
 
       # Use short-lived GitHub OIDC credentials instead of storing a service-account key.
       - name: Authenticate to Google Cloud

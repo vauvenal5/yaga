@@ -12,11 +12,20 @@ on:
 permissions:
   contents: read
 
+# Keep artifact locations consistent across build, verification, signing, and release steps.
+env:
+  AAB_BUILD_PATH: build/app/outputs/bundle/release/app-release.aab
+  APK_BUILD_PATH: build/app/outputs/flutter-apk/app-release.apk
+  AAB_RELEASE_PATH: release-assets/app-release.aab
+  APK_RELEASE_PATH: release-assets/app-release.apk
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       contents: read
+      attestations: write
     strategy:
       matrix:
         artifact: [appbundle, apk]
@@ -61,12 +70,17 @@ jobs:
       - name: Build Android release artifact
         run: flutter build "${{ matrix.artifact }}" --release
 
+      - name: Attest Android release artifact
+        uses: actions/attest@v4.2.2
+        with:
+          subject-path: ${{ matrix.artifact == 'appbundle' && env.AAB_BUILD_PATH || env.APK_BUILD_PATH }}
+
       - name: Upload Android release artifact
         uses: actions/upload-artifact@v7.0.2
         with:
           name: release-${{ matrix.artifact }}
           # Use Flutter's direct APK output for F-Droid reproducible build checks.
-          path: ${{ matrix.artifact == 'appbundle' && 'build/app/outputs/bundle/release/app-release.aab' || 'build/app/outputs/flutter-apk/app-release.apk' }}
+          path: ${{ matrix.artifact == 'appbundle' && env.AAB_BUILD_PATH || env.APK_BUILD_PATH }}
           if-no-files-found: error
 
   publish:
@@ -76,6 +90,8 @@ jobs:
     permissions:
       contents: write
       actions: read
+      id-token: write
+      attestations: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v7.0.1
@@ -87,6 +103,20 @@ jobs:
           pattern: release-*
           path: release-assets
           merge-multiple: true
+
+      # Verify provenance and source revision before the release key signs these artifacts.
+      - name: Verify Android build attestations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for artifact in "$AAB_RELEASE_PATH" "$APK_RELEASE_PATH"; do
+            gh attestation verify "$artifact" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release-to-github.yml" \
+              --source-ref "$GITHUB_REF" \
+              --source-digest "$GITHUB_SHA"
+          done
 
       - name: Set up Java
         uses: actions/setup-java@v6.1.0
@@ -108,8 +138,8 @@ jobs:
           test -n "$UPLOAD_KEYSTORE_JKS_B64"
           test -n "$UPLOAD_KEYSTORE_PASSWORD"
           KEYSTORE="$RUNNER_TEMP/upload-keystore.jks"
-          APK="$GITHUB_WORKSPACE/release-assets/app-release.apk"
-          AAB="$GITHUB_WORKSPACE/release-assets/app-release.aab"
+          APK="$GITHUB_WORKSPACE/$APK_RELEASE_PATH"
+          AAB="$GITHUB_WORKSPACE/$AAB_RELEASE_PATH"
           test -s "$APK"
           test -s "$AAB"
           printf '%s' "$UPLOAD_KEYSTORE_JKS_B64" | base64 --decode > "$KEYSTORE"
@@ -137,6 +167,14 @@ jobs:
         if: ${{ always() }}
         run: rm -f "$RUNNER_TEMP/upload-keystore.jks"
 
+      # Attest the exact signed files that will be published as release assets.
+      - name: Attest signed Android release artifacts
+        uses: actions/attest@v4.2.2
+        with:
+          subject-path: |
+            ${{ env.AAB_RELEASE_PATH }}
+            ${{ env.APK_RELEASE_PATH }}
+
       # Publish the bundle and APK together on the GitHub release.
       - name: Create GitHub Release
         env:
@@ -156,8 +194,8 @@ jobs:
             TITLE="$TITLE Beta"
           fi
           gh release create "$TAG" \
-            release-assets/app-release.aab \
-            release-assets/app-release.apk \
+            "$AAB_RELEASE_PATH" \
+            "$APK_RELEASE_PATH" \
             --target "$GITHUB_SHA" \
             --title "$TITLE" \
             --generate-notes \

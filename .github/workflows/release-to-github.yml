@@ -10,13 +10,13 @@ on:
         type: boolean
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # This environment supplies the Android signing secrets to the job.
-    environment: github
+    permissions:
+      contents: read
     strategy:
       matrix:
         artifact: [appbundle, apk]
@@ -57,35 +57,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile
 
-      # Materialize ignored signing files only for this ephemeral CI build.
-      - name: Prepare Android signing
-        env:
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          UPLOAD_KEYSTORE_JKS_B64: ${{ secrets.UPLOAD_KEYSTORE_JKS_B64 }}
-          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
-        run: |
-          test -n "$KEY_ALIAS"
-          test -n "$KEY_PASSWORD"
-          test -n "$UPLOAD_KEYSTORE_JKS_B64"
-          test -n "$UPLOAD_KEYSTORE_PASSWORD"
-          printf '%s' "$UPLOAD_KEYSTORE_JKS_B64" | base64 --decode > android/upload-keystore.jks
-          {
-            printf 'storeFile=upload-keystore.jks\n'
-            printf 'storePassword=%s\n' "$UPLOAD_KEYSTORE_PASSWORD"
-            printf 'keyAlias=%s\n' "$KEY_ALIAS"
-            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
-          } > android/key.properties
-          chmod 600 android/upload-keystore.jks android/key.properties
-
       # Separate runners avoid concurrent Gradle builds writing to the same outputs.
       - name: Build Android release artifact
         run: flutter build "${{ matrix.artifact }}" --release
-
-      # Remove private signing material even when an earlier step fails.
-      - name: Clean up Android signing files
-        if: ${{ always() }}
-        run: rm -f android/key.properties android/upload-keystore.jks
 
       - name: Upload Android release artifact
         uses: actions/upload-artifact@v7.0.2
@@ -98,6 +72,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     needs: build
+    environment: github
     permissions:
       contents: write
       actions: read
@@ -112,6 +87,55 @@ jobs:
           pattern: release-*
           path: release-assets
           merge-multiple: true
+
+      - name: Set up Java
+        uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Preserve APK padding so F-Droid can copy and verify the upstream signature.
+      - name: Sign Android release artifacts
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          UPLOAD_KEYSTORE_JKS_B64: ${{ secrets.UPLOAD_KEYSTORE_JKS_B64 }}
+          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          test -n "$UPLOAD_KEYSTORE_JKS_B64"
+          test -n "$UPLOAD_KEYSTORE_PASSWORD"
+          KEYSTORE="$RUNNER_TEMP/upload-keystore.jks"
+          APK="$GITHUB_WORKSPACE/release-assets/app-release.apk"
+          AAB="$GITHUB_WORKSPACE/release-assets/app-release.aab"
+          test -s "$APK"
+          test -s "$AAB"
+          printf '%s' "$UPLOAD_KEYSTORE_JKS_B64" | base64 --decode > "$KEYSTORE"
+          chmod 600 "$KEYSTORE"
+
+          # ubuntu-latest includes Build Tools 36.0.0 under ANDROID_HOME.
+          APKSIGNER="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          "$APKSIGNER" sign \
+            --ks "$KEYSTORE" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:UPLOAD_KEYSTORE_PASSWORD \
+            --key-pass env:KEY_PASSWORD \
+            --alignment-preserved \
+            "$APK"
+          "$APKSIGNER" verify --verbose "$APK"
+
+          jarsigner \
+            -keystore "$KEYSTORE" \
+            -storepass:env UPLOAD_KEYSTORE_PASSWORD \
+            -keypass:env KEY_PASSWORD \
+            "$AAB" "$KEY_ALIAS"
+          jarsigner -verify "$AAB"
+
+      - name: Clean up Android signing files
+        if: ${{ always() }}
+        run: rm -f "$RUNNER_TEMP/upload-keystore.jks"
 
       # Publish the bundle and APK together on the GitHub release.
       - name: Create GitHub Release

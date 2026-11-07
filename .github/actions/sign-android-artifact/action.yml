@@ -33,7 +33,7 @@ runs:
         case "$ARTIFACT_PATH" in
           *.apk)
             # Preserve APK alignment so F-Droid can reproduce and verify the APK.
-            APKSIGNER="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+            APKSIGNER="$ANDROID_HOME/build-tools/37.0.0/apksigner"
             "$APKSIGNER" sign \
               --ks "$KEYSTORE" \
               --ks-key-alias "$KEY_ALIAS" \

@@ -169,6 +169,7 @@ jobs:
             --ks-key-alias "$KEY_ALIAS" \
             --ks-pass env:UPLOAD_KEYSTORE_PASSWORD \
             --key-pass env:KEY_PASSWORD \
+            --alignment-preserved \
             "$APK"
           "$APKSIGNER" verify --verbose --print-certs "$APK"
 

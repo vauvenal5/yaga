@@ -15,9 +15,11 @@ permissions:
 # Keep artifact locations consistent across build, verification, signing, and release steps.
 env:
   AAB_BUILD_PATH: build/app/outputs/bundle/release/app-release.aab
-  APK_BUILD_PATH: build/app/outputs/flutter-apk/app-release.apk
+  APK_BUILD_GLOB: build/app/outputs/flutter-apk/app-*-release.apk
   AAB_RELEASE_PATH: release-assets/app-release.aab
-  APK_RELEASE_PATH: release-assets/app-release.apk
+  APK_ARMEABI_V7A_RELEASE_PATH: release-assets/app-armeabi-v7a-release.apk
+  APK_ARM64_V8A_RELEASE_PATH: release-assets/app-arm64-v8a-release.apk
+  APK_X86_64_RELEASE_PATH: release-assets/app-x86_64-release.apk
 
 jobs:
   build:
@@ -29,6 +31,11 @@ jobs:
     strategy:
       matrix:
         artifact: [appbundle, apk]
+        include:
+          - artifact: appbundle
+            flutter-flags: ''
+          - artifact: apk
+            flutter-flags: --split-per-abi
     steps:
       - name: Check out repository
         uses: actions/checkout@v7.0.1
@@ -66,21 +73,38 @@ jobs:
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile
 
+      # Disable the plugin's linker build ID so the APK matches the F-Droid build.
+      # This can be removed once we upgraded flutter_zxing to a version higher than 3.0.1.
+      - name: Patch flutter_zxing CMake build ID
+        if: ${{ matrix.artifact == 'apk' }}
+        run: |
+          set -euo pipefail
+          PUB_CACHE_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
+          shopt -s nullglob
+          CMAKE_FILES=("$PUB_CACHE_DIR"/hosted/pub.dev/flutter_zxing-*/src/CMakeLists.txt)
+          ((${#CMAKE_FILES[@]} > 0))
+          for CMAKE_LISTS in "${CMAKE_FILES[@]}"; do
+            if ! grep -Fq 'add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"; then
+              sed -i '1a add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"
+            fi
+          done
+
       # Separate runners avoid concurrent Gradle builds writing to the same outputs.
       - name: Build Android release artifact
-        run: flutter build "${{ matrix.artifact }}" --release
+        run: flutter build "${{ matrix.artifact }}" --release ${{ matrix['flutter-flags'] }}
 
+      # Select the bundle or APK glob so each matrix build attests its outputs.
       - name: Attest Android release artifact
         uses: actions/attest@v4.2.2
         with:
-          subject-path: ${{ matrix.artifact == 'appbundle' && env.AAB_BUILD_PATH || env.APK_BUILD_PATH }}
+          subject-path: ${{ matrix.artifact == 'appbundle' && env.AAB_BUILD_PATH || env.APK_BUILD_GLOB }}
 
       - name: Upload Android release artifact
         uses: actions/upload-artifact@v7.0.2
         with:
           name: release-${{ matrix.artifact }}
-          # Use Flutter's direct APK output for F-Droid reproducible build checks.
-          path: ${{ matrix.artifact == 'appbundle' && env.AAB_BUILD_PATH || env.APK_BUILD_PATH }}
+          # Keep direct Flutter APK outputs available for F-Droid rebuild comparison.
+          path: ${{ matrix.artifact == 'appbundle' && env.AAB_BUILD_PATH || env.APK_BUILD_GLOB }}
           if-no-files-found: error
 
   publish:
@@ -110,7 +134,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          for artifact in "$AAB_RELEASE_PATH" "$APK_RELEASE_PATH"; do
+          for artifact in "$AAB_RELEASE_PATH" \
+            "$APK_ARMEABI_V7A_RELEASE_PATH" \
+            "$APK_ARM64_V8A_RELEASE_PATH" \
+            "$APK_X86_64_RELEASE_PATH"; do
             gh attestation verify "$artifact" \
               --repo "$GITHUB_REPOSITORY" \
               --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release-to-github.yml" \
@@ -124,44 +151,54 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # Preserve APK padding so F-Droid can copy and verify the upstream signature.
-      - name: Sign Android release artifacts
+      # Prepare one keystore shared by the per-artifact signing action calls.
+      - name: Prepare Android signing key
         env:
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           UPLOAD_KEYSTORE_JKS_B64: ${{ secrets.UPLOAD_KEYSTORE_JKS_B64 }}
           UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
         run: |
           set -euo pipefail
-          test -n "$KEY_ALIAS"
-          test -n "$KEY_PASSWORD"
           test -n "$UPLOAD_KEYSTORE_JKS_B64"
           test -n "$UPLOAD_KEYSTORE_PASSWORD"
           KEYSTORE="$RUNNER_TEMP/upload-keystore.jks"
-          APK="$GITHUB_WORKSPACE/$APK_RELEASE_PATH"
-          AAB="$GITHUB_WORKSPACE/$AAB_RELEASE_PATH"
-          test -s "$APK"
-          test -s "$AAB"
+          test -s "$GITHUB_WORKSPACE/$AAB_RELEASE_PATH"
+          test -s "$GITHUB_WORKSPACE/$APK_ARMEABI_V7A_RELEASE_PATH"
+          test -s "$GITHUB_WORKSPACE/$APK_ARM64_V8A_RELEASE_PATH"
+          test -s "$GITHUB_WORKSPACE/$APK_X86_64_RELEASE_PATH"
           printf '%s' "$UPLOAD_KEYSTORE_JKS_B64" | base64 --decode > "$KEYSTORE"
           chmod 600 "$KEYSTORE"
 
-          # ubuntu-latest includes Build Tools 36.0.0 under ANDROID_HOME.
-          APKSIGNER="$ANDROID_HOME/build-tools/36.0.0/apksigner"
-          "$APKSIGNER" sign \
-            --ks "$KEYSTORE" \
-            --ks-key-alias "$KEY_ALIAS" \
-            --ks-pass env:UPLOAD_KEYSTORE_PASSWORD \
-            --key-pass env:KEY_PASSWORD \
-            --alignment-preserved \
-            "$APK"
-          "$APKSIGNER" verify --verbose "$APK"
+      - name: Sign release AAB
+        uses: ./.github/actions/sign-android-artifact
+        with:
+          artifact-path: ${{ env.AAB_RELEASE_PATH }}
+          key-alias: ${{ secrets.KEY_ALIAS }}
+          key-password: ${{ secrets.KEY_PASSWORD }}
+          keystore-password: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
 
-          jarsigner \
-            -keystore "$KEYSTORE" \
-            -storepass:env UPLOAD_KEYSTORE_PASSWORD \
-            -keypass:env KEY_PASSWORD \
-            "$AAB" "$KEY_ALIAS"
-          jarsigner -verify "$AAB"
+      - name: Sign armeabi-v7a release APK
+        uses: ./.github/actions/sign-android-artifact
+        with:
+          artifact-path: ${{ env.APK_ARMEABI_V7A_RELEASE_PATH }}
+          key-alias: ${{ secrets.KEY_ALIAS }}
+          key-password: ${{ secrets.KEY_PASSWORD }}
+          keystore-password: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+
+      - name: Sign arm64-v8a release APK
+        uses: ./.github/actions/sign-android-artifact
+        with:
+          artifact-path: ${{ env.APK_ARM64_V8A_RELEASE_PATH }}
+          key-alias: ${{ secrets.KEY_ALIAS }}
+          key-password: ${{ secrets.KEY_PASSWORD }}
+          keystore-password: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+
+      - name: Sign x86_64 release APK
+        uses: ./.github/actions/sign-android-artifact
+        with:
+          artifact-path: ${{ env.APK_X86_64_RELEASE_PATH }}
+          key-alias: ${{ secrets.KEY_ALIAS }}
+          key-password: ${{ secrets.KEY_PASSWORD }}
+          keystore-password: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
 
       - name: Clean up Android signing files
         if: ${{ always() }}
@@ -173,9 +210,11 @@ jobs:
         with:
           subject-path: |
             ${{ env.AAB_RELEASE_PATH }}
-            ${{ env.APK_RELEASE_PATH }}
+            ${{ env.APK_ARMEABI_V7A_RELEASE_PATH }}
+            ${{ env.APK_ARM64_V8A_RELEASE_PATH }}
+            ${{ env.APK_X86_64_RELEASE_PATH }}
 
-      # Publish the bundle and APK together on the GitHub release.
+      # Publish the bundle and ABI-specific APKs together on the GitHub release.
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -195,7 +234,9 @@ jobs:
           fi
           gh release create "$TAG" \
             "$AAB_RELEASE_PATH" \
-            "$APK_RELEASE_PATH" \
+            "$APK_ARMEABI_V7A_RELEASE_PATH" \
+            "$APK_ARM64_V8A_RELEASE_PATH" \
+            "$APK_X86_64_RELEASE_PATH" \
             --target "$GITHUB_SHA" \
             --title "$TITLE" \
             --generate-notes \

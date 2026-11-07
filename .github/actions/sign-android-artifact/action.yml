@@ -1,0 +1,58 @@
+name: Sign Android release artifact
+description: Sign and verify one APK or AAB release artifact.
+inputs:
+  artifact-path:
+    description: Artifact path relative to the GitHub workspace.
+    required: true
+  key-alias:
+    description: Signing key alias.
+    required: true
+  key-password:
+    description: Signing key password.
+    required: true
+  keystore-password:
+    description: Keystore password.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Sign and verify artifact
+      shell: bash
+      env:
+        ARTIFACT_PATH: ${{ inputs.artifact-path }}
+        KEY_ALIAS: ${{ inputs.key-alias }}
+        KEY_PASSWORD: ${{ inputs.key-password }}
+        KEYSTORE_PASSWORD: ${{ inputs.keystore-password }}
+      run: |
+        set -euo pipefail
+        ARTIFACT="$GITHUB_WORKSPACE/$ARTIFACT_PATH"
+        KEYSTORE="$RUNNER_TEMP/upload-keystore.jks"
+        test -s "$ARTIFACT"
+        test -s "$KEYSTORE"
+
+        case "$ARTIFACT_PATH" in
+          *.apk)
+            # Preserve APK alignment so F-Droid can reproduce and verify the APK.
+            APKSIGNER="$ANDROID_HOME/build-tools/37.0.0/apksigner"
+            "$APKSIGNER" sign \
+              --ks "$KEYSTORE" \
+              --ks-key-alias "$KEY_ALIAS" \
+              --ks-pass env:KEYSTORE_PASSWORD \
+              --key-pass env:KEY_PASSWORD \
+              --alignment-preserved \
+              "$ARTIFACT"
+            "$APKSIGNER" verify --verbose --print-certs "$ARTIFACT"
+            ;;
+          *.aab)
+            jarsigner \
+              -keystore "$KEYSTORE" \
+              -storepass:env KEYSTORE_PASSWORD \
+              -keypass:env KEY_PASSWORD \
+              "$ARTIFACT" "$KEY_ALIAS"
+            jarsigner -verify "$ARTIFACT"
+            ;;
+          *)
+            echo "Unsupported Android artifact extension: $ARTIFACT_PATH" >&2
+            exit 1
+            ;;
+        esac

@@ -33,6 +33,10 @@ jobs:
             gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json tagName >/dev/null
           fi
           echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          # Resolve the selected release tag so verification can bind the AAB to that commit.
+          RELEASE_COMMIT="$(gh api "repos/$GITHUB_REPOSITORY/commits/$RELEASE_TAG" --jq .sha)"
+          test -n "$RELEASE_COMMIT"
+          echo "release_commit=$RELEASE_COMMIT" >> "$GITHUB_OUTPUT"
           RELEASE_URL="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json url --jq .url)"
           echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
           mkdir release-assets
@@ -89,10 +93,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           AAB_PATH: ${{ steps.package.outputs.path }}
+          RELEASE_COMMIT: ${{ steps.download.outputs.release_commit }}
         run: |
+          set -euo pipefail
           gh attestation verify "$AAB_PATH" \
             --repo "$GITHUB_REPOSITORY" \
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release-to-github.yml"
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release-to-github.yml" \
+            --source-digest "$RELEASE_COMMIT"
 
       # Use short-lived GitHub OIDC credentials instead of storing a service-account key.
       - name: Authenticate to Google Cloud

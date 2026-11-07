@@ -1,4 +1,5 @@
 import java.util.Properties
+import com.android.build.api.variant.FilterConfiguration.FilterType.ABI
 
 plugins {
     id("com.android.application")
@@ -65,26 +66,29 @@ android {
     }
 }
 
+// Match F-Droid's ABI-specific version-code suffixes for split APK outputs.
+val fdroidBaseVersionCode = flutter.versionCode
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            val abi = output.filters.find { it.filterType == ABI }?.identifier
+            val abiSuffix = when (abi) {
+                "armeabi-v7a" -> 1
+                "arm64-v8a" -> 2
+                "x86_64" -> 3
+                else -> null
+            }
+            if (abiSuffix != null) {
+                output.versionCode.set(fdroidBaseVersionCode * 10 + abiSuffix)
+            }
+        }
+    }
+}
+
 flutter {
     source = "../.."
 }
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
-}
-
-// Rename the release APK with the app version after Gradle packages it.
-tasks.register("versionReleaseApk") {
-    val apk = layout.buildDirectory.file("outputs/flutter-apk/app-release.apk")
-    val versionedApk = layout.buildDirectory.file("outputs/flutter-apk/app-release-${flutter.versionName}.apk")
-
-    doLast {
-        val source = apk.get().asFile
-        check(source.exists()) { "Release APK not found: $source" }
-        source.copyTo(versionedApk.get().asFile, overwrite = true)
-    }
-}
-
-tasks.matching { it.name == "assembleRelease" }.configureEach {
-    finalizedBy("versionReleaseApk")
 }

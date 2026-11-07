@@ -66,6 +66,19 @@ jobs:
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile
 
+      # Disable the plugin's linker build ID so the APK matches the F-Droid build.
+      # This can be removed once we upgraded flutter_zxing to a version higher than 3.0.1.
+      - name: Patch flutter_zxing CMake build ID
+        if: ${{ matrix.artifact == 'apk' }}
+        run: |
+          set -euo pipefail
+          PUB_CACHE_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
+          CMAKE_LISTS="$PUB_CACHE_DIR/hosted/pub.dev/flutter_zxing-*/src/CMakeLists.txt"
+          test -f "$CMAKE_LISTS"
+          if ! grep -Fq 'add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"; then
+            sed -i '1a add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"
+          fi
+
       # Separate runners avoid concurrent Gradle builds writing to the same outputs.
       - name: Build Android release artifact
         run: flutter build "${{ matrix.artifact }}" --release

@@ -66,6 +66,22 @@ jobs:
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile
 
+      # Disable the plugin's linker build ID so the APK matches the F-Droid build.
+      # This can be removed once we upgraded flutter_zxing to a version higher than 3.0.1.
+      - name: Patch flutter_zxing CMake build ID
+        if: ${{ matrix.artifact == 'apk' }}
+        run: |
+          set -euo pipefail
+          PUB_CACHE_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
+          shopt -s nullglob
+          CMAKE_FILES=("$PUB_CACHE_DIR"/hosted/pub.dev/flutter_zxing-*/src/CMakeLists.txt)
+          ((${#CMAKE_FILES[@]} > 0))
+          for CMAKE_LISTS in "${CMAKE_FILES[@]}"; do
+            if ! grep -Fq 'add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"; then
+              sed -i '1a add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"
+            fi
+          done
+
       # Separate runners avoid concurrent Gradle builds writing to the same outputs.
       - name: Build Android release artifact
         run: flutter build "${{ matrix.artifact }}" --release
@@ -147,6 +163,7 @@ jobs:
 
           # ubuntu-latest includes Build Tools 36.0.0 under ANDROID_HOME.
           APKSIGNER="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          # --alignment-preserved: Preserve APK alignment required for F-Droid reproducible builds.
           "$APKSIGNER" sign \
             --ks "$KEYSTORE" \
             --ks-key-alias "$KEY_ALIAS" \
@@ -154,7 +171,7 @@ jobs:
             --key-pass env:KEY_PASSWORD \
             --alignment-preserved \
             "$APK"
-          "$APKSIGNER" verify --verbose "$APK"
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
 
           jarsigner \
             -keystore "$KEYSTORE" \

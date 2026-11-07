@@ -147,14 +147,19 @@ jobs:
 
           # ubuntu-latest includes Build Tools 36.0.0 under ANDROID_HOME.
           APKSIGNER="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          # Match the locally verified APK signature scheme: V2 only.
           "$APKSIGNER" sign \
+            --v1-signing-enabled false \
+            --v2-signing-enabled true \
+            --v3-signing-enabled false \
+            --v4-signing-enabled false \
             --ks "$KEYSTORE" \
             --ks-key-alias "$KEY_ALIAS" \
             --ks-pass env:UPLOAD_KEYSTORE_PASSWORD \
             --key-pass env:KEY_PASSWORD \
             --alignment-preserved \
             "$APK"
-          "$APKSIGNER" verify --verbose "$APK"
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
 
           jarsigner \
             -keystore "$KEYSTORE" \

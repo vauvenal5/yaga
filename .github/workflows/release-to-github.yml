@@ -73,11 +73,14 @@ jobs:
         run: |
           set -euo pipefail
           PUB_CACHE_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
-          CMAKE_LISTS="$PUB_CACHE_DIR/hosted/pub.dev/flutter_zxing-*/src/CMakeLists.txt"
-          test -f "$CMAKE_LISTS"
-          if ! grep -Fq 'add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"; then
-            sed -i '1a add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"
-          fi
+          shopt -s nullglob
+          CMAKE_FILES=("$PUB_CACHE_DIR"/hosted/pub.dev/flutter_zxing-*/src/CMakeLists.txt)
+          ((${#CMAKE_FILES[@]} > 0))
+          for CMAKE_LISTS in "${CMAKE_FILES[@]}"; do
+            if ! grep -Fq 'add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"; then
+              sed -i '1a add_link_options("LINKER:--build-id=none")' "$CMAKE_LISTS"
+            fi
+          done
 
       # Separate runners avoid concurrent Gradle builds writing to the same outputs.
       - name: Build Android release artifact
